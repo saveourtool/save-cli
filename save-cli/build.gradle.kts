@@ -1,37 +1,30 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem
 
 plugins {
-    kotlin("multiplatform") version Versions.kotlin
-    kotlin("plugin.serialization") version Versions.kotlin
-
+    kotlin("multiplatform")
 }
-
-group = "org.cqfn"
-version = "0.0.1-SNAPSHOT"
 
 repositories {
     mavenCentral()
     maven(url = "https://kotlin.bintray.com/kotlinx/")
 }
 
-
-
 kotlin {
     jvm()
-    val hostOs = System.getProperty("os.name")
-    val isMingwX64 = hostOs.startsWith("Windows")
+    val os = getCurrentOperatingSystem()
     val saveTarget = when {
-        hostOs == "Mac OS X" -> macosX64("save")
-        hostOs == "Linux" -> linuxX64("save")
-        isMingwX64 -> mingwX64("save")
+        os.isMacOsX -> macosX64("save")
+        os.isLinux -> linuxX64("save")
+        os.isWindows -> mingwX64("save")
         else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
     }
 
     saveTarget.apply {
         binaries {
             executable {
-                entryPoint = "org.cqfn"
+                entryPoint = "org.cqfn.save.cli.main"
             }
         }
     }
@@ -39,9 +32,8 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("com.squareup.okio:okio-multiplatform:3.0.0-alpha.1")
-                implementation( "org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.1")
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.1")
+                implementation(project(":save-core"))
+                implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.2")
             }
         }
         val commonTest by getting
