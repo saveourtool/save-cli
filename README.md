@@ -1,3 +1,7 @@
+![Build and test](https://github.com/cqfn/save/workflows/Build%20and%20test/badge.svg)
+[![License](https://img.shields.io/github/license/cqfn/save)](https://github.com/cqfn/save/blob/master/LICENSE)
+[![codecov](https://codecov.io/gh/cqfn/save/branch/master/graph/badge.svg)](https://codecov.io/gh/cqfn/save)
+
 ## Purpose of Static Analysis Verification and Evaluation (SAVE) project
 Usage of [static analyzers](https://en.wikipedia.org/wiki/Static_program_analysis) - is a very important part of development each and every software product.
 All human beings can make a mistake in their code even when a software developer is writing all kinds of tests and has a very good test-coverage.
