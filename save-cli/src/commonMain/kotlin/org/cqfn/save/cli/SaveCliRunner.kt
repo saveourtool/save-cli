@@ -1,3 +1,7 @@
+/**
+ * Main entry point for SAVE CLI execution
+ */
+
 package org.cqfn.save.cli
 
 import org.cqfn.save.core.Save

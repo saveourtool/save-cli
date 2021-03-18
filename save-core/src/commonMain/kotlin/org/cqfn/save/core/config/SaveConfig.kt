@@ -6,6 +6,10 @@ import okio.Path
 /**
  * Configuration properties of save application, retrieved either from peoperties file
  * or from CLI args.
+ * @property configPath
+ * @property debug
+ * @property quiet
+ * @property reportType
  */
 @OptIn(ExperimentalFileSystem::class)
 data class SaveConfig(
