@@ -29,6 +29,10 @@ kotlin {
     }
 
     sourceSets {
+        all {
+            languageSettings.useExperimentalAnnotation("kotlin.RequiresOptIn")
+            languageSettings.useExperimentalAnnotation("okio.ExperimentalFileSystem")
+        }
         val commonMain by getting {
             dependencies {
                 implementation(project(":save-core"))

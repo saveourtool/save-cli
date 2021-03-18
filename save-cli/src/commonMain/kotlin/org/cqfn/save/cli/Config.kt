@@ -7,7 +7,6 @@ package org.cqfn.save.cli
 import org.cqfn.save.core.config.ReportType
 import org.cqfn.save.core.config.SaveConfig
 
-import okio.ExperimentalFileSystem
 import okio.Path.Companion.toPath
 
 import kotlinx.cli.ArgParser
@@ -18,7 +17,6 @@ import kotlinx.cli.default
  * @param args CLI args
  * @return an instance of [SaveConfig]
  */
-@OptIn(ExperimentalFileSystem::class)
 fun createConfigFromArgs(args: Array<String>): SaveConfig {
     val parser = ArgParser("save")
 

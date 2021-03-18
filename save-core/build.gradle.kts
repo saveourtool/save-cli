@@ -24,6 +24,10 @@ kotlin {
     }
 
     sourceSets {
+        all {
+            languageSettings.useExperimentalAnnotation("kotlin.RequiresOptIn")
+            languageSettings.useExperimentalAnnotation("okio.ExperimentalFileSystem")
+        }
         val commonMain by getting {
             dependencies {
                 api("com.squareup.okio:okio-multiplatform:3.0.0-alpha.1")
