@@ -21,7 +21,7 @@ kotlin {
         else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
     }
 
-    saveTarget.apply {
+    configure(listOf(saveTarget)) {
         binaries {
             executable {
                 entryPoint = "org.cqfn.save.cli.main"
