@@ -1,30 +1,30 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.cqfn.save.buildutils.configureDetekt
+import org.cqfn.save.buildutils.configureDiktat
+import org.cqfn.save.buildutils.createDetektTask
+import org.cqfn.save.buildutils.createDiktatTask
+import org.cqfn.save.buildutils.installGitHooks
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 
 plugins {
     kotlin("multiplatform") version Versions.kotlin
     kotlin("plugin.serialization") version Versions.kotlin
-
 }
 
-group = "org.cqfn"
-version = "0.0.1-SNAPSHOT"
+version = "0.1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
     maven(url = "https://kotlin.bintray.com/kotlinx/")
 }
 
-
-
 kotlin {
     jvm()
-    val hostOs = System.getProperty("os.name")
-    val isMingwX64 = hostOs.startsWith("Windows")
+    val os = getCurrentOperatingSystem()
     val saveTarget = when {
-        hostOs == "Mac OS X" -> macosX64("save")
-        hostOs == "Linux" -> linuxX64("save")
-        isMingwX64 -> mingwX64("save")
+        os.isMacOsX -> macosX64("save")
+        os.isLinux -> linuxX64("save")
+        os.isWindows -> mingwX64("save")
         else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
     }
 
@@ -60,3 +60,14 @@ kotlin {
 tasks.withType<KotlinJvmTest> {
     useJUnitPlatform()
 }
+
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+    configureDiktat()
+    configureDetekt()
+}
+createDiktatTask()
+createDetektTask()
+installGitHooks()
