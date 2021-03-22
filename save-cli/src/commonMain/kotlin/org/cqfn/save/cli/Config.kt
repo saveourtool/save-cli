@@ -12,6 +12,7 @@ import okio.Path.Companion.toPath
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.default
+import kotlinx.cli.required
 
 /**
  * @param args CLI args
@@ -20,9 +21,9 @@ import kotlinx.cli.default
 fun createConfigFromArgs(args: Array<String>): SaveConfig {
     val parser = ArgParser("save")
 
-    val configPath by parser.option(
+    val config by parser.option(
         ArgType.String,
-        shortName = "f",
+        shortName = "c",
         description = "Path to the root save config file",
     ).default("save.toml")
 
@@ -43,11 +44,18 @@ fun createConfigFromArgs(args: Array<String>): SaveConfig {
         shortName = "r",
     ).default(ReportType.JSON)
 
+    val baseline by parser.option(
+        ArgType.String,
+        shortName = "b",
+        description = "Path to the file with baseline data",
+    )
+
     parser.parse(args)
     return SaveConfig(
-        configPath = configPath.toPath(),
+        configPath = config.toPath(),
         debug = debug,
         quiet = quiet,
-        reportType = reportType
+        reportType = reportType,
+        baselinePath = baseline?.toPath()
     )
 }
