@@ -12,7 +12,6 @@ import okio.Path.Companion.toPath
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.default
-import kotlinx.cli.required
 
 /**
  * @param args CLI args
