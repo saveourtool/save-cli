@@ -66,6 +66,15 @@ save -exec_cmd="my_analyzer -my_option1 -my_option2"
 
 SAVE framework will run your analyzer on the following test packages and calculate the pass-rate. 
 
+## SAVE: Using plugins for specific inspections
+SAVE doesn't have any inspections active by default, instead the behavior of the analysis is fully configurable using plugins.
+Plugins are dynamic libraries (`.so` or `.dll`) and they should be provided using argument `--plugins-path`. Some plugins are bundled
+with SAVE out-of-the-box and don't require additional setup. Here is a list of standard plugins:
+* [diff-plugin](save-plugins/diff-plugin/README.md) for testing tools that mutate text
+* [warnings-plugin](save-plugins/warnings-plugin/README.md) for testing tools that find problems in code and emit warnings
+
+Extending SAVE and writing your own plugin is simple. For instructions, see [corresponding README](save-plugins/README.md).
+
 ## SAVE: writing your test packages and running them with SAVE:
 With option `-suite` your can provide to SAVE a path to your custom test suites. 
 Please note, that SAVE has special notation of tests:
