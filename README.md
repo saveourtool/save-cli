@@ -28,111 +28,155 @@ that have been written already thousands of times for his analyzer/linter. Someo
 or using [PMD rules](https://pmd.github.io/). But in all cases lot of time will be spent on reinventing, writing and debuging tests.
 
 ## What is SAVE?
-SAVE - is an eco-system for measuring, testing and certification of static code analyzers. Instead of writing your test framework SAVE will provide you a command line application with a
+SAVE - is an eco-system (see also [save-cloud](https://github.com/cqfn/save-cloud)) for measuring, testing and certification of static analyzers. Instead of writing your test framework SAVE will provide you a command line (and cloud) application with a
 test sets for the language that you are developing analyzer for. It provides you also a service that can be used to determine the readiness of your tool. SAVE has a committee of static analysis experts
 that regularly updates tests and discuss the best practices for particular programming languages.
 
-SAVE supports 5 different categories of static analysis. All of them have the description and special test packages:
-- code style 
+SAVE supports 5 different categories of static analysis and can be used for testing tools that are used both for checking and for autofixing the code.
+All of them have the description and special test packages:
+- code style issues
 - functional bugs
 - security issues
 - code smells
 - best practices 
 
-## SAVE CLI: how to configure 
-SAVE has a command line interface that runs the framework and your executable. What you need is simply to configure the output of your static analyzer so SAVE will be able to
-check if the proper error was raised on the proper line of test code. To check that the warning is correct your static analyzer must print the result to stderr/stdout or to some log file.
- 
- 
-If you don't want to make any configuration - you can simply create an adaptor from your style of warnings/errors to the **default** style of warnings in SAVE framework:
-```bash
-WARN FileName.your_extension:line:column: your warning text 
-``` 
+Save can be used not only with static analyzers, but can be used as a test framework for writing functional tests for compilers (as testing principles remain the same).
 
-Configuration file that can be provided to save (`save -prop $PATH_TO_PROPS/save.properties`), `save.properties`:
+<img src="/readme/static-analysis-process.png" width="500px"/>
+
+## How to configure 
+SAVE has a command line interface that runs the framework and your executable. What you need is simply to configure the output of your static analyzer so SAVE will be able to
+check if the proper error was raised on the proper line of test code.
+
+// FixMe: specify options here 
+To check that the warning is correct for SAVE - your static analyzer must print the result to stderr/stdout or to some log file.
+
+// FixMe: specify options here
+For [save-cloud](https://github.com/cqfn/save-cloud) it is extremely important to detect properties file for SAVE,
+so in case you would like to use both cli application and cloud application we suggest to put the file with name `save.properties` in the root folder of your repository. 
+
+Configuration file can be also provided to save via command line: `save -prop $PATH_TO_PROPS/save.properties`
+
+Example of `save.properties` file:
 ```bash
-exec_cmd = "my_analyzer -my_option1 -my_option2"
-result_output = stderr/stdout/file
-suppressed_tests = "list of tests that should be suppressed, separated by comma"
-mode = single/parallel
-language = java/cpp/c/python/kotlin
-category = security/style/smells/bugs/practices
-# to configure the format of warnings that will be raised by your analyzer
-warn_format = ".*$filename.format:$line:$column:.*" 
+resultOutput = stderr | stdout | file
+parallelMode = true | false
+language = java | cpp | c | python | kotlin
+testRootPath = /usr/my_dir/dir_to_tests_root (relative path from place, where 'save.properties' is stored or absolute path)
+reportDir = /usr/bin/report
 ```
 
-OR you can pass these arguments directly in command line:
-save -exec_cmd="my_analyzer -my_option1 -my_option2"
+OR you can pass these arguments directly in command line: 
+`save --mode=single --language=java`
 
-SAVE framework will run your analyzer on the following test packages and calculate the pass-rate. 
 
-## SAVE: Using plugins for specific inspections
+# List of options Save cli
+Most of the options below can be passed to a SAVE via `save.properties` file
+
+// FixMe: add description and short names
+| short name | long name  | description   | default |
+|------------|------------|---------------|---------------|
+|   | help |   | |
+|   | parallelMode |   | |
+|   | threads |   | |
+|   | propertiesFile  |   | |
+|   | quiet  |   | |
+|   | reportType  |   | |
+|   | excludeSuites  |   | |
+|   | includeSuites  |   | |
+|   | language  |   | |
+|   | testRootPath | relative path from place, where save.properties is stored or absolute path  | |
+|   | resultOutput |   | |
+|   | disableConfigInheritance |   | |
+|   | ignoreTechnicalComments | should ignore our technical special comments that we use to describe warnings  | |
+|   | reportDir |   | |
+|   | runSingleTest | in case you need to run a single test - just provide a path to the file with 'Test' postfix and save will run it | |
+
+SAVE framework will detect tests, run your analyzer on these tests, will calculate the pass-rate and test results.
+
+## <a name="test_detection"></a> Test detection and save.toml file
+To make SAVE detect your test suites you need to put `save.toml` file in each directory where you have tests that should be run.
+Note, that these configuration files are could inherit configurations from the previous level of directories.
+
+For example, in case of the following hierarchy of directories:
+```bash
+| A
+  | save.toml
+  | B
+    | save.toml
+```
+
+`save.toml` from the directory B will inherit settings and properties from directory A.
+
+Please note, that SAVE will detect all files with Test postfix and will automatically use configuration from `save.toml` file that is placed
+in the directory. Tests are named by the In case SAVE will detect a file with Test postfix in test resources and will not be able to find any `save.toml` configurations
+in the hierarchy of directories - it will raise an error.
+
+For example, the following example is invalid and will cause an error, because SAVE framework will not be able to find `save.toml` configuration file:
+```bash
+| A
+  | B
+  | myTest.java
+```
+
+As described above, `save.toml` is needed to configure tests. The idea is to have only one configuration file for a directory with tests (one to many relation). 
+Such directories we will call `test suites`. We decided to have only one configuration file as we have many times seen that for such tests there is a duplication of configuration in the same test suite.
+
+
+## save.toml configuration file
+Save configuration uses [toml](https://toml.io/en/) format. As it was told [above](#test_detection), save.toml can be imported from the directory hierarchy.
+The configuration file has `[general]` table and `[plugins]` table. To see more information about plugins, read [this](#plugins) section.
+In this section we will give information only about the `[general]` table that can be used in all plugins.
+
+```toml
+[general]
+# your custom tags that will be used to detect groups of tests (optional)
+tags = parsing, null-pointer, e.t.c
+
+# custom free text that describes the test suite (required)
+description = "My suite description"
+
+# Simple suite name (required)
+suiteName = DocsCheck, CaseCheck, NpeTests, e.t.c 
+
+# excluded tests in the suite (optional). Here you can provide names of excluded tests, separated by comma. By the default no tests are excluded. 
+# names can have 'Test' postifix or can be without a postfix - this does not matter. Save will detect tests for both cases
+excludedTests = NameWithTestPostfix, NameWithoutPostfix, e.t.c
+
+# tests included in the suite (optional). Here you can provide names of tests, that are included in this suite.
+ By the default all tests in the same directory with 'save.toml' file are included in the suite. 
+includedTests = NameWithTestPostfix, NameWithoutPostfix, e.t.c
+```
+
+## <a name="plugins"></a> Using plugins for specific test-scenarios
 SAVE doesn't have any inspections active by default, instead the behavior of the analysis is fully configurable using plugins.
 Plugins are dynamic libraries (`.so` or `.dll`) and they should be provided using argument `--plugins-path`. Some plugins are bundled
-with SAVE out-of-the-box and don't require additional setup. Here is a list of standard plugins:
-* [diff-plugin](save-plugins/diff-plugin/README.md) for testing tools that mutate text
-* [warnings-plugin](save-plugins/warnings-plugin/README.md) for testing tools that find problems in code and emit warnings
+with SAVE out-of-the-box and don't require an additional setup. Here is a list of standard plugins:
+* [diff-plugin](save-plugins/fix-plugin/README.md) for testing tools for static analyzers that mutate text
+* [warn-plugin](save-plugins/warn-plugin/README.md) for testing tools that find problems in the source code and emit warnings
 
 Extending SAVE and writing your own plugin is simple. For instructions, see [corresponding README](save-plugins/README.md).
 
-## SAVE: writing your test packages and running them with SAVE:
-With option `-suite` your can provide to SAVE a path to your custom test suites. 
-Please note, that SAVE has special notation of tests:
-```java
-// warn:1:6: Class name should be in an uppercase format
-class a {
-     String b;
-     String getB() {}
-     String setB() {}
-}
+In case you would like to have several plugins to work in your directory with same test files, just simply add them all to `save.toml` config:
+```bash
+[general]
+...
+
+[fix]
+...
+
+[warn]
+...
+
+[other plugin]
+...
+
 ```
 
-## SAVE dashboard: how to use
-SAVE provides the dashboard that can be run on your server and output the pass-rate (in percents) and existing test failures for your static analyzer.
-To start you will need to install java on your server and run:
-```bash
-java -jar save-board.jar
-``` 
+## SAVE output
+// FixMe: add output formats and a link to a dashboard from save-cloud
 
 ## Contribution
 You can always contribute to the main SAVE framework or to a dashboard - just create a PR for it. But to contribute or change tests in categories you will need get approvals from 
 the maintaner of the test package/analysis category. Please see the list of them.  
-
-
-====== Test framework
-# sactest
-Test framework for Static Analyzers and Compilers
-
-# options 
-1. help
-2. workers (threads)
-3. config 
-4. debug
-5. directory to detect and run all tests inside
-5. quiet (just report?)
-6. report type (xml, json, e.t.c)
-7. exclude tests by name
-8. list of tests run by name
-
-
-# config file
-TOML format
-```toml
-[test]
-name = SomeTestName
-source = /usr/test/Test.java (optional, first should try to resolve by TestName)
-expected = /usr/test/Test.java (optional, can be missing or will be resolved by TestName)
-tags = parsing, null-pointer, e.t.c
-description = (optional??)
-
-[compiler]
-testType = frontend, backend, codegen, translator
-binaryPath = /usr/bin/
-
-[static analyzer]
-testType = checker, fixer
-binaryPath = /usr/bin/
-```
-
-# can be used as functional tests and as functional tests
 
