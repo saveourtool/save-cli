@@ -1,5 +1,11 @@
-Plugin that runs provided executable and compares its output with desired.
+## Save fix plugin
+Plugin that runs provided executable on the inintial file with a test source code and compares its output with an expected result.
+Please note, that it is important for test resources to have specific postfixes. By the default test file it should be `Test`
+, for the file with expected result - it should be `Expected`.
 
+// FixMe: say some words about the configuration of postfixes
+
+## Configuration
 Assuming you want to run your tool on input file path/to/example1/ExampleTest.kt and compare with /path/to/example1/ExampleExpected.kt,
 and you have directory structure like this
 ```bash
@@ -32,15 +38,14 @@ language=kotlin
 
 `save.toml`:
 ```toml
-[test]
-name = diKTat tests
-category = code style
+[general]
+description = "My suite description"
+suiteName = "DocsCheck"
 
 [diff]
-testSuites = format, smoke
 testFilePattern=*Test.kt
 expectedFilePattern=*Expected.kt
-output = stdout
+output = stdout # you can also use 'inPlace' here to do fixes right into the test file (test files won't be broken or changed)
 batchMode = false
 ```
 
