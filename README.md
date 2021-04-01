@@ -99,7 +99,7 @@ To make SAVE detect your test suites you need to put `save.toml` file in each di
 Note, that these configuration files are could inherit configurations from the previous level of directories.
 
 For example, in case of the following hierarchy of directories:
-```bash
+```text
 | A
   | save.toml
   | B
@@ -113,7 +113,7 @@ in the directory. Tests are named by the In case SAVE will detect a file with Te
 in the hierarchy of directories - it will raise an error.
 
 For example, the following example is invalid and will cause an error, because SAVE framework will not be able to find `save.toml` configuration file:
-```bash
+```text
 | A
   | B
   | myTest.java
@@ -128,7 +128,7 @@ Save configuration uses [toml](https://toml.io/en/) format. As it was told [abov
 The configuration file has `[general]` table and `[plugins]` table. To see more information about plugins, read [this](#plugins) section.
 In this section we will give information only about the `[general]` table that can be used in all plugins.
 
-```toml
+```text
 [general]
 # your custom tags that will be used to detect groups of tests (optional)
 tags = parsing, null-pointer, e.t.c
@@ -158,7 +158,7 @@ with SAVE out-of-the-box and don't require an additional setup. Here is a list o
 Extending SAVE and writing your own plugin is simple. For instructions, see [corresponding README](save-plugins/README.md).
 
 In case you would like to have several plugins to work in your directory with same test files, just simply add them all to `save.toml` config:
-```bash
+```text
 [general]
 ...
 
