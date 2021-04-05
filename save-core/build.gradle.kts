@@ -30,10 +30,15 @@ kotlin {
         }
         val commonMain by getting {
             dependencies {
-                api("com.squareup.okio:okio-multiplatform:3.0.0-alpha.1")
+                api("com.squareup.okio:okio-multiplatform:${Versions.okio}")
             }
         }
-        val commonTest by getting
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test-common"))
+                implementation(kotlin("test-annotations-common"))
+            }
+        }
 
         val jvmMain by getting
 
