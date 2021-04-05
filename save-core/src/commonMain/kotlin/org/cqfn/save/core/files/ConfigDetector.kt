@@ -17,6 +17,7 @@ class ConfigDetector {
      * @return [TestSuiteConfig] or null if no suitable config file has been found.
      */
     fun configFromFile(file: Path): TestSuiteConfig? = when {
+        // if provided file is save.toml, create config from it
         file.isDefaultSaveConfig() -> TestSuiteConfig(
             "todo: read from file",
             "todo: read from file",
@@ -31,11 +32,16 @@ class ConfigDetector {
                 .firstOrNull()
                 ?.let { configFromFile(it) }
         )
+        // if provided file is a directory, try to find save.toml inside it
         FileSystem.SYSTEM.metadata(file).isDirectory -> file
             .findChildByOrNull { it.isDefaultSaveConfig() }
             ?.let { configFromFile(it) }
-        file.name.matches(Regex(".*Test\\.\\w+")) -> file.parent!!
-            .findChildByOrNull { it.isDefaultSaveConfig() }
+        // if provided file is an individual test file, we search a config file in this and parent directories
+        file.name.matches(Regex(".*Test\\.\\w+")) -> file.parents()
+            .mapNotNull { dir ->
+                dir.findChildByOrNull { it.isDefaultSaveConfig() }
+            }
+            .firstOrNull()
             ?.let { configFromFile(it) }
         else -> null
     }

@@ -9,6 +9,7 @@ import okio.use
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ConfigDetectorTest {
@@ -22,10 +23,30 @@ class ConfigDetectorTest {
 
     @Test
     fun `should detect single file`() {
-        val file = "save.toml".toPath()
-        fs.sink(tmpDir / file).close()
+        val file = tmpDir / "save.toml"
+        fs.sink(file).close()
 
         val result = configDetector.configFromFile(file)
+
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `should return null for different single file`() {
+        val file = tmpDir / "random.text"
+        fs.sink(file).close()
+
+        val result = configDetector.configFromFile(file)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `should detect single file from a directory`() {
+        val file = tmpDir / "save.toml"
+        fs.sink(file).close()
+
+        val result = configDetector.configFromFile(tmpDir)
 
         assertNotNull(result)
     }
@@ -45,6 +66,18 @@ class ConfigDetectorTest {
 
         assertNotNull(result)
         assertNotNull(result.parentConfig)
+    }
+
+    @Test
+    fun `should detect config file from single Test file`() {
+        val resourceFile = tmpDir / "Feature1Test.java"
+        fs.sink(resourceFile).close()
+        val file = tmpDir / "save.toml"
+        fs.sink(file).close()
+
+        val result = configDetector.configFromFile(file)
+
+        assertNotNull(result)
     }
 
     @AfterTest
