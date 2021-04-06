@@ -104,7 +104,7 @@ fun createConfigFromArgs(args: Array<String>): SaveConfig {
     val resultOutput by parser.option(
         ArgType.Choice<ResultOutputType>(),
         fullName = "result-output",
-        shortName = "output",
+        shortName = "out",
         description = "Data output stream",
     ).default(ResultOutputType.STDOUT)
 
@@ -114,10 +114,9 @@ fun createConfigFromArgs(args: Array<String>): SaveConfig {
         description = "Whether configuration files should inherit configurations from the previous level of directories",
     ).default(true)
 
-    val ignoreTechnicalComments by parser.option(
+    val ignoreSaveComments by parser.option(
         ArgType.Boolean,
-        fullName = "ignore-technical-comments",
-        shortName = "ignore",
+        fullName = "ignore-save-comments",
         description = "If true, ignore technical comments, that SAVE uses to describe warnings, when running tests",
     ).default(false)
 
@@ -126,12 +125,6 @@ fun createConfigFromArgs(args: Array<String>): SaveConfig {
         fullName = "report-dir",
         description = "Path to directory, where to store output (when `resultOutput` is set to `FILE`)",
     ).default("save-reports")
-
-    val runSingleTest by parser.option(
-        ArgType.String,
-        fullName = "run-single-test",
-        description = "Path to the file with 'Test' postfix, which need to be run in single mode",
-    )
 
     parser.parse(args)
     return SaveConfig(
@@ -149,8 +142,7 @@ fun createConfigFromArgs(args: Array<String>): SaveConfig {
         testRootPath = testRootPath.toPath(),
         resultOutput = resultOutput,
         configInheritance = configInheritance,
-        ignoreTechnicalComments = ignoreTechnicalComments,
+        ignoreSaveComments = ignoreSaveComments,
         reportDir = reportDir.toPath(),
-        runSingleTest = runSingleTest?.toPath()
     )
 }

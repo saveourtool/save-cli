@@ -20,9 +20,8 @@ import okio.Path
  * @property testRootPath path to directory with tests
  * @property resultOutput data output stream
  * @property configInheritance whether configuration files should inherit configurations from the previous level of directories
- * @property ignoreTechnicalComments if true, ignore technical comments, that SAVE uses to describe warnings, when running tests
+ * @property ignoreSaveComments if true, ignore technical comments, that SAVE uses to describe warnings, when running tests
  * @property reportDir path to directory where to store output (when `resultOutput` is set to `FILE`)
- * @property runSingleTest path to the file with 'Test' postfix, which need to be run in single mode
  */
 @OptIn(ExperimentalFileSystem::class)
 data class SaveConfig(
@@ -40,7 +39,6 @@ data class SaveConfig(
     val testRootPath: Path,
     val resultOutput: ResultOutputType,
     val configInheritance: Boolean,
-    val ignoreTechnicalComments: Boolean,
+    val ignoreSaveComments: Boolean,
     val reportDir: Path,
-    val runSingleTest: Path?
 )
