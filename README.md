@@ -53,9 +53,9 @@ To check that the warning is correct for SAVE - your static analyzer must print 
 
 // FixMe: specify options here
 For [save-cloud](https://github.com/cqfn/save-cloud) it is extremely important to detect properties file for SAVE,
-so in case you would like to use both cli application and cloud application we suggest to put the file with name `save.properties` in the root folder of your repository. 
+so in case you would like to use both cli application and cloud application we suggest putting the file with name `save.properties` in the root folder of your repository.
 
-Configuration file can be also provided to save via command line: `save -prop $PATH_TO_PROPS/save.properties`
+Configuration file can be also provided to SAVE via command line: `save -prop $PATH_TO_PROPS/save.properties`
 
 Example of `save.properties` file:
 ```bash
@@ -70,7 +70,6 @@ OR you can pass these arguments directly in command line:
 ```bash
 save --mode=single --language=java
 ```
-
 
 # List of options Save cli
 Most of the options below can be passed to a SAVE via `save.properties` file

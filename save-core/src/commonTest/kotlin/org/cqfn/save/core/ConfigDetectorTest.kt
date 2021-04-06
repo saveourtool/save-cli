@@ -76,7 +76,9 @@ class ConfigDetectorTest {
 
         assertNotNull(result)
         assertEquals(2, result.parentConfigs().count())
-        assertTrue(result.parentConfigs().all { it.childConfigs.isNotEmpty() })
+        result.parentConfigs().forEach {
+            assertTrue(it.childConfigs.isNotEmpty(), "Child configs for config @${it.location} are empty")
+        }
     }
 
     @Test
@@ -90,6 +92,33 @@ class ConfigDetectorTest {
 
         assertNotNull(result)
         assertTrue(result.childConfigs.isNotEmpty())
+    }
+
+    @Test
+    fun `should detect multiple files starting from the middle`() {
+        // save.toml
+        // nestedDir1
+        // |___save.toml  <-- starting search from this
+        // |___nestedDir2
+        // | |___save.toml
+        // |___nestedDir3
+        // | |___nestedDir4
+        // | | |___save.toml
+        fs.createFile(tmpDir / "save.toml")
+        val nestedDir1 = tmpDir / "nestedDir1"
+        fs.createDirectory(nestedDir1)
+        val file = fs.createFile(nestedDir1 / "save.toml")
+        fs.createDirectory(nestedDir1 / "nestedDir2")
+        fs.createDirectory(nestedDir1 / "nestedDir3")
+        fs.createFile(nestedDir1 / "nestedDir2" / "save.toml")
+        fs.createDirectory(nestedDir1 / "nestedDir3" / "nestedDir4")
+        fs.createFile(nestedDir1 / "nestedDir3" / "nestedDir4" / "save.toml")
+
+        val result = configDetector.configFromFile(file)
+
+        assertNotNull(result)
+        assertEquals(1, result.parentConfigs().count())
+        assertEquals(2, result.childConfigs.size)
     }
 
     @Test

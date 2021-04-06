@@ -19,7 +19,7 @@ class ConfigDetector {
     fun configFromFile(file: Path): TestSuiteConfig? = discoverConfigWithParents(file)
         ?.also { config ->
             // fill children for parent configs
-            config.parentConfigs().toList().reversed()
+            config.parentConfigs(wihSelf = true).toList().reversed()
                 .zipWithNext().forEach { (parent, child) ->
                     parent.childConfigs.add(child)
                 }
@@ -31,14 +31,15 @@ class ConfigDetector {
                 .forEachIndexed { index, path ->
                     configs.add(
                         TestSuiteConfig(
-                            "", "", path,
+                            "todo: read from file",
+                            "todo: read from file",
+                            path,
                             configs.find { discoveredConfig ->
                                 discoveredConfig.location ==
                                         locationsFlattened.take(index + 1).reversed().find { it.parent in path.parents() }!!
                             }!!
                         ).also {
-                            // println("Adding $it as a child")
-                            it.parentConfig?.childConfigs?.add(it)
+                            it.parentConfig!!.childConfigs.add(it)
                         }
                     )
                 }
@@ -50,7 +51,7 @@ class ConfigDetector {
             .findChildByOrNull { it.isDefaultSaveConfig() }
             ?.let { discoverConfigWithParents(it) }
         // if provided file is an individual test file, we search a config file in this and parent directories
-        file.name.matches(Regex(".*Test\\.\\w+")) -> file.parents()
+        file.name.matches(testResourceFilePattern) -> file.parents()
             .mapNotNull { dir ->
                 dir.findChildByOrNull { it.isDefaultSaveConfig() }
             }
@@ -61,7 +62,7 @@ class ConfigDetector {
         else -> null
     }
 
-    private fun testSuiteConfigFromFile(file: Path) = TestSuiteConfig(
+    private fun testSuiteConfigFromFile(file: Path): TestSuiteConfig = TestSuiteConfig(
         "todo: read from file",
         "todo: read from file",
         file,
@@ -73,6 +74,6 @@ class ConfigDetector {
                 }
             }
             .firstOrNull()
-            ?.let { configFromFile(it) }
+            ?.let { testSuiteConfigFromFile(it) }
     )
 }
