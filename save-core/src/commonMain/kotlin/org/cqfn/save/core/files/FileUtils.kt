@@ -6,20 +6,22 @@ package org.cqfn.save.core.files
 
 import okio.FileSystem
 import okio.Path
+import okio.Path.Companion.toPath
 
 /**
  * Find all descendant files in the directory denoted by [this] [Path], that match [condition].
+ * This method uses BFS, so files will appear in the returned list in order of directory levels.
  *
  * @param condition a condition to match
  * @return a list of files
  */
-fun Path.findAllFilesMatching(condition: (Path) -> Boolean): List<Path> = FileSystem.SYSTEM.list(this).flatMap {
-    when {
-        FileSystem.SYSTEM.metadata(it).isDirectory -> it.findAllFilesMatching(condition)
-        condition.invoke(it) -> listOf(it)
-        else -> emptyList()
+fun Path.findAllFilesMatching(condition: (Path) -> Boolean): List<List<Path>> = FileSystem.SYSTEM.list(this)
+    .partition { FileSystem.SYSTEM.metadata(it).isDirectory }
+    .let { (directories, files) ->
+        listOf(files.filter(condition)) + directories.flatMap {
+            it.findAllFilesMatching(condition)
+        }
     }
-}
 
 /**
  * @param condition a condition to match
@@ -39,3 +41,22 @@ fun Path.parents(): Sequence<Path> = generateSequence(parent) { it.parent }
  * @param condition a condition to match
  */
 fun Path.findAllParentsMatching(condition: (Path) -> Boolean) = parents().filter(condition)
+
+/**
+ * Create file in [this] [FileSystem], denoted by path [pathString]
+ *
+ * @param pathString path to a new file
+ * @return [Path] denoting the created file
+ */
+fun FileSystem.createFile(pathString: String): Path = createFile(pathString.toPath())
+
+/**
+ * Create file in [this] [FileSystem], denoted by [Path] [path]
+ *
+ * @param path path to a new file
+ * @return [path]
+ */
+fun FileSystem.createFile(path: Path): Path {
+    sink(path).close()
+    return path
+}

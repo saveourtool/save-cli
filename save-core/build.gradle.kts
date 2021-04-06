@@ -11,7 +11,13 @@ repositories {
 }
 
 kotlin {
-    jvm()
+    jvm {
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = "11"
+            }
+        }
+    }
     val os = getCurrentOperatingSystem()
     val saveTarget = when {
         os.isMacOsX -> macosX64()

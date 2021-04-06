@@ -8,12 +8,14 @@ import okio.Path
  * @property description description of test suite
  * @property location [Path] denoting the location of this file
  * @property parentConfig parent config in the hierarchy of configs, `null` if this config is root.
+ * @property childConfigs list of child configs in the hierarchy of configs, can be empty if this config is at the very bottom.
  */
 data class TestSuiteConfig(
     val suiteName: String,
     val description: String,
     val location: Path,
-    val parentConfig: TestSuiteConfig?
+    val parentConfig: TestSuiteConfig?,
+    val childConfigs: MutableList<TestSuiteConfig> = mutableListOf(),
 ) {
     /**
      * @return whether this config file is in the root on the hierarchy

@@ -1,13 +1,13 @@
 package org.cqfn.save.core
 
 import org.cqfn.save.core.files.ConfigDetector
+import org.cqfn.save.core.files.createFile
 
 import okio.FileSystem
-import okio.Path.Companion.toPath
-import okio.use
 
 import kotlin.test.AfterTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -23,8 +23,7 @@ class ConfigDetectorTest {
 
     @Test
     fun `should detect single file`() {
-        val file = tmpDir / "save.toml"
-        fs.sink(file).close()
+        val file = fs.createFile(tmpDir / "save.toml")
 
         val result = configDetector.configFromFile(file)
 
@@ -33,8 +32,7 @@ class ConfigDetectorTest {
 
     @Test
     fun `should return null for different single file`() {
-        val file = tmpDir / "random.text"
-        fs.sink(file).close()
+        val file = fs.createFile(tmpDir / "random.text")
 
         val result = configDetector.configFromFile(file)
 
@@ -43,8 +41,7 @@ class ConfigDetectorTest {
 
     @Test
     fun `should detect single file from a directory`() {
-        val file = tmpDir / "save.toml"
-        fs.sink(file).close()
+        fs.createFile(tmpDir / "save.toml")
 
         val result = configDetector.configFromFile(tmpDir)
 
@@ -52,28 +49,53 @@ class ConfigDetectorTest {
     }
 
     @Test
-    fun `should detect multiple files`() {
-        val parentFile = tmpDir / "save.toml"
-        fs.sink(parentFile).close()
+    fun `should detect starting from bottom`() {
+        fs.createFile(tmpDir / "save.toml")
         val nestedDir = tmpDir / "nestedDir"
         fs.createDirectory(nestedDir)
-        val file = nestedDir / "save.toml"
-        fs.sink(file).use { it.flush() }
-
-        assertTrue { fs.metadata(file).isRegularFile }
+        val file = fs.createFile(nestedDir / "save.toml")
 
         val result = configDetector.configFromFile(file)
 
         assertNotNull(result)
         assertNotNull(result.parentConfig)
+        assertTrue(result.parentConfig!!.childConfigs.isNotEmpty())
+    }
+
+    @Test
+    fun `should detect starting from bottom with multiple parent configs`() {
+        fs.createFile(tmpDir / "save.toml")
+        val nestedDir1 = tmpDir / "nestedDir1"
+        fs.createDirectory(nestedDir1)
+        fs.createFile(nestedDir1 / "save.toml")
+        val nestedDir2 = nestedDir1 / "nestedDir2"
+        fs.createDirectory(nestedDir2)
+        val file = fs.createFile(nestedDir2 / "save.toml")
+
+        val result = configDetector.configFromFile(file)
+
+        assertNotNull(result)
+        assertEquals(2, result.parentConfigs().count())
+        assertTrue(result.parentConfigs().all { it.childConfigs.isNotEmpty() })
+    }
+
+    @Test
+    fun `should detect multiple files starting from top`() {
+        val parentFile = fs.createFile(tmpDir / "save.toml")
+        val nestedDir = tmpDir / "nestedDir"
+        fs.createDirectory(nestedDir)
+        fs.createFile(nestedDir / "save.toml")
+
+        val result = configDetector.configFromFile(parentFile)
+
+        assertNotNull(result)
+        assertTrue(result.childConfigs.isNotEmpty())
     }
 
     @Test
     fun `should detect config file from single Test file`() {
-        val resourceFile = tmpDir / "Feature1Test.java"
-        fs.sink(resourceFile).close()
-        val file = tmpDir / "save.toml"
-        fs.sink(file).close()
+        val file = fs.createFile(tmpDir / "Feature1Test.java")
+        fs.createFile(tmpDir / "save.toml")
 
         val result = configDetector.configFromFile(file)
 
