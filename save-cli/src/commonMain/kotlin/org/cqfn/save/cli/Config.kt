@@ -21,6 +21,7 @@ import kotlinx.cli.required
  * @param args CLI args
  * @return an instance of [SaveConfig]
  */
+@Suppress("TOO_LONG_FUNCTION")
 fun createConfigFromArgs(args: Array<String>): SaveConfig {
     val parser = ArgParser("save")
 
@@ -110,20 +111,20 @@ fun createConfigFromArgs(args: Array<String>): SaveConfig {
     val configInheritance by parser.option(
         ArgType.Boolean,
         fullName = "config-inheritance",
-        description = "Whether configuration files could inherit configurations from the previous level of directories",
+        description = "Whether configuration files should inherit configurations from the previous level of directories",
     ).default(true)
 
     val ignoreTechnicalComments by parser.option(
         ArgType.Boolean,
         fullName = "ignore-technical-comments",
         shortName = "ignore",
-        description = "Should ignore our technical special comments, that we use to describe warnings",
+        description = "If true, ignore technical comments, that SAVE uses to describe warnings, when running tests",
     ).default(false)
 
     val reportDir by parser.option(
         ArgType.String,
         fullName = "report-dir",
-        description = "Path to directory, where to store output",
+        description = "Path to directory, where to store output (when `resultOutput` is set to `FILE`)",
     ).default("save-reports")
 
     val runSingleTest by parser.option(

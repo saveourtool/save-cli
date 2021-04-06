@@ -19,9 +19,9 @@ import okio.Path
  * @property language language that you are developing analyzer for
  * @property testRootPath path to directory with tests
  * @property resultOutput data output stream
- * @property configInheritance whether configuration files could inherit configurations from the previous level of directories
- * @property ignoreTechnicalComments should ignore our technical special comments, that we use to describe warnings
- * @property reportDir path to directory where to store output
+ * @property configInheritance whether configuration files should inherit configurations from the previous level of directories
+ * @property ignoreTechnicalComments if true, ignore technical comments, that SAVE uses to describe warnings, when running tests
+ * @property reportDir path to directory where to store output (when `resultOutput` is set to `FILE`)
  * @property runSingleTest path to the file with 'Test' postfix, which need to be run in single mode
  */
 @OptIn(ExperimentalFileSystem::class)

@@ -89,10 +89,10 @@ Most of the options below can be passed to a SAVE via `save.properties` file
 | l | language  | Language that you are developing analyzer for | java |
 | - | test-root-path | Path to directory with tests (relative path from place, where save.properties is stored or absolute path)  | - |
 | output | result-output | Data output stream | STDOUT |
-| - | config-inheritance | Whether configuration files could inherit configurations from the previous level of directories | true |
-| ignore | ignore-technical-comments | Should ignore our technical special comments, that we use to describe warnings  | false |
-| - | report-dir | Path to directory where to store output | save-reports |
-| - | run-single-test | In case you need to run a single test - just provide a path to the file with 'Test' postfix and save will run it | - |
+| - | config-inheritance | Whether configuration files should inherit configurations from the previous level of directories | true |
+| ignore | ignore-technical-comments | If true, ignore technical comments, that SAVE uses to describe warnings, when running tests  | false |
+| - | report-dir | Path to directory where to store output (when `resultOutput` is set to `FILE`) | save-reports |
+| - | run-single-test | In case you need to run a single test - just provide a path to the file with 'Test' postfix and SAVE will run it | - |
 
 SAVE framework will detect tests, run your analyzer on these tests, will calculate the pass-rate and test results.
 

@@ -3,6 +3,7 @@ package org.cqfn.save.core.config
 /**
  * Available languages
  */
+@Suppress("IDENTIFIER_LENGTH")
 enum class LanguageType {
-    JAVA, CPP, C, KOTLIN
+    C, CPP, JAVA, KOTLIN
 }
