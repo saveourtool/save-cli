@@ -1,7 +1,9 @@
 package org.cqfn.save.core.files
 
 import org.cqfn.save.core.config.TestSuiteConfig
-import org.cqfn.save.core.config.isDefaultSaveConfig
+import org.cqfn.save.core.config.isSaveTomlConfig
+import org.cqfn.save.core.logging.logDebug
+import org.cqfn.save.core.logging.logError
 
 import okio.FileSystem
 import okio.Path
@@ -24,56 +26,68 @@ class ConfigDetector {
                     parent.childConfigs.add(child)
                 }
             // discover all descendant configs of [config]
-            val locationsFlattened = config.location.parent!!.findAllFilesMatching { it.isDefaultSaveConfig() }.flatten()
+            val locationsFlattened = config.location.parent!!.findAllFilesMatching { it.isSaveTomlConfig() }.flatten()
             val configs = mutableListOf(config)
             locationsFlattened
                 .drop(1)  // because [config] will be discovered too
                 .forEachIndexed { index, path ->
+                    val parentConfig = configs.find { discoveredConfig ->
+                        discoveredConfig.location ==
+                                locationsFlattened.take(index + 1).reversed().find { it.parent in path.parents() }!!
+                    }!!
                     configs.add(
                         TestSuiteConfig(
                             "todo: read from file",
                             "todo: read from file",
                             path,
-                            configs.find { discoveredConfig ->
-                                discoveredConfig.location ==
-                                        locationsFlattened.take(index + 1).reversed().find { it.parent in path.parents() }!!
-                            }!!
+                            parentConfig,
                         ).also {
+                            logDebug("Found config file at $path, adding as a child for ${parentConfig.location}")
                             it.parentConfig!!.childConfigs.add(it)
                         }
                     )
                 }
         }
+        ?: run {
+            logError("Config file was not found in $file")
+            null
+        }
 
     private fun discoverConfigWithParents(file: Path): TestSuiteConfig? = when {
         // if provided file is a directory, try to find save.toml inside it
         FileSystem.SYSTEM.metadata(file).isDirectory -> file
-            .findChildByOrNull { it.isDefaultSaveConfig() }
+            .findChildByOrNull { it.isSaveTomlConfig() }
             ?.let { discoverConfigWithParents(it) }
         // if provided file is an individual test file, we search a config file in this and parent directories
         file.name.matches(testResourceFilePattern) -> file.parents()
             .mapNotNull { dir ->
-                dir.findChildByOrNull { it.isDefaultSaveConfig() }
+                dir.findChildByOrNull { it.isSaveTomlConfig() }
             }
             .firstOrNull()
             ?.let { discoverConfigWithParents(it) }
         // if provided file is save.toml, create config from it
-        file.isDefaultSaveConfig() -> testSuiteConfigFromFile(file)
+        file.isSaveTomlConfig() -> testSuiteConfigFromFile(file)
         else -> null
     }
 
-    private fun testSuiteConfigFromFile(file: Path): TestSuiteConfig = TestSuiteConfig(
-        "todo: read from file",
-        "todo: read from file",
-        file,
-        file.parents()
+    private fun testSuiteConfigFromFile(file: Path): TestSuiteConfig {
+        val parentConfig = file.parents()
             .drop(1)  // because immediate parent already contains [this] config
             .mapNotNull { parentDir ->
                 parentDir.findChildByOrNull {
-                    it.isDefaultSaveConfig()
+                    it.isSaveTomlConfig()
                 }
             }
             .firstOrNull()
             ?.let { testSuiteConfigFromFile(it) }
-    )
+        return TestSuiteConfig(
+            "todo: read from file",
+            "todo: read from file",
+            file,
+            parentConfig
+        )
+            .also {
+                logDebug("Discovered config file at $file")
+            }
+    }
 }

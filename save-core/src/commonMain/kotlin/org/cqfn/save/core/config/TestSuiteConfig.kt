@@ -36,4 +36,4 @@ data class TestSuiteConfig(
 /**
  * @return whether a file denoted by this [Path] is a default save configuration file (save.toml)
  */
-fun Path.isDefaultSaveConfig() = name == "save.toml"
+fun Path.isSaveTomlConfig() = name == "save.toml"
