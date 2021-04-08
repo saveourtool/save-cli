@@ -29,6 +29,13 @@ fun logDebug(msg: String) {
 fun logInfo(msg: String): Unit = println("INFO: $msg")
 
 /**
+ * Log a message with warn level
+ *
+ * @param msg a message string
+ */
+fun logWarn(msg: String): Unit = println("WARN: $msg")
+
+/**
  * Log a message with error level
  *
  * @param msg a message string
