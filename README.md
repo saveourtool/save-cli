@@ -53,9 +53,9 @@ To check that the warning is correct for SAVE - your static analyzer must print 
 
 // FixMe: specify options here
 For [save-cloud](https://github.com/cqfn/save-cloud) it is extremely important to detect properties file for SAVE,
-so in case you would like to use both cli application and cloud application we suggest to put the file with name `save.properties` in the root folder of your repository. 
+so in case you would like to use both cli application and cloud application we suggest putting the file with name `save.properties` in the root folder of your repository.
 
-Configuration file can be also provided to save via command line: `save -prop $PATH_TO_PROPS/save.properties`
+Configuration file can be also provided to SAVE via command line: `save -prop $PATH_TO_PROPS/save.properties`
 
 Example of `save.properties` file:
 ```bash
@@ -67,8 +67,9 @@ reportDir = /usr/bin/report
 ```
 
 OR you can pass these arguments directly in command line: 
-`save --mode=single --language=java`
-
+```bash
+save --mode=single --language=java
+```
 
 # List of options Save cli
 Most of the options below can be passed to a SAVE via `save.properties` file
@@ -97,7 +98,7 @@ SAVE framework will detect tests, run your analyzer on these tests, will calcula
 
 ## <a name="test_detection"></a> Test detection and save.toml file
 To make SAVE detect your test suites you need to put `save.toml` file in each directory where you have tests that should be run.
-Note, that these configuration files are could inherit configurations from the previous level of directories.
+Note, that these configuration files inherit configurations from the previous level of directories.
 
 For example, in case of the following hierarchy of directories:
 ```text
@@ -110,7 +111,8 @@ For example, in case of the following hierarchy of directories:
 `save.toml` from the directory B will inherit settings and properties from directory A.
 
 Please note, that SAVE will detect all files with Test postfix and will automatically use configuration from `save.toml` file that is placed
-in the directory. Tests are named by the In case SAVE will detect a file with Test postfix in test resources and will not be able to find any `save.toml` configurations
+in the directory. Tests are named by the test file resource name without a suffix 'Test'.
+In case SAVE will detect a file with Test postfix in test resources and will not be able to find any `save.toml` configurations
 in the hierarchy of directories - it will raise an error.
 
 For example, the following example is invalid and will cause an error, because SAVE framework will not be able to find `save.toml` configuration file:
@@ -179,5 +181,5 @@ In case you would like to have several plugins to work in your directory with sa
 
 ## Contribution
 You can always contribute to the main SAVE framework or to a dashboard - just create a PR for it. But to contribute or change tests in categories you will need get approvals from 
-the maintaner of the test package/analysis category. Please see the list of them.  
+the maintainer of the test package/analysis category. Please see the list of them.  
 
