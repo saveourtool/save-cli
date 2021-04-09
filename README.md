@@ -57,13 +57,13 @@ so in case you would like to use both cli application and cloud application we s
 
 Configuration file can be also provided to SAVE via command line: `save -prop $PATH_TO_PROPS/save.properties`
 
-Example of `save.properties` file:
-```bash
-resultOutput = stderr | stdout | file
-parallelMode = true | false
-language = java | cpp | c | python | kotlin
-testRootPath = /usr/my_dir/dir_to_tests_root (relative path from place, where 'save.properties' is stored or absolute path)
-reportDir = /usr/bin/report
+Example of `save.properties` file (for full description and possible values, refer to the [corresponding section](#config_options)):
+```properties
+resultOutput=stdout
+parallelMode=true
+language=c++
+testRootPath=~/my_dir/dir_to_tests_root
+reportDir=~/report
 ```
 
 OR you can pass these arguments directly in command line: 
@@ -71,8 +71,8 @@ OR you can pass these arguments directly in command line:
 save --mode=single --language=java
 ```
 
-# List of options Save cli
-Most of the options below can be passed to a SAVE via `save.properties` file
+# <a name="config_options"></a> List of options Save cli
+Most (except for `-h` and `-prop`) of the options below can be passed to a SAVE via `save.properties` file
 
 | Short name | Long name  | Description   | Default |
 |------------|------------|---------------|---------------|
