@@ -24,6 +24,7 @@ import kotlinx.cli.MultipleOption
 import kotlinx.cli.default
 import kotlinx.cli.multiple
 import kotlinx.cli.required
+import org.cqfn.save.cli.logging.logErrorAndExit
 
 private fun <U> Map<String, String>.getAndParseOrElse(
     key: String,
@@ -57,8 +58,10 @@ fun createConfigFromArgs(args: Array<String>): SaveConfig {
                 }
             }
     } catch (e: IOException) {
-        logError("Unable to read properties file $propertiesFileName: ${e.message}")
-        exitProcess(ExitCodes.GENERAL_ERROR.code)
+        logErrorAndExit(
+            ExitCodes.GENERAL_ERROR,
+            "Unable to read properties file $propertiesFileName: ${e.message}"
+        )
     }
     logInfo("Read from properties file: $properties")
 
