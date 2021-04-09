@@ -4,12 +4,12 @@
 
 package org.cqfn.save.cli
 
+import org.cqfn.save.cli.logging.logErrorAndExit
 import org.cqfn.save.core.config.LanguageType
 import org.cqfn.save.core.config.ReportType
 import org.cqfn.save.core.config.ResultOutputType
 import org.cqfn.save.core.config.SaveConfig
 import org.cqfn.save.core.logging.logDebug
-import org.cqfn.save.core.logging.logError
 import org.cqfn.save.core.logging.logInfo
 
 import okio.FileSystem
@@ -56,8 +56,10 @@ fun createConfigFromArgs(args: Array<String>): SaveConfig {
                 }
             }
     } catch (e: IOException) {
-        logError("Unable to read properties file $propertiesFileName: ${e.message}")
-        emptyMap()  // todo exit with exit code?
+        logErrorAndExit(
+            ExitCodes.GENERAL_ERROR,
+            "Unable to read properties file $propertiesFileName: ${e.message}"
+        )
     }
     logInfo("Read from properties file: $properties")
 
