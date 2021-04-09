@@ -16,6 +16,7 @@ import okio.FileSystem
 import okio.IOException
 import okio.Path.Companion.toPath
 
+import kotlin.system.exitProcess
 import kotlinx.cli.AbstractSingleOption
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
@@ -57,7 +58,7 @@ fun createConfigFromArgs(args: Array<String>): SaveConfig {
             }
     } catch (e: IOException) {
         logError("Unable to read properties file $propertiesFileName: ${e.message}")
-        emptyMap()  // todo exit with exit code?
+        exitProcess(ExitCodes.GENERAL_ERROR.code)
     }
     logInfo("Read from properties file: $properties")
 
