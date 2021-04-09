@@ -8,7 +8,11 @@ import org.cqfn.save.core.config.LanguageType
 import org.cqfn.save.core.config.ReportType
 import org.cqfn.save.core.config.ResultOutputType
 import org.cqfn.save.core.config.SaveConfig
+import org.cqfn.save.core.logging.logDebug
+import org.cqfn.save.core.logging.logError
 
+import okio.FileSystem
+import okio.IOException
 import okio.Path.Companion.toPath
 
 import kotlinx.cli.ArgParser
@@ -16,64 +20,91 @@ import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import kotlinx.cli.multiple
 import kotlinx.cli.required
+import org.cqfn.save.core.logging.logInfo
+
+private fun <U> Map<String, String>.getAndParseOrElse(
+    key: String,
+    parse: String.() -> U,
+    default: () -> U) =
+        get(key)?.let(parse) ?: default()
 
 /**
  * @param args CLI args
  * @return an instance of [SaveConfig]
+ * @throws e
  */
 @Suppress("TOO_LONG_FUNCTION")
 fun createConfigFromArgs(args: Array<String>): SaveConfig {
-    val parser = ArgParser("save")
+    // The first iteration of parsing - get location of properties file. Ignore any other arguments.
+    val propertiesFile = args.toList().zipWithNext()
+        .firstOrNull { it.first == "--properties-file" || it.first == "-prop" }
+        ?.second
+        ?: "save.properties"
+    logDebug("Using properties file $propertiesFile")
+
+    val properties: Map<String, String> = try {
+        FileSystem.SYSTEM.read(propertiesFile.toPath()) {
+            generateSequence { readUtf8Line() }.toList()
+        }
+            .associate { line ->
+                line.split("=", limit = 2).let {
+                    it.first() to it.last()
+                }
+            }
+    } catch (e: IOException) {
+        logError("Unable to read properties file $propertiesFile: ${e.message}")
+        throw e  // todo exit with exit code
+    }
+    logInfo("Read from properties file: $properties")
+
+    val parser = ArgParser("save")  // todo: or save-cli?
 
     val config by parser.option(
         ArgType.String,
+        fullName = "config",
         shortName = "c",
         description = "Path to the root save config file",
-    ).default("save.toml")
+    ).default(properties.getOrElse("config") { "save.toml" })
 
     val parallelMode by parser.option(
         ArgType.Boolean,
         fullName = "parallel-mode",
         shortName = "parallel",
         description = "Whether to enable parallel mode",
-    ).default(false)
+    ).default(properties.getAndParseOrElse("parallelMode", String::toBoolean) { false })
 
     val threads by parser.option(
         ArgType.Int,
         shortName = "t",
         description = "Number of threads",
-    ).default(1)
-
-    val propertiesFile by parser.option(
-        ArgType.String,
-        fullName = "properties-file",
-        shortName = "prop",
-        description = "Path to the file with configuration properties of save application",
-    ).default("save.properties")
+    ).default(properties.getAndParseOrElse("threads", String::toInt) { 1 })
 
     val debug by parser.option(
         ArgType.Boolean,
         shortName = "d",
         description = "Turn on debug logging"
-    ).default(false)
+    ).default(properties.getAndParseOrElse("debug", String::toBoolean) { false })
 
     val quiet by parser.option(
         ArgType.Boolean,
         shortName = "q",
         description = "Do not log anything"
-    ).default(false)
+    ).default(properties.getAndParseOrElse("quiet", String::toBoolean) { false })
 
     val reportType by parser.option(
         ArgType.Choice<ReportType>(),
         fullName = "report-type",
         description = "Possible types of output formats"
-    ).default(ReportType.JSON)
+    ).default(properties.getAndParseOrElse("reportType", ReportType::valueOf) { ReportType.JSON })
 
-    val baseline by parser.option(
+    val baselineOption = parser.option(
         ArgType.String,
         shortName = "b",
         description = "Path to the file with baseline data",
-    )
+    ).run {
+        properties["baseline"]?.let { default(it) } ?: this
+    }
+    val baseline: String? by baselineOption
 
     val excludeSuites by parser.option(
         ArgType.String,
@@ -93,38 +124,42 @@ fun createConfigFromArgs(args: Array<String>): SaveConfig {
         ArgType.Choice<LanguageType>(),
         shortName = "l",
         description = "Language that you are developing analyzer for",
-    ).default(LanguageType.JAVA)
+    ).default(properties.getAndParseOrElse("language", LanguageType::valueOf) { LanguageType.JAVA })
 
-    val testRootPath by parser.option(
+    val testRootPathOption = parser.option(
         ArgType.String,
         fullName = "test-root-path",
         description = "Path to directory with tests (relative path from place, where save.properties is stored or absolute path)",
-    ).required()
+    ).run {
+        properties["testRootPath"]?.let { default(it) }
+            ?: required()
+    }
+    val testRootPath: String by testRootPathOption
 
     val resultOutput by parser.option(
         ArgType.Choice<ResultOutputType>(),
         fullName = "result-output",
         shortName = "out",
         description = "Data output stream",
-    ).default(ResultOutputType.STDOUT)
+    ).default(properties.getAndParseOrElse("resultOutput", ResultOutputType::valueOf) { ResultOutputType.STDOUT })
 
     val configInheritance by parser.option(
         ArgType.Boolean,
         fullName = "config-inheritance",
         description = "Whether configuration files should inherit configurations from the previous level of directories",
-    ).default(true)
+    ).default(properties.getAndParseOrElse("configInheritance", String::toBoolean) { true })
 
     val ignoreSaveComments by parser.option(
         ArgType.Boolean,
         fullName = "ignore-save-comments",
         description = "If true, ignore technical comments, that SAVE uses to describe warnings, when running tests",
-    ).default(false)
+    ).default(properties.getAndParseOrElse("ignoreSaveComments", String::toBoolean) { false })
 
     val reportDir by parser.option(
         ArgType.String,
         fullName = "report-dir",
         description = "Path to directory, where to store output (when `resultOutput` is set to `FILE`)",
-    ).default("save-reports")
+    ).default(properties.getOrElse("reportDir") { "save-reports" })
 
     parser.parse(args)
     return SaveConfig(
@@ -144,5 +179,7 @@ fun createConfigFromArgs(args: Array<String>): SaveConfig {
         configInheritance = configInheritance,
         ignoreSaveComments = ignoreSaveComments,
         reportDir = reportDir.toPath(),
-    )
+    ).also {
+        logDebug("Will be running SAVE with the following options: $it")
+    }
 }
