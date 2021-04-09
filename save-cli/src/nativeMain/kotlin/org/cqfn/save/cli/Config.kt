@@ -4,19 +4,18 @@
 
 package org.cqfn.save.cli
 
+import org.cqfn.save.cli.logging.logErrorAndExit
 import org.cqfn.save.core.config.LanguageType
 import org.cqfn.save.core.config.ReportType
 import org.cqfn.save.core.config.ResultOutputType
 import org.cqfn.save.core.config.SaveConfig
 import org.cqfn.save.core.logging.logDebug
-import org.cqfn.save.core.logging.logError
 import org.cqfn.save.core.logging.logInfo
 
 import okio.FileSystem
 import okio.IOException
 import okio.Path.Companion.toPath
 
-import kotlin.system.exitProcess
 import kotlinx.cli.AbstractSingleOption
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
@@ -24,7 +23,6 @@ import kotlinx.cli.MultipleOption
 import kotlinx.cli.default
 import kotlinx.cli.multiple
 import kotlinx.cli.required
-import org.cqfn.save.cli.logging.logErrorAndExit
 
 private fun <U> Map<String, String>.getAndParseOrElse(
     key: String,

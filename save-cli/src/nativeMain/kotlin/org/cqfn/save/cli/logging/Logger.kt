@@ -1,3 +1,7 @@
+/**
+ * Logging utilities specific for native code.
+ */
+
 package org.cqfn.save.cli.logging
 
 import org.cqfn.save.cli.ExitCodes
