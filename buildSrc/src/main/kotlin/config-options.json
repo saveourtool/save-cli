@@ -1,0 +1,144 @@
+{
+    "config" : {
+      "type" : "ArgType.String",
+      "fullName" : "",
+      "shortName" : "c",
+      "description" : "Path to the root save config file",
+      "option" : {
+        "default" : "save.toml"
+      }
+    },
+    "parallelMode" : {
+      "type" : "ArgType.Boolean",
+      "fullName" : "parallel-mode",
+      "shortName" : "parallel",
+      "description" : "Whether to enable parallel mode",
+      "option" : {
+        "default" : "false"
+      }
+    },
+    "threads" : {
+      "type" : "ArgType.Int",
+      "fullName" : "",
+      "shortName" : "t",
+      "description" : "Number of threads",
+      "option" : {
+        "default" : "1"
+      }
+    },
+    "propertiesFile" : {
+      "type" : "ArgType.String",
+      "fullName" : "properties-file",
+      "shortName" : "prop",
+      "description" : "Path to the file with configuration properties of save application",
+      "option" : {
+        "default" : "save.properties"
+      }
+    },
+    "debug" : {
+      "type" : "ArgType.Boolean",
+      "fullName" : "",
+      "shortName" : "d",
+      "description" : "Turn on debug logging",
+      "option" : {
+        "default" : "false"
+      }
+    },
+    "quiet" : {
+      "type" : "ArgType.Boolean",
+      "fullName" : "",
+      "shortName" : "q",
+      "description" : "Do not log anything",
+      "option" : {
+        "default" : "false"
+      }
+    },
+    "reportType" : {
+      "type" : "ArgType.Choice<ReportType>()",
+      "fullName" : "report-type",
+      "shortName" : "",
+      "description" : "Possible types of output formats",
+      "option" : {
+        "default" : "ReportType.JSON"
+      }
+    },
+    "baseline" : {
+      "type" : "ArgType.String",
+      "fullName" : "",
+      "shortName" : "b",
+      "description" : "Path to the file with baseline data",
+      "option" : {}
+    },
+    "excludeSuites" : {
+      "type" : "ArgType.String",
+      "fullName" : "exclude-suites",
+      "shortName" : "e",
+      "description" : "Test suites, which won't be checked",
+      "option" : {
+        "multiple" : ""
+      }
+    },
+    "includeSuites" : {
+      "type" : "ArgType.String",
+      "fullName" : "include-suites",
+      "shortName" : "i",
+      "description" : "Test suites, only which ones will be checked",
+      "option" : {
+        "multiple" : ""
+      }
+    },
+    "language" : {
+      "type" : "ArgType.Choice<LanguageType>()",
+      "fullName" : "",
+      "shortName" : "l",
+      "description" : "Language that you are developing analyzer for",
+      "option" : {
+        "default" : "LanguageType.JAVA"
+      }
+    },
+    "testRootPath" : {
+      "type" : "ArgType.String",
+      "fullName" : "test-root-path",
+      "shortName" : "",
+      "description" : "Path to directory with tests (relative path from place, where save.properties is stored or absolute path)",
+      "option" : {
+        "required" : ""
+      }
+    },
+    "resultOutput" : {
+      "type" : "ArgType.Choice<ResultOutputType>()",
+      "fullName" : "result-output",
+      "shortName" : "out",
+      "description" : "Data output stream",
+      "option" : {
+        "default" : "ResultOutputType.STDOUT"
+      }
+    },
+    "configInheritance" : {
+      "type" : "ArgType.Boolean",
+      "fullName" : "config-inheritance",
+      "shortName" : "",
+      "description" : "Whether configuration files should inherit configurations from the previous level of directories",
+      "option" : {
+        "default" : "true"
+      }
+    },
+    "ignoreSaveComments" : {
+      "type" : "ArgType.Boolean",
+      "fullName" : "ignore-save-comments",
+      "shortName" : "",
+      "description" : "If true, ignore technical comments, that SAVE uses to describe warnings, when running tests",
+      "option" : {
+        "default" : "false"
+      }
+    },
+    "reportDir" : {
+      "type" : "ArgType.String",
+      "fullName" : "report-dir",
+      "shortName" : "",
+      "description" : "Path to directory, where to store output (when `resultOutput` is set to `FILE`)",
+      "option" : {
+        "default" : "save-reports"
+      }
+    }
+}
