@@ -10,17 +10,19 @@ import org.cqfn.save.core.config.ResultOutputType
 import org.cqfn.save.core.config.SaveConfig
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
+import org.cqfn.save.core.logging.logInfo
 
 import okio.FileSystem
 import okio.IOException
 import okio.Path.Companion.toPath
 
+import kotlinx.cli.AbstractSingleOption
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
+import kotlinx.cli.MultipleOption
 import kotlinx.cli.default
 import kotlinx.cli.multiple
 import kotlinx.cli.required
-import org.cqfn.save.core.logging.logInfo
 
 private fun <U> Map<String, String>.getAndParseOrElse(
     key: String,
@@ -36,14 +38,16 @@ private fun <U> Map<String, String>.getAndParseOrElse(
 @Suppress("TOO_LONG_FUNCTION")
 fun createConfigFromArgs(args: Array<String>): SaveConfig {
     // The first iteration of parsing - get location of properties file. Ignore any other arguments.
-    val propertiesFile = args.toList().zipWithNext()
-        .firstOrNull { it.first == "--properties-file" || it.first == "-prop" }
+    val propertiesFileOptionFullName = "properties-file"
+    val propertiesFileOptionShortName = "prop"
+    val propertiesFileName = args.toList().zipWithNext()
+        .firstOrNull { it.first == "--$propertiesFileOptionFullName" || it.first == "-$propertiesFileOptionShortName" }
         ?.second
         ?: "save.properties"
-    logDebug("Using properties file $propertiesFile")
+    logDebug("Using properties file $propertiesFileName")
 
     val properties: Map<String, String> = try {
-        FileSystem.SYSTEM.read(propertiesFile.toPath()) {
+        FileSystem.SYSTEM.read(propertiesFileName.toPath()) {
             generateSequence { readUtf8Line() }.toList()
         }
             .associate { line ->
@@ -52,8 +56,8 @@ fun createConfigFromArgs(args: Array<String>): SaveConfig {
                 }
             }
     } catch (e: IOException) {
-        logError("Unable to read properties file $propertiesFile: ${e.message}")
-        throw e  // todo exit with exit code
+        logError("Unable to read properties file $propertiesFileName: ${e.message}")
+        emptyMap()  // todo exit with exit code?
     }
     logInfo("Read from properties file: $properties")
 
@@ -61,7 +65,6 @@ fun createConfigFromArgs(args: Array<String>): SaveConfig {
 
     val config by parser.option(
         ArgType.String,
-        fullName = "config",
         shortName = "c",
         description = "Path to the root save config file",
     ).default(properties.getOrElse("config") { "save.toml" })
@@ -78,6 +81,13 @@ fun createConfigFromArgs(args: Array<String>): SaveConfig {
         shortName = "t",
         description = "Number of threads",
     ).default(properties.getAndParseOrElse("threads", String::toInt) { 1 })
+
+    val propertiesFile by parser.option(
+        ArgType.String,
+        fullName = propertiesFileOptionFullName,
+        shortName = propertiesFileOptionShortName,
+        description = "Path to the file with configuration properties of save application",
+    ).default(propertiesFileName)
 
     val debug by parser.option(
         ArgType.Boolean,
@@ -97,21 +107,25 @@ fun createConfigFromArgs(args: Array<String>): SaveConfig {
         description = "Possible types of output formats"
     ).default(properties.getAndParseOrElse("reportType", ReportType::valueOf) { ReportType.JSON })
 
-    val baselineOption = parser.option(
+    val baseline: String? by (parser.option(
         ArgType.String,
         shortName = "b",
         description = "Path to the file with baseline data",
     ).run {
         properties["baseline"]?.let { default(it) } ?: this
-    }
-    val baseline: String? by baselineOption
+    } as AbstractSingleOption<*, out String?, *>)
 
-    val excludeSuites by parser.option(
+    val excludeSuites: List<String> by (parser.option(
         ArgType.String,
         fullName = "exclude-suites",
         shortName = "e",
         description = "Test suites, which won't be checked",
-    ).multiple()
+    ).multiple().run {
+        properties["exclude-suites"]?.let {
+            default(it.split(","))
+        }
+            ?: this
+    } as MultipleOption<out String, *, *>)
 
     val includeSuites by parser.option(
         ArgType.String,
@@ -126,15 +140,14 @@ fun createConfigFromArgs(args: Array<String>): SaveConfig {
         description = "Language that you are developing analyzer for",
     ).default(properties.getAndParseOrElse("language", LanguageType::valueOf) { LanguageType.JAVA })
 
-    val testRootPathOption = parser.option(
+    val testRootPath: String by (parser.option(
         ArgType.String,
         fullName = "test-root-path",
         description = "Path to directory with tests (relative path from place, where save.properties is stored or absolute path)",
     ).run {
         properties["testRootPath"]?.let { default(it) }
             ?: required()
-    }
-    val testRootPath: String by testRootPathOption
+    } as AbstractSingleOption<*, out String, *>)
 
     val resultOutput by parser.option(
         ArgType.Choice<ResultOutputType>(),
