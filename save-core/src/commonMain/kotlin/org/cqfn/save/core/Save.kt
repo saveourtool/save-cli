@@ -1,9 +1,8 @@
 package org.cqfn.save.core
 
 import org.cqfn.save.core.config.SaveConfig
+import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.plugin.Plugin
-
-import okio.FileSystem
 
 /**
  * @property saveConfig an instance of [SaveConfig]
@@ -17,14 +16,12 @@ class Save(
      */
     fun performAnalysis() {
         // get all toml configs in file system
-        val fs = FileSystem.SYSTEM
-        val configFileLines: List<String> = fs.read(saveConfig.configPath) {
-            generateSequence { readUtf8Line() }.toList()
-        }
+        val testSuiteConfig = ConfigDetector().configFromFile(saveConfig.configPath)
+        requireNotNull(testSuiteConfig) { "Provided path ${saveConfig.configPath} doesn't correspond to a valid save.toml file" }
 
         val plugins: List<Plugin> = emptyList()  // todo: discover plugins
         plugins.forEach {
-            it.execute(configFileLines)
+            it.execute(testSuiteConfig)
         }
     }
 }
