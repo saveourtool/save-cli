@@ -1,5 +1,6 @@
 package org.cqfn.save.core.plugin
 
+import org.cqfn.save.core.config.SaveConfig
 import org.cqfn.save.core.config.TestSuiteConfig
 
 /**
@@ -7,7 +8,8 @@ import org.cqfn.save.core.config.TestSuiteConfig
  */
 interface Plugin {
     /**
+     * @param saveConfig general configuration of SAVE
      * @param testSuiteConfig configuration of current test suite
      */
-    fun execute(testSuiteConfig: TestSuiteConfig)
+    fun execute(saveConfig: SaveConfig, testSuiteConfig: TestSuiteConfig)
 }

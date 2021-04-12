@@ -1,19 +1,19 @@
 package org.cqfn.save.core.config
 
+import org.cqfn.save.core.plugin.PluginConfig
+
 import okio.Path
 
 /**
  * Configuration for a test suite, that is read from test suite configuration file (toml config)
- * @property suiteName name of test suite
- * @property description description of test suite
  * @property location [Path] denoting the location of this file
  * @property parentConfig parent config in the hierarchy of configs, `null` if this config is root.
+ * @property pluginConfigs list of configurations for plugins that are active in this config
  */
 data class TestSuiteConfig(
-    val suiteName: String,
-    val description: String,
     val location: Path,
     val parentConfig: TestSuiteConfig?,
+    val pluginConfigs: List<PluginConfig> = emptyList(),
 ) {
     /**
      * List of child configs in the hierarchy of configs, can be empty if this config is at the very bottom.

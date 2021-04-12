@@ -45,6 +45,10 @@ kotlin {
                 implementation(kotlin("test-annotations-common"))
             }
         }
+        val nativeMain by creating {
+            dependsOn(commonMain)
+        }
+        getByName("${saveTarget.name}Main").dependsOn(nativeMain)
 
         val jvmMain by getting
 

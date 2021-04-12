@@ -1,0 +1,91 @@
+package org.cqfn.save.plugins.fix
+
+import org.cqfn.save.core.config.LanguageType
+import org.cqfn.save.core.config.ReportType
+import org.cqfn.save.core.config.ResultOutputType
+import org.cqfn.save.core.config.SaveConfig
+import org.cqfn.save.core.config.TestSuiteConfig
+import org.cqfn.save.core.files.createFile
+
+import okio.FileSystem
+import okio.Path.Companion.toPath
+
+import kotlin.test.AfterTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
+private val mockConfig = SaveConfig(
+    configPath = ".".toPath(),
+    parallelMode = false,
+    threads = 1,
+    propertiesFile = ".".toPath(),
+    debug = true,
+    quiet = false,
+    reportType = ReportType.PLAIN,
+    baselinePath = null,
+    excludeSuites = emptyList(),
+    includeSuites = emptyList(),
+    language = LanguageType.KOTLIN,
+    testRootPath = ".".toPath(),
+    resultOutput = ResultOutputType.STDOUT,
+    configInheritance = true, ignoreSaveComments = true, reportDir = ".".toPath()
+)
+
+/**
+ * Needed tests:
+ * - discovering of file pairs
+ * - running tool
+ */
+class FixPluginTest {
+    private val fs = FileSystem.SYSTEM
+    private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPluginTest::class.simpleName!!).also {
+        fs.createDirectory(it)
+    }
+
+    @Test
+    fun `should detect two files`() {
+        val testFile = fs.createFile(tmpDir / "Test1Test.java")
+        val expectedFile = fs.createFile(tmpDir / "Test1Expected.java")
+
+        val pairs = FixPlugin().discoverFilePairs(listOf(testFile, expectedFile))
+
+        assertEquals(1, pairs.size)
+        assertEquals("Test1Expected.java", pairs.single().first.name)
+        assertEquals("Test1Test.java", pairs.single().second.name)
+    }
+
+    @Test
+    fun `should detect two files - among other files`() {
+        fs.createFile(tmpDir / "Test2Test.java")
+        fs.createFile(tmpDir / "Test2Expected.java")
+        fs.createFile(tmpDir / "Something.java")
+        fs.createFile(tmpDir / "SomethingExpected.java")
+        fs.createFile(tmpDir / "Anything.java")
+        fs.createFile(tmpDir / "AnythingTest.java")
+        fs.createFile(tmpDir / "CompletelyDifferentTest.java")
+        fs.createFile(tmpDir / "NowCompletelyDifferentExpected.java")
+        fs.createFile(tmpDir / "AndNowCompletelyDifferent.java")
+
+        val pairs = FixPlugin().discoverFilePairs(fs.list(tmpDir))
+
+        assertEquals(1, pairs.size)
+        assertEquals("Test2Expected.java", pairs.single().first.name)
+        assertEquals("Test2Test.java", pairs.single().second.name)
+    }
+
+    @Test
+    fun `should calculate diff of discovered files`() {
+        val testFile = fs.createFile(tmpDir / "Test3Test.java")
+        val expectedFile = fs.createFile(tmpDir / "Test3Expected.java")
+
+        FixPlugin().execute(
+            mockConfig,
+            TestSuiteConfig(tmpDir, null, listOf(FixPluginConfig("echo")))
+        )
+    }
+
+    @AfterTest
+    fun tearDown() {
+        fs.deleteRecursively(tmpDir)
+    }
+}

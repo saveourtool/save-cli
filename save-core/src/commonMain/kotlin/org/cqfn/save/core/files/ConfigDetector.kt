@@ -37,8 +37,6 @@ class ConfigDetector {
                     }!!
                     configs.add(
                         TestSuiteConfig(
-                            "todo: read from file",
-                            "todo: read from file",
                             path,
                             parentConfig,
                         ).also {
@@ -81,8 +79,6 @@ class ConfigDetector {
             .firstOrNull()
             ?.let { testSuiteConfigFromFile(it) }
         return TestSuiteConfig(
-            "todo: read from file",
-            "todo: read from file",
             file,
             parentConfig
         )

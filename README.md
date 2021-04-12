@@ -93,6 +93,7 @@ Most (except for `-h` and `-prop`) of the options below can be passed to a SAVE 
 | - | config-inheritance | Whether configuration files should inherit configurations from the previous level of directories | true |
 | - | ignore-save-comments | If true, ignore technical comments, that SAVE uses to describe warnings, when running tests  | false |
 | - | report-dir | Path to directory where to store output (when `resultOutput` is set to `FILE`) | save-reports |
+| - | plugins | For custom plugins: mapping of short name to fully qualified plugin class | empty |
 
 SAVE framework will detect tests, run your analyzer on these tests, will calculate the pass-rate and test results.
 

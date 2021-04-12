@@ -28,7 +28,6 @@ you will need the following SAVE configuration:
 
 `save.properties`:
 ```properties
-exec_cmd="./ktlint -R diktat-0.4.2.jar -F"
 rootDir=src/test/resources
 reports=plain,json
 reportsDir=build/reports/save
@@ -43,9 +42,10 @@ description = "My suite description"
 suiteName = "DocsCheck"
 
 [diff]
-testFilePattern=*Test.kt
-expectedFilePattern=*Expected.kt
-output = stdout # you can also use 'inPlace' here to do fixes right into the test file (test files won't be broken or changed)
+exec_cmd="./ktlint -R diktat-0.4.2.jar -F"
+testFilePattern="*Test.kt"
+expectedFilePattern="*Expected.kt"
+output = "stdout" # you can also use 'inPlace' here to do fixes right into the test file (test files won't be broken or changed)
 batchMode = false
 ```
 

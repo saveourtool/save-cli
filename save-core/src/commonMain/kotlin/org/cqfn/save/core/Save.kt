@@ -21,7 +21,7 @@ class Save(
 
         val plugins: List<Plugin> = emptyList()  // todo: discover plugins
         plugins.forEach {
-            it.execute(testSuiteConfig)
+            it.execute(saveConfig, testSuiteConfig)
         }
     }
 }
