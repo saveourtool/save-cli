@@ -1,6 +1,7 @@
 {
     "config" : {
-      "type" : "ArgType.String",
+      "argType" : "ArgType.String",
+      "kotlinType": "Path",
       "fullName" : "",
       "shortName" : "c",
       "description" : "Path to the root save config file",
@@ -9,7 +10,8 @@
       }
     },
     "parallelMode" : {
-      "type" : "ArgType.Boolean",
+      "argType" : "ArgType.Boolean",
+      "kotlinType": "Boolean",
       "fullName" : "parallel-mode",
       "shortName" : "parallel",
       "description" : "Whether to enable parallel mode",
@@ -18,7 +20,8 @@
       }
     },
     "threads" : {
-      "type" : "ArgType.Int",
+      "argType" : "ArgType.Int",
+      "kotlinType": "Int",
       "fullName" : "",
       "shortName" : "t",
       "description" : "Number of threads",
@@ -27,7 +30,8 @@
       }
     },
     "propertiesFile" : {
-      "type" : "ArgType.String",
+      "argType" : "ArgType.String",
+      "kotlinType": "Path",
       "fullName" : "properties-file",
       "shortName" : "prop",
       "description" : "Path to the file with configuration properties of save application",
@@ -36,7 +40,8 @@
       }
     },
     "debug" : {
-      "type" : "ArgType.Boolean",
+      "argType" : "ArgType.Boolean",
+      "kotlinType": "Boolean",
       "fullName" : "",
       "shortName" : "d",
       "description" : "Turn on debug logging",
@@ -45,7 +50,8 @@
       }
     },
     "quiet" : {
-      "type" : "ArgType.Boolean",
+      "argType" : "ArgType.Boolean",
+      "kotlinType": "Boolean",
       "fullName" : "",
       "shortName" : "q",
       "description" : "Do not log anything",
@@ -54,7 +60,8 @@
       }
     },
     "reportType" : {
-      "type" : "ArgType.Choice<ReportType>()",
+      "argType" : "ArgType.Choice<ReportType>()",
+      "kotlinType": "ReportType",
       "fullName" : "report-type",
       "shortName" : "",
       "description" : "Possible types of output formats",
@@ -63,14 +70,16 @@
       }
     },
     "baseline" : {
-      "type" : "ArgType.String",
+      "argType" : "ArgType.String",
+      "kotlinType": "Path?",
       "fullName" : "",
       "shortName" : "b",
       "description" : "Path to the file with baseline data",
       "option" : {}
     },
     "excludeSuites" : {
-      "type" : "ArgType.String",
+      "argType" : "ArgType.String",
+      "kotlinType": "String",
       "fullName" : "exclude-suites",
       "shortName" : "e",
       "description" : "Test suites, which won't be checked",
@@ -79,7 +88,8 @@
       }
     },
     "includeSuites" : {
-      "type" : "ArgType.String",
+      "argType" : "ArgType.String",
+      "kotlinType": "String",
       "fullName" : "include-suites",
       "shortName" : "i",
       "description" : "Test suites, only which ones will be checked",
@@ -88,7 +98,8 @@
       }
     },
     "language" : {
-      "type" : "ArgType.Choice<LanguageType>()",
+      "argType" : "ArgType.Choice<LanguageType>()",
+      "kotlinType": "LanguageType",
       "fullName" : "",
       "shortName" : "l",
       "description" : "Language that you are developing analyzer for",
@@ -97,7 +108,8 @@
       }
     },
     "testRootPath" : {
-      "type" : "ArgType.String",
+      "argType" : "ArgType.String",
+      "kotlinType": "Path",
       "fullName" : "test-root-path",
       "shortName" : "",
       "description" : "Path to directory with tests (relative path from place, where save.properties is stored or absolute path)",
@@ -106,7 +118,8 @@
       }
     },
     "resultOutput" : {
-      "type" : "ArgType.Choice<ResultOutputType>()",
+      "argType" : "ArgType.Choice<ResultOutputType>()",
+      "kotlinType": "ResultOutputType",
       "fullName" : "result-output",
       "shortName" : "out",
       "description" : "Data output stream",
@@ -115,7 +128,8 @@
       }
     },
     "configInheritance" : {
-      "type" : "ArgType.Boolean",
+      "argType" : "ArgType.Boolean",
+      "kotlinType": "Boolean",
       "fullName" : "config-inheritance",
       "shortName" : "",
       "description" : "Whether configuration files should inherit configurations from the previous level of directories",
@@ -124,7 +138,8 @@
       }
     },
     "ignoreSaveComments" : {
-      "type" : "ArgType.Boolean",
+      "argType" : "ArgType.Boolean",
+      "kotlinType": "Boolean",
       "fullName" : "ignore-save-comments",
       "shortName" : "",
       "description" : "If true, ignore technical comments, that SAVE uses to describe warnings, when running tests",
@@ -133,7 +148,8 @@
       }
     },
     "reportDir" : {
-      "type" : "ArgType.String",
+      "argType" : "ArgType.String",
+      "kotlinType": "Path",
       "fullName" : "report-dir",
       "shortName" : "",
       "description" : "Path to directory, where to store output (when `resultOutput` is set to `FILE`)",
