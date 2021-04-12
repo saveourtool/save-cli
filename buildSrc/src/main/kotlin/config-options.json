@@ -66,7 +66,7 @@
       "shortName" : "",
       "description" : "Possible types of output formats",
       "option" : {
-        "default" : "ReportType.JSON"
+        "default" : "JSON"
       }
     },
     "baseline" : {
@@ -104,7 +104,7 @@
       "shortName" : "l",
       "description" : "Language that you are developing analyzer for",
       "option" : {
-        "default" : "LanguageType.JAVA"
+        "default" : "JAVA"
       }
     },
     "testRootPath" : {
@@ -124,7 +124,7 @@
       "shortName" : "out",
       "description" : "Data output stream",
       "option" : {
-        "default" : "ResultOutputType.STDOUT"
+        "default" : "STDOUT"
       }
     },
     "configInheritance" : {

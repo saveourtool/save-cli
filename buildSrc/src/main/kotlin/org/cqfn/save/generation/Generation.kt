@@ -128,5 +128,17 @@ fun selectType(value: Option): TypeName =
     }
 
 fun generateReadme(jsonObject: Map<String, Option>) {
+    var readmeContent = """
+        || Short name | Long name  | Description   | Default |
+        ||------------|------------|---------------|---------------|
+        || h | help | Usage info | - |
+    """.trimMargin()
+    jsonObject.forEach {
 
+        val shortName = if (it.value.shortName.isNotEmpty()) it.value.shortName else "-"
+        val longName = if (it.value.fullName.isNotEmpty()) it.value.fullName else it.key
+        val description = it.value.description
+        val default = if ("default" in it.value.option.keys) it.value.option["default"] else "-"
+        readmeContent +=  "\n| $shortName | $longName | $description | $default |"}
+    println(readmeContent)
 }
