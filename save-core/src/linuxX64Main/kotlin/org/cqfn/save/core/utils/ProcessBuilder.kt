@@ -4,9 +4,12 @@ package org.cqfn.save.core.utils
 
 import okio.FileSystem
 import okio.Path
-import platform.posix.*
+import platform.posix.fgets
+import platform.posix.pclose
+import platform.posix.popen
 
-import kotlinx.cinterop.*
+import kotlinx.cinterop.refTo
+import kotlinx.cinterop.toKString
 
 @Suppress("MISSING_KDOC_TOP_LEVEL",
     "MISSING_KDOC_CLASS_ELEMENTS",
@@ -18,9 +21,8 @@ actual class ProcessBuilder {
 
         val stdout = buildString {
             val buffer = ByteArray(4096)
-            while (true) {
-                val input = fgets(buffer.refTo(0), buffer.size, pd) ?: break
-                append(input.toKString())
+            while (fgets(buffer.refTo(0), buffer.size, pd) != null) {
+                append(buffer.toKString())
             }
         }
 
