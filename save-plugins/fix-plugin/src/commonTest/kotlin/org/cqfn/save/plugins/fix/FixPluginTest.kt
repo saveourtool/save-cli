@@ -6,13 +6,16 @@ import org.cqfn.save.core.config.ResultOutputType
 import org.cqfn.save.core.config.SaveConfig
 import org.cqfn.save.core.config.TestSuiteConfig
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.files.readLines
 
+import io.github.petertrr.diffutils.diff
 import okio.FileSystem
 import okio.Path.Companion.toPath
 
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 private val mockConfig = SaveConfig(
     configPath = ".".toPath(),
@@ -74,14 +77,53 @@ class FixPluginTest {
     }
 
     @Test
-    fun `should calculate diff of discovered files`() {
+    fun `should calculate diff of discovered files in inPlace mode`() {
         val testFile = fs.createFile(tmpDir / "Test3Test.java")
+        fs.write(testFile) {
+            write("Original file".encodeToByteArray())
+        }
         val expectedFile = fs.createFile(tmpDir / "Test3Expected.java")
+        fs.write(expectedFile) {
+            write("Expected file".encodeToByteArray())
+        }
 
         FixPlugin().execute(
             mockConfig,
-            TestSuiteConfig(tmpDir, null, listOf(FixPluginConfig("echo")))
+            TestSuiteConfig(tmpDir,
+                null,
+                listOf(FixPluginConfig("cd $tmpDir && echo Expected file> Test3Test.java", inPlace = true, testResources = listOf(testFile, expectedFile)))
+            )
         )
+
+        assertTrue("Files should be identical") {
+            diff(fs.readLines(testFile), fs.readLines(expectedFile))
+                .deltas.isEmpty()
+        }
+    }
+
+    @Test
+    fun `should calculate diff of discovered files with destinationFileSuffix`() {
+        val testFile = fs.createFile(tmpDir / "Test3Test.java")
+        fs.write(testFile) {
+            write("Original file".encodeToByteArray())
+        }
+        val expectedFile = fs.createFile(tmpDir / "Test3Expected.java")
+        fs.write(expectedFile) {
+            write("Expected file".encodeToByteArray())
+        }
+
+        FixPlugin().execute(
+            mockConfig,
+            TestSuiteConfig(tmpDir,
+                null,
+                listOf(FixPluginConfig("cd $tmpDir && echo Expected file> Test3Test_copy.java", destinationFileSuffix = "_copy", testResources = listOf(testFile, expectedFile)))
+            )
+        )
+
+        assertTrue("Files should be identical") {
+            diff(fs.readLines(tmpDir / "Test3Test_copy.java"), fs.readLines(expectedFile))
+                .deltas.isEmpty()
+        }
     }
 
     @AfterTest

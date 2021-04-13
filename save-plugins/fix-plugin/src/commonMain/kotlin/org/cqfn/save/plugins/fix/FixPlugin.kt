@@ -26,11 +26,13 @@ class FixPlugin : Plugin {
                 logInfo("Discovered the following file pairs: $it")
             }
             .forEach { (expected, test) ->
-                val original = FileSystem.SYSTEM.readLines(test)
-                pb.exec(fixPluginConfig.execCmd.split(" "), "output".toPath())
-                val fixed = original  // todo: read result of exec
-                val expected = FileSystem.SYSTEM.readLines(expected)
-                diff(expected, fixed)
+                pb.exec(fixPluginConfig.execCmd.split(" "), null)
+                val fixedLines = FileSystem.SYSTEM.readLines(
+                    if (fixPluginConfig.inPlace) test else test.parent!! / fixPluginConfig.destinationFileFor(test).toPath()
+                )
+                val expectedLines = FileSystem.SYSTEM.readLines(expected)
+                // todo: check equality here
+                diff(expectedLines, fixedLines)
             }
     }
 

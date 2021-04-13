@@ -15,7 +15,7 @@ expect class ProcessBuilder() {
      * Execute [command] and wait for its completion.
      *
      * @param command executable command with arguments
-     * @param redirectTo a file where process output should be redirected too. If null, output will e returned as [ExecutionResult.stdout].
+     * @param redirectTo a file where process output should be redirected too. If null, output will be returned as [ExecutionResult.stdout].
      * @return [ExecutionResult] built from process output
      */
     fun exec(command: List<String>, redirectTo: Path?): ExecutionResult
