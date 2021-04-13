@@ -63,6 +63,7 @@ class SaveConfig (
 
         threads = parser.option(
             ArgType.Int,
+            fullName = "threads",
             shortName = "t",
             description = "Number of threads",
         ).value
@@ -76,12 +77,14 @@ class SaveConfig (
 
         debug = parser.option(
             ArgType.Boolean,
+            fullName = "debug",
             shortName = "d",
             description = "Turn on debug logging"
         ).value
 
         quiet = parser.option(
             ArgType.Boolean,
+            fullName = "quiet",
             shortName = "q",
             description = "Do not log anything"
         ).value
@@ -94,6 +97,7 @@ class SaveConfig (
 
         baseline = parser.option(
             ArgType.String,
+            fullName = "baseline",
             shortName = "b",
             description = "Path to the file with baseline data",
         ).value
@@ -114,6 +118,7 @@ class SaveConfig (
 
         language =  parser.option(
             ArgType.Choice<LanguageType>(),
+            fullName= "language",
             shortName = "l",
             description = "Language that you are developing analyzer for",
         ).value

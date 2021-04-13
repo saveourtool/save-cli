@@ -15,6 +15,8 @@ import okio.Path.Companion.toPath
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.properties.Properties
 import kotlinx.serialization.serializer
+import okio.FileNotFoundException
+import org.cqfn.save.core.Save
 import org.cqfn.save.core.config.*
 
 /**
@@ -28,7 +30,7 @@ fun createConfigFromArgs(args: Array<String>): SaveConfig {
     // reading configuration from the properties file
     val configFromPropertiesFile = readPropertiesFile(configFromCli.propertiesFile)
     // merging two configurations into one [SaveConfig] with a priority to command line arguments
-    return configFromCli.mergeConfigWithPriorityToThis(configFromPropertiesFile)
+    return configFromCli.mergeConfigWithPriorityToThis(configFromPropertiesFile).validate()
 }
 
 /**
@@ -67,4 +69,15 @@ fun readPropertiesFile(propertiesFileName: String?): SaveConfig {
     logInfo("Read properties from the properties file: $deserializedPropertiesFile")
 
     return deserializedPropertiesFile
+}
+
+fun SaveConfig.validate(): SaveConfig {
+    try {
+        FileSystem.SYSTEM.metadata(this.configPath?.toPath()!!)
+    } catch(e: FileNotFoundException) {
+        logErrorAndExit(ExitCodes.INVALID_CONFIGURATION, "Not able to find file '${this.configPath}'." +
+                " Please provide a path to the valid test config via command-line or using the file with properties.")
+    }
+
+    return this
 }
