@@ -14,7 +14,7 @@ import kotlinx.cinterop.*
 )
 actual class ProcessBuilder {
     actual fun exec(command: List<String>, redirectTo: Path?): ExecutionResult {
-        val pd = popen!!.invoke(command.joinToString(" ").cstr.placeTo(MemScope()), "r".cstr.placeTo(MemScope()))
+        val pd = popen(command.joinToString(" ").cstr.placeTo(MemScope()), "r".cstr.placeTo(MemScope()))
 
         val stdout = buildString {
             val buffer = ByteArray(4096)
@@ -24,7 +24,7 @@ actual class ProcessBuilder {
             }
         }
 
-        val status = pclose!!.invoke(pd)
+        val status = pclose(pd)
         if (status != 0) {
             error("Command `$command` failed with status $status: $stdout")
         }
