@@ -14,6 +14,7 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 
 import java.io.File
 import java.io.BufferedReader
@@ -25,6 +26,10 @@ private val autoGenerationComment =
     """
     | This document was auto generated, please don't modify it.
     """.trimMargin()
+
+val generatedSaveConfigPath = "save-core/src/commonMain/kotlin/org/cqfn/save/core/config/"
+val generatedConfigPath = "save-cli/src/nativeMain/kotlin/org/cqfn/save/cli/config/"
+val generatedOptionsTablePath = "buildSrc/src/main/kotlin/org/cqfn/save/generation/"
 
 class Option {
     lateinit var argType: String
@@ -84,6 +89,7 @@ fun generateConfig(jsonObject: Map<String, Option>) {
 fun generateSaveConfig(jsonObject: Map<String, Option>) {
     println("-----------generateSaveConfig------------")
     val builder = FileSpec.builder("org.cqfn.save.core.config", "SaveConfig")
+    builder.addComment(autoGenerationComment)
     builder.addImport("okio", "ExperimentalFileSystem")
 
     var properties = ""
@@ -111,6 +117,7 @@ fun generateSaveConfig(jsonObject: Map<String, Option>) {
 
     builder.addType(classBuilder.build())
     builder.build().writeTo(System.out)
+    //File("$generatedSaveConfigPath/SaveConfig.kt").writeText(builder.build().toString())
     println("-------------------------------------")
 }
 
@@ -119,6 +126,7 @@ fun selectType(value: Option): TypeName =
         "Boolean" -> ClassName("kotlin", "Boolean")
         "Int" -> ClassName("kotlin", "Int")
         "String" -> ClassName("kotlin", "String")
+        "List<String>" -> ClassName("kotlin.collections", "List").parameterizedBy(ClassName("kotlin", "String"))
         "Path" -> ClassName("okio", "Path")
         "Path?" -> ClassName("okio", "Path").copy(nullable = true)
         "ReportType" -> ClassName("org.cqfn.save.core.config","ReportType")
@@ -128,17 +136,21 @@ fun selectType(value: Option): TypeName =
     }
 
 fun generateReadme(jsonObject: Map<String, Option>) {
-    var readmeContent = """
+    var readmeContent =
+        """
+        |Most (except for `-h` and `-prop`) of the options below can be passed to a SAVE via `save.properties` file
+        |
         || Short name | Long name  | Description   | Default |
         ||------------|------------|---------------|---------------|
         || h | help | Usage info | - |
-    """.trimMargin()
+        """.trimMargin()
     jsonObject.forEach {
-
         val shortName = if (it.value.shortName.isNotEmpty()) it.value.shortName else "-"
         val longName = if (it.value.fullName.isNotEmpty()) it.value.fullName else it.key
         val description = it.value.description
         val default = if ("default" in it.value.option.keys) it.value.option["default"] else "-"
-        readmeContent +=  "\n| $shortName | $longName | $description | $default |"}
+        readmeContent +=  "\n| $shortName | $longName | $description | $default |"
+    }
     println(readmeContent)
+    File("$generatedOptionsTablePath/OptionsTable.md").writeText(readmeContent)
 }
