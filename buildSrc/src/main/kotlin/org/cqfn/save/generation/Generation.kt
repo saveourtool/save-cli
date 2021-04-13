@@ -24,13 +24,23 @@ import java.io.BufferedReader
  */
 private val autoGenerationComment =
     """
-    | This document was auto generated, please don't modify it.
+    | This file was auto generated, please don't modify it.
     """.trimMargin()
 
+// Paths, where to store generated files
 val generatedSaveConfigPath = "save-core/src/commonMain/kotlin/org/cqfn/save/core/config/"
-val generatedConfigPath = "save-cli/src/nativeMain/kotlin/org/cqfn/save/cli/config/"
+val generatedConfigPath = "save-cli/src/nativeMain/kotlin/org/cqfn/save/cli/"
 val generatedOptionsTablePath = "buildSrc/src/main/kotlin/org/cqfn/save/generation/"
 
+/**
+ * This class represents the general form of each key in json file with config options
+ * @property argType Type which will be used in ArgParser in Config.kt
+ * @property kotlinType Type which will be used in kotlin code
+ * @property fullName Full name of option for usage in Save cli
+ * @property shortName Short name of option for usage in Save cli
+ * @property description Option description
+ * @property option Additional argument, which will be used in Config.kt (default(), multiple(), required(), etc)
+ */
 class Option {
     lateinit var argType: String
     lateinit var kotlinType: String
@@ -47,24 +57,22 @@ fun main() {
     val bufferedReader: BufferedReader = File(configFile).bufferedReader()
     val jsonString = bufferedReader.use { it.readText() }
     val jsonObject = gson.fromJson<Map<String, Option>>(jsonString, object : TypeToken<Map<String, Option>>(){}.type)
-
     generateConfig(jsonObject)
     generateSaveConfig(jsonObject)
     generateReadme(jsonObject)
-
     println("\n======================")
 }
-
-class SaveConfig
 
 fun generateConfig(jsonObject: Map<String, Option>) {
     println("--------------generateConfig-----------------------")
     val builder = FileSpec.builder("org.cqfn.save.cli", "Config")
     builder.addComment(autoGenerationComment)
+    builder.addImport("org.cqfn.save.core.config", "LanguageType")
+    builder.addImport("org.cqfn.save.core.config", "ReportType")
+    builder.addImport("org.cqfn.save.core.config", "ResultOutputType")
+    builder.addImport("kotlinx.cli", "ArgParser")
+    builder.addImport("kotlinx.cli", "ArgType")
 
-
-    var properties = ""
-    jsonObject.forEach { properties += ("@property ${it.key} ${it.value.description}\n")}
     val kdoc =
              """
              | @param args CLI args
@@ -75,19 +83,20 @@ fun generateConfig(jsonObject: Map<String, Option>) {
     val funcBuilder = FunSpec.builder("createConfigFromArgs")
         .addKdoc(kdoc)
         .addAnnotation(AnnotationSpec.builder(Suppress::class).addMember("\"TOO_LONG_FUNCTION\"").build())
-        .addParameter("args", ClassName("kotlin", "Array").parameterizedBy(ClassName("kotlin", "String")))
+        .addParameter("args", ClassName("kotlin", "Array")
+                                        .parameterizedBy(ClassName("kotlin", "String")))
         .returns(ClassName("org.cqfn.save.core.config","SaveConfig"))
         .addStatement("    val parser = ArgParser(\"save\")")
         .addStatement(addOptions(jsonObject))
         .build()
 
-
     builder.addFunction(funcBuilder)
     builder.build().writeTo(System.out)
-    //File("$generatedSaveConfigPath/SaveConfig.kt").writeText(builder.build().toString())
+    //File("$generatedConfigPath/Config.kt").writeText(builder.build().toString())
     println("-------------------------------------")
 }
 
+// Add options for ArgParser in Config.kt
 fun addOptions(jsonObject: Map<String, Option>): String {
     var options = "    "
     jsonObject.forEach {
@@ -106,7 +115,6 @@ fun addOptions(jsonObject: Map<String, Option>): String {
         options += "    description = \"${it.value.description.replace(" ", "·")}\"\n" +
                             ")\n"
     }
-    //options += " val d = \"AAAaaaaaaaaaaaaaaaaaaaaas zzzzzzzzzzzzzzzzzzaaaaaaa aaaaaaaaaaaaaaaaassssssssssssaaaaaaaaaaaallllllllllllllllllll llllllllllllllllaaaaaaaaaaaaaaaaaaaaaaaaaaaA\""
     return options
 }
 
@@ -126,8 +134,9 @@ fun generateSaveConfig(jsonObject: Map<String, Option>) {
 
     val classBuilder = TypeSpec.classBuilder("SaveConfig").addModifiers(KModifier.DATA)
     classBuilder.addKdoc(kdoc)
-    val experimentalFileSystem = AnnotationSpec.builder(ClassName("kotlin", "OptIn")).addMember("ExperimentalFileSystem::class")
 
+    val experimentalFileSystem = AnnotationSpec.builder(ClassName("kotlin", "OptIn"))
+                                                            .addMember("ExperimentalFileSystem::class")
     classBuilder.addAnnotation(experimentalFileSystem.build())
 
     val ctor = FunSpec.constructorBuilder()
@@ -150,7 +159,8 @@ fun selectType(value: Option): TypeName =
         "Boolean" -> ClassName("kotlin", "Boolean")
         "Int" -> ClassName("kotlin", "Int")
         "String" -> ClassName("kotlin", "String")
-        "List<String>" -> ClassName("kotlin.collections", "List").parameterizedBy(ClassName("kotlin", "String"))
+        "List<String>" -> ClassName("kotlin.collections", "List")
+                              .parameterizedBy(ClassName("kotlin", "String"))
         "Path" -> ClassName("okio", "Path")
         "Path?" -> ClassName("okio", "Path").copy(nullable = true)
         "ReportType" -> ClassName("org.cqfn.save.core.config","ReportType")
