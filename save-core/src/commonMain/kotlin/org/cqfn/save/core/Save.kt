@@ -1,23 +1,24 @@
 package org.cqfn.save.core
 
+import okio.Path.Companion.toPath
 import org.cqfn.save.core.config.SaveConfig
 import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.plugin.Plugin
 
 /**
- * @property saveConfig an instance of [SaveConfig]
+ * @property saveCliConfig an instance of [SaveCliConfig]
  */
 @Suppress("INLINE_CLASS_CAN_BE_USED")  // todo: remove when there are >1 constructor parameters
 class Save(
-    private val saveConfig: SaveConfig
+    private val saveCliConfig: SaveConfig
 ) {
     /**
      * Main entrypoint for SAVE framework. Discovers plugins and calls their execution.
      */
     fun performAnalysis() {
         // get all toml configs in file system
-        val testSuiteConfig = ConfigDetector().configFromFile(saveConfig.configPath)
-        requireNotNull(testSuiteConfig) { "Provided path ${saveConfig.configPath} doesn't correspond to a valid save.toml file" }
+        val testSuiteConfig = ConfigDetector().configFromFile(saveCliConfig.configPath?.toPath()!!)
+        requireNotNull(testSuiteConfig) { "Provided path ${saveCliConfig.configPath} doesn't correspond to a valid save.toml file" }
 
         val plugins: List<Plugin> = emptyList()  // todo: discover plugins
         plugins.forEach {

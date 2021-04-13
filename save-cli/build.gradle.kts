@@ -33,6 +33,8 @@ kotlin {
             languageSettings.useExperimentalAnnotation("kotlin.RequiresOptIn")
             languageSettings.useExperimentalAnnotation("okio.ExperimentalFileSystem")
         }
+        val jvmMain by getting
+
         val commonMain by getting
         val nativeMain by creating {
             dependsOn(commonMain)
@@ -45,7 +47,6 @@ kotlin {
         getByName("${saveTarget.name}Main").dependsOn(nativeMain)
         val commonTest by getting
 
-        val jvmMain by getting
 
         val jvmTest by getting {
             dependencies {
