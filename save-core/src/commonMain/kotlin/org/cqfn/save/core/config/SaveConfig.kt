@@ -1,7 +1,31 @@
 package org.cqfn.save.core.config
 
+import kotlinx.serialization.Serializable
 import okio.ExperimentalFileSystem
 import okio.Path
+import okio.Path.Companion.toPath
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+
+
+@OptIn(ExperimentalFileSystem::class)
+@Serializable
+data class SaveConfig(
+    @Serializable(with = PathDeserializer::class)
+    val propertiesFile: Path,
+    val savePropertiesConfig: SavePropertiesConfig,
+)
+
+object PathDeserializer : KSerializer<Path> {
+    override val descriptor = PrimitiveSerialDescriptor("Path", PrimitiveKind.STRING)
+    override fun deserialize(decoder: Decoder) = decoder.decodeString().toPath()
+
+    override fun serialize(encoder: Encoder, value: Path) =
+        TODO("To serialize Path, FileSystem is needed to get the full canonical path")
+}
 
 /**
  * Configuration properties of save application, retrieved either from properties file
@@ -9,7 +33,6 @@ import okio.Path
  * @property configPath path to the configuration file
  * @property parallelMode whether to enable parallel mode
  * @property threads number of threads
- * @property propertiesFile path to the file with configuration properties of save application
  * @property debug turn on debug logging
  * @property quiet do not log anything
  * @property reportType type of generated report with execution results
@@ -23,22 +46,25 @@ import okio.Path
  * @property ignoreSaveComments if true, ignore technical comments, that SAVE uses to describe warnings, when running tests
  * @property reportDir path to directory where to store output (when `resultOutput` is set to `FILE`)
  */
-@OptIn(ExperimentalFileSystem::class)
-data class SaveConfig(
-    val configPath: Path,
-    val parallelMode: Boolean,
-    val threads: Int,
-    val propertiesFile: Path,
-    val debug: Boolean,
-    val quiet: Boolean,
-    val reportType: ReportType,
-    val baselinePath: Path?,
-    val excludeSuites: List<String>,
-    val includeSuites: List<String>,
-    val language: LanguageType,
-    val testRootPath: Path,
-    val resultOutput: ResultOutputType,
-    val configInheritance: Boolean,
-    val ignoreSaveComments: Boolean,
-    val reportDir: Path,
+@Serializable
+data class SavePropertiesConfig (
+    @Serializable(with = PathDeserializer::class)
+    val configPath: Path = "save.toml".toPath(),
+    val parallelMode: Boolean = false,
+    val threads: Int = 1,
+    val debug: Boolean = false,
+    val quiet: Boolean = false,
+    val reportType: ReportType = ReportType.JSON,
+    @Serializable(with = PathDeserializer::class)
+    val baselinePath: Path? = null,
+    val excludeSuites: String = "",
+    val includeSuites: String = "",
+    val language: LanguageType = LanguageType.UNDEFINED,
+    @Serializable(with = PathDeserializer::class)
+    val testRootPath: Path? = null,
+    val configInheritance: Boolean = true,
+    val ignoreSaveComments: Boolean = false,
+    @Serializable(with = PathDeserializer::class)
+    val reportDir: Path = "save-reports".toPath(),
+    val resultOutput: ResultOutputType = ResultOutputType.STDOUT
 )

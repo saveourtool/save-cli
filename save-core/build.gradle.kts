@@ -3,6 +3,7 @@ import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurr
 
 plugins {
     kotlin("multiplatform")
+    kotlin("plugin.serialization")
 }
 
 repositories {
@@ -37,6 +38,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api("com.squareup.okio:okio-multiplatform:${Versions.okio}")
+                implementation( "org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.1")
             }
         }
         val commonTest by getting {
