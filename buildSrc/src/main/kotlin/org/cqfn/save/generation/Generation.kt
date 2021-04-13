@@ -55,35 +55,59 @@ fun main() {
     println("\n======================")
 }
 
+class SaveConfig
+
 fun generateConfig(jsonObject: Map<String, Option>) {
-    jsonObject.forEach {
-        //val currOption = it.value
-        //println("${it.key} ${currOption.type}")
-    }
-    /*
-    val t = FunSpec.builder()
-        .addCode("""
-            |private fun <U> Map<String, String>.getAndParseOrElse(
-    |key: String,
-    |parse: String.() -> U,
-    |default: () -> U) =
-        |get(key)?.let(parse) ?: default()
-            """)
+    println("--------------generateConfig-----------------------")
+    val builder = FileSpec.builder("org.cqfn.save.cli", "Config")
+    builder.addComment(autoGenerationComment)
 
-    val kotlinFile = FileSpec.builder("org.cqfn.save.cli", "Config")
-        //.addType(fileBody)
-        .indent("    ")
-        .addComment(autoGenerationComment)
-        .addFunction(FunSpec.builder("main")
-            .addStatement("val a = %M()", createA)
-            .addStatement("val b = %M()", createB)
-            .addStatement("println(a.%M)")
-            .addStatement("println(b.%M)")
-            .build())
+
+    var properties = ""
+    jsonObject.forEach { properties += ("@property ${it.key} ${it.value.description}\n")}
+    val kdoc =
+             """
+             | @param args CLI args
+             | @return an instance of [SaveConfig]
+             | @throws e
+             """.trimMargin()
+
+    val funcBuilder = FunSpec.builder("createConfigFromArgs")
+        .addKdoc(kdoc)
+        .addAnnotation(AnnotationSpec.builder(Suppress::class).addMember("\"TOO_LONG_FUNCTION\"").build())
+        .addParameter("args", ClassName("kotlin", "Array").parameterizedBy(ClassName("kotlin", "String")))
+        .returns(ClassName("org.cqfn.save.core.config","SaveConfig"))
+        .addStatement("    val parser = ArgParser(\"save\")")
+        .addStatement(addOptions(jsonObject))
         .build()
-    */
 
-    //kotlinFile.writeTo(System.out)
+
+    builder.addFunction(funcBuilder)
+    builder.build().writeTo(System.out)
+    //File("$generatedSaveConfigPath/SaveConfig.kt").writeText(builder.build().toString())
+    println("-------------------------------------")
+}
+
+fun addOptions(jsonObject: Map<String, Option>): String {
+    var options = "    "
+    jsonObject.forEach {
+        options += "val ${it.key} by parser.option(\n" +
+                        "    ${it.value.argType},\n"
+        val fullName = if (it.value.fullName.isNotEmpty()) "    fullName = \"${it.value.fullName}\",\n" else ""
+        if (fullName.isNotEmpty()) {
+            options += fullName
+        }
+        val shortName = if (it.value.shortName.isNotEmpty()) "    shortName = \"${it.value.shortName}\",\n" else ""
+        if (shortName.isNotEmpty()) {
+            options += shortName
+        }
+        // We replace whitespaces to `·`, in aim to avoid incorrect line breaking,
+        // which could be done by kotlinpoet
+        options += "    description = \"${it.value.description.replace(" ", "·")}\"\n" +
+                            ")\n"
+    }
+    //options += " val d = \"AAAaaaaaaaaaaaaaaaaaaaaas zzzzzzzzzzzzzzzzzzaaaaaaa aaaaaaaaaaaaaaaaassssssssssssaaaaaaaaaaaallllllllllllllllllll llllllllllllllllaaaaaaaaaaaaaaaaaaaaaaaaaaaA\""
+    return options
 }
 
 fun generateSaveConfig(jsonObject: Map<String, Option>) {
