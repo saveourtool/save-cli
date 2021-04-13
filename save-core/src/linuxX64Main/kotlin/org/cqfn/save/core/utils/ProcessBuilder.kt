@@ -14,7 +14,7 @@ import kotlinx.cinterop.*
 )
 actual class ProcessBuilder {
     actual fun exec(command: List<String>, redirectTo: Path?): ExecutionResult {
-        val pd = popen(command.joinToString(" ").cstr.placeTo(MemScope()), "r".cstr.placeTo(MemScope()))
+        val pd = popen(command.joinToString(" "), "r")
 
         val stdout = buildString {
             val buffer = ByteArray(4096)
