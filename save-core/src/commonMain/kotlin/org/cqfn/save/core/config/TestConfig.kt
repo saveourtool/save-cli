@@ -9,17 +9,17 @@ import okio.Path
  * @property location [Path] denoting the location of this file
  * @property parentConfig parent config in the hierarchy of configs, `null` if this config is root.
  */
-data class TestSuiteConfig(
+data class TestConfig(
     val suiteName: String,
     val description: String,
     val location: Path,
-    val parentConfig: TestSuiteConfig?,
+    val parentConfig: TestConfig?,
 ) {
     /**
      * List of child configs in the hierarchy of configs, can be empty if this config is at the very bottom.
      * NB: don't move to constructor in order not to break toString into infinite recursion.
      */
-    val childConfigs: MutableList<TestSuiteConfig> = mutableListOf()
+    val childConfigs: MutableList<TestConfig> = mutableListOf()
 
     /**
      * @return whether this config file is in the root on the hierarchy

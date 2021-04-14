@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 /**
  * Configuration properties of save application, retrieved either from properties file
  * or from CLI args.
- * @property configPath path to the configuration file
+ * @property testConfig path to the configuration file
  * @property parallelMode whether to enable parallel mode
  * @property threads number of threads
  * @property debug turn on debug logging
@@ -26,8 +26,8 @@ import kotlinx.serialization.Serializable
  * @property propertiesFile path to the file with extra properties (that can be also passed as command-line arguments)
  */
 @Serializable
-class SaveConfig(
-    var configPath: String? = "save.toml",
+class SaveProperties(
+    var testConfig: String? = "save.toml",
     var parallelMode: Boolean? = false,
     var threads: Int? = 1,
     var debug: Boolean? = false,
@@ -47,9 +47,9 @@ class SaveConfig(
     constructor(args: Array<String>) : this() {
         val parser = ArgParser("save")
 
-        configPath = parser.option(
+        testConfig = parser.option(
             ArgType.String,
-            fullName = "config",
+            fullName = "test-config",
             shortName = "c",
             description = "Path to a configuration of a test suite",
         ).value
@@ -161,8 +161,8 @@ class SaveConfig(
      * @param configFromPropertiesFile - config that will be used as a fallback in case when the field was not provided
      * @return this configuration
      */
-    fun mergeConfigWithPriorityToThis(configFromPropertiesFile: SaveConfig): SaveConfig {
-        configPath = configPath ?: configFromPropertiesFile.configPath
+    fun mergeConfigWithPriorityToThis(configFromPropertiesFile: SaveProperties): SaveProperties {
+        testConfig = testConfig ?: configFromPropertiesFile.testConfig
         parallelMode = parallelMode ?: configFromPropertiesFile.parallelMode
         threads = threads ?: configFromPropertiesFile.threads
         debug = debug ?: configFromPropertiesFile.debug
