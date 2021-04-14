@@ -1,160 +1,130 @@
 {
-    "config" : {
+    "testConfig" : {
       "argType" : "ArgType.String",
-      "kotlinType": "Path",
-      "fullName" : "",
+      "kotlinType": "kotlin.String",
+      "fullName" : "test-config",
       "shortName" : "c",
       "description" : "Path to the root save config file",
-      "option" : {
-        "default" : "save.toml"
-      }
+      "default" : "save.toml"
     },
     "parallelMode" : {
       "argType" : "ArgType.Boolean",
-      "kotlinType": "Boolean",
+      "kotlinType": "kotlin.Boolean",
       "fullName" : "parallel-mode",
       "shortName" : "parallel",
       "description" : "Whether to enable parallel mode",
-      "option" : {
-        "default" : "false"
-      }
+      "default" : "false"
     },
     "threads" : {
       "argType" : "ArgType.Int",
-      "kotlinType": "Int",
-      "fullName" : "",
+      "kotlinType": "kotlin.Int",
+      "fullName" : "threads",
       "shortName" : "t",
       "description" : "Number of threads",
-      "option" : {
-        "default" : "1"
-      }
+      "default" : "1"
     },
     "propertiesFile" : {
       "argType" : "ArgType.String",
-      "kotlinType": "Path",
+      "kotlinType": "kotlin.String",
       "fullName" : "properties-file",
       "shortName" : "prop",
       "description" : "Path to the file with configuration properties of save application",
-      "option" : {
-        "default" : "save.properties"
-      }
+      "default" : "save.properties"
     },
     "debug" : {
       "argType" : "ArgType.Boolean",
-      "kotlinType": "Boolean",
-      "fullName" : "",
+      "kotlinType": "kotlin.Boolean",
+      "fullName" : "debug",
       "shortName" : "d",
       "description" : "Turn on debug logging",
-      "option" : {
-        "default" : "false"
-      }
+      "default" : "false"
     },
     "quiet" : {
       "argType" : "ArgType.Boolean",
-      "kotlinType": "Boolean",
-      "fullName" : "",
+      "kotlinType": "kotlin.Boolean",
+      "fullName" : "quiet",
       "shortName" : "q",
       "description" : "Do not log anything",
-      "option" : {
-        "default" : "false"
-      }
+      "default" : "false"
     },
     "reportType" : {
       "argType" : "ArgType.Choice<ReportType>()",
-      "kotlinType": "ReportType",
+      "kotlinType": "org.cqfn.save.core.config.ReportType",
       "fullName" : "report-type",
       "shortName" : "",
       "description" : "Possible types of output formats",
-      "option" : {
-        "default" : "JSON"
-      }
+      "default" : "ReportType.JSON"
     },
     "baseline" : {
       "argType" : "ArgType.String",
-      "kotlinType": "Path?",
-      "fullName" : "",
+      "kotlinType": "kotlin.String",
+      "fullName" : "baseline",
       "shortName" : "b",
       "description" : "Path to the file with baseline data",
-      "option" : {}
+      "default" : "null"
     },
     "excludeSuites" : {
       "argType" : "ArgType.String",
-      "kotlinType": "List<String>",
+      "kotlinType": "kotlin.collections.List<kotlin.String>",
       "fullName" : "exclude-suites",
       "shortName" : "e",
       "description" : "Test suites, which won't be checked",
-      "option" : {
-        "multiple" : ""
-      }
+      "default" : "null"
     },
     "includeSuites" : {
       "argType" : "ArgType.String",
-      "kotlinType": "List<String>",
+      "kotlinType": "kotlin.collections.List<kotlin.collections.List<kotlin.String>>",
       "fullName" : "include-suites",
       "shortName" : "i",
       "description" : "Test suites, only which ones will be checked",
-      "option" : {
-        "multiple" : ""
-      }
+      "default" : "null"
     },
     "language" : {
       "argType" : "ArgType.Choice<LanguageType>()",
-      "kotlinType": "LanguageType",
-      "fullName" : "",
+      "kotlinType": "org.cqfn.save.core.config.LanguageType",
+      "fullName" : "language",
       "shortName" : "l",
       "description" : "Language that you are developing analyzer for",
-      "option" : {
-        "default" : "JAVA"
-      }
+      "default" : "LanguageType.UNDEFINED"
     },
     "testRootPath" : {
       "argType" : "ArgType.String",
-      "kotlinType": "Path",
+      "kotlinType": "kotlin.String",
       "fullName" : "test-root-path",
       "shortName" : "",
       "description" : "Path to directory with tests (relative path from place, where save.properties is stored or absolute path)",
-      "option" : {
-        "required" : ""
-      }
+      "default" : "null"
     },
     "resultOutput" : {
       "argType" : "ArgType.Choice<ResultOutputType>()",
-      "kotlinType": "ResultOutputType",
+      "kotlinType": "org.cqfn.save.core.config.ResultOutputType",
       "fullName" : "result-output",
       "shortName" : "out",
       "description" : "Data output stream",
-      "option" : {
-        "default" : "STDOUT"
-      }
+      "default" : "ResultOutputType.STDOUT"
     },
     "configInheritance" : {
       "argType" : "ArgType.Boolean",
-      "kotlinType": "Boolean",
+      "kotlinType": "kotlin.Boolean",
       "fullName" : "config-inheritance",
       "shortName" : "",
       "description" : "Whether configuration files should inherit configurations from the previous level of directories",
-      "option" : {
-        "default" : "true"
-      }
+      "default" : "true"
     },
     "ignoreSaveComments" : {
       "argType" : "ArgType.Boolean",
-      "kotlinType": "Boolean",
+      "kotlinType": "kotlin.Boolean",
       "fullName" : "ignore-save-comments",
       "shortName" : "",
       "description" : "If true, ignore technical comments, that SAVE uses to describe warnings, when running tests",
-      "option" : {
-        "default" : "false"
-      }
+      "default" : "false"
     },
     "reportDir" : {
       "argType" : "ArgType.String",
-      "kotlinType": "Path",
+      "kotlinType": "kotlin.String",
       "fullName" : "report-dir",
       "shortName" : "",
       "description" : "Path to directory, where to store output (when `resultOutput` is set to `FILE`)",
-      "option" : {
-        "default" : "save-reports"
-      }
+      "default" : "save-reports"
     }
 }
