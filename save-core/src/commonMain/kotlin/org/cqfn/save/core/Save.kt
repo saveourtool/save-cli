@@ -1,9 +1,10 @@
 package org.cqfn.save.core
 
-import okio.Path.Companion.toPath
 import org.cqfn.save.core.config.SaveConfig
 import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.plugin.Plugin
+
+import okio.Path.Companion.toPath
 
 /**
  * @property saveCliConfig an instance of [SaveCliConfig]

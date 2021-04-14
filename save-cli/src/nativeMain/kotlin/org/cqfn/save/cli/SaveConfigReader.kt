@@ -5,9 +5,11 @@
 package org.cqfn.save.cli
 
 import org.cqfn.save.cli.logging.logErrorAndExit
+import org.cqfn.save.core.config.SaveConfig
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logInfo
 
+import okio.FileNotFoundException
 import okio.FileSystem
 import okio.IOException
 import okio.Path.Companion.toPath
@@ -15,9 +17,20 @@ import okio.Path.Companion.toPath
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.properties.Properties
 import kotlinx.serialization.serializer
-import okio.FileNotFoundException
-import org.cqfn.save.core.Save
-import org.cqfn.save.core.config.*
+
+/**
+ * @return this config in case we have valid configuration
+ */
+fun SaveConfig.validate(): SaveConfig {
+    try {
+        FileSystem.SYSTEM.metadata(this.configPath?.toPath()!!)
+    } catch (e: FileNotFoundException) {
+        logErrorAndExit(ExitCodes.INVALID_CONFIGURATION, "Not able to find file '${this.configPath}'." +
+                " Please provide a path to the valid test config via command-line or using the file with properties.")
+    }
+
+    return this
+}
 
 /**
  * @param args CLI args
@@ -39,7 +52,7 @@ fun createConfigFromArgs(args: Array<String>): SaveConfig {
  */
 @OptIn(ExperimentalSerializationApi::class)
 fun readPropertiesFile(propertiesFileName: String?): SaveConfig {
-    propertiesFileName?: return SaveConfig()
+    propertiesFileName ?: return SaveConfig()
 
     logDebug("Reading properties file $propertiesFileName")
 
@@ -52,7 +65,7 @@ fun readPropertiesFile(propertiesFileName: String?): SaveConfig {
                     if (it.size != 2) {
                         logErrorAndExit(ExitCodes.GENERAL_ERROR,
                             "Incorrect format of property in $propertiesFileName" +
-                                " Should be <key = value>, but was $line")
+                                    " Should be <key = value>, but was $line")
                     }
                     it[0].trim() to it[1].trim()
                 }
@@ -69,15 +82,4 @@ fun readPropertiesFile(propertiesFileName: String?): SaveConfig {
     logInfo("Read properties from the properties file: $deserializedPropertiesFile")
 
     return deserializedPropertiesFile
-}
-
-fun SaveConfig.validate(): SaveConfig {
-    try {
-        FileSystem.SYSTEM.metadata(this.configPath?.toPath()!!)
-    } catch(e: FileNotFoundException) {
-        logErrorAndExit(ExitCodes.INVALID_CONFIGURATION, "Not able to find file '${this.configPath}'." +
-                " Please provide a path to the valid test config via command-line or using the file with properties.")
-    }
-
-    return this
 }

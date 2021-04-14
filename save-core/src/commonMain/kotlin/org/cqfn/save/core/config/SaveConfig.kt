@@ -1,10 +1,9 @@
 // ******* !!! Automatically generated code, do not change *******
 package org.cqfn.save.core.config
 
-import kotlinx.serialization.Serializable
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
-import org.cqfn.save.core.Save
+import kotlinx.serialization.Serializable
 
 /**
  * Configuration properties of save application, retrieved either from properties file
@@ -15,7 +14,7 @@ import org.cqfn.save.core.Save
  * @property debug turn on debug logging
  * @property quiet do not log anything
  * @property reportType type of generated report with execution results
- * @property baselinePath path to the file with baseline data
+ * @property baseline path to the file with baseline data
  * @property excludeSuites test suites, which won't be checked
  * @property includeSuites test suites, only which ones will be checked
  * @property language language that you are developing analyzer for
@@ -24,9 +23,10 @@ import org.cqfn.save.core.Save
  * @property configInheritance whether configuration files should inherit configurations from the previous level of directories
  * @property ignoreSaveComments if true, ignore technical comments, that SAVE uses to describe warnings, when running tests
  * @property reportDir path to directory where to store output (when `resultOutput` is set to `FILE`)
+ * @property propertiesFile path to the file with extra properties (that can be also passed as command-line arguments)
  */
 @Serializable
-class SaveConfig (
+class SaveConfig(
     var configPath: String? = "save.toml",
     var parallelMode: Boolean? = false,
     var threads: Int? = 1,
@@ -44,7 +44,7 @@ class SaveConfig (
     var resultOutput: ResultOutputType? = ResultOutputType.STDOUT,
     var propertiesFile: String? = null,
 ) {
-    constructor (args: Array<String>) : this() {
+    constructor(args: Array<String>) : this() {
         val parser = ArgParser("save")
 
         configPath = parser.option(
@@ -55,10 +55,10 @@ class SaveConfig (
         ).value
 
         parallelMode = parser.option(
-                ArgType.Boolean,
-        fullName = "parallel-mode",
-        shortName = "parallel",
-        description = "Whether to enable parallel mode",
+            ArgType.Boolean,
+            fullName = "parallel-mode",
+            shortName = "parallel",
+            description = "Whether to enable parallel mode",
         ).value
 
         threads = parser.option(
@@ -116,9 +116,9 @@ class SaveConfig (
             description = "Test suites, only which ones will be checked",
         ).value
 
-        language =  parser.option(
+        language = parser.option(
             ArgType.Choice<LanguageType>(),
-            fullName= "language",
+            fullName = "language",
             shortName = "l",
             description = "Language that you are developing analyzer for",
         ).value
@@ -157,23 +157,27 @@ class SaveConfig (
         parser.parse(args)
     }
 
+    /**
+     * @param configFromPropertiesFile - config that will be used as a fallback in case when the field was not provided
+     * @return this configuration
+     */
     fun mergeConfigWithPriorityToThis(configFromPropertiesFile: SaveConfig): SaveConfig {
-        configPath = configPath?: configFromPropertiesFile.configPath
-        parallelMode = parallelMode?: configFromPropertiesFile.parallelMode
-        threads = threads?: configFromPropertiesFile.threads
-        debug = debug?: configFromPropertiesFile.debug
-        quiet = quiet?: configFromPropertiesFile.quiet
-        reportType = reportType?: configFromPropertiesFile.reportType
-        baseline = baseline?: configFromPropertiesFile.baseline
-        excludeSuites = excludeSuites?: configFromPropertiesFile.excludeSuites
-        includeSuites = includeSuites?: configFromPropertiesFile.includeSuites
-        language = language?: configFromPropertiesFile.language
-        testRootPath = testRootPath?: configFromPropertiesFile.testRootPath
-        configInheritance = configInheritance?: configFromPropertiesFile.configInheritance
-        ignoreSaveComments = ignoreSaveComments?: configFromPropertiesFile.ignoreSaveComments
-        reportDir = reportDir?: configFromPropertiesFile.reportDir
-        resultOutput = resultOutput?: configFromPropertiesFile.resultOutput
-        propertiesFile = propertiesFile?: configFromPropertiesFile.propertiesFile
+        configPath = configPath ?: configFromPropertiesFile.configPath
+        parallelMode = parallelMode ?: configFromPropertiesFile.parallelMode
+        threads = threads ?: configFromPropertiesFile.threads
+        debug = debug ?: configFromPropertiesFile.debug
+        quiet = quiet ?: configFromPropertiesFile.quiet
+        reportType = reportType ?: configFromPropertiesFile.reportType
+        baseline = baseline ?: configFromPropertiesFile.baseline
+        excludeSuites = excludeSuites ?: configFromPropertiesFile.excludeSuites
+        includeSuites = includeSuites ?: configFromPropertiesFile.includeSuites
+        language = language ?: configFromPropertiesFile.language
+        testRootPath = testRootPath ?: configFromPropertiesFile.testRootPath
+        configInheritance = configInheritance ?: configFromPropertiesFile.configInheritance
+        ignoreSaveComments = ignoreSaveComments ?: configFromPropertiesFile.ignoreSaveComments
+        reportDir = reportDir ?: configFromPropertiesFile.reportDir
+        resultOutput = resultOutput ?: configFromPropertiesFile.resultOutput
+        propertiesFile = propertiesFile ?: configFromPropertiesFile.propertiesFile
         return this
     }
 }
