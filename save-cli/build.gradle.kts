@@ -7,7 +7,6 @@ plugins {
 
 repositories {
     mavenCentral()
-    maven(url = "https://kotlin.bintray.com/kotlinx/")
 }
 
 kotlin {
@@ -33,18 +32,19 @@ kotlin {
             languageSettings.useExperimentalAnnotation("kotlin.RequiresOptIn")
             languageSettings.useExperimentalAnnotation("okio.ExperimentalFileSystem")
         }
+        val jvmMain by getting
+
         val commonMain by getting
         val nativeMain by creating {
             dependsOn(commonMain)
             dependencies {
                 implementation(project(":save-core"))
-                implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.2")
+                implementation( "org.jetbrains.kotlinx:kotlinx-serialization-properties:1.0.1")
             }
         }
         getByName("${saveTarget.name}Main").dependsOn(nativeMain)
         val commonTest by getting
 
-        val jvmMain by getting
 
         val jvmTest by getting {
             dependencies {

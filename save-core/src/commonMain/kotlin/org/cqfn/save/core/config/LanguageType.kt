@@ -5,5 +5,5 @@ package org.cqfn.save.core.config
  */
 @Suppress("IDENTIFIER_LENGTH")
 enum class LanguageType {
-    C, CPP, JAVA, KOTLIN
+    C, CPP, JAVA, KOTLIN, UNDEFINED
 }

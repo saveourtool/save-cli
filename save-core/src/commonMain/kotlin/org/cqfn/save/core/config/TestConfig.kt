@@ -10,16 +10,16 @@ import okio.Path
  * @property parentConfig parent config in the hierarchy of configs, `null` if this config is root.
  * @property pluginConfigs list of configurations for plugins that are active in this config
  */
-data class TestSuiteConfig(
+data class TestConfig(
     val location: Path,
-    val parentConfig: TestSuiteConfig?,
+    val parentConfig: TestConfig?,
     val pluginConfigs: List<PluginConfig> = emptyList(),
 ) {
     /**
      * List of child configs in the hierarchy of configs, can be empty if this config is at the very bottom.
      * NB: don't move to constructor in order not to break toString into infinite recursion.
      */
-    val childConfigs: MutableList<TestSuiteConfig> = mutableListOf()
+    val childConfigs: MutableList<TestConfig> = mutableListOf()
 
     /**
      * @return whether this config file is in the root on the hierarchy
