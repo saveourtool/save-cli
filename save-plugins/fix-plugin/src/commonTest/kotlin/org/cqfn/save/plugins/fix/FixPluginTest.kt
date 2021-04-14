@@ -3,35 +3,36 @@ package org.cqfn.save.plugins.fix
 import org.cqfn.save.core.config.LanguageType
 import org.cqfn.save.core.config.ReportType
 import org.cqfn.save.core.config.ResultOutputType
-import org.cqfn.save.core.config.SaveConfig
-import org.cqfn.save.core.config.TestSuiteConfig
+import org.cqfn.save.core.config.SaveProperties
+import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
 
 import io.github.petertrr.diffutils.diff
 import okio.FileSystem
-import okio.Path.Companion.toPath
 
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-private val mockConfig = SaveConfig(
-    configPath = ".".toPath(),
+private val mockConfig = SaveProperties(
+    testConfig = ".",
     parallelMode = false,
     threads = 1,
-    propertiesFile = ".".toPath(),
+    propertiesFile = ".",
     debug = true,
     quiet = false,
     reportType = ReportType.PLAIN,
-    baselinePath = null,
-    excludeSuites = emptyList(),
-    includeSuites = emptyList(),
+    baseline = null,
+    excludeSuites = null,
+    includeSuites = null,
     language = LanguageType.KOTLIN,
-    testRootPath = ".".toPath(),
+    testRootPath = ".",
     resultOutput = ResultOutputType.STDOUT,
-    configInheritance = true, ignoreSaveComments = true, reportDir = ".".toPath()
+    configInheritance = true,
+    ignoreSaveComments = true,
+    reportDir = "."
 )
 
 /**
@@ -89,7 +90,7 @@ class FixPluginTest {
 
         FixPlugin().execute(
             mockConfig,
-            TestSuiteConfig(tmpDir,
+            TestConfig(tmpDir,
                 null,
                 listOf(FixPluginConfig("cd $tmpDir && echo Expected file> Test3Test.java", inPlace = true, testResources = listOf(testFile, expectedFile)))
             )
@@ -114,7 +115,7 @@ class FixPluginTest {
 
         FixPlugin().execute(
             mockConfig,
-            TestSuiteConfig(tmpDir,
+            TestConfig(tmpDir,
                 null,
                 listOf(FixPluginConfig("cd $tmpDir && echo Expected file> Test3Test_copy.java", destinationFileSuffix = "_copy", testResources = listOf(testFile, expectedFile)))
             )

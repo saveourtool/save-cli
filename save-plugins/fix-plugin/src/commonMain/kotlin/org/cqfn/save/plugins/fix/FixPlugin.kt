@@ -1,7 +1,7 @@
 package org.cqfn.save.plugins.fix
 
-import org.cqfn.save.core.config.SaveConfig
-import org.cqfn.save.core.config.TestSuiteConfig
+import org.cqfn.save.core.config.SaveProperties
+import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.logInfo
 import org.cqfn.save.core.plugin.Plugin
@@ -19,8 +19,8 @@ import okio.Path.Companion.toPath
 class FixPlugin : Plugin {
     private val pb = ProcessBuilder()
 
-    override fun execute(saveConfig: SaveConfig, testSuiteConfig: TestSuiteConfig) {
-        val fixPluginConfig = testSuiteConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
+    override fun execute(saveProperties: SaveProperties, testConfig: TestConfig) {
+        val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
         discoverFilePairs(fixPluginConfig.testResources)
             .also {
                 logInfo("Discovered the following file pairs: $it")

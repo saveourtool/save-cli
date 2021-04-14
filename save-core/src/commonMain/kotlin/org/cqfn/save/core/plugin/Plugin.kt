@@ -1,6 +1,6 @@
 package org.cqfn.save.core.plugin
 
-import org.cqfn.save.core.config.SaveConfig
+import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.TestConfig
 
 /**
@@ -8,8 +8,8 @@ import org.cqfn.save.core.config.TestConfig
  */
 interface Plugin {
     /**
-     * @param saveConfig general configuration of SAVE. todo: is it needed here? Or should [PluginConfig] be passed here?
+     * @param saveProperties general configuration of SAVE. todo: is it needed here? Or should [PluginConfig] be passed here?
      * @param testConfig configuration of current test suite
      */
-    fun execute(saveConfig: SaveConfig, testConfig: TestConfig)
+    fun execute(saveProperties: SaveProperties, testConfig: TestConfig)
 }
