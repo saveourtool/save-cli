@@ -4,11 +4,6 @@ plugins {
     kotlin("multiplatform")
 }
 
-repositories {
-    mavenCentral()
-    maven(url = "https://kotlin.bintray.com/kotlinx/")
-}
-
 kotlin {
     jvm()
     val os = getCurrentOperatingSystem()

@@ -16,6 +16,7 @@ version = "0.1.0-SNAPSHOT"
 allprojects {
     repositories {
         mavenCentral()
+        maven(url = "https://kotlin.bintray.com/kotlinx/")
     }
     configureDiktat()
     configureDetekt()

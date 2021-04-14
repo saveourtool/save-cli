@@ -6,11 +6,6 @@ plugins {
     kotlin("plugin.serialization")
 }
 
-repositories {
-    mavenCentral()
-    maven(url = "https://kotlin.bintray.com/kotlinx/")
-}
-
 kotlin {
     jvm {
         compilations.all {
