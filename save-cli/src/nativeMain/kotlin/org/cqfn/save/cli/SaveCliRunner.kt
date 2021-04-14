@@ -7,8 +7,7 @@ package org.cqfn.save.cli
 import org.cqfn.save.core.Save
 
 fun main(args: Array<String>) {
-    val save = Save(
-        createConfigFromArgs(args)
-    )
-    save.performAnalysis()
+    val config = createConfigFromArgs(args)
+    Save(config)
+        .performAnalysis()
 }

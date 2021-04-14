@@ -1,6 +1,6 @@
 package org.cqfn.save.core.files
 
-import org.cqfn.save.core.config.TestSuiteConfig
+import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.config.isSaveTomlConfig
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
@@ -16,9 +16,9 @@ class ConfigDetector {
      * Try to create SAVE config file from [file].
      *
      * @param file a [Path] from which SAVE config file should be built.
-     * @return [TestSuiteConfig] or null if no suitable config file has been found.
+     * @return [TestConfig] or null if no suitable config file has been found.
      */
-    fun configFromFile(file: Path): TestSuiteConfig? = discoverConfigWithParents(file)
+    fun configFromFile(file: Path): TestConfig? = discoverConfigWithParents(file)
         ?.also { config ->
             // fill children for parent configs
             config.parentConfigs(wihSelf = true).toList().reversed()
@@ -36,7 +36,7 @@ class ConfigDetector {
                                 locationsFlattened.take(index + 1).reversed().find { it.parent in path.parents() }!!
                     }!!
                     configs.add(
-                        TestSuiteConfig(
+                        TestConfig(
                             "todo: read from file",
                             "todo: read from file",
                             path,
@@ -53,7 +53,7 @@ class ConfigDetector {
             null
         }
 
-    private fun discoverConfigWithParents(file: Path): TestSuiteConfig? = when {
+    private fun discoverConfigWithParents(file: Path): TestConfig? = when {
         // if provided file is a directory, try to find save.toml inside it
         FileSystem.SYSTEM.metadata(file).isDirectory -> file
             .findChildByOrNull { it.isSaveTomlConfig() }
@@ -66,11 +66,11 @@ class ConfigDetector {
             .firstOrNull()
             ?.let { discoverConfigWithParents(it) }
         // if provided file is save.toml, create config from it
-        file.isSaveTomlConfig() -> testSuiteConfigFromFile(file)
+        file.isSaveTomlConfig() -> testConfigFromFile(file)
         else -> null
     }
 
-    private fun testSuiteConfigFromFile(file: Path): TestSuiteConfig {
+    private fun testConfigFromFile(file: Path): TestConfig {
         val parentConfig = file.parents()
             .drop(1)  // because immediate parent already contains [this] config
             .mapNotNull { parentDir ->
@@ -79,8 +79,8 @@ class ConfigDetector {
                 }
             }
             .firstOrNull()
-            ?.let { testSuiteConfigFromFile(it) }
-        return TestSuiteConfig(
+            ?.let { testConfigFromFile(it) }
+        return TestConfig(
             "todo: read from file",
             "todo: read from file",
             file,
