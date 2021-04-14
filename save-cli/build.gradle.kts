@@ -40,7 +40,6 @@ kotlin {
             dependsOn(commonMain)
             dependencies {
                 implementation(project(":save-core"))
-                implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.2")
                 implementation( "org.jetbrains.kotlinx:kotlinx-serialization-properties:1.0.1")
             }
         }

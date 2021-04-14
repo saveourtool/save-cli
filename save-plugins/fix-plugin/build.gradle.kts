@@ -6,6 +6,7 @@ plugins {
 
 repositories {
     mavenCentral()
+    maven(url = "https://kotlin.bintray.com/kotlinx/")
 }
 
 kotlin {
