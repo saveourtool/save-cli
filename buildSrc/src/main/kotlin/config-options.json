@@ -65,7 +65,7 @@
     },
     "excludeSuites" : {
       "argType" : "ArgType.String",
-      "kotlinType": "kotlin.collections.List<kotlin.String>",
+      "kotlinType": "kotlin.String",
       "fullName" : "exclude-suites",
       "shortName" : "e",
       "description" : "Test suites, which won't be checked",
@@ -73,7 +73,7 @@
     },
     "includeSuites" : {
       "argType" : "ArgType.String",
-      "kotlinType": "kotlin.collections.List<kotlin.collections.List<kotlin.String>>",
+      "kotlinType": "kotlin.String",
       "fullName" : "include-suites",
       "shortName" : "i",
       "description" : "Test suites, only which ones will be checked",
