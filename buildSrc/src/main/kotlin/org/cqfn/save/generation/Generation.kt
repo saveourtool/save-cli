@@ -52,7 +52,6 @@ class Option {
 }
 
 fun main() {
-    println("======================")
     val configFile = "buildSrc/src/main/kotlin/config-options.json"
     val gson = Gson()
     val bufferedReader: BufferedReader = File(configFile).bufferedReader()
@@ -60,21 +59,19 @@ fun main() {
     val jsonObject = gson.fromJson<Map<String, Option>>(jsonString, object : TypeToken<Map<String, Option>>(){}.type)
     generateSaveProperties(jsonObject)
     generateReadme(jsonObject)
-    println("\n======================")
 }
 
 fun generateSaveProperties(jsonObject: Map<String, Option>) {
-    println("-----------generateSaveConfig------------")
     val builder = FileSpec.builder("org.cqfn.save.core.config", "SaveProperties")
     builder.addComment(autoGenerationComment)
     builder.addImport("kotlinx.cli", "ArgParser")
     builder.addImport("kotlinx.cli", "ArgType")
-
     val classBuilder = generateSavePropertiesClass(jsonObject)
+    val mergeFunc = generateMergeConfigFunc(jsonObject)
+    classBuilder.addFunction(mergeFunc.build())
     builder.addType(classBuilder.build())
     builder.build().writeTo(System.out)
     File("$generatedSaveSavePropertiesPath/SaveProperties.kt").writeText(builder.build().toString())
-    println("-------------------------------------")
 }
 
 fun generateSavePropertiesClass(jsonObject: Map<String, Option>): TypeSpec.Builder {
@@ -143,15 +140,32 @@ fun generateOptions(jsonObject: Map<String, Option>): String {
 // TODO: For now generic types with multiple args (like Map) doesn't supported
 fun createClassName(type: String): TypeName {
     if (!type.contains("<")) {
-        return createSimpleClassName(type)
+        return extractClassNameFromString(type)
     }
     val packageName = type.substringBefore("<")
     val simpleName = type.substringAfter("<").substringBeforeLast(">")
-    return createSimpleClassName(packageName).parameterizedBy(createClassName(simpleName))
+    return extractClassNameFromString(packageName).parameterizedBy(createClassName(simpleName))
 }
 
-fun createSimpleClassName(type: String): ClassName {
+fun extractClassNameFromString(type: String): ClassName {
     return ClassName(type.substringBeforeLast("."), type.substringAfterLast("."))
+}
+
+fun generateMergeConfigFunc(jsonObject: Map<String, Option>): FunSpec.Builder {
+    val kdoc =
+        """ 
+            |@param configFromPropertiesFile - config that will be used as a fallback in case when the field was not provided
+            |@return this configuration
+            """.trimMargin()
+    val mergeFunc = FunSpec.builder("mergeConfigWithPriorityToThis")
+        .addKdoc(kdoc)
+        .addParameter("configFromPropertiesFile", ClassName("org.cqfn.save.core.config", "SaveProperties"))
+        .returns(ClassName("org.cqfn.save.core.config", "SaveProperties"))
+    var statements = ""
+    jsonObject.forEach { statements += "\n${it.key} = ${it.key} ?: configFromPropertiesFile.${it.key}" }
+    mergeFunc.addStatement(statements)
+    mergeFunc.addStatement("    return this")
+    return mergeFunc
 }
 
 fun generateReadme(jsonObject: Map<String, Option>) {

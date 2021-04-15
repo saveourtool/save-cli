@@ -4,7 +4,7 @@
       "kotlinType": "kotlin.String",
       "fullName" : "test-config",
       "shortName" : "c",
-      "description" : "Path to the root save config file",
+      "description" : "Path to a configuration of a test suite",
       "default" : "save.toml"
     },
     "parallelMode" : {
@@ -28,7 +28,7 @@
       "kotlinType": "kotlin.String",
       "fullName" : "properties-file",
       "shortName" : "prop",
-      "description" : "Path to the file with configuration properties of save application",
+      "description" : "Path to the file with configuration properties of save application aka save.properties",
       "default" : "save.properties"
     },
     "debug" : {
@@ -52,7 +52,7 @@
       "kotlinType": "org.cqfn.save.core.config.ReportType",
       "fullName" : "report-type",
       "shortName" : "",
-      "description" : "Possible types of output formats",
+      "description" : "Type of generated report with execution results",
       "default" : "ReportType.JSON"
     },
     "baseline" : {
