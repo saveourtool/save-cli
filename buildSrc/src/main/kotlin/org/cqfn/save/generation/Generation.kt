@@ -112,6 +112,7 @@ fun generateSavePropertiesClass(jsonObject: Map<String, Option>): TypeSpec.Build
     secondaryCtor.addStatement("val parser = ArgParser(\"save\")")
                     .generateOptions(jsonObject)
                         .addStatement("parser.parse(args)")
+                            .assignMembersToOptions(jsonObject)
     classBuilder.addFunction(secondaryCtor.build())
     return classBuilder
 }
@@ -119,7 +120,7 @@ fun generateSavePropertiesClass(jsonObject: Map<String, Option>): TypeSpec.Build
 // Generate options for ArgParser
 fun FunSpec.Builder.generateOptions(jsonObject: Map<String, Option>): FunSpec.Builder {
     jsonObject.forEach {
-        var option = "${it.key} = parser.option(\n"
+        var option = "val ${it.key} by parser.option(\n"
         option += "${it.value.argType},\n"
         option += "fullName = \"${it.value.fullName}\",\n"
         if (it.value.shortName.isNotEmpty()) {
@@ -128,11 +129,21 @@ fun FunSpec.Builder.generateOptions(jsonObject: Map<String, Option>): FunSpec.Bu
         // We replace whitespaces to `·`, in aim to avoid incorrect line breaking,
         // which could be done by kotlinpoet
         option += "description = \"${it.value.description.replace(" ", "·")}\"\n"
-        option += ").value\n"
+        option += ")\n"
         this.addStatement(option)
     }
     return this
 }
+
+// Assign class members to options
+fun FunSpec.Builder.assignMembersToOptions(jsonObject: Map<String, Option>): FunSpec.Builder {
+    jsonObject.forEach {
+        val assign = "this.${it.key} = ${it.key}\n"
+        this.addStatement(assign)
+    }
+    return this
+}
+
 // TODO: For now generic types with multiple args (like Map) doesn't supported
 fun createClassName(type: String): TypeName {
     if (!type.contains("<")) {
@@ -150,9 +161,9 @@ fun extractClassNameFromString(type: String): ClassName {
 fun generateMergeConfigFunc(jsonObject: Map<String, Option>): FunSpec.Builder {
     val kdoc =
         """ 
-            |@param configFromPropertiesFile - config that will be used as a fallback in case when the field was not provided
-            |@return this configuration
-            """.trimMargin()
+        |@param configFromPropertiesFile - config that will be used as a fallback in case when the field was not provided
+        |@return this configuration
+        """.trimMargin()
     val mergeFunc = FunSpec.builder("mergeConfigWithPriorityToThis")
                         .addKdoc(kdoc)
                             .addParameter("configFromPropertiesFile", ClassName("org.cqfn.save.core.config", "SaveProperties"))
@@ -174,7 +185,7 @@ fun generateReadme(jsonObject: Map<String, Option>) {
         """.trimMargin()
     jsonObject.forEach {
         val shortName = if (it.value.shortName.isNotEmpty()) it.value.shortName else "-"
-        val longName = if (it.value.fullName.isNotEmpty()) it.value.fullName else it.key
+        val longName = it.value.fullName
         val description = it.value.description
         var default = it.value.default
         // If some option have user defined type, then we will print to the README

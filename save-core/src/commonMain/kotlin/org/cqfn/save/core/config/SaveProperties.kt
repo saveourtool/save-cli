@@ -57,133 +57,151 @@ public class SaveProperties(
 ) {
     public constructor(args: Array<String>) : this() {
         val parser = ArgParser("save")
-
         val testConfig by parser.option(
-            ArgType.String,
-            fullName = "test-config",
-            shortName = "c",
-            description = "Path to a configuration of a test suite",
-        )
+                ArgType.String,
+                fullName = "test-config",
+                shortName = "c",
+                description = "Path to a configuration of a test suite"
+                )
 
         val parallelMode by parser.option(
-            ArgType.Boolean,
-            fullName = "parallel-mode",
-            shortName = "parallel",
-            description = "Whether to enable parallel mode",
-        )
+                ArgType.Boolean,
+                fullName = "parallel-mode",
+                shortName = "parallel",
+                description = "Whether to enable parallel mode"
+                )
 
         val threads by parser.option(
-            ArgType.Int,
-            fullName = "threads",
-            shortName = "t",
-            description = "Number of threads",
-        )
-
-        val debug by parser.option(
-            ArgType.Boolean,
-            fullName = "debug",
-            shortName = "d",
-            description = "Turn on debug logging"
-        )
-
-        val quiet by parser.option(
-            ArgType.Boolean,
-            fullName = "quiet",
-            shortName = "q",
-            description = "Do not log anything"
-        )
-
-        val reportType by parser.option(
-            ArgType.Choice<ReportType>(),
-            fullName = "report-type",
-            description = "Possible types of output formats"
-        )
-
-        val baseline by parser.option(
-            ArgType.String,
-            fullName = "baseline",
-            shortName = "b",
-            description = "Path to the file with baseline data",
-        )
-
-        val excludeSuites by parser.option(
-            ArgType.String,
-            fullName = "exclude-suites",
-            shortName = "e",
-            description = "Test suites, which won't be checked",
-        )
-
-        val includeSuites by parser.option(
-            ArgType.String,
-            fullName = "includeSuites",
-            shortName = "i",
-            description = "Test suites, only which ones will be checked",
-        )
-
-        val language by parser.option(
-            ArgType.Choice<LanguageType>(),
-            fullName = "language",
-            shortName = "l",
-            description = "Language that you are developing analyzer for",
-        )
-
-        val testRootPath by parser.option(
-            ArgType.String,
-            fullName = "test-root-path",
-            description = "Path to directory with tests (relative path from place, where save.properties is stored or absolute path)",
-        )
-
-        val resultOutput by parser.option(
-            ArgType.Choice<ResultOutputType>(),
-            fullName = "result-output",
-            shortName = "out",
-            description = "Data output stream",
-        )
-
-        val configInheritance by parser.option(
-            ArgType.Boolean,
-            fullName = "config-inheritance",
-            description = "Whether configuration files should inherit configurations from the previous level of directories",
-        )
-
-        val ignoreSaveComments by parser.option(
-            ArgType.Boolean,
-            fullName = "ignore-save-comments",
-            description = "If true, ignore technical comments, that SAVE uses to describe warnings, when running tests",
-        )
-
-        val reportDir by parser.option(
-            ArgType.String,
-            fullName = "report-dir",
-            description = "Path to directory, where to store output (when `resultOutput` is set to `FILE`)",
-        )
+                ArgType.Int,
+                fullName = "threads",
+                shortName = "t",
+                description = "Number of threads"
+                )
 
         val propertiesFile by parser.option(
-            ArgType.String,
-            fullName = "properties-file",
-            shortName = "prop",
-            description = "Path to the file with configuration properties of save application aka save.properties",
-        )
+                ArgType.String,
+                fullName = "properties-file",
+                shortName = "prop",
+                description =
+                        "Path to the file with configuration properties of save application aka save.properties"
+                )
+
+        val debug by parser.option(
+                ArgType.Boolean,
+                fullName = "debug",
+                shortName = "d",
+                description = "Turn on debug logging"
+                )
+
+        val quiet by parser.option(
+                ArgType.Boolean,
+                fullName = "quiet",
+                shortName = "q",
+                description = "Do not log anything"
+                )
+
+        val reportType by parser.option(
+                ArgType.Choice<ReportType>(),
+                fullName = "report-type",
+                description = "Type of generated report with execution results"
+                )
+
+        val baseline by parser.option(
+                ArgType.String,
+                fullName = "baseline",
+                shortName = "b",
+                description = "Path to the file with baseline data"
+                )
+
+        val excludeSuites by parser.option(
+                ArgType.String,
+                fullName = "exclude-suites",
+                shortName = "e",
+                description = "Test suites, which won't be checked"
+                )
+
+        val includeSuites by parser.option(
+                ArgType.String,
+                fullName = "include-suites",
+                shortName = "i",
+                description = "Test suites, only which ones will be checked"
+                )
+
+        val language by parser.option(
+                ArgType.Choice<LanguageType>(),
+                fullName = "language",
+                shortName = "l",
+                description = "Language that you are developing analyzer for"
+                )
+
+        val testRootPath by parser.option(
+                ArgType.String,
+                fullName = "test-root-path",
+                description =
+                        "Path to directory with tests (relative path from place, where save.properties is stored or absolute path)"
+                )
+
+        val resultOutput by parser.option(
+                ArgType.Choice<ResultOutputType>(),
+                fullName = "result-output",
+                shortName = "out",
+                description = "Data output stream"
+                )
+
+        val configInheritance by parser.option(
+                ArgType.Boolean,
+                fullName = "config-inheritance",
+                description =
+                        "Whether configuration files should inherit configurations from the previous level of directories"
+                )
+
+        val ignoreSaveComments by parser.option(
+                ArgType.Boolean,
+                fullName = "ignore-save-comments",
+                description =
+                        "If true, ignore technical comments, that SAVE uses to describe warnings, when running tests"
+                )
+
+        val reportDir by parser.option(
+                ArgType.String,
+                fullName = "report-dir",
+                description =
+                        "Path to directory, where to store output (when `resultOutput` is set to `FILE`)"
+                )
 
         parser.parse(args)
+        this.testConfig = testConfig
+
+        this.parallelMode = parallelMode
+
+        this.threads = threads
 
         this.propertiesFile = propertiesFile
-        this.testConfig = testConfig
-        this.parallelMode = parallelMode
-        this.reportDir = reportDir
-        this.ignoreSaveComments = ignoreSaveComments
-        this.configInheritance = configInheritance
-        this.resultOutput = resultOutput
-        this.testRootPath = testRootPath
-        this.language = language
-        this.includeSuites = includeSuites
-        this.excludeSuites = excludeSuites
-        this.baseline = baseline
-        this.propertiesFile = propertiesFile
-        this.reportType = reportType
-        this.quiet = quiet
+
         this.debug = debug
-        this.threads = threads
+
+        this.quiet = quiet
+
+        this.reportType = reportType
+
+        this.baseline = baseline
+
+        this.excludeSuites = excludeSuites
+
+        this.includeSuites = includeSuites
+
+        this.language = language
+
+        this.testRootPath = testRootPath
+
+        this.resultOutput = resultOutput
+
+        this.configInheritance = configInheritance
+
+        this.ignoreSaveComments = ignoreSaveComments
+
+        this.reportDir = reportDir
+
     }
 
     /**
