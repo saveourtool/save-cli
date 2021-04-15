@@ -138,7 +138,7 @@ fun FunSpec.Builder.generateOptions(jsonObject: Map<String, Option>): FunSpec.Bu
 // Assign class members to options
 fun FunSpec.Builder.assignMembersToOptions(jsonObject: Map<String, Option>): FunSpec.Builder {
     jsonObject.forEach {
-        val assign = "this.${it.key} = ${it.key}\n"
+        val assign = "this.${it.key} = ${it.key}"
         this.addStatement(assign)
     }
     return this

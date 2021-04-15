@@ -171,37 +171,21 @@ public class SaveProperties(
 
         parser.parse(args)
         this.testConfig = testConfig
-
         this.parallelMode = parallelMode
-
         this.threads = threads
-
         this.propertiesFile = propertiesFile
-
         this.debug = debug
-
         this.quiet = quiet
-
         this.reportType = reportType
-
         this.baseline = baseline
-
         this.excludeSuites = excludeSuites
-
         this.includeSuites = includeSuites
-
         this.language = language
-
         this.testRootPath = testRootPath
-
         this.resultOutput = resultOutput
-
         this.configInheritance = configInheritance
-
         this.ignoreSaveComments = ignoreSaveComments
-
         this.reportDir = reportDir
-
     }
 
     /**
