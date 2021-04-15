@@ -62,3 +62,11 @@ fun FileSystem.createFile(path: Path): Path {
     sink(path).close()
     return path
 }
+
+/**
+ * @param path a path to a file
+ * @return list of strings from the file
+ */
+fun FileSystem.readLines(path: Path): List<String> = this.read(path) {
+    generateSequence { readUtf8Line() }.toList()
+}
