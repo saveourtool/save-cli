@@ -21,9 +21,9 @@ class Save(
         val testConfig = ConfigDetector().configFromFile(saveProperties.testConfig!!.toPath())
         requireNotNull(testConfig) { "Provided path ${saveProperties.testConfig} doesn't correspond to a valid save.toml file" }
 
-        val plugins: List<Plugin> = emptyList()  // todo: discover plugins
+        val plugins: List<Plugin> = emptyList()  // todo: discover plugins (from configuration blocks in TestSuiteConfig?)
         plugins.forEach {
-            it.execute(testConfig)
+            it.execute(saveProperties, testConfig)
         }
     }
 }
