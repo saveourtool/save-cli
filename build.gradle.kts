@@ -1,4 +1,4 @@
-import org.cqfn.save.generation.main
+import org.cqfn.save.generation.generateConfigOptions
 import org.cqfn.save.buildutils.configureDetekt
 import org.cqfn.save.buildutils.configureDiktat
 import org.cqfn.save.buildutils.createDetektTask
@@ -32,4 +32,4 @@ talaiot {
     }
 }
 
-tasks.register("generateConfigOptions") { main() }
+tasks.register("generateConfigOptions") { generateConfigOptions() }

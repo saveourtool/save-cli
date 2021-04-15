@@ -29,13 +29,16 @@ private val autoGenerationComment =
     | ---------------------------------------------------------------------
     """.trimMargin()
 
+// Path to config file
+val configFilePath = "buildSrc/src/main/resources/config-options.json"
+
 // Paths, where to store generated files
 val generatedSaveSavePropertiesPath = "save-core/src/commonMain/kotlin/org/cqfn/save/core/config/"
-val generatedOptionsTablePath = "buildSrc/src/main/kotlin/org/cqfn/save/generation/"
+val generatedOptionsTablePath = "."
 
 /**
  * This class represents the general form of each key in json file with config options
- * @property argType Type which will be used in ArgParser in Config.kt
+ * @property argType Type which will be used by ArgParser
  * @property kotlinType Type which will be used in kotlin code
  * @property fullName Full name of option for usage in Save cli
  * @property shortName Short name of option for usage in Save cli
@@ -51,8 +54,8 @@ class Option {
     lateinit var default: String
 }
 
-fun main() {
-    val configFile = "buildSrc/src/main/kotlin/config-options.json"
+fun generateConfigOptions() {
+    val configFile = configFilePath
     val gson = Gson()
     val bufferedReader: BufferedReader = File(configFile).bufferedReader()
     val jsonString = bufferedReader.use { it.readText() }
@@ -69,15 +72,13 @@ fun generateSaveProperties(jsonObject: Map<String, Option>) {
     val classBuilder = generateSavePropertiesClass(jsonObject)
     val mergeFunc = generateMergeConfigFunc(jsonObject)
     classBuilder.addFunction(mergeFunc.build())
-    builder.addType(classBuilder.build())
-    builder.build().writeTo(System.out)
+    builder.addType(classBuilder.build()).indent("    ")
     File("$generatedSaveSavePropertiesPath/SaveProperties.kt").writeText(builder.build().toString())
 }
 
 fun generateSavePropertiesClass(jsonObject: Map<String, Option>): TypeSpec.Builder {
     val classBuilder = TypeSpec.classBuilder("SaveProperties")
-    var properties = ""
-    jsonObject.forEach { properties += ("@property ${it.key} ${it.value.description}\n")}
+    var properties = jsonObject.entries.joinToString("\n"){ "@property ${it.key} ${it.value.description}" }
     val kdoc = """
                |Configuration properties of save application, retrieved either from properties file
                |or from CLI args.
@@ -106,37 +107,36 @@ fun generateSavePropertiesClass(jsonObject: Map<String, Option>): TypeSpec.Build
     // Generate secondary ctor
     val secondaryCtor = FunSpec.constructorBuilder()
     secondaryCtor.addParameter("args", ClassName("kotlin", "Array")
-                                                .parameterizedBy(ClassName("kotlin", "String")))
+                                           .parameterizedBy(ClassName("kotlin", "String")))
     secondaryCtor.callThisConstructor()
-    secondaryCtor.addStatement("    val parser = ArgParser(\"save\")")
-                    .addStatement(generateOptions(jsonObject))
-                        .addStatement("    parser.parse(args)")
+    secondaryCtor.addStatement("val parser = ArgParser(\"save\")")
+                    .generateOptions(jsonObject)
+                        .addStatement("parser.parse(args)")
     classBuilder.addFunction(secondaryCtor.build())
     return classBuilder
 }
 
 // Generate options for ArgParser
-fun generateOptions(jsonObject: Map<String, Option>): String {
-    var options = "    "
+fun FunSpec.Builder.generateOptions(jsonObject: Map<String, Option>): FunSpec.Builder {
     jsonObject.forEach {
-        options += "\n${it.key} = parser.option(\n" +
-                "    ${it.value.argType},\n"
-        val fullName = if (it.value.fullName.isNotEmpty()) "    fullName = \"${it.value.fullName}\",\n" else ""
+        var option = "${it.key} = parser.option(\n"
+        option += "${it.value.argType},\n"
+        val fullName = if (it.value.fullName.isNotEmpty()) "fullName = \"${it.value.fullName}\",\n" else ""
         if (fullName.isNotEmpty()) {
-            options += fullName
+            option += fullName
         }
-        val shortName = if (it.value.shortName.isNotEmpty()) "    shortName = \"${it.value.shortName}\",\n" else ""
+        val shortName = if (it.value.shortName.isNotEmpty()) "shortName = \"${it.value.shortName}\",\n" else ""
         if (shortName.isNotEmpty()) {
-            options += shortName
+            option += shortName
         }
         // We replace whitespaces to `·`, in aim to avoid incorrect line breaking,
         // which could be done by kotlinpoet
-        options += "    description = \"${it.value.description.replace(" ", "·")}\"\n" +
-                   ").value\n"
+        option += "description = \"${it.value.description.replace(" ", "·")}\"\n"
+        option += ").value\n"
+        this.addStatement(option)
     }
-    return options
+    return this
 }
-
 // TODO: For now generic types with multiple args (like Map) doesn't supported
 fun createClassName(type: String): TypeName {
     if (!type.contains("<")) {
@@ -158,13 +158,12 @@ fun generateMergeConfigFunc(jsonObject: Map<String, Option>): FunSpec.Builder {
             |@return this configuration
             """.trimMargin()
     val mergeFunc = FunSpec.builder("mergeConfigWithPriorityToThis")
-        .addKdoc(kdoc)
-        .addParameter("configFromPropertiesFile", ClassName("org.cqfn.save.core.config", "SaveProperties"))
-        .returns(ClassName("org.cqfn.save.core.config", "SaveProperties"))
-    var statements = ""
-    jsonObject.forEach { statements += "\n${it.key} = ${it.key} ?: configFromPropertiesFile.${it.key}" }
+                        .addKdoc(kdoc)
+                            .addParameter("configFromPropertiesFile", ClassName("org.cqfn.save.core.config", "SaveProperties"))
+                                .returns(ClassName("org.cqfn.save.core.config", "SaveProperties"))
+    val statements = jsonObject.entries.joinToString("\n") { "${it.key} = ${it.key} ?: configFromPropertiesFile.${it.key}" }
     mergeFunc.addStatement(statements)
-    mergeFunc.addStatement("    return this")
+    mergeFunc.addStatement("return this")
     return mergeFunc
 }
 
@@ -191,6 +190,5 @@ fun generateReadme(jsonObject: Map<String, Option>) {
         }
         readmeContent +=  "\n| $shortName | $longName | $description | $default |"
     }
-    println(readmeContent)
     File("$generatedOptionsTablePath/OptionsTable.md").writeText(readmeContent)
 }

@@ -73,7 +73,7 @@ save --mode=single --language=java
 
 # <a name="config_options"></a> List of options Save cli
 
-[Save cli options](buildSrc/src/main/kotlin/org/cqfn/save/generation/OptionsTable.md)
+[Save cli options](/OptionsTable.md)
 
 SAVE framework will detect tests, run your analyzer on these tests, will calculate the pass-rate and test results.
 
