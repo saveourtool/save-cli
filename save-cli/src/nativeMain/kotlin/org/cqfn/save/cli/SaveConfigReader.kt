@@ -17,6 +17,7 @@ import okio.Path.Companion.toPath
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.properties.Properties
 import kotlinx.serialization.properties.decodeFromMap
+import kotlinx.serialization.serializer
 
 /**
  * @return this config in case we have valid configuration
@@ -78,7 +79,7 @@ fun readPropertiesFile(propertiesFileName: String?): SaveProperties {
     }
 
     logDebug("Read properties from the properties file: $properties")
-    val deserializedPropertiesFile: SaveProperties = Properties.decodeFromMap(properties)
+    val deserializedPropertiesFile: SaveProperties = Properties.decodeFromStringMap(serializer(), properties)
     logInfo("Read properties from the properties file: $deserializedPropertiesFile")
 
     return deserializedPropertiesFile
