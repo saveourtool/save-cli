@@ -78,7 +78,7 @@ fun generateSaveProperties(jsonObject: Map<String, Option>) {
 
 fun generateSavePropertiesClass(jsonObject: Map<String, Option>): TypeSpec.Builder {
     val classBuilder = TypeSpec.classBuilder("SaveProperties")
-    var properties = jsonObject.entries.joinToString("\n"){ "@property ${it.key} ${it.value.description}" }
+    val properties = jsonObject.entries.joinToString("\n") { "@property ${it.key} ${it.value.description}" }
     val kdoc = """
                |Configuration properties of save application, retrieved either from properties file
                |or from CLI args.
@@ -121,13 +121,9 @@ fun FunSpec.Builder.generateOptions(jsonObject: Map<String, Option>): FunSpec.Bu
     jsonObject.forEach {
         var option = "${it.key} = parser.option(\n"
         option += "${it.value.argType},\n"
-        val fullName = if (it.value.fullName.isNotEmpty()) "fullName = \"${it.value.fullName}\",\n" else ""
-        if (fullName.isNotEmpty()) {
-            option += fullName
-        }
-        val shortName = if (it.value.shortName.isNotEmpty()) "shortName = \"${it.value.shortName}\",\n" else ""
-        if (shortName.isNotEmpty()) {
-            option += shortName
+        option += "fullName = \"${it.value.fullName}\",\n"
+        if (it.value.shortName.isNotEmpty()) {
+            option += "shortName = \"${it.value.shortName}\",\n"
         }
         // We replace whitespaces to `·`, in aim to avoid incorrect line breaking,
         // which could be done by kotlinpoet
