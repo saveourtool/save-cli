@@ -1,3 +1,4 @@
+import org.cqfn.save.generation.generateConfigOptions
 import org.cqfn.save.buildutils.configureDetekt
 import org.cqfn.save.buildutils.configureDiktat
 import org.cqfn.save.buildutils.createDetektTask
@@ -30,3 +31,5 @@ talaiot {
         timelinePublisher = true
     }
 }
+
+tasks.register("generateConfigOptions") { generateConfigOptions() }

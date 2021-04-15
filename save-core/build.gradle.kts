@@ -50,3 +50,8 @@ kotlin {
 tasks.withType<KotlinJvmTest> {
     useJUnitPlatform()
 }
+
+// TODO: Remove SaveProperties file and this rule in future commits
+diktat {
+    excludes = files("src/commonMain/kotlin/org/cqfn/save/core/config/SaveProperties.kt")
+}

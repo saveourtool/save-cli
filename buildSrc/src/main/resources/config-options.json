@@ -1,0 +1,130 @@
+{
+    "testConfig" : {
+      "argType" : "ArgType.String",
+      "kotlinType": "kotlin.String",
+      "fullName" : "test-config",
+      "shortName" : "c",
+      "description" : "Path to a configuration of a test suite",
+      "default" : "save.toml"
+    },
+    "parallelMode" : {
+      "argType" : "ArgType.Boolean",
+      "kotlinType": "kotlin.Boolean",
+      "fullName" : "parallel-mode",
+      "shortName" : "parallel",
+      "description" : "Whether to enable parallel mode",
+      "default" : "false"
+    },
+    "threads" : {
+      "argType" : "ArgType.Int",
+      "kotlinType": "kotlin.Int",
+      "fullName" : "threads",
+      "shortName" : "t",
+      "description" : "Number of threads",
+      "default" : "1"
+    },
+    "propertiesFile" : {
+      "argType" : "ArgType.String",
+      "kotlinType": "kotlin.String",
+      "fullName" : "properties-file",
+      "shortName" : "prop",
+      "description" : "Path to the file with configuration properties of save application aka save.properties",
+      "default" : "save.properties"
+    },
+    "debug" : {
+      "argType" : "ArgType.Boolean",
+      "kotlinType": "kotlin.Boolean",
+      "fullName" : "debug",
+      "shortName" : "d",
+      "description" : "Turn on debug logging",
+      "default" : "false"
+    },
+    "quiet" : {
+      "argType" : "ArgType.Boolean",
+      "kotlinType": "kotlin.Boolean",
+      "fullName" : "quiet",
+      "shortName" : "q",
+      "description" : "Do not log anything",
+      "default" : "false"
+    },
+    "reportType" : {
+      "argType" : "ArgType.Choice<ReportType>()",
+      "kotlinType": "org.cqfn.save.core.config.ReportType",
+      "fullName" : "report-type",
+      "shortName" : "",
+      "description" : "Type of generated report with execution results",
+      "default" : "ReportType.JSON"
+    },
+    "baseline" : {
+      "argType" : "ArgType.String",
+      "kotlinType": "kotlin.String",
+      "fullName" : "baseline",
+      "shortName" : "b",
+      "description" : "Path to the file with baseline data",
+      "default" : "null"
+    },
+    "excludeSuites" : {
+      "argType" : "ArgType.String",
+      "kotlinType": "kotlin.String",
+      "fullName" : "exclude-suites",
+      "shortName" : "e",
+      "description" : "Test suites, which won't be checked",
+      "default" : "null"
+    },
+    "includeSuites" : {
+      "argType" : "ArgType.String",
+      "kotlinType": "kotlin.String",
+      "fullName" : "include-suites",
+      "shortName" : "i",
+      "description" : "Test suites, only which ones will be checked",
+      "default" : "null"
+    },
+    "language" : {
+      "argType" : "ArgType.Choice<LanguageType>()",
+      "kotlinType": "org.cqfn.save.core.config.LanguageType",
+      "fullName" : "language",
+      "shortName" : "l",
+      "description" : "Language that you are developing analyzer for",
+      "default" : "LanguageType.UNDEFINED"
+    },
+    "testRootPath" : {
+      "argType" : "ArgType.String",
+      "kotlinType": "kotlin.String",
+      "fullName" : "test-root-path",
+      "shortName" : "",
+      "description" : "Path to directory with tests (relative path from place, where save.properties is stored or absolute path)",
+      "default" : "null"
+    },
+    "resultOutput" : {
+      "argType" : "ArgType.Choice<ResultOutputType>()",
+      "kotlinType": "org.cqfn.save.core.config.ResultOutputType",
+      "fullName" : "result-output",
+      "shortName" : "out",
+      "description" : "Data output stream",
+      "default" : "ResultOutputType.STDOUT"
+    },
+    "configInheritance" : {
+      "argType" : "ArgType.Boolean",
+      "kotlinType": "kotlin.Boolean",
+      "fullName" : "config-inheritance",
+      "shortName" : "",
+      "description" : "Whether configuration files should inherit configurations from the previous level of directories",
+      "default" : "true"
+    },
+    "ignoreSaveComments" : {
+      "argType" : "ArgType.Boolean",
+      "kotlinType": "kotlin.Boolean",
+      "fullName" : "ignore-save-comments",
+      "shortName" : "",
+      "description" : "If true, ignore technical comments, that SAVE uses to describe warnings, when running tests",
+      "default" : "false"
+    },
+    "reportDir" : {
+      "argType" : "ArgType.String",
+      "kotlinType": "kotlin.String",
+      "fullName" : "report-dir",
+      "shortName" : "",
+      "description" : "Path to directory, where to store output (when `resultOutput` is set to `FILE`)",
+      "default" : "save-reports"
+    }
+}
