@@ -177,6 +177,8 @@ fun generateReadme(jsonObject: Map<String, Option>) {
         val longName = if (it.value.fullName.isNotEmpty()) it.value.fullName else it.key
         val description = it.value.description
         var default = it.value.default
+        // If some option have user defined type, then we will print to the README
+        // only the value (e.g. LanguageType.UNDEFINED --> UNDEFINED)
         if (default != "null") {
             if (it.value.kotlinType != "kotlin.String") {
                 default = default.substringAfterLast(".")

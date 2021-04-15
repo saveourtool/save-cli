@@ -71,9 +71,7 @@ OR you can pass these arguments directly in command line:
 save --mode=single --language=java
 ```
 
-# <a name="config_options"></a> List of options Save cli
-
-[Save cli options](/OptionsTable.md)
+For the complete list of supported options refer to the [options table.](/OptionsTable.md)
 
 SAVE framework will detect tests, run your analyzer on these tests, will calculate the pass-rate and test results.
 
