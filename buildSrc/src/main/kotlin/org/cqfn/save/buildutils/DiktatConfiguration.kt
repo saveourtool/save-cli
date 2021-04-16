@@ -17,7 +17,9 @@ fun Project.configureDiktat() {
     apply<DiktatGradlePlugin>()
     configure<DiktatExtension> {
         diktatConfigFile = rootProject.file("diktat-analysis.yml")
-        inputs = files("src/**/*.kt")
+        inputs = files("src/**/*.kt"
+//            , "**/*.kts"
+        )
     }
 }
 
@@ -25,6 +27,16 @@ fun Project.configureDiktat() {
  * Creates unified tasks to run diktat on all projects
  */
 fun Project.createDiktatTask() {
+    if (this == rootProject) {
+        // apply diktat to buildSrc
+        apply<DiktatGradlePlugin>()
+        configure<DiktatExtension> {
+            diktatConfigFile = rootProject.file("diktat-analysis.yml")
+            inputs = files("$rootDir/buildSrc/src/**/*.kt"
+            //    , "$rootDir/*.kts", "$rootDir/buildSrc/**/*.kts"
+            )
+        }
+    }
     tasks.register("diktatCheckAll") {
         allprojects {
             this@register.dependsOn(tasks.getByName("diktatCheck"))

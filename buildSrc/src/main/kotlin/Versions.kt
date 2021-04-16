@@ -1,3 +1,5 @@
+@file:Suppress("PACKAGE_NAME_MISSING")
+
 object Versions {
     val kotlin = "1.4.31"
     val junit = "5.7.1"
