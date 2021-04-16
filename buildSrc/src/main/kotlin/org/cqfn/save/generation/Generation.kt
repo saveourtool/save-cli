@@ -95,18 +95,24 @@ fun FunSpec.Builder.assignMembersToOptions(jsonObject: Map<String, Option>): Fun
     return this
 }
 
+/**
+ * General function for auto generation of config options and readme table
+ */
+@Suppress("EMPTY_BLOCK_STRUCTURE_ERROR")
 fun generateConfigOptions() {
     val configFile = configFilePath
     val gson = Gson()
     val bufferedReader: BufferedReader = File(configFile).bufferedReader()
     val jsonString = bufferedReader.use { it.readText() }
-    val jsonObject = gson.fromJson<Map<String, Option>>(jsonString, object : TypeToken<Map<String, Option>>() {}.type)
+    val jsonObject: Map<String, Option> = gson.fromJson(jsonString, object : TypeToken<Map<String, Option>>() {}.type)
     generateSaveProperties(jsonObject)
     generateReadme(jsonObject)
 }
 
 /**
- * @param jsonObject
+ * Generate SaveProperties class which represents configuration properties of SAVE application
+ *
+ * @param jsonObject map of cli option names to [Option] objects
  */
 fun generateSaveProperties(jsonObject: Map<String, Option>) {
     val builder = FileSpec.builder("org.cqfn.save.core.config", "SaveProperties")
@@ -121,9 +127,12 @@ fun generateSaveProperties(jsonObject: Map<String, Option>) {
 }
 
 /**
- * @param jsonObject
- * @return
+ * Generate constructors for SaveProperties class
+ *
+ * @param jsonObject map of cli option names to [Option] objects
+ * @return a corresponding [TypeSpec.Builder]
  */
+@Suppress("TOO_LONG_FUNCTION")
 fun generateSavePropertiesClass(jsonObject: Map<String, Option>): TypeSpec.Builder {
     val classBuilder = TypeSpec.classBuilder("SaveProperties")
     val properties = jsonObject.entries.joinToString("\n") { "@property ${it.key} ${it.value.description}" }
@@ -166,8 +175,10 @@ fun generateSavePropertiesClass(jsonObject: Map<String, Option>): TypeSpec.Build
 }
 
 /**
- * @param type
- * @return
+ * Create ClassName object from string, which represents generic kotlin type
+ *
+ * @param type kotlin type
+ * @return corresponding ClassName object
  */
 // TODO: For now generic types with multiple args (like Map) doesn't supported
 fun createClassName(type: String): TypeName {
@@ -180,14 +191,18 @@ fun createClassName(type: String): TypeName {
 }
 
 /**
- * @param type
- * @return
+ * Create ClassName object from string, which represents simple kotlin type
+ *
+ * @param type kotlin type
+ * @return corresponding ClassName object
  */
 fun extractClassNameFromString(type: String) = ClassName(type.substringBeforeLast("."), type.substringAfterLast("."))
 
 /**
- * @param jsonObject
- * @return
+ * Generate function, which will merge cli config options and options from property file
+ *
+ * @param jsonObject map of cli option names to [Option] objects
+ * @return a corresponding [FunSpec.Builder]
  */
 fun generateMergeConfigFunc(jsonObject: Map<String, Option>): FunSpec.Builder {
     val kdoc =
@@ -206,8 +221,11 @@ fun generateMergeConfigFunc(jsonObject: Map<String, Option>): FunSpec.Builder {
 }
 
 /**
- * @param jsonObject
+ * Generate readme table from json object
+ *
+ * @param jsonObject map of cli option names to [Option] objects
  */
+@Suppress("TOO_MANY_LINES_IN_LAMBDA")
 fun generateReadme(jsonObject: Map<String, Option>) {
     var readmeContent =
             """
