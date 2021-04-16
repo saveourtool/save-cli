@@ -18,7 +18,7 @@ fun Project.configureDiktat() {
     configure<DiktatExtension> {
         diktatConfigFile = rootProject.file("diktat-analysis.yml")
         inputs = files("src/**/*.kt"
-//            , "**/*.kts"
+            // , "**/*.kts"
         )
     }
 }
@@ -33,7 +33,7 @@ fun Project.createDiktatTask() {
         configure<DiktatExtension> {
             diktatConfigFile = rootProject.file("diktat-analysis.yml")
             inputs = files("$rootDir/buildSrc/src/**/*.kt"
-            //    , "$rootDir/*.kts", "$rootDir/buildSrc/**/*.kts"
+                // , "$rootDir/*.kts", "$rootDir/buildSrc/**/*.kts"
             )
         }
     }
