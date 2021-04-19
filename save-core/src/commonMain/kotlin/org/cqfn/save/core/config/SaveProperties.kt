@@ -37,7 +37,7 @@ import kotlinx.serialization.Serializable
  * `FILE`)
  */
 @Serializable
-public class SaveProperties(
+public data class SaveProperties(
     public var testConfig: String? = "save.toml",
     public var parallelMode: Boolean? = false,
     public var threads: Int? = 1,

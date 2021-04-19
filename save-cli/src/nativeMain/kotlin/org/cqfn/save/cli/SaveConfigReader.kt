@@ -33,6 +33,13 @@ fun SaveProperties.validate(): SaveProperties {
 }
 
 /**
+ * @return string which represents all fields of current instance
+ */
+fun SaveProperties.getFields(): String {
+    return this.toString().dropWhile { it != '(' }.drop(1).dropLast(1)
+}
+
+/**
  * @param args CLI args
  * @return an instance of [SaveProperties]
  */
@@ -40,10 +47,13 @@ fun SaveProperties.validate(): SaveProperties {
 fun createConfigFromArgs(args: Array<String>): SaveProperties {
     // getting configuration from command-line arguments
     val configFromCli = SaveProperties(args)
+    logDebug("Properties after parsed command line args:\n${configFromCli.getFields()}")
     // reading configuration from the properties file
     val configFromPropertiesFile = readPropertiesFile(configFromCli.propertiesFile)
-    // merging two configurations into signle [SaveProperties] class with a priority to command line arguments
-    return configFromCli.mergeConfigWithPriorityToThis(configFromPropertiesFile).validate()
+    // merging two configurations into single [SaveProperties] class with a priority to command line arguments
+    val mergedProperties = configFromCli.mergeConfigWithPriorityToThis(configFromPropertiesFile)
+    logInfo("Summary properties:\n${mergedProperties.getFields()}")
+    return mergedProperties.validate()
 }
 
 /**
@@ -54,7 +64,7 @@ fun createConfigFromArgs(args: Array<String>): SaveProperties {
 fun readPropertiesFile(propertiesFileName: String?): SaveProperties {
     propertiesFileName ?: return SaveProperties()
 
-    logDebug("Reading properties file $propertiesFileName")
+    logDebug("Reading properties from the file: $propertiesFileName")
 
     val properties: Map<String, String> = try {
         FileSystem.SYSTEM.read(propertiesFileName.toPath()) {
@@ -77,9 +87,6 @@ fun readPropertiesFile(propertiesFileName: String?): SaveProperties {
         )
     }
 
-    logDebug("Read properties from the properties file: $properties")
-    val deserializedPropertiesFile: SaveProperties = Properties.decodeFromStringMap(serializer(), properties)
-    logInfo("Read properties from the properties file: $deserializedPropertiesFile")
-
-    return deserializedPropertiesFile
+    logDebug("Found properties: $properties")
+    return Properties.decodeFromStringMap(serializer(), properties)
 }

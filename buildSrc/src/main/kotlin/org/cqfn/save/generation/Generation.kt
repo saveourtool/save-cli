@@ -12,6 +12,7 @@ import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
@@ -134,7 +135,7 @@ fun generateSaveProperties(jsonObject: Map<String, Option>) {
  */
 @Suppress("TOO_LONG_FUNCTION")
 fun generateSavePropertiesClass(jsonObject: Map<String, Option>): TypeSpec.Builder {
-    val classBuilder = TypeSpec.classBuilder("SaveProperties")
+    val classBuilder = TypeSpec.classBuilder("SaveProperties").addModifiers(KModifier.DATA)
     val properties = jsonObject.entries.joinToString("\n") { "@property ${it.key} ${it.value.description}" }
     val kdoc = """
                |Configuration properties of save application, retrieved either from properties file

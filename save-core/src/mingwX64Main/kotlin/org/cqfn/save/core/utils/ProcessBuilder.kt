@@ -14,6 +14,9 @@ import kotlinx.cinterop.invoke
 import kotlinx.cinterop.placeTo
 import kotlinx.cinterop.refTo
 import kotlinx.cinterop.toKString
+import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.logging.logDebug
+import org.cqfn.save.core.logging.logWarn
 
 @Suppress("MISSING_KDOC_TOP_LEVEL",
     "MISSING_KDOC_CLASS_ELEMENTS",
@@ -21,8 +24,17 @@ import kotlinx.cinterop.toKString
 )
 actual class ProcessBuilder {
     actual fun exec(command: List<String>, redirectTo: Path?): ExecutionResult {
-        val pd = popen!!.invoke(command.joinToString(" ").cstr.placeTo(MemScope()), "r".cstr.placeTo(MemScope()))
-
+        val fs = FileSystem.SYSTEM
+        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / this::class.simpleName!!).also {
+            fs.createDirectory(it)
+        }
+        val stderrFile = tmpDir / "stderr.txt"
+        fs.createFile(stderrFile)
+        logDebug("Created file for stderr: $stderrFile")
+        val cmd = command.joinToString(" ") + " 2>$stderrFile"
+        logDebug("Executing: $cmd")
+        val pd = popen!!.invoke((cmd).cstr.placeTo(MemScope()), "r".cstr.placeTo(MemScope()))
+            ?: error("Pipe error. Couldn't execute command: `$command`")
         val stdout = buildString {
             val buffer = ByteArray(4096)
             while (fgets(buffer.refTo(0), buffer.size, pd) != null) {
@@ -31,14 +43,24 @@ actual class ProcessBuilder {
         }
 
         val status = pclose!!.invoke(pd)
-        if (status != 0) {
-            error("Command `$command` failed with status $status: $stdout")
+        if (status == -1) {
+            fs.deleteRecursively(tmpDir)
+            error("Couldn't close the pipe, exit status: $status")
         }
-        println(stdout)
-        redirectTo?.let {
-            FileSystem.SYSTEM.write(redirectTo) {
+        val stderr = fs.read(stderrFile) {
+            generateSequence { readUtf8Line() }.toList()
+        }
+        fs.deleteRecursively(tmpDir)
+        if (stderr.isNotEmpty()) {
+            logWarn(stderr.joinToString("\n"))
+            return ExecutionResult(status, emptyList(), stderr)
+        }
+        if (redirectTo != null) {
+            fs.write(redirectTo) {
                 write(stdout.encodeToByteArray())
             }
+        } else {
+            logDebug("Execution output:\n${stdout}")
         }
         return ExecutionResult(0, stdout.split("\n"), emptyList())
     }
