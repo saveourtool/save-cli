@@ -44,12 +44,12 @@ class ProcessBuilderInternal {
     /**
      * Path to stdout file
      */
-    val stdoutFile = tmpDir / "stdout.txt".also { logDebug("Created file for stdout of ProcessBuilder in: ${tmpDir}") }
+    val stdoutFile = tmpDir / "stdout.txt".also { logDebug("Created file for stdout of ProcessBuilder in: $tmpDir") }
 
     /**
      * Path to stderr file
      */
-    val stderrFile = tmpDir / "stderr.txt".also { logDebug("Created file for stderr of ProcessBuilder in: ${tmpDir}") }
+    val stderrFile = tmpDir / "stderr.txt".also { logDebug("Created file for stderr of ProcessBuilder in: $tmpDir") }
 
     /**
      *  Read data from stdout file, we will use it in [ExecutionResult]
