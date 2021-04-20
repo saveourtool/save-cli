@@ -42,7 +42,7 @@ class ProcessBuilderInternal {
      * Temporary directory for stderr and stdout (popen can't separate streams, so we do it ourselves)
      */
     val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY /
-            (this::class.simpleName!! + "_" + Clock.System.now().epochSeconds).toPath()).also {
+            (this::class.simpleName!! + "_" + Clock.System.now().toEpochMilliseconds()).toPath()).also {
         fs.createDirectory(it)
     }
 

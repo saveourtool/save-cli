@@ -25,9 +25,9 @@ class Save(
         val plugins: List<Plugin> = emptyList()  // todo: discover plugins (from configuration blocks in TestSuiteConfig?)
         logInfo("Discovered plugins: $plugins")
         plugins.forEach {
-            logInfo("Execute plugin: ${it::class::simpleName}")
+            logInfo("Execute plugin: ${it::class.simpleName}")
             it.execute(saveProperties, testConfig)
-            logInfo("${it::class::simpleName} successfully executed!")
+            logInfo("${it::class.simpleName} successfully executed!")
         }
     }
 }
