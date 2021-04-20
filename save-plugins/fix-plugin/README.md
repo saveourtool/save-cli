@@ -1,5 +1,5 @@
 ## Save fix plugin
-Plugin that runs provided executable on the inintial file with a test source code and compares its output with an expected result.
+Plugin that runs provided executable on the initial file with a test source code and compares its output with an expected result.
 Please note, that it is important for test resources to have specific postfixes. By the default test file it should be `Test`
 , for the file with expected result - it should be `Expected`.
 
