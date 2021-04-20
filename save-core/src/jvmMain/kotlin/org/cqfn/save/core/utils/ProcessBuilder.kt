@@ -18,7 +18,6 @@ actual class ProcessBuilder {
     actual fun exec(command: List<String>, redirectTo: Path?): ExecutionResult {
         val common = ProcessBuilderInternal()
 
-        logDebug("Created file for stderr: ${common.stderrFile}")
         val shell = if (System.getProperty("os.name").startsWith("Windows", ignoreCase = true)) listOf("CMD", "/C") else listOf("sh", "-c")
         val cmd = shell + listOf(command.joinToString(" "))
         logDebug("Executing: ${cmd.joinToString(" ")}")

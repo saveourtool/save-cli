@@ -23,7 +23,7 @@ class FixPlugin : Plugin {
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
         discoverFilePairs(fixPluginConfig.testResources)
             .also {
-                logInfo("Discovered the following file pairs: $it")
+                logInfo("Discovered the following file pairs for comparison: $it")
             }
             .forEach { (expected, test) ->
                 pb.exec(fixPluginConfig.execCmd.split(" "), null)

@@ -44,12 +44,12 @@ class ProcessBuilderInternal {
     /**
      * Path to stdout file
      */
-    val stdoutFile = tmpDir / "stdout.txt"
+    val stdoutFile = tmpDir / "stdout.txt".also { logDebug("Created file for stdout of ProcessBuilder in: ${tmpDir}") }
 
     /**
      * Path to stderr file
      */
-    val stderrFile = tmpDir / "stderr.txt"
+    val stderrFile = tmpDir / "stderr.txt".also { logDebug("Created file for stderr of ProcessBuilder in: ${tmpDir}") }
 
     /**
      *  Read data from stdout file, we will use it in [ExecutionResult]
@@ -82,8 +82,7 @@ class ProcessBuilderInternal {
      * @param command raw command
      * @return command with redirection of stderr to tmp file
      */
-    fun prepare(command: List<String>): String {
-        logDebug("Created file for stderr: $stderrFile")
+    fun prepareCmd(command: List<String>): String {
         val cmd = command.joinToString(" ") + " 2>$stderrFile"
         logDebug("Executing: $cmd")
         return cmd

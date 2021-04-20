@@ -21,7 +21,7 @@ import kotlinx.cinterop.toKString
 actual class ProcessBuilder {
     actual fun exec(command: List<String>, redirectTo: Path?): ExecutionResult {
         val common = ProcessBuilderInternal()
-        val cmd = common.prepare(command)
+        val cmd = common.prepareCmd(command)
 
         val pd = popen!!.invoke((cmd).cstr.placeTo(MemScope()), "r".cstr.placeTo(MemScope()))
             ?: error("Pipe error. Couldn't execute command: `$command`")
