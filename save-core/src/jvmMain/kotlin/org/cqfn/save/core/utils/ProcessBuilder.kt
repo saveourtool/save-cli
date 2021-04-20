@@ -1,8 +1,10 @@
 package org.cqfn.save.core.utils
 
-import okio.Path
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logWarn
+
+import okio.Path
+
 import java.io.File
 import java.lang.ProcessBuilder
 
@@ -22,11 +24,12 @@ actual class ProcessBuilder {
         logDebug("Executing: ${cmd.joinToString(" ")}")
         val code = pb.command(cmd)
             .let { builder ->
-                if (redirectTo != null) {
+                redirectTo?.let {
                     builder.redirectOutput(File(redirectTo.name))
-                } else {
-                    builder.redirectOutput(File(common.stdoutFile.toString()))
                 }
+                    ?: run {
+                        builder.redirectOutput(File(common.stdoutFile.toString()))
+                    }
             }
             .redirectError(File(common.stderrFile.toString()))
             .start()
@@ -38,7 +41,7 @@ actual class ProcessBuilder {
             logWarn(stderr.joinToString("\n"))
             return ExecutionResult(code, emptyList(), stderr)
         }
-        if (redirectTo == null) {
+        redirectTo ?: run {
             logDebug("Execution output:\n${stdout.joinToString("\n")}")
         }
         return ExecutionResult(code, redirectTo?.let { File(it.name).readLines() } ?: stdout, emptyList())

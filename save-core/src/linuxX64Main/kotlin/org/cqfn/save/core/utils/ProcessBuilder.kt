@@ -9,9 +9,6 @@ import platform.posix.popen
 
 import kotlinx.cinterop.refTo
 import kotlinx.cinterop.toKString
-import org.cqfn.save.core.logging.logDebug
-import org.cqfn.save.core.logging.logWarn
-import platform.posix.pread
 
 @Suppress("MISSING_KDOC_TOP_LEVEL",
     "MISSING_KDOC_CLASS_ELEMENTS",

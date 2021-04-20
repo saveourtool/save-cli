@@ -4,10 +4,11 @@
 
 package org.cqfn.save.core.utils
 
-import okio.FileSystem
-import okio.Path
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logWarn
+
+import okio.FileSystem
+import okio.Path
 
 /**
  * A class that is capable of executing OS processes and returning their output.
@@ -28,16 +29,32 @@ expect class ProcessBuilder() {
  * Class contains common fields for all platforms
  */
 class ProcessBuilderInternal {
-    // Temporary files for stderr and stdout (popen can't separate streams, so we do it ourselves)
+    /**
+     * Typealias
+     */
     val fs = FileSystem.SYSTEM
+
+    /**
+     * Temporary directory for stderr and stdout (popen can't separate streams, so we do it ourselves)
+     */
     val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / this::class.simpleName!!).also {
         fs.createDirectory(it)
     }
+
+    /**
+     * Path to stdout file
+     */
     val stdoutFile = tmpDir / "stdout.txt"
+
+    /**
+     * Path to stderr file
+     */
     val stderrFile = tmpDir / "stderr.txt"
 
     /**
      *  Read data from stdout file, we will use it in [ExecutionResult]
+     *
+     * @return string containing stdout
      */
     fun getStdout(): List<String> {
         val stdout = fs.read(stdoutFile) {
@@ -48,6 +65,8 @@ class ProcessBuilderInternal {
 
     /**
      * Read data from stderr file, we will use it in [ExecutionResult]
+     *
+     * @return string containing stderr
      */
     fun getStderr(): List<String> {
         val stderr = fs.read(stderrFile) {
@@ -59,18 +78,29 @@ class ProcessBuilderInternal {
     /**
      * Modify execution command for popen,
      * stderr will be redirected to tmp file
+     *
+     * @param command raw command
+     * @return command with redirection of stderr to tmp file
      */
     fun prepare(command: List<String>): String {
-        logDebug("Created file for stderr: ${stderrFile}")
-        val cmd = command.joinToString(" ") + " 2>${stderrFile}"
+        logDebug("Created file for stderr: $stderrFile")
+        val cmd = command.joinToString(" ") + " 2>$stderrFile"
         logDebug("Executing: $cmd")
         return cmd
     }
 
     /**
      * Finish execution and return depends of status and errors
+     *
+     * @param stdout output data, will be printed to console or redirected to the file
+     * @param status popen exit status
+     * @param redirectTo path to the file, where to redirect output
+     * @return [ExecutionResult] depends of status and errors
      */
-    fun logAndReturn(stdout: String, status: Int, redirectTo: Path?): ExecutionResult {
+    fun logAndReturn(
+        stdout: String,
+        status: Int,
+        redirectTo: Path?): ExecutionResult {
         if (status == -1) {
             fs.deleteRecursively(tmpDir)
             error("Couldn't close the pipe, exit status: $status")
@@ -81,13 +111,14 @@ class ProcessBuilderInternal {
             logWarn(stderr.joinToString("\n"))
             return ExecutionResult(status, emptyList(), stderr)
         }
-        if (redirectTo != null) {
+        redirectTo?.let {
             fs.write(redirectTo) {
                 write(stdout.encodeToByteArray())
             }
-        } else {
-            logDebug("Execution output:\n${stdout}")
         }
+            ?: run {
+                logDebug("Execution output:\n$stdout")
+            }
         return ExecutionResult(0, stdout.split("\n"), emptyList())
     }
 }

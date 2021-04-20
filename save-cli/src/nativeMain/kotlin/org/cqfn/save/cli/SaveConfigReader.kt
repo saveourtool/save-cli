@@ -35,9 +35,8 @@ fun SaveProperties.validate(): SaveProperties {
 /**
  * @return string which represents all fields of current instance
  */
-fun SaveProperties.getFields(): String {
-    return this.toString().dropWhile { it != '(' }.drop(1).dropLast(1)
-}
+fun SaveProperties.getFields() = this.toString().dropWhile { it != '(' }.drop(1)
+    .dropLast(1)
 
 /**
  * @param args CLI args
