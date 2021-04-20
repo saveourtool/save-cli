@@ -19,7 +19,7 @@ data class FixPluginConfig(
 ) : PluginConfig {
     init {
         require(inPlace || destinationFileSuffix != null) {
-            "Plugin ${FixPlugin::class.simpleName} should either be configured with inPlace = true or have destinationFileSuffix"
+            "Plugin ${FixPlugin::class.simpleName} should either be configured with inPlace=true or have destinationFileSuffix"
         }
     }
 

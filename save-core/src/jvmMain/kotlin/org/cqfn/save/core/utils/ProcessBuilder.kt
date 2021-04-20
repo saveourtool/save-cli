@@ -38,11 +38,10 @@ actual class ProcessBuilder {
         common.fs.deleteRecursively(common.tmpDir)
         if (stderr.isNotEmpty()) {
             logWarn(stderr.joinToString("\n"))
-            return ExecutionResult(code, emptyList(), stderr)
         }
         redirectTo ?: run {
             logDebug("Execution output:\n${stdout.joinToString("\n")}")
         }
-        return ExecutionResult(code, redirectTo?.let { File(it.name).readLines() } ?: stdout, emptyList())
+        return ExecutionResult(code, redirectTo?.let { File(it.name).readLines() } ?: stdout, stderr)
     }
 }

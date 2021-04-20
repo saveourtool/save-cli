@@ -51,7 +51,7 @@ fun createConfigFromArgs(args: Array<String>): SaveProperties {
     val configFromPropertiesFile = readPropertiesFile(configFromCli.propertiesFile)
     // merging two configurations into single [SaveProperties] class with a priority to command line arguments
     val mergedProperties = configFromCli.mergeConfigWithPriorityToThis(configFromPropertiesFile)
-    logInfo("Summary properties:\n${mergedProperties.getFields()}")
+    logInfo("Using the following properties for SAVE execution:\n${mergedProperties.getFields()}")
     return mergedProperties.validate()
 }
 

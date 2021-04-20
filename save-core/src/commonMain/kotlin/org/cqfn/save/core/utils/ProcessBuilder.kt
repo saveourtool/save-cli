@@ -4,11 +4,15 @@
 
 package org.cqfn.save.core.utils
 
+import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logWarn
 
 import okio.FileSystem
 import okio.Path
+import okio.Path.Companion.toPath
+
+import kotlinx.datetime.Clock
 
 /**
  * A class that is capable of executing OS processes and returning their output.
@@ -37,7 +41,8 @@ class ProcessBuilderInternal {
     /**
      * Temporary directory for stderr and stdout (popen can't separate streams, so we do it ourselves)
      */
-    val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / this::class.simpleName!!).also {
+    val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY /
+            (this::class.simpleName!! + "_" + Clock.System.now().toString().substringAfterLast(".")).toPath()).also {
         fs.createDirectory(it)
     }
 
@@ -56,24 +61,14 @@ class ProcessBuilderInternal {
      *
      * @return string containing stdout
      */
-    fun getStdout(): List<String> {
-        val stdout = fs.read(stdoutFile) {
-            generateSequence { readUtf8Line() }.toList()
-        }
-        return stdout
-    }
+    fun getStdout() = fs.readLines(stdoutFile)
 
     /**
      * Read data from stderr file, we will use it in [ExecutionResult]
      *
      * @return string containing stderr
      */
-    fun getStderr(): List<String> {
-        val stderr = fs.read(stderrFile) {
-            generateSequence { readUtf8Line() }.toList()
-        }
-        return stderr
-    }
+    fun getStderr() = fs.readLines(stderrFile)
 
     /**
      * Modify execution command for popen,
@@ -83,7 +78,12 @@ class ProcessBuilderInternal {
      * @return command with redirection of stderr to tmp file
      */
     fun prepareCmd(command: List<String>): String {
-        val cmd = command.joinToString(" ") + " 2>$stderrFile"
+        val userCmd = command.joinToString(" ")
+        if (userCmd.contains("2>")) {
+            logWarn("Found user provided stderr redirection in `$userCmd`. " +
+                    "SAVE use stderr for internal purpose and will redirect it to the $stderrFile")
+        }
+        val cmd = "$userCmd 2>$stderrFile"
         logDebug("Executing: $cmd")
         return cmd
     }
@@ -108,17 +108,14 @@ class ProcessBuilderInternal {
         fs.deleteRecursively(tmpDir)
         if (stderr.isNotEmpty()) {
             logWarn(stderr.joinToString("\n"))
-            return ExecutionResult(status, emptyList(), stderr)
         }
         redirectTo?.let {
             fs.write(redirectTo) {
                 write(stdout.encodeToByteArray())
             }
         }
-            ?: run {
-                logDebug("Execution output:\n$stdout")
-            }
-        return ExecutionResult(0, stdout.split("\n"), emptyList())
+            ?: logDebug("Execution output:\n$stdout")
+        return ExecutionResult(status, stdout.split("\n"), stderr)
     }
 }
 
