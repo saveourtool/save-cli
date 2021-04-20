@@ -2,7 +2,6 @@
 
 package org.cqfn.save.core.utils
 
-import okio.FileSystem
 import okio.Path
 import platform.posix.fgets
 import platform.posix.pclose
@@ -17,25 +16,19 @@ import kotlinx.cinterop.toKString
 )
 actual class ProcessBuilder {
     actual fun exec(command: List<String>, redirectTo: Path?): ExecutionResult {
-        val pd = popen(command.joinToString(" "), "r")
+        val common = ProcessBuilderInternal()
+        val cmd = common.prepareCmd(command)
 
+        val pd = popen(cmd, "r")
+            ?: error("Pipe error. Couldn't execute command: `$command`")
         val stdout = buildString {
             val buffer = ByteArray(4096)
             while (fgets(buffer.refTo(0), buffer.size, pd) != null) {
                 append(buffer.toKString())
             }
         }
-
         val status = pclose(pd)
-        if (status != 0) {
-            error("Command `$command` failed with status $status: $stdout")
-        }
-        println(stdout)
-        redirectTo?.let {
-            FileSystem.SYSTEM.write(redirectTo) {
-                write(stdout.encodeToByteArray())
-            }
-        }
-        return ExecutionResult(0, stdout.split("\n"), emptyList())
+
+        return common.logAndReturn(stdout, status, redirectTo)
     }
 }
