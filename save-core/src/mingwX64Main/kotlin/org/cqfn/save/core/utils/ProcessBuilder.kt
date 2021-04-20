@@ -29,7 +29,6 @@ actual class ProcessBuilder {
             fs.createDirectory(it)
         }
         val stderrFile = tmpDir / "stderr.txt"
-        fs.createFile(stderrFile)
         logDebug("Created file for stderr: $stderrFile")
         val cmd = command.joinToString(" ") + " 2>$stderrFile"
         logDebug("Executing: $cmd")
