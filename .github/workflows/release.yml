@@ -38,6 +38,7 @@ jobs:
           prerelease: false
   release_macos:
     name: Build release on MacOS
+    if: ${{ false }}
     runs-on: macos-latest
     steps:
       - name: Checkout
