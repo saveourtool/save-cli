@@ -11,7 +11,7 @@ import org.cqfn.save.core.plugin.PluginConfig
  */
 data class WarnPluginConfig(
     val execCmd: String,
-    // todo: add warnings input pattern
+    val warningsInputPattern: Regex,
     val warningsOutputPattern: Regex,
     val warningTextHasLine: Boolean = true,
     val warningTextHasColumn: Boolean = true,
@@ -28,11 +28,8 @@ data class WarnPluginConfig(
             "warn-plugin configuration error: either warningTextHasColumn should be false (actual: $warningTextHasColumn) or columnCaptureGroup should be provided (actual: $columnCaptureGroup}"
         }
     }
-}
 
-internal fun warningRegex(warnPluginConfig: WarnPluginConfig): Regex = StringBuilder(";warn:").run {
-    if (warnPluginConfig.warningTextHasColumn) append("(\\d+):")
-    if (warnPluginConfig.warningTextHasLine) append("(\\d+):")
-    append(" (.+)")
-    Regex(toString())
+    companion object {
+        internal val DEFAULT_INPUT_PATTERN = Regex(";warn:(\\d+):(\\d+): (.+)")
+    }
 }

@@ -19,31 +19,47 @@ class WarnPlugin : Plugin {
 
     override fun execute(saveProperties: SaveProperties, testConfig: TestConfig) {
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
-        val warningRegex = warningRegex(warnPluginConfig)
         discoverTestFiles(warnPluginConfig.testResources).forEach { testFile ->
-            val expectedWarnings = fs.readLines(testFile)
-                .mapNotNull {
-                    it.extractWarning(warningRegex, warnPluginConfig.columnCaptureGroup, warnPluginConfig.lineCaptureGroup, warnPluginConfig.messageCaptureGroup)
-                }
-                .groupBy { it.line to it.column }
-                .mapValues { it.value.sortedBy { it.message } }
-            val executionResult = pb.exec(warnPluginConfig.execCmd.split(" "), null)
-            val actualWarningsMap: Map<Pair<Int?, Int?>, List<Warning>> = executionResult.stdout.mapNotNull {
-                with (warnPluginConfig) {
-                    it.extractWarning(warningsOutputPattern, columnCaptureGroup, lineCaptureGroup, messageCaptureGroup)
-                }
-            }
-                .groupBy { it.line to it.column }
-                .mapValues { it.value.sortedBy { it.message } }
-            expectedWarnings.forEach { (pair, warnings) ->
-                val actualWarnings = actualWarningsMap[pair]
-                requireNotNull(actualWarnings)
-                require(warnings.size == actualWarnings.size)
-                require(warnings.zip(actualWarnings).all { it.first == it.second })
-            }
+            handleTestFile(testFile, warnPluginConfig, saveProperties)
         }
     }
 
     internal fun discoverTestFiles(resources: List<Path>) = resources
         .filter { it.name.contains("Test.") }
+
+    private fun handleTestFile(path: Path, warnPluginConfig: WarnPluginConfig, saveProperties: SaveProperties) {
+        val expectedWarnings = fs.readLines(path)
+            .mapNotNull {
+                with (warnPluginConfig) {
+                    it.extractWarning(
+                        warningsInputPattern,
+                        columnCaptureGroup,
+                        lineCaptureGroup,
+                        messageCaptureGroup
+                    )
+                }
+            }
+            .mapIndexed { index, warning ->
+                if (saveProperties.ignoreSaveComments!! && warning?.line != null) warning.copy(line = warning.line + index + 1) else warning
+            }
+            .groupBy { it.line to it.column }
+            .mapValues { it.value.sortedBy { it.message } }
+        val executionResult = pb.exec(warnPluginConfig.execCmd.split(" "), null)
+        val actualWarningsMap: Map<Pair<Int?, Int?>, List<Warning>> = executionResult.stdout.mapNotNull {
+            with (warnPluginConfig) {
+                it.extractWarning(warningsOutputPattern, columnCaptureGroup, lineCaptureGroup, messageCaptureGroup)
+            }
+        }
+            .groupBy { it.line to it.column }
+            .mapValues { it.value.sortedBy { it.message } }
+        // todo: handle test results here
+        require(expectedWarnings.size == actualWarningsMap.size)
+        expectedWarnings.forEach { (pair, warnings) ->
+            val actualWarnings = actualWarningsMap[pair]
+            requireNotNull(actualWarnings)
+            require(warnings.size == actualWarnings.size)
+            require(warnings.zip(actualWarnings).all { it.first == it.second })
+        }
+
+    }
 }

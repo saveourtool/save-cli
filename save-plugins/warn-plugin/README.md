@@ -57,11 +57,12 @@ description = "My suite description"
 suiteName = "DocsCheck"
 
 [warn]
-execCmd="./detekt --build-upon-default-config -i"
-warningsOutputPattern="\w+ - (\d+)/(\d+) - (.*)$"
-lineCaptureGroup=1
-columnCaptureGroup=2
-messageCaptureGroup=3
+execCmd = "./detekt --build-upon-default-config -i"
+warningsInputPattern = "// ;warn:(\\d+):(\\d+): (.*)"  # warning is set inside the comment in code, `//` marks comment start in Java
+warningsOutputPattern = "\\w+ - (\\d+)/(\\d+) - (.*)$"  # e.g. `WARN - 10/14 - Class name is in incorrect case`
+lineCaptureGroup = 1
+columnCaptureGroup = 2
+messageCaptureGroup = 3
 warningTextHasColumn = true
 warningTextHasLine = true
 ```
@@ -70,6 +71,8 @@ When executed from project root (where `save.propertes` is located), SAVE will c
 matching `inputFilePattern`. It will then execute `$exec_cmd $testFile` (since we specified
 `batchMode = false`, it will provide inputs one by one) and compare warnings its stdout (as per `output` option) parsed using `warningsOutputPattern` with warnings
 parsed from the same `$testFile` using `warningsInputPattern`.
-`warningsOutputPattern` must include some mandatory capture groups: for line number (if `warningTextHasLine` is true), for column number (if `warningTextHasColumn` is true)
-and for warning text. Their indices can be customized with `lineCaptureGroup`, `columnCaptureGroup` and `messageCaptureGroup` parameters.
-Results will be written in plain text as well as JSON.  `# TODO: Aren't we allowing any type of reporter?`
+
+`warningsInputPattern` and `warningsOutputPattern` must include some mandatory capture groups: for line number (if `warningTextHasLine` is true),
+for column number (if `warningTextHasColumn` is true) and for warning text. Their indices can be customized
+with `lineCaptureGroup`, `columnCaptureGroup` and `messageCaptureGroup` parameters. These parameters are shared between input and output pattern;
+usually you'll want them to be consistent to make testing easier, i.e. if input has line number, then so should output.

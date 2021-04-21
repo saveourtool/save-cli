@@ -9,8 +9,10 @@ import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
 
 import okio.FileSystem
+import okio.Path.Companion.toPath
 
 import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -30,7 +32,7 @@ private val mockConfig = SaveProperties(
     testRootPath = ".",
     resultOutput = ResultOutputType.STDOUT,
     configInheritance = true,
-    ignoreSaveComments = true,
+    ignoreSaveComments = false,
     reportDir = "."
 )
 
@@ -41,23 +43,70 @@ private val mockConfig = SaveProperties(
  */
 class WarnPluginTest {
     private val fs = FileSystem.SYSTEM
-    private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPluginTest::class.simpleName!!).also {
-        fs.createDirectory(it)
+    private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPluginTest::class.simpleName!!)
+
+    @BeforeTest
+    fun setUp() {
+        if (fs.exists(tmpDir)) {
+            fs.deleteRecursively(tmpDir)
+        }
+        fs.createDirectory(tmpDir)
     }
 
     @Test
-    fun `should detect two files`() {
-        val testFile = fs.createFile(tmpDir / "Test1Test.java")
-        val expectedFile = fs.createFile(tmpDir / "Test1Expected.java")
+    fun `basic warn-plugin test`() {
+        performTest(
+            """
+                package org.cqfn.save.example
+                
+                // ;warn:4:6: Class name should be in PascalCase
+                class example {
+                    int foo = 42;                
+                }
+            """.trimIndent(),
+            WarnPluginConfig(
+                "echo Test1Test.java:4:6: Class name should be in PascalCase",
+                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
+                Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
+                true, true, 1, 2, 3
+            )
+        )
+    }
 
-//        val pairs = FixPlugin().discoverFilePairs(listOf(testFile, expectedFile))
-//        assertEquals(1, pairs.size)
-//        assertEquals("Test1Expected.java", pairs.single().first.name)
-//        assertEquals("Test1Test.java", pairs.single().second.name)
+    @Test
+    fun `basic warn-plugin test with ignoreTechnicalComments=true`() {
+        performTest(
+            """
+                package org.cqfn.save.example
+                
+                // ;warn:3:6: Class name should be in PascalCase
+                class example {
+                    int foo = 42;                
+                }
+            """.trimIndent(),
+            WarnPluginConfig(
+                "echo Test1Test.java:4:6: Class name should be in PascalCase",
+                Regex("// ;warn:(\\d+):(\\d+): (.*)"), Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
+                true, true, 1, 2, 3
+            ),
+            mockConfig.copy(ignoreSaveComments = true)
+        )
     }
 
     @AfterTest
     fun tearDown() {
         fs.deleteRecursively(tmpDir)
+    }
+
+    private fun performTest(text: String, warnPluginConfig: WarnPluginConfig, saveProperties: SaveProperties = mockConfig) {
+        val testFile = fs.createFile(tmpDir / "Test1Test.java")
+        fs.write(testFile) {
+            write(text.encodeToByteArray())
+        }
+
+        WarnPlugin().execute(
+            saveProperties,
+            TestConfig(".".toPath(), null, listOf(warnPluginConfig.copy(testResources = listOf(testFile))))
+        )
     }
 }

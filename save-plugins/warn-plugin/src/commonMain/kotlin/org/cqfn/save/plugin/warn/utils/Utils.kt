@@ -12,7 +12,7 @@ internal fun String.extractWarning(warningRegex: Regex,
                                    lineGroupIdx: Int?,
                                    messageGroupIdx: Int,
 ): Warning? {
-    val groups = warningRegex.matchEntire(this)?.groups ?: return null
+    val groups = warningRegex.find(this)?.groups ?: return null
     val line = if (lineGroupIdx != null) groups[lineGroupIdx]?.value?.toInt() else null
     val column =  if (columnGroupIdx != null) groups[columnGroupIdx]?.value?.toInt() else null
     return Warning(
