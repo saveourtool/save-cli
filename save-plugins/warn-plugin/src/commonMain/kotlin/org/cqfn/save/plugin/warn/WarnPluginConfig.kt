@@ -11,11 +11,23 @@ import org.cqfn.save.core.plugin.PluginConfig
  */
 data class WarnPluginConfig(
     val execCmd: String,
+    // todo: add warnings input pattern
     val warningsOutputPattern: Regex,
-    val warningTextHasLine: Boolean,
-    val warningTextHasColumn: Boolean,
+    val warningTextHasLine: Boolean = true,
+    val warningTextHasColumn: Boolean = true,
+    val lineCaptureGroup: Int?,
+    val columnCaptureGroup: Int?,
+    val messageCaptureGroup: Int,
     val testResources: List<Path> = emptyList(),
 ) : PluginConfig {
+    init {
+        require(warningTextHasLine xor (lineCaptureGroup == null)) {
+            "warn-plugin configuration error: either warningTextHasLine should be false (actual: $warningTextHasLine) or lineCaptureGroup should be provided (actual: $lineCaptureGroup}"
+        }
+        require(warningTextHasColumn xor (columnCaptureGroup == null)) {
+            "warn-plugin configuration error: either warningTextHasColumn should be false (actual: $warningTextHasColumn) or columnCaptureGroup should be provided (actual: $columnCaptureGroup}"
+        }
+    }
 }
 
 internal fun warningRegex(warnPluginConfig: WarnPluginConfig): Regex = StringBuilder(";warn:").run {

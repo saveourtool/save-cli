@@ -58,7 +58,10 @@ suiteName = "DocsCheck"
 
 [warn]
 execCmd="./detekt --build-upon-default-config -i"
-warningsOutputPattern="\w+ - \d+/\d+ - .*$"
+warningsOutputPattern="\w+ - (\d+)/(\d+) - (.*)$"
+lineCaptureGroup=1
+columnCaptureGroup=2
+messageCaptureGroup=3
 warningTextHasColumn = true
 warningTextHasLine = true
 ```
@@ -67,4 +70,6 @@ When executed from project root (where `save.propertes` is located), SAVE will c
 matching `inputFilePattern`. It will then execute `$exec_cmd $testFile` (since we specified
 `batchMode = false`, it will provide inputs one by one) and compare warnings its stdout (as per `output` option) parsed using `warningsOutputPattern` with warnings
 parsed from the same `$testFile` using `warningsInputPattern`.
-Results will be written in plain text as well as JSON.
+`warningsOutputPattern` must include some mandatory capture groups: for line number (if `warningTextHasLine` is true), for column number (if `warningTextHasColumn` is true)
+and for warning text. Their indices can be customized with `lineCaptureGroup`, `columnCaptureGroup` and `messageCaptureGroup` parameters.
+Results will be written in plain text as well as JSON.  `# TODO: Aren't we allowing any type of reporter?`

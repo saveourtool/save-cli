@@ -7,11 +7,17 @@ data class Warning(
     val column: Int?,
 )
 
-internal fun String.extractWarning(warningRegex: Regex, hasColumn: Boolean, hasLine: Boolean): Warning? {
+internal fun String.extractWarning(warningRegex: Regex,
+                                   columnGroupIdx: Int?,
+                                   lineGroupIdx: Int?,
+                                   messageGroupIdx: Int,
+): Warning? {
     val groups = warningRegex.matchEntire(this)?.groups ?: return null
+    val line = if (lineGroupIdx != null) groups[lineGroupIdx]?.value?.toInt() else null
+    val column =  if (columnGroupIdx != null) groups[columnGroupIdx]?.value?.toInt() else null
     return Warning(
-        groups.last()!!.value,
-        if (hasLine) groups[1]?.value?.toInt() else null,
-        if (hasLine && hasColumn) groups[2]?.value?.toInt() else if (hasColumn) groups[1]?.value?.toInt() else null,
+        groups[messageGroupIdx]!!.value,
+        line,
+        column,
     )
 }
