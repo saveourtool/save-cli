@@ -2,6 +2,7 @@ package org.cqfn.save.core
 
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.files.ConfigDetector
+import org.cqfn.save.core.logging.logInfo
 import org.cqfn.save.core.plugin.Plugin
 
 import okio.Path.Companion.toPath
@@ -22,8 +23,11 @@ class Save(
         requireNotNull(testConfig) { "Provided path ${saveProperties.testConfig} doesn't correspond to a valid save.toml file" }
 
         val plugins: List<Plugin> = emptyList()  // todo: discover plugins (from configuration blocks in TestSuiteConfig?)
+        logInfo("Discovered plugins: $plugins")
         plugins.forEach {
+            logInfo("Execute plugin: ${it::class.simpleName}")
             it.execute(saveProperties, testConfig)
+            logInfo("${it::class.simpleName} successfully executed!")
         }
     }
 }
