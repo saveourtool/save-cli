@@ -14,13 +14,10 @@ import kotlinx.cinterop.toKString
     "MISSING_KDOC_CLASS_ELEMENTS",
     "MISSING_KDOC_ON_FUNCTION"
 )
-actual class ProcessBuilder {
-    actual fun exec(command: List<String>, redirectTo: Path?): ExecutionResult {
-        val common = ProcessBuilderInternal()
-        val cmd = common.prepareCmd(command)
-
+actual class ProcessBuilderInternal {
+    actual fun exec(cmd: String): Pair<Int, String> {
         val pd = popen(cmd, "r")
-            ?: error("Pipe error. Couldn't execute command: `$command`")
+            ?: error("Pipe error. Couldn't execute command: `$cmd`")
         val stdout = buildString {
             val buffer = ByteArray(4096)
             while (fgets(buffer.refTo(0), buffer.size, pd) != null) {
@@ -28,7 +25,6 @@ actual class ProcessBuilder {
             }
         }
         val status = pclose(pd)
-
-        return common.logAndReturn(stdout, status, redirectTo)
+        return status to stdout
     }
 }
