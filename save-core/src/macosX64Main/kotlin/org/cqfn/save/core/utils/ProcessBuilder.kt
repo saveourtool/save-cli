@@ -2,29 +2,15 @@
 
 package org.cqfn.save.core.utils
 
-import okio.Path
-import platform.posix.fgets
-import platform.posix.pclose
-import platform.posix.popen
 
-import kotlinx.cinterop.refTo
-import kotlinx.cinterop.toKString
+import platform.posix.system
 
 @Suppress("MISSING_KDOC_TOP_LEVEL",
     "MISSING_KDOC_CLASS_ELEMENTS",
     "MISSING_KDOC_ON_FUNCTION"
 )
 actual class ProcessBuilderInternal {
-    actual fun exec(cmd: String): Pair<Int, String> {
-        val pd = popen(cmd, "r")
-            ?: error("Pipe error. Couldn't execute command: `$cmd`")
-        val stdout = buildString {
-            val buffer = ByteArray(4096)
-            while (fgets(buffer.refTo(0), buffer.size, pd) != null) {
-                append(buffer.toKString())
-            }
-        }
-        val status = pclose(pd)
-        return status to stdout
+    actual fun exec(cmd: String): Int {
+        return system(cmd)
     }
 }

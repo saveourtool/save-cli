@@ -66,7 +66,7 @@ expect fun prepareCmd(command: List<String>): String
  * @param redirectTo path to the file, where to redirect output
  * @return [ExecutionResult] depends of status and errors
  */
-expect fun logAndReturn(stdout: String, status: Int, redirectTo: Path?): ExecutionResult
+expect fun logAndReturn(status: Int, redirectTo: Path?): ExecutionResult
 
 /**
  * A class that is capable of executing OS processes and returning their output.
@@ -79,7 +79,7 @@ expect class ProcessBuilderInternal() {
      * @param command executable command with arguments
      * @return pair of execution exit code and execution output
      */
-    fun exec(cmd: String): Pair<Int, String>
+    fun exec(cmd: String): Int
 }
 
 /**
@@ -105,8 +105,8 @@ class ProcessBuilder {
         fs.createFile(stderrFile)
         logDebug("Created file for stderr of ProcessBuilder in: $tmpDir")
         val cmd = prepareCmd(command)
-        val (status, stdout) = processBuilderInternal.exec(cmd)
-        return logAndReturn(stdout, status, redirectTo)
+        val status = processBuilderInternal.exec(cmd)
+        return logAndReturn(status, redirectTo)
     }
 }
 

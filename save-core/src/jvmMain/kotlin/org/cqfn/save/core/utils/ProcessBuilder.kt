@@ -16,12 +16,11 @@ import java.lang.ProcessBuilder
 actual class ProcessBuilderInternal {
     private val pb = ProcessBuilder()
 
-    actual fun exec(cmd: String): Pair<Int, String> {
+    actual fun exec(cmd: String): Int {
         val code = pb.command((cmd.split(" ")))
             .start()
             .waitFor()
-        val stdout = getStdout().joinToString("\n")
-        return code to stdout
+        return code
     }
 }
 
@@ -40,9 +39,9 @@ actual fun prepareCmd(command: List<String>): String {
 
 @Suppress("MISSING_KDOC_TOP_LEVEL")
 actual fun logAndReturn(
-    stdout: String,
     status: Int,
     redirectTo: Path?): ExecutionResult {
+    val stdout = getStdout()
     val stderr = getStderr()
     fs.deleteRecursively(tmpDir)
     if (stderr.isNotEmpty()) {
@@ -50,8 +49,8 @@ actual fun logAndReturn(
     }
     redirectTo?.let {
         fs.write(redirectTo) {
-            write(stdout.encodeToByteArray())
+            write(stdout.joinToString("\n").encodeToByteArray())
         }
     } ?: logDebug("Execution output:\n$stdout")
-    return ExecutionResult(status, stdout.split("\n"), stderr)
+    return ExecutionResult(status, stdout, stderr)
 }

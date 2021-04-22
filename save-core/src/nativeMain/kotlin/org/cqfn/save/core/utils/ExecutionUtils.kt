@@ -13,14 +13,13 @@ actual fun prepareCmd(command: List<String>): String {
         logWarn("Found user provided stderr redirection in `$userCmd`. " +
                 "SAVE use stderr for internal purpose and will redirect it to the $stderrFile")
     }
-    val cmd = "$userCmd 2>$stderrFile"
+    val cmd = "$userCmd >$stdoutFile 2>$stderrFile"
     logDebug("Executing: $cmd")
     return cmd
 }
 
 @Suppress("MISSING_KDOC_TOP_LEVEL")
 actual fun logAndReturn(
-    stdout: String,
     status: Int,
     redirectTo: Path?): ExecutionResult {
     if (status == -1) {
@@ -28,15 +27,16 @@ actual fun logAndReturn(
         error("Couldn't close the pipe, exit status: $status")
     }
     val stderr = getStderr()
+    val stdout = getStdout()
     fs.deleteRecursively(tmpDir)
     if (stderr.isNotEmpty()) {
         logWarn(stderr.joinToString("\n"))
     }
     redirectTo?.let {
         fs.write(redirectTo) {
-            write(stdout.encodeToByteArray())
+            write(stdout.joinToString("\n").encodeToByteArray())
         }
     }
         ?: logDebug("Execution output:\n$stdout")
-    return ExecutionResult(status, stdout.split("\n"), stderr)
+    return ExecutionResult(status, stdout, stderr)
 }

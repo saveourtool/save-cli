@@ -32,7 +32,7 @@ class ProcessBuilderTest {
     @Test
     fun `check stderr`() {
         val actualResult = processBuilder.exec("ls -l root".split(" "), null)
-        val expectedStdout: List<String> = listOf("")
+        val expectedStdout: List<String> = emptyList()
         val expectedStderr = listOf("'ls' is not recognized as an internal or external command,",
             "operable program or batch file.")
         assertEquals(1, actualResult.code)
@@ -43,7 +43,7 @@ class ProcessBuilderTest {
     @Test
     fun `check stderr with additional warning`() {
         val actualResult = processBuilder.exec("ls -l root 2>/dev/null".split(" "), null)
-        val expectedStdout: List<String> = listOf("")
+        val expectedStdout: List<String> = emptyList()
         val expectedStderr = listOf("'ls' is not recognized as an internal or external command,",
             "operable program or batch file.")
         assertEquals(1, actualResult.code)
