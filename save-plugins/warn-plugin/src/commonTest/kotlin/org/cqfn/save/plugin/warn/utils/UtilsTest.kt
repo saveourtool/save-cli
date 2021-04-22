@@ -1,7 +1,7 @@
 package org.cqfn.save.plugin.warn.utils
 
 import org.cqfn.save.plugin.warn.WarnPluginConfig
-import org.cqfn.save.plugin.warn.WarnPluginConfig.Companion.DEFAULT_INPUT_PATTERN
+import org.cqfn.save.plugin.warn.WarnPluginConfig.Companion.defaultInputPattern
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -9,7 +9,7 @@ import kotlin.test.assertNull
 class UtilsTest {
     @Test
     fun `should extract warnings from different text with line and col`() {
-        val config = WarnPluginConfig("stub", DEFAULT_INPUT_PATTERN, Regex("stub"), warningTextHasLine = true, warningTextHasColumn = true,
+        val config = WarnPluginConfig("stub", defaultInputPattern, Regex("stub"), warningTextHasLine = true, warningTextHasColumn = true,
             lineCaptureGroup = 1, columnCaptureGroup = 2, messageCaptureGroup = 3)
         assertExtracts(config, ";warn:1:2: Foo bar baz", Warning("Foo bar baz", 1, 2))
         assertExtracts(config, ";warn:1:2:  Foo bar baz", Warning(" Foo bar baz", 1, 2))
@@ -46,7 +46,10 @@ class UtilsTest {
         assertExtractionFails(config, ";warn:1: ")
     }
 
-    private fun assertExtracts(warnPluginConfig: WarnPluginConfig, text: String, expectedWarning: Warning) {
+    private fun assertExtracts(
+        warnPluginConfig: WarnPluginConfig,
+        text: String,
+        expectedWarning: Warning) {
         val warning = text.extractWarning(
             warnPluginConfig.warningsInputPattern,
             columnGroupIdx = warnPluginConfig.columnCaptureGroup,

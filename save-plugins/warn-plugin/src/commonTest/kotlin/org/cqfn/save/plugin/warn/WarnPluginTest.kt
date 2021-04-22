@@ -6,7 +6,6 @@ import org.cqfn.save.core.config.ResultOutputType
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
-import org.cqfn.save.core.files.readLines
 
 import okio.FileSystem
 import okio.Path.Companion.toPath
@@ -14,8 +13,6 @@ import okio.Path.Companion.toPath
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 private val mockConfig = SaveProperties(
     testConfig = ".",
@@ -98,7 +95,10 @@ class WarnPluginTest {
         fs.deleteRecursively(tmpDir)
     }
 
-    private fun performTest(text: String, warnPluginConfig: WarnPluginConfig, saveProperties: SaveProperties = mockConfig) {
+    private fun performTest(
+        text: String,
+        warnPluginConfig: WarnPluginConfig,
+        saveProperties: SaveProperties = mockConfig) {
         val testFile = fs.createFile(tmpDir / "Test1Test.java")
         fs.write(testFile) {
             write(text.encodeToByteArray())
