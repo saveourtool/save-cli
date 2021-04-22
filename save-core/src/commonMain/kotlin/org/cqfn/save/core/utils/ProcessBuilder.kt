@@ -37,21 +37,7 @@ val stdoutFile = tmpDir / "stdout.txt"
 val stderrFile = tmpDir / "stderr.txt"
 
 /**
- *  Read data from stdout file, we will use it in [ExecutionResult]
- *
- * @return string containing stdout
- */
-fun getStdout() = fs.readLines(stdoutFile)
-
-/**
- * Read data from stderr file, we will use it in [ExecutionResult]
- *
- * @return string containing stderr
- */
-fun getStderr() = fs.readLines(stderrFile)
-
-/**
- * A class that is capable of executing OS processes and returning their output.
+ * A class that is capable of executing processes, specific to different OS and returning their output.
  */
 @Suppress("EMPTY_PRIMARY_CONSTRUCTOR")  // expected class should have explicit default constructor
 expect class ProcessBuilderInternal() {
@@ -74,33 +60,34 @@ expect class ProcessBuilderInternal() {
 }
 
 /**
- * Class contains common fields for all platforms
+ * Class contains common logic for all platforms
  */
+@Suppress("INLINE_CLASS_CAN_BE_USED")
 class ProcessBuilder {
     /**
      * Instance, containing platform-dependent realization of command execution
      */
-    val processBuilderInternal = ProcessBuilderInternal()
+    private val processBuilderInternal = ProcessBuilderInternal()
 
     /**
      * Execute [command] and wait for its completion.
      *
      * @param command executable command with arguments
-     * @param redirectTo a file where process output should be redirected too. If null, output will be returned as [ExecutionResult.stdout].
+     * @param redirectTo a file where process output should be redirected. If null, output will be returned as [ExecutionResult.stdout].
      * @return [ExecutionResult] built from process output
      */
     fun exec(command: List<String>, redirectTo: Path?): ExecutionResult {
         fs.createDirectories(tmpDir)
         fs.createFile(stdoutFile)
         fs.createFile(stderrFile)
-        logDebug("Created temp directory $tmpDir for stderr and srdout of ProcessBuilder")
+        logDebug("Created temp directory $tmpDir for stderr and stdout of ProcessBuilder")
         val userCmd = command.joinToString(" ")
         if (userCmd.contains(">")) {
             logWarn("Found user provided redirections in `$userCmd`. " +
                     "SAVE use own redirections for internal purpose and will redirect it to the $tmpDir")
         }
         val cmd = processBuilderInternal.prepareCmd(userCmd)
-        val status = processBuilderInternal.exec(cmd, redirectTo)
+        val status = processBuilderInternal.exec(cmd)
         val stdout = getStdout()
         val stderr = getStderr()
         fs.deleteRecursively(tmpDir)
@@ -127,3 +114,17 @@ data class ExecutionResult(
     val stdout: List<String>,
     val stderr: List<String>,
 )
+
+/**
+ *  Read data from stdout file, we will use it in [ExecutionResult]
+ *
+ * @return string containing stdout
+ */
+fun getStdout() = fs.readLines(stdoutFile)
+
+/**
+ * Read data from stderr file, we will use it in [ExecutionResult]
+ *
+ * @return string containing stderr
+ */
+fun getStderr() = fs.readLines(stderrFile)

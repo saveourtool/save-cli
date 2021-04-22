@@ -1,5 +1,3 @@
-@file:JvmName("ProcessBuilderJvm")
-
 package org.cqfn.save.core.utils
 
 import org.cqfn.save.core.logging.logDebug
@@ -11,13 +9,13 @@ import java.lang.ProcessBuilder
     "MISSING_KDOC_ON_FUNCTION"
 )
 actual class ProcessBuilderInternal {
+    private val pb = ProcessBuilder()
+
     actual fun prepareCmd(command: String): String {
         val shell = if (System.getProperty("os.name").startsWith("Windows", ignoreCase = true)) listOf("CMD", "/C") else listOf("sh", "-c")
         val cmd = shell + listOf(command) + listOf(" >$stdoutFile 2>$stderrFile")
         return cmd.joinToString(" ")
     }
-
-    private val pb = ProcessBuilder()
 
     actual fun exec(cmd: String): Int {
         logDebug("Executing: $cmd")
