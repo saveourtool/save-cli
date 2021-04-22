@@ -36,3 +36,5 @@ actual class ProcessBuilder {
         return common.logAndReturn(stdout, status, redirectTo)
     }
 }
+
+actual fun isCurrentOsWindows() = Platform.osFamily == OsFamily.WINDOWS

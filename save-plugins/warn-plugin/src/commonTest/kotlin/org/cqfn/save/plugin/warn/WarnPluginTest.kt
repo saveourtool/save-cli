@@ -9,6 +9,7 @@ import org.cqfn.save.core.files.createFile
 
 import okio.FileSystem
 import okio.Path.Companion.toPath
+import org.cqfn.save.core.utils.isCurrentOsWindows
 
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -58,7 +59,7 @@ class WarnPluginTest {
                 
                 // ;warn:4:6: Class name should be in PascalCase
                 class example {
-                    int foo = 42;                
+                    int foo = 42;
                 }
             """.trimIndent(),
             WarnPluginConfig(
@@ -78,7 +79,7 @@ class WarnPluginTest {
                 
                 // ;warn:3:6: Class name should be in PascalCase
                 class example {
-                    int foo = 42;                
+                    int foo = 42;
                 }
             """.trimIndent(),
             WarnPluginConfig(
@@ -88,6 +89,71 @@ class WarnPluginTest {
             ),
             mockConfig.copy(ignoreSaveComments = true)
         )
+    }
+
+    @Test
+    fun `warn-plugin test - multiple warnings`() {
+        fs.write(fs.createFile(tmpDir / "resource")) {
+            write(
+                """Test1Test.java:1:1: Avoid using default package
+                    |Test1Test.java:3:6: Class name should be in PascalCase
+                    |Test1Test.java:5:5: Variable name should be in lowerCamelCase
+                    |Test1Test.java:7:1: File should end with trailing newline
+                    |""".trimMargin().encodeToByteArray()
+            )
+        }
+        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
+        performTest(
+            """
+                // ;warn:1:1: Avoid using default package
+                // ;warn:3:6: Class name should be in PascalCase
+                class example {
+                    // ;warn:5:5: Variable name should be in lowerCamelCase
+                    int Foo = 42;
+                }
+                // ;warn:7:1: File should end with trailing newline
+            """.trimIndent(),
+            WarnPluginConfig(
+                "$catCmd ${tmpDir / "resource"}",
+                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
+                Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
+                true, true, 1, 2, 3
+            )
+        )
+        fs.delete(tmpDir / "resource")
+    }
+
+    @Test
+    fun `warn-plugin test - multiple warnings & ignore technical comments`() {
+        fs.write(fs.createFile(tmpDir / "resource")) {
+            write(
+                """Test1Test.java:1:1: Avoid using default package
+                    |Test1Test.java:3:6: Class name should be in PascalCase
+                    |Test1Test.java:5:5: Variable name should be in lowerCamelCase
+                    |Test1Test.java:7:1: File should end with trailing newline
+                    |""".trimMargin().encodeToByteArray()
+            )
+        }
+        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
+        performTest(
+            """
+                // ;warn:1:1: Avoid using default package
+                // ;warn:1:6: Class name should be in PascalCase
+                class example {
+                    // ;warn:2:5: Variable name should be in lowerCamelCase
+                    int Foo = 42;
+                }
+                // ;warn:3:1: File should end with trailing newline
+            """.trimIndent(),
+            WarnPluginConfig(
+                "$catCmd ${tmpDir / "resource"}",
+                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
+                Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
+                true, true, 1, 2, 3
+            ),
+            mockConfig.copy(ignoreSaveComments = true)
+        )
+        fs.delete(tmpDir / "resource")
     }
 
     @AfterTest

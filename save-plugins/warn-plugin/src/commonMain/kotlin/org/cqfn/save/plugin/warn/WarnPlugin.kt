@@ -48,7 +48,7 @@ class WarnPlugin : Plugin {
                 }
             }
             .mapIndexed { index, warning ->
-                if (saveProperties.ignoreSaveComments!! && warning?.line != null) warning.copy(line = warning.line + index + 1) else warning
+                if (saveProperties.ignoreSaveComments!! && warning.line != null) warning.copy(line = warning.line + index + 1) else warning
             }
             .groupBy { it.line to it.column }
             .mapValues { it.value.sortedBy { it.message } }
@@ -61,12 +61,18 @@ class WarnPlugin : Plugin {
             .groupBy { it.line to it.column }
             .mapValues { it.value.sortedBy { it.message } }
         // todo: handle test results here
-        require(expectedWarnings.size == actualWarningsMap.size)
+        require(expectedWarnings.size == actualWarningsMap.size) {
+            "Number of expected and actual warnings differ: expected ${expectedWarnings.size}, but was ${actualWarningsMap.size}"
+        }
         expectedWarnings.forEach { (pair, warnings) ->
             val actualWarnings = actualWarningsMap[pair]
-            requireNotNull(actualWarnings)
-            require(warnings.size == actualWarnings.size)
-            require(warnings.zip(actualWarnings).all { it.first == it.second })
+            requireNotNull(actualWarnings) { "Expected a warning at $pair, but it was not present in actual output" }
+            require(warnings.size == actualWarnings.size) {
+                "Number of expected and actual warnings differ at $pair: expected ${warnings.size} but was ${actualWarnings.size}"
+            }
+            warnings.zip(actualWarnings).forEach {
+                require(it.first == it.second) { "Warnings differ: expected [${it.first}] but was [${it.second}]" }
+            }
         }
     }
 }

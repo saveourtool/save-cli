@@ -129,3 +129,9 @@ data class ExecutionResult(
     val stdout: List<String>,
     val stderr: List<String>,
 )
+
+/**
+ * Checks if the current OS is windows.
+ * Todo: move to more accurate PlatformUtils.
+ */
+expect fun isCurrentOsWindows(): Boolean

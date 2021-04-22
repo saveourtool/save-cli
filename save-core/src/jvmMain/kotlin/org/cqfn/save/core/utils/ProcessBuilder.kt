@@ -45,3 +45,5 @@ actual class ProcessBuilder {
         return ExecutionResult(code, redirectTo?.let { File(it.name).readLines() } ?: stdout, stderr)
     }
 }
+
+actual fun isCurrentOsWindows() = System.getProperty("os.name").startsWith("Windows", ignoreCase = true)
