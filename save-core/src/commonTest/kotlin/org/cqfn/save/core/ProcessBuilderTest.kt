@@ -4,6 +4,7 @@ import org.cqfn.save.core.utils.ProcessBuilder
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@Suppress("LOCAL_VARIABLE_EARLY_DECLARATION")
 class ProcessBuilderTest {
     private val processBuilder = ProcessBuilder()
 
@@ -11,9 +12,9 @@ class ProcessBuilderTest {
     fun `check stdout`() {
         val actualResult = processBuilder.exec("echo something".split(" "), null)
         val expectedStdout = "something"
-        val expectedStderr = emptyList<String>()
+        val expectedStderr: List<String> = emptyList()
         assertEquals(0, actualResult.code)
-        // posix popen and JVM process builder returns lines with different whitespaces, so we cut them
+        // posix `system()` and JVM process builder returns lines with different whitespaces, so we cut them
         assertEquals(expectedStdout, actualResult.stdout[0].trimEnd())
         assertEquals(expectedStderr, actualResult.stderr)
     }
@@ -22,7 +23,7 @@ class ProcessBuilderTest {
     fun `check stdout 2`() {
         val actualResult = processBuilder.exec("echo something >/dev/null".split(" "), null)
         val expectedStdout = "something"
-        val expectedStderr = emptyList<String>()
+        val expectedStderr: List<String> = emptyList()
         assertEquals(0, actualResult.code)
         // posix popen and JVM process builder returns lines with different whitespaces, so we cut them
         assertEquals(expectedStdout, actualResult.stdout[0].trimEnd())
@@ -50,5 +51,4 @@ class ProcessBuilderTest {
         assertEquals(expectedStdout, actualResult.stdout)
         assertEquals(expectedStderr, actualResult.stderr)
     }
-
 }
