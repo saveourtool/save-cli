@@ -1,3 +1,5 @@
+@file:JvmName("ProcessBuilderJvm")
+
 package org.cqfn.save.core.utils
 
 import org.cqfn.save.core.logging.logDebug
@@ -5,7 +7,6 @@ import org.cqfn.save.core.logging.logWarn
 
 import okio.Path
 
-import java.io.File
 import java.lang.ProcessBuilder
 
 @Suppress("MISSING_KDOC_TOP_LEVEL",
@@ -16,20 +17,11 @@ actual class ProcessBuilderInternal {
     private val pb = ProcessBuilder()
 
     actual fun exec(cmd: String): Pair<Int, String> {
-
-        val code = pb.command(cmd)
-            .let { builder ->
-                redirectTo?.let {
-                    builder.redirectOutput(File(redirectTo.name))
-                }
-                    ?: run {
-                        builder.redirectOutput(File(stdoutFile.toString()))
-                    }
-            }
-            .redirectError(File(stderrFile.toString()))
+        val code = pb.command((cmd.split(" ")))
             .start()
             .waitFor()
-        return 0 to ""
+        val stdout = getStdout().joinToString("\n")
+        return code to stdout
     }
 }
 
@@ -41,7 +33,7 @@ actual fun prepareCmd(command: List<String>): String {
                 "SAVE use stderr for internal purpose and will redirect it to the $stderrFile")
     }
     val shell = if (System.getProperty("os.name").startsWith("Windows", ignoreCase = true)) listOf("CMD", "/C") else listOf("sh", "-c")
-    val cmd = shell + listOf(command.joinToString(" "))
+    val cmd = shell + listOf(userCmd) + listOf(" >$stdoutFile 2>$stderrFile")
     logDebug("Executing: $cmd")
     return cmd.joinToString(" ")
 }
@@ -51,14 +43,15 @@ actual fun logAndReturn(
     stdout: String,
     status: Int,
     redirectTo: Path?): ExecutionResult {
-    val stdout = getStdout()
     val stderr = getStderr()
     fs.deleteRecursively(tmpDir)
     if (stderr.isNotEmpty()) {
         logWarn(stderr.joinToString("\n"))
     }
-    redirectTo ?: run {
-        logDebug("Execution output:\n${stdout.joinToString("\n")}")
-    }
-    return ExecutionResult(status, redirectTo?.let { File(it.name).readLines() } ?: stdout, stderr)
+    redirectTo?.let {
+        fs.write(redirectTo) {
+            write(stdout.encodeToByteArray())
+        }
+    } ?: logDebug("Execution output:\n$stdout")
+    return ExecutionResult(status, stdout.split("\n"), stderr)
 }

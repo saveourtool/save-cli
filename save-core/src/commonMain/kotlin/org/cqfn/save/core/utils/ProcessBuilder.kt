@@ -12,6 +12,7 @@ import okio.Path
 import okio.Path.Companion.toPath
 
 import kotlinx.datetime.Clock
+import org.cqfn.save.core.files.createFile
 
 /**
  * Typealias
@@ -22,19 +23,17 @@ val fs = FileSystem.SYSTEM
  * Temporary directory for stderr and stdout (popen can't separate streams, so we do it ourselves)
  */
 val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY /
-        ("ProcessBuilder_" + Clock.System.now().toEpochMilliseconds()).toPath()).also {
-    fs.createDirectory(it)
-}
+        ("ProcessBuilder_" + Clock.System.now().toEpochMilliseconds()).toPath())
 
 /**
  * Path to stdout file
  */
-val stdoutFile = tmpDir / "stdout.txt".also { logDebug("Created file for stdout of ProcessBuilder in: $tmpDir") }
+val stdoutFile = tmpDir / "stdout.txt"
 
 /**
  * Path to stderr file
  */
-val stderrFile = tmpDir / "stderr.txt".also { logDebug("Created file for stderr of ProcessBuilder in: $tmpDir") }
+val stderrFile = tmpDir / "stderr.txt"
 
 /**
  *  Read data from stdout file, we will use it in [ExecutionResult]
@@ -100,6 +99,11 @@ class ProcessBuilder {
      * @return [ExecutionResult] built from process output
      */
     fun exec(command: List<String>, redirectTo: Path?): ExecutionResult {
+        fs.createDirectories(tmpDir)
+        fs.createFile(stdoutFile)
+        logDebug("Created file for stdout of ProcessBuilder in: $tmpDir")
+        fs.createFile(stderrFile)
+        logDebug("Created file for stderr of ProcessBuilder in: $tmpDir")
         val cmd = prepareCmd(command)
         val (status, stdout) = processBuilderInternal.exec(cmd)
         return logAndReturn(stdout, status, redirectTo)
