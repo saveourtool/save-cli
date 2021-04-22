@@ -14,6 +14,8 @@ plugins {
     id("com.cdsap.talaiot.plugin.base") version "1.4.2"
 }
 
+configureVersioning()
+
 allprojects {
     repositories {
         mavenCentral()
@@ -25,8 +27,8 @@ allprojects {
 createDiktatTask()
 createDetektTask()
 installGitHooks()
+
 configurePublishing()
-configureVersioning()
 
 talaiot {
     publishers {
