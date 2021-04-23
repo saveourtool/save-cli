@@ -1,5 +1,6 @@
 import org.cqfn.save.buildutils.configurePublishing
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem
 
 plugins {
     kotlin("multiplatform")
@@ -14,9 +15,15 @@ kotlin {
             }
         }
     }
-    linuxX64()
-    mingwX64()
-    macosX64()
+    val os = getCurrentOperatingSystem()
+    // Create a target for the host platform.
+    val hostTarget = when {
+        os.isLinux -> linuxX64()
+        os.isWindows -> mingwX64()
+        os.isMacOsX -> macosX64()
+        else -> throw GradleException("Host OS '${os.name}' is not supported in Kotlin/Native $project.")
+    }
+
 
     sourceSets {
         all {
@@ -40,17 +47,11 @@ kotlin {
         val nativeMain by creating {
             dependsOn(commonMain)
         }
-        val linuxX64Main by getting {
-            dependsOn(nativeMain)
-        }
-        val mingwX64Main by getting {
-            dependsOn(nativeMain)
-        }
-        val macosX64Main by getting {
-            dependsOn(nativeMain)
-        }
+        getByName("${hostTarget.name}Main").dependsOn(nativeMain)
 
-        val jvmMain by getting
+        val jvmMain by getting {
+            dependsOn(commonMain)
+        }
 
         val jvmTest by getting {
             dependencies {
