@@ -1,3 +1,4 @@
+import org.cqfn.save.buildutils.configurePublishing
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 
 plugins {
@@ -59,6 +60,8 @@ kotlin {
         }
     }
 }
+
+configurePublishing()
 
 tasks.withType<KotlinJvmTest> {
     useJUnitPlatform()
