@@ -6,10 +6,10 @@ import org.cqfn.save.core.config.ResultOutputType
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.utils.isCurrentOsWindows
 
 import okio.FileSystem
 import okio.Path.Companion.toPath
-import org.cqfn.save.core.utils.isCurrentOsWindows
 
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -155,6 +155,38 @@ class WarnPluginTest {
                 true, true, 1, 2, 3
             ),
             mockConfig.copy(ignoreSaveComments = true)
+        )
+        fs.delete(tmpDir / "resource")
+    }
+
+    @Test
+    fun `warn-plugin test - multiple warnings, no line-col`() {
+        fs.write(fs.createFile(tmpDir / "resource")) {
+            write(
+                """Test1Test.java: Avoid using default package
+                    |Test1Test.java: Class name should be in PascalCase
+                    |Test1Test.java: Variable name should be in lowerCamelCase
+                    |Test1Test.java: File should end with trailing newline
+                    |""".trimMargin().encodeToByteArray()
+            )
+        }
+        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
+        performTest(
+            """
+                // ;warn: Avoid using default package
+                // ;warn: Class name should be in PascalCase
+                class example {
+                    // ;warn: Variable name should be in lowerCamelCase
+                    int Foo = 42;
+                }
+                // ;warn: File should end with trailing newline
+            """.trimIndent(),
+            WarnPluginConfig(
+                "$catCmd ${tmpDir / "resource"}",
+                Regex("// ;warn: (.*)"),
+                Regex("[\\w\\d.-]+: (.+)"),
+                false, false, null, null, 1
+            )
         )
         fs.delete(tmpDir / "resource")
     }

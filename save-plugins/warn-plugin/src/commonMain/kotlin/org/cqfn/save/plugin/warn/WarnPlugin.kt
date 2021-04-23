@@ -5,10 +5,13 @@ import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.utils.ProcessBuilder
+import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
 
 import okio.FileSystem
 import okio.Path
+
+private typealias LineColumn = Pair<Int, Int>
 
 /**
  * A plugin that runs an executable and verifies that it produces required warning messages.
@@ -47,7 +50,7 @@ class WarnPlugin : Plugin {
                     )
                 }
             }
-            .groupBy { it.line to it.column }
+            .groupBy { if (it.line != null && it.column != null) it.line to it.column else null }
             .mapValues { it.value.sortedBy { it.message } }
         // todo: create a temp file with technical comments removed and feed it to the tool
         val executionResult = pb.exec(warnPluginConfig.execCmd.split(" "), null)
@@ -56,13 +59,18 @@ class WarnPlugin : Plugin {
                 it.extractWarning(warningsOutputPattern, columnCaptureGroup, lineCaptureGroup, messageCaptureGroup)
             }
         }
-            .groupBy { it.line to it.column }
+            .groupBy { if (it.line != null && it.column != null) it.line to it.column else null }
             .mapValues { it.value.sortedBy { it.message } }
         // todo: handle test results here
-        require(expectedWarnings.size == actualWarningsMap.size) {
-            "Number of expected and actual warnings differ: expected ${expectedWarnings.size}, but was ${actualWarningsMap.size}"
+        checkResults(expectedWarnings, actualWarningsMap)
+    }
+
+    @Suppress("TYPE_ALIAS")
+    private fun checkResults(expectedWarningsMap: Map<LineColumn?, List<Warning>>, actualWarningsMap: Map<LineColumn?, List<Warning>>) {
+        require(expectedWarningsMap.size == actualWarningsMap.size) {
+            "Number of expected and actual warnings differ: expected ${expectedWarningsMap.size}, but was ${actualWarningsMap.size}"
         }
-        expectedWarnings.forEach { (pair, warnings) ->
+        expectedWarningsMap.forEach { (pair, warnings) ->
             val actualWarnings = actualWarningsMap[pair]
             requireNotNull(actualWarnings) { "Expected a warning at $pair, but it was not present in actual output" }
             require(warnings.size == actualWarnings.size) {

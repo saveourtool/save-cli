@@ -133,5 +133,7 @@ data class ExecutionResult(
 /**
  * Checks if the current OS is windows.
  * Todo: move to more accurate PlatformUtils.
+ *
+ * @return true if current OS is Windows
  */
 expect fun isCurrentOsWindows(): Boolean

@@ -46,4 +46,7 @@ actual class ProcessBuilder {
     }
 }
 
+/**
+ * @return true if current OS is Windows
+ */
 actual fun isCurrentOsWindows() = System.getProperty("os.name").startsWith("Windows", ignoreCase = true)

@@ -35,15 +35,9 @@ internal fun String.extractWarning(warningRegex: Regex,
     val line = lineGroupIdx?.let {
         groups[lineGroupIdx]?.value?.toInt()
     }
-        ?: run {
-            null
-        }
     val column = columnGroupIdx?.let {
         groups[columnGroupIdx]?.value?.toInt()
     }
-        ?: run {
-            null
-        }
     return Warning(
         groups[messageGroupIdx]!!.value,
         line,
