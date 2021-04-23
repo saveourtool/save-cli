@@ -32,13 +32,14 @@ class FixPlugin : Plugin {
         .newTag { start -> if (start) "<" else ">" }
         .build()
 
-    override fun execute(saveProperties: SaveProperties, testConfig: TestConfig): Collection<TestResult> {
+    override fun execute(saveProperties: SaveProperties, testConfig: TestConfig): Sequence<TestResult> {
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
-        return discoverFilePairs(fixPluginConfig.testResources)
+        val files = discoverFilePairs(fixPluginConfig.testResources)
             .also {
                 logInfo("Discovered the following file pairs for comparison: $it")
             }
-            .map { (expected, test) ->
+        return sequence {
+            files.forEach { (expected, test) ->
                 pb.exec(fixPluginConfig.execCmd.split(" "), null)
                 val fixedLines = FileSystem.SYSTEM.readLines(
                     if (fixPluginConfig.inPlace) test else test.parent!! / fixPluginConfig.destinationFileFor(test).toPath()
@@ -51,8 +52,9 @@ class FixPlugin : Plugin {
                         Failure(patch.formatToString())
                     }
                 }
-                TestResult(listOf(expected, test), status)
+                yield(TestResult(listOf(expected, test), status))
             }
+        }
     }
 
     /**

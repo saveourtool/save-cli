@@ -13,7 +13,7 @@ interface Plugin {
      *
      * @param saveProperties general configuration of SAVE. todo: is it needed here? Or should [PluginConfig] be passed here?
      * @param testConfig configuration of current test suite
-     * @return a collection of [TestResult]s for each group of test resources
+     * @return a sequence of [TestResult]s for each group of test resources
      */
-    fun execute(saveProperties: SaveProperties, testConfig: TestConfig): Collection<TestResult>
+    fun execute(saveProperties: SaveProperties, testConfig: TestConfig): Sequence<TestResult>
 }
