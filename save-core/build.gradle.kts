@@ -49,11 +49,17 @@ kotlin {
         }
         getByName("${hostTarget.name}Main").dependsOn(nativeMain)
 
+        val nativeTest by creating {
+            dependsOn(commonTest)
+        }
+        getByName("${hostTarget.name}Test").dependsOn(nativeTest)
+
         val jvmMain by getting {
             dependsOn(commonMain)
         }
 
         val jvmTest by getting {
+            dependsOn(commonTest)
             dependencies {
                 implementation(kotlin("test-junit5"))
                 implementation("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
