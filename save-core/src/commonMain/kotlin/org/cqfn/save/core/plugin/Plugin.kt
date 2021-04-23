@@ -9,8 +9,11 @@ import org.cqfn.save.core.result.TestResult
  */
 interface Plugin {
     /**
+     * Perform plugin's work.
+     *
      * @param saveProperties general configuration of SAVE. todo: is it needed here? Or should [PluginConfig] be passed here?
      * @param testConfig configuration of current test suite
+     * @return a collection of [TestResult]s for each group of test resources
      */
     fun execute(saveProperties: SaveProperties, testConfig: TestConfig): Collection<TestResult>
 }
