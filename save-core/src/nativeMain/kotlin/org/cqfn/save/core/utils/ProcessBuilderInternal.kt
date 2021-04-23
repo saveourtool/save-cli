@@ -10,8 +10,12 @@ import platform.posix.system
     "MISSING_KDOC_ON_FUNCTION"
 )
 actual class ProcessBuilderInternal {
-    actual fun prepareCmd(command: String): String {
-        val cmd = "$command >$stdoutFile 2>$stderrFile"
+    actual fun prepareCmd(command: String, collectStdout: Boolean): String {
+        val cmd = if (collectStdout) {
+            "$command >$stdoutFile 2>$stderrFile"
+        } else {
+            "$command 2>$stderrFile"
+        }
         return cmd
     }
 

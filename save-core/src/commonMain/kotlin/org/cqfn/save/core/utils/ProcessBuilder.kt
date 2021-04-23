@@ -46,9 +46,10 @@ expect class ProcessBuilderInternal() {
      * stdout and stderr will be redirected to tmp files
      *
      * @param command raw command
+     * @param collectStdout whether to collect stdout for future usage
      * @return command with redirection of stderr to tmp file
      */
-    fun prepareCmd(command: String): String
+    fun prepareCmd(command: String, collectStdout: Boolean): String
 
     /**
      * Execute [cmd] and wait for its completion.
@@ -74,9 +75,13 @@ class ProcessBuilder {
      *
      * @param command executable command with arguments
      * @param redirectTo a file where process output should be redirected. If null, output will be returned as [ExecutionResult.stdout].
+     * @param collectStdout whether to collect stdout for future usage, [redirectTo] will be ignored
      * @return [ExecutionResult] built from process output
      */
-    fun exec(command: List<String>, redirectTo: Path?): ExecutionResult {
+    fun exec(
+        command: List<String>,
+        redirectTo: Path?,
+        collectStdout: Boolean = true): ExecutionResult {
         fs.createDirectories(tmpDir)
         fs.createFile(stdoutFile)
         fs.createFile(stderrFile)
@@ -86,7 +91,7 @@ class ProcessBuilder {
             logWarn("Found user provided redirections in `$userCmd`. " +
                     "SAVE use own redirections for internal purpose and will redirect it to the $tmpDir")
         }
-        val cmd = processBuilderInternal.prepareCmd(userCmd)
+        val cmd = processBuilderInternal.prepareCmd(userCmd, collectStdout)
         val status = processBuilderInternal.exec(cmd)
         val stdout = getStdout()
         val stderr = getStderr()

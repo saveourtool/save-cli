@@ -11,9 +11,13 @@ import java.lang.ProcessBuilder
 actual class ProcessBuilderInternal {
     private val pb = ProcessBuilder()
 
-    actual fun prepareCmd(command: String): String {
+    actual fun prepareCmd(command: String, collectStdout: Boolean): String {
         val shell = if (System.getProperty("os.name").startsWith("Windows", ignoreCase = true)) listOf("CMD", "/C") else listOf("sh", "-c")
-        val cmd = shell + listOf(command) + listOf(" >$stdoutFile 2>$stderrFile")
+        val cmd = if (collectStdout) {
+            shell + listOf(command) + listOf(" >$stdoutFile 2>$stderrFile")
+        } else {
+            shell + listOf(command) + listOf(" 2>$stderrFile")
+        }
         return cmd.joinToString(" ")
     }
 
