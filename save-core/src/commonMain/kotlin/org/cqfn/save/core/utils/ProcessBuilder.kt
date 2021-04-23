@@ -83,6 +83,9 @@ class ProcessBuilder {
         }
         val cmd = processBuilderInternal.prepareCmd(userCmd, collectStdout, stdoutFile, stderrFile)
         val status = processBuilderInternal.exec(cmd)
+        println("Tmp dir exists${fs.exists(tmpDir)}")
+        println("Stdout file exists: ${fs.exists(stdoutFile)}")
+        println("Stderr file exists: ${fs.exists(stderrFile)}")
         val stdout = fs.readLines(stdoutFile)
         val stderr = fs.readLines(stderrFile)
         fs.deleteRecursively(tmpDir)
