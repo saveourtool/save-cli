@@ -46,11 +46,21 @@ class ProcessBuilderInternalTest {
     fun `check stderr`() {
         val actualResult = processBuilder.exec("cd non_existent_dir".split(" "), null)
         val expectedStdout: List<String> = emptyList()
-        val expectedStderr = listOf("The system cannot find the path specified.")
-        val expectedCode = when (Platform.osFamily) {
-            OsFamily.LINUX -> 512
-            OsFamily.MACOSX -> 512
-            OsFamily.WINDOWS -> 1
+        lateinit var expectedStderr: List<String>
+        var expectedCode = 0
+        when (Platform.osFamily) {
+            OsFamily.LINUX -> {
+                expectedCode = 512
+                expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
+            }
+            OsFamily.MACOSX -> {
+                expectedCode = 512
+                expectedStderr = listOf("The system cannot find the path specified.")
+            }
+            OsFamily.WINDOWS -> {
+                expectedCode = 1
+                expectedStderr = listOf("The system cannot find the path specified.")
+            }
             else -> return
         }
         assertEquals(expectedCode, actualResult.code)
@@ -62,11 +72,21 @@ class ProcessBuilderInternalTest {
     fun `check stderr with additional warning`() {
         val actualResult = processBuilder.exec("cd non_existent_dir 2>/dev/null".split(" "), null)
         val expectedStdout: List<String> = emptyList()
-        val expectedStderr = listOf("The system cannot find the path specified.")
-        val expectedCode = when (Platform.osFamily) {
-            OsFamily.LINUX -> 512
-            OsFamily.MACOSX -> 512
-            OsFamily.WINDOWS -> 1
+        lateinit var expectedStderr: List<String>
+        var expectedCode = 0
+        when (Platform.osFamily) {
+            OsFamily.LINUX -> {
+                expectedCode = 512
+                expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
+            }
+            OsFamily.MACOSX -> {
+                expectedCode = 512
+                expectedStderr = listOf("The system cannot find the path specified.")
+            }
+            OsFamily.WINDOWS -> {
+                expectedCode = 1
+                expectedStderr = listOf("The system cannot find the path specified.")
+            }
             else -> return
         }
         assertEquals(expectedCode, actualResult.code)

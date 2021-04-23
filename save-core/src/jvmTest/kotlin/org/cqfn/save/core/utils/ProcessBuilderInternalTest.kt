@@ -10,11 +10,21 @@ class ProcessBuilderInternalTest {
     @Test
     fun `check stdout`() {
         val actualResult = processBuilder.exec("echo \"something\"".split(" "), null)
-        val expectedCode = 0
-        val expectedStdout = when {
-            System.getProperty("os.name").contains("Linux", ignoreCase = true) -> "something"
-            System.getProperty("os.name").contains("Mac", ignoreCase = true) -> "something"
-            System.getProperty("os.name").contains("Windows", ignoreCase = true) -> "\"something\""
+        var expectedCode = 0
+        lateinit var expectedStdout: String
+        when {
+            System.getProperty("os.name").contains("Linux", ignoreCase = true) -> {
+                expectedCode = 2
+                expectedStdout = "something"
+            }
+            System.getProperty("os.name").contains("Mac", ignoreCase = true) -> {
+                expectedCode = 2
+                expectedStdout = "something"
+            }
+            System.getProperty("os.name").contains("Windows", ignoreCase = true) -> {
+                expectedCode = 0
+                expectedStdout = "\"something\""
+            }
             else -> return
         }
 
@@ -28,11 +38,21 @@ class ProcessBuilderInternalTest {
     @Test
     fun `check stdout with redirection`() {
         val actualResult = processBuilder.exec("echo \"something\" >/dev/null".split(" "), null)
-        val expectedCode = 0
-        val expectedStdout = when {
-            System.getProperty("os.name").contains("Linux", ignoreCase = true) -> "something"
-            System.getProperty("os.name").contains("Mac", ignoreCase = true) -> "something"
-            System.getProperty("os.name").contains("Windows", ignoreCase = true) -> "\"something\""
+        var expectedCode = 0
+        lateinit var expectedStdout: String
+        when {
+            System.getProperty("os.name").contains("Linux", ignoreCase = true) -> {
+                expectedCode = 2
+                expectedStdout = "something"
+            }
+            System.getProperty("os.name").contains("Mac", ignoreCase = true) -> {
+                expectedCode = 2
+                expectedStdout = "something"
+            }
+            System.getProperty("os.name").contains("Windows", ignoreCase = true) -> {
+                expectedCode = 0
+                expectedStdout = "\"something\""
+            }
             else -> return
         }
         val expectedStderr: List<String> = emptyList()
@@ -46,11 +66,21 @@ class ProcessBuilderInternalTest {
     fun `check stderr`() {
         val actualResult = processBuilder.exec("cd non_existent_dir".split(" "), null)
         val expectedStdout: List<String> = emptyList()
-        val expectedStderr = listOf("The system cannot find the path specified.")
-        val expectedCode = when {
-            System.getProperty("os.name").contains("Linux", ignoreCase = true) -> 512
-            System.getProperty("os.name").contains("Mac", ignoreCase = true) -> 512
-            System.getProperty("os.name").contains("Windows", ignoreCase = true) -> 1
+        var expectedCode = 0
+        lateinit var expectedStderr: List<String>
+        when {
+            System.getProperty("os.name").contains("Linux", ignoreCase = true) -> {
+                expectedCode = 2
+                expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
+            }
+            System.getProperty("os.name").contains("Mac", ignoreCase = true) -> {
+                expectedCode = 2
+                expectedStderr = listOf("The system cannot find the path specified.")
+            }
+            System.getProperty("os.name").contains("Windows", ignoreCase = true) -> {
+                expectedCode = 1
+                expectedStderr = listOf("The system cannot find the path specified.")
+            }
             else -> return
         }
         assertEquals(expectedCode, actualResult.code)
@@ -62,11 +92,21 @@ class ProcessBuilderInternalTest {
     fun `check stderr with additional warning`() {
         val actualResult = processBuilder.exec("cd non_existent_dir 2>/dev/null".split(" "), null)
         val expectedStdout: List<String> = emptyList()
-        val expectedStderr = listOf("The system cannot find the path specified.")
-        val expectedCode = when {
-            System.getProperty("os.name").contains("Linux", ignoreCase = true) -> 512
-            System.getProperty("os.name").contains("Mac", ignoreCase = true) -> 512
-            System.getProperty("os.name").contains("Windows", ignoreCase = true) -> 1
+        var expectedCode = 0
+        lateinit var expectedStderr: List<String>
+        when {
+            System.getProperty("os.name").contains("Linux", ignoreCase = true) -> {
+                expectedCode = 2
+                expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
+            }
+            System.getProperty("os.name").contains("Mac", ignoreCase = true) -> {
+                expectedCode = 2
+                expectedStderr = listOf("The system cannot find the path specified.")
+            }
+            System.getProperty("os.name").contains("Windows", ignoreCase = true) -> {
+                expectedCode = 1
+                expectedStderr = listOf("The system cannot find the path specified.")
+            }
             else -> return
         }
         assertEquals(expectedCode, actualResult.code)
