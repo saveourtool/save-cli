@@ -27,10 +27,6 @@ import org.gradle.plugins.signing.SigningPlugin
     "MISSING_KDOC_TOP_LEVEL",
     "TOO_LONG_FUNCTION")
 fun Project.configurePublishing() {
-    apply<MavenPublishPlugin>()
-    apply<SigningPlugin>()
-    apply<NexusPublishPlugin>()
-
     // If present, set properties from env variables. If any are absent, release will fail.
     System.getenv("OSSRH_USERNAME")?.let {
         extra.set("sonatypeUsername", it)
@@ -45,19 +41,26 @@ fun Project.configurePublishing() {
         extra.set("signingPassword", it)
     }
 
+    if (this == rootProject) {
+        apply<NexusPublishPlugin>()
+        if (hasProperty("sonatypeUsername")) {
+            configureNexusPublishing()
+        }
+    }
+
+    apply<MavenPublishPlugin>()
+    apply<SigningPlugin>()
+
     configurePublications()
 
     if (hasProperty("signingKey")) {
         configureSigning()
     }
-    if (hasProperty("sonatypeUsername")) {
-        configureNexusPublishing()
-    }
 
     // https://kotlinlang.org/docs/mpp-publish-lib.html#avoid-duplicate-publications
     // Publication with name `save` is for the default artifact.
     // `configureNexusPublishing` adds sonatype publication tasks inside `afterEvaluate`.
-    rootProject.afterEvaluate {
+    afterEvaluate {
         val publicationsFromMainHost = listOf("jvm", "js", "linuxX64", "kotlinMultiplatform", "metadata")
         configure<PublishingExtension> {
             publications.matching { it.name in publicationsFromMainHost }.all {
