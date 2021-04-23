@@ -10,8 +10,8 @@ class ProcessBuilderTest {
 
     @Test
     fun `check stdout`() {
-        val actualResult = processBuilder.exec("echo something".split(" "), null)
-        val expectedStdout = "something"
+        val actualResult = processBuilder.exec("echo \"something\"".split(" "), null)
+        val expectedStdout = "\"something\""
         val expectedStderr: List<String> = emptyList()
         assertEquals(0, actualResult.code)
         // posix `system()` and JVM process builder returns lines with different whitespaces, so we cut them
@@ -21,8 +21,8 @@ class ProcessBuilderTest {
 
     @Test
     fun `check stdout 2`() {
-        val actualResult = processBuilder.exec("echo something >/dev/null".split(" "), null)
-        val expectedStdout = "something"
+        val actualResult = processBuilder.exec("echo \"something\" >/dev/null".split(" "), null)
+        val expectedStdout = "\"something\""
         val expectedStderr: List<String> = emptyList()
         assertEquals(0, actualResult.code)
         // posix popen and JVM process builder returns lines with different whitespaces, so we cut them
@@ -32,10 +32,9 @@ class ProcessBuilderTest {
 
     @Test
     fun `check stderr`() {
-        val actualResult = processBuilder.exec("ls -l root".split(" "), null)
+        val actualResult = processBuilder.exec("cd non_existent_dir".split(" "), null)
         val expectedStdout: List<String> = emptyList()
-        val expectedStderr = listOf("'ls' is not recognized as an internal or external command,",
-            "operable program or batch file.")
+        val expectedStderr = listOf("The system cannot find the path specified.")
         assertEquals(1, actualResult.code)
         assertEquals(expectedStdout, actualResult.stdout)
         assertEquals(expectedStderr, actualResult.stderr)
@@ -43,10 +42,9 @@ class ProcessBuilderTest {
 
     @Test
     fun `check stderr with additional warning`() {
-        val actualResult = processBuilder.exec("ls -l root 2>/dev/null".split(" "), null)
+        val actualResult = processBuilder.exec("cd non_existent_dir 2>/dev/null".split(" "), null)
         val expectedStdout: List<String> = emptyList()
-        val expectedStderr = listOf("'ls' is not recognized as an internal or external command,",
-            "operable program or batch file.")
+        val expectedStderr = listOf("The system cannot find the path specified.")
         assertEquals(1, actualResult.code)
         assertEquals(expectedStdout, actualResult.stdout)
         assertEquals(expectedStderr, actualResult.stderr)
