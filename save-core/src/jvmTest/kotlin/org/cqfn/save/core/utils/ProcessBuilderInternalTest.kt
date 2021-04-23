@@ -14,7 +14,7 @@ class ProcessBuilderInternalTest {
         lateinit var expectedStdout: String
         when {
             System.getProperty("os.name").contains("Linux", ignoreCase = true) -> {
-                expectedCode = 2
+                expectedCode = 0
                 expectedStdout = "something"
             }
             System.getProperty("os.name").contains("Mac", ignoreCase = true) -> {
@@ -42,7 +42,7 @@ class ProcessBuilderInternalTest {
         lateinit var expectedStdout: String
         when {
             System.getProperty("os.name").contains("Linux", ignoreCase = true) -> {
-                expectedCode = 2
+                expectedCode = 0
                 expectedStdout = "something"
             }
             System.getProperty("os.name").contains("Mac", ignoreCase = true) -> {
@@ -70,7 +70,7 @@ class ProcessBuilderInternalTest {
         lateinit var expectedStderr: List<String>
         when {
             System.getProperty("os.name").contains("Linux", ignoreCase = true) -> {
-                expectedCode = 2
+                expectedCode = 0
                 expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
             }
             System.getProperty("os.name").contains("Mac", ignoreCase = true) -> {
@@ -96,7 +96,7 @@ class ProcessBuilderInternalTest {
         lateinit var expectedStderr: List<String>
         when {
             System.getProperty("os.name").contains("Linux", ignoreCase = true) -> {
-                expectedCode = 2
+                expectedCode = 0
                 expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
             }
             System.getProperty("os.name").contains("Mac", ignoreCase = true) -> {
