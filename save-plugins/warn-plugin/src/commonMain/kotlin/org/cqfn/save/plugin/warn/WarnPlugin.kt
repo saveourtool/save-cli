@@ -47,11 +47,9 @@ class WarnPlugin : Plugin {
                     )
                 }
             }
-            .mapIndexed { index, warning ->
-                if (saveProperties.ignoreSaveComments!! && warning.line != null) warning.copy(line = warning.line + index + 1) else warning
-            }
             .groupBy { it.line to it.column }
             .mapValues { it.value.sortedBy { it.message } }
+        // todo: create a temp file with technical comments removed and feed it to the tool
         val executionResult = pb.exec(warnPluginConfig.execCmd.split(" "), null)
         val actualWarningsMap = executionResult.stdout.mapNotNull {
             with(warnPluginConfig) {
