@@ -8,9 +8,17 @@ import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.utils.ProcessBuilder
 
 import io.github.petertrr.diffutils.diff
+import io.github.petertrr.diffutils.patch.ChangeDelta
+import io.github.petertrr.diffutils.patch.Delta
+import io.github.petertrr.diffutils.patch.Patch
+import io.github.petertrr.diffutils.text.DiffRowGenerator
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
+import org.cqfn.save.core.result.Failure
+import org.cqfn.save.core.result.Success
+import org.cqfn.save.core.result.TestResult
+import org.cqfn.save.core.result.TestStatus
 
 /**
  * A plugin that runs an executable on a file and compares output with expected output.
@@ -18,21 +26,35 @@ import okio.Path.Companion.toPath
 @Suppress("INLINE_CLASS_CAN_BE_USED")
 class FixPlugin : Plugin {
     private val pb = ProcessBuilder()
+    private val diffGenerator = DiffRowGenerator.create()
+        .showInlineDiffs(true)
+        .mergeOriginalRevised(false)
+        .inlineDiffByWord(false)
+        .oldTag { start -> if (start) "[" else "]" }
+        .newTag { start -> if (start) "<" else ">" }
+        .build()
 
-    override fun execute(saveProperties: SaveProperties, testConfig: TestConfig) {
+
+    override fun execute(saveProperties: SaveProperties, testConfig: TestConfig): Collection<TestResult> {
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
-        discoverFilePairs(fixPluginConfig.testResources)
+        return discoverFilePairs(fixPluginConfig.testResources)
             .also {
                 logInfo("Discovered the following file pairs for comparison: $it")
             }
-            .forEach { (expected, test) ->
+            .map { (expected, test) ->
                 pb.exec(fixPluginConfig.execCmd.split(" "), null)
                 val fixedLines = FileSystem.SYSTEM.readLines(
                     if (fixPluginConfig.inPlace) test else test.parent!! / fixPluginConfig.destinationFileFor(test).toPath()
                 )
                 val expectedLines = FileSystem.SYSTEM.readLines(expected)
-                // todo: check equality here
-                diff(expectedLines, fixedLines)
+                val status = diff(expectedLines, fixedLines).let { patch ->
+                    if (patch.deltas.isEmpty()) {
+                        Success
+                    } else {
+                        Failure(patch.formatToString())
+                    }
+                }
+                TestResult(listOf(expected, test), status)
             }
     }
 
@@ -54,4 +76,14 @@ class FixPlugin : Plugin {
                 }
                 .values
         }
+
+    private fun Patch<String>.formatToString() = deltas.joinToString("\n") { delta ->
+        when (delta) {
+            is ChangeDelta -> diffGenerator
+                .generateDiffRows(delta.source.lines, delta.target.lines)
+                .joinToString("\n") { it.oldLine }
+                .let { "[ChangeDelta, position ${delta.source.position}, lines: [$it]]" }
+            else -> delta.toString()
+        }
+    }
 }

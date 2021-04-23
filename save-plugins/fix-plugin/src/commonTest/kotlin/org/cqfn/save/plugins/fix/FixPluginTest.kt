@@ -10,6 +10,9 @@ import org.cqfn.save.core.files.readLines
 
 import io.github.petertrr.diffutils.diff
 import okio.FileSystem
+import org.cqfn.save.core.result.Success
+import org.cqfn.save.core.result.TestResult
+import org.cqfn.save.core.result.TestStatus
 
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -88,7 +91,7 @@ class FixPluginTest {
             write("Expected file".encodeToByteArray())
         }
 
-        FixPlugin().execute(
+        val results = FixPlugin().execute(
             mockConfig,
             TestConfig(tmpDir,
                 null,
@@ -100,6 +103,9 @@ class FixPluginTest {
             diff(fs.readLines(testFile), fs.readLines(expectedFile))
                 .deltas.isEmpty()
         }
+
+        assertEquals(1, results.size, "Size of results should equal number of pairs")
+        assertEquals(TestResult(listOf(expectedFile, testFile), Success), results.single())
     }
 
     @Test
@@ -113,7 +119,7 @@ class FixPluginTest {
             write("Expected file".encodeToByteArray())
         }
 
-        FixPlugin().execute(
+        val results = FixPlugin().execute(
             mockConfig,
             TestConfig(tmpDir,
                 null,
@@ -125,6 +131,9 @@ class FixPluginTest {
             diff(fs.readLines(tmpDir / "Test3Test_copy.java"), fs.readLines(expectedFile))
                 .deltas.isEmpty()
         }
+
+        assertEquals(1, results.size, "Size of results should equal number of pairs")
+        assertEquals(TestResult(listOf(expectedFile, testFile), Success), results.single())
     }
 
     @AfterTest
