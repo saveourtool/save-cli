@@ -89,7 +89,7 @@ class ProcessBuilder {
         val userCmd = command.joinToString(" ")
         if (userCmd.contains(">")) {
             logWarn("Found user provided redirections in `$userCmd`. " +
-                    "SAVE use own redirections for internal purpose and will redirect it to the $tmpDir")
+                    "SAVE use own redirections for internal purpose and will redirect all to the $tmpDir")
         }
         val cmd = processBuilderInternal.prepareCmd(userCmd, collectStdout)
         val status = processBuilderInternal.exec(cmd)

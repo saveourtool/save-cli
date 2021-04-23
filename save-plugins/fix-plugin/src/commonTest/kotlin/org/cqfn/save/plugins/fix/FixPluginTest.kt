@@ -97,6 +97,7 @@ class FixPluginTest {
         )
 
         assertTrue("Files should be identical") {
+            println("Delta: ${diff(fs.readLines(testFile), fs.readLines(expectedFile)).deltas}")
             diff(fs.readLines(testFile), fs.readLines(expectedFile))
                 .deltas.isEmpty()
         }
