@@ -16,27 +16,6 @@ import okio.Path.Companion.toPath
 import kotlinx.datetime.Clock
 
 /**
- * Typealias
- */
-val fs = FileSystem.SYSTEM
-
-/**
- * Temporary directory for stderr and stdout (posix `system()` can't separate streams, so we do it ourselves)
- */
-val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY /
-        ("ProcessBuilder_" + Clock.System.now().toEpochMilliseconds()).toPath())
-
-/**
- * Path to stdout file
- */
-val stdoutFile = tmpDir / "stdout.txt"
-
-/**
- * Path to stderr file
- */
-val stderrFile = tmpDir / "stderr.txt"
-
-/**
  * A class that is capable of executing processes, specific to different OS and returning their output.
  */
 @Suppress("EMPTY_PRIMARY_CONSTRUCTOR")  // expected class should have explicit default constructor
@@ -49,7 +28,7 @@ expect class ProcessBuilderInternal() {
      * @param collectStdout whether to collect stdout for future usage
      * @return command with redirection of stderr to tmp file
      */
-    fun prepareCmd(command: String, collectStdout: Boolean): String
+    fun prepareCmd(command: String, collectStdout: Boolean, stdoutFile: Path, stderrFile: Path): String
 
     /**
      * Execute [cmd] and wait for its completion.
@@ -82,6 +61,17 @@ class ProcessBuilder {
         command: List<String>,
         redirectTo: Path?,
         collectStdout: Boolean = true): ExecutionResult {
+        val fs = FileSystem.SYSTEM
+
+        //Temporary directory for stderr and stdout (posix `system()` can't separate streams, so we do it ourselves)
+        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY /
+                ("ProcessBuilder_" + Clock.System.now().toEpochMilliseconds()).toPath())
+
+        //Path to stdout file
+        val stdoutFile = tmpDir / "stdout.txt"
+
+        //Path to stderr file
+        val stderrFile = tmpDir / "stderr.txt"
         fs.createDirectories(tmpDir)
         fs.createFile(stdoutFile)
         fs.createFile(stderrFile)
@@ -91,10 +81,10 @@ class ProcessBuilder {
             logWarn("Found user provided redirections in `$userCmd`. " +
                     "SAVE use own redirections for internal purpose and will redirect all to the $tmpDir")
         }
-        val cmd = processBuilderInternal.prepareCmd(userCmd, collectStdout)
+        val cmd = processBuilderInternal.prepareCmd(userCmd, collectStdout, stdoutFile, stderrFile)
         val status = processBuilderInternal.exec(cmd)
-        val stdout = getStdout()
-        val stderr = getStderr()
+        val stdout = fs.readLines(stdoutFile)
+        val stderr = fs.readLines(stderrFile)
         fs.deleteRecursively(tmpDir)
         logDebug("Removed temp directory $tmpDir")
         if (stderr.isNotEmpty()) {
@@ -119,17 +109,3 @@ data class ExecutionResult(
     val stdout: List<String>,
     val stderr: List<String>,
 )
-
-/**
- *  Read data from stdout file, we will use it in [ExecutionResult]
- *
- * @return string containing stdout
- */
-fun getStdout() = fs.readLines(stdoutFile)
-
-/**
- * Read data from stderr file, we will use it in [ExecutionResult]
- *
- * @return string containing stderr
- */
-fun getStderr() = fs.readLines(stderrFile)

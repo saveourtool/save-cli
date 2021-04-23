@@ -101,7 +101,7 @@ class FixPluginTest {
             diff(fs.readLines(testFile), fs.readLines(expectedFile))
                 .deltas.isEmpty()
         }
-       
+
          */
     }
 
