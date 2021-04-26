@@ -7,12 +7,12 @@ import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
+import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Success
 import org.cqfn.save.core.result.TestResult
 
 import io.github.petertrr.diffutils.diff
 import okio.FileSystem
-import org.cqfn.save.core.result.DebugInfo
 
 import kotlin.test.AfterTest
 import kotlin.test.Test
