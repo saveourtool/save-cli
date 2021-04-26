@@ -12,6 +12,7 @@ import org.cqfn.save.core.result.TestResult
 
 import io.github.petertrr.diffutils.diff
 import okio.FileSystem
+import org.cqfn.save.core.result.DebugInfo
 
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -99,7 +100,7 @@ class FixPluginTest {
         )
 
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
-        assertEquals(TestResult(listOf(expectedFile, testFile), Success), results.single())
+        assertEquals(TestResult(listOf(expectedFile, testFile), Success, DebugInfo("", null)), results.single())
 
         assertTrue("Files should be identical") {
             diff(fs.readLines(testFile), fs.readLines(expectedFile))
@@ -127,7 +128,7 @@ class FixPluginTest {
         )
 
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
-        assertEquals(TestResult(listOf(expectedFile, testFile), Success), results.single())
+        assertEquals(TestResult(listOf(expectedFile, testFile), Success, DebugInfo("", null)), results.single())
 
         assertTrue("Files should be identical") {
             diff(fs.readLines(tmpDir / "Test3Test_copy.java"), fs.readLines(expectedFile))
