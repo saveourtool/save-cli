@@ -5,6 +5,7 @@ import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.logInfo
 import org.cqfn.save.core.plugin.Plugin
+import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Failure
 import org.cqfn.save.core.result.Success
 import org.cqfn.save.core.result.TestResult
@@ -40,7 +41,7 @@ class FixPlugin : Plugin {
             }
         return sequence {
             files.forEach { (expected, test) ->
-                pb.exec(fixPluginConfig.execCmd.split(" "), null)
+                val executionResult = pb.exec(fixPluginConfig.execCmd.split(" "), null)
                 val fixedLines = FileSystem.SYSTEM.readLines(
                     if (fixPluginConfig.inPlace) test else test.parent!! / fixPluginConfig.destinationFileFor(test).toPath()
                 )
@@ -52,7 +53,11 @@ class FixPlugin : Plugin {
                         Failure(patch.formatToString())
                     }
                 }
-                yield(TestResult(listOf(expected, test), status))
+                yield(TestResult(
+                    listOf(expected, test),
+                    status,
+                    DebugInfo(executionResult.stdout.joinToString("\n"), null)
+                ))
             }
         }
     }
