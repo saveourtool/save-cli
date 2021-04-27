@@ -100,7 +100,7 @@ class FixPluginTest {
         )
 
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
-        assertEquals(TestResult(listOf(expectedFile, testFile), Success, DebugInfo("", null)), results.single())
+        assertEquals(TestResult(listOf(expectedFile, testFile), Success, DebugInfo("", null, null)), results.single())
 
         assertTrue("Files should be identical") {
             diff(fs.readLines(testFile), fs.readLines(expectedFile))
@@ -128,7 +128,7 @@ class FixPluginTest {
         )
 
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
-        assertEquals(TestResult(listOf(expectedFile, testFile), Success, DebugInfo("", null)), results.single())
+        assertEquals(TestResult(listOf(expectedFile, testFile), Success, DebugInfo("", null, null)), results.single())
 
         assertTrue("Files should be identical") {
             diff(fs.readLines(tmpDir / "Test3Test_copy.java"), fs.readLines(expectedFile))
