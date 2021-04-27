@@ -7,6 +7,9 @@ import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
+import org.cqfn.save.core.result.DebugInfo
+import org.cqfn.save.core.result.Pass
+import org.cqfn.save.core.result.TestResult
 
 import io.github.petertrr.diffutils.diff
 import okio.FileSystem
@@ -88,13 +91,16 @@ class FixPluginTest {
             write("Expected file".encodeToByteArray())
         }
 
-        FixPlugin().execute(
+        val results = FixPlugin().execute(
             mockConfig,
             TestConfig(tmpDir,
                 null,
                 listOf(FixPluginConfig("cd $tmpDir && echo Expected file> Test3Test.java", inPlace = true, testResources = listOf(testFile, expectedFile)))
             )
         )
+
+        assertEquals(1, results.count(), "Size of results should equal number of pairs")
+        assertEquals(TestResult(listOf(expectedFile, testFile), Pass, DebugInfo("", null, null)), results.single())
 
         assertTrue("Files should be identical") {
             diff(fs.readLines(testFile), fs.readLines(expectedFile))
@@ -113,13 +119,16 @@ class FixPluginTest {
             write("Expected file".encodeToByteArray())
         }
 
-        FixPlugin().execute(
+        val results = FixPlugin().execute(
             mockConfig,
             TestConfig(tmpDir,
                 null,
                 listOf(FixPluginConfig("cd $tmpDir && echo Expected file> Test3Test_copy.java", destinationFileSuffix = "_copy", testResources = listOf(testFile, expectedFile)))
             )
         )
+
+        assertEquals(1, results.count(), "Size of results should equal number of pairs")
+        assertEquals(TestResult(listOf(expectedFile, testFile), Pass, DebugInfo("", null, null)), results.single())
 
         assertTrue("Files should be identical") {
             diff(fs.readLines(tmpDir / "Test3Test_copy.java"), fs.readLines(expectedFile))
