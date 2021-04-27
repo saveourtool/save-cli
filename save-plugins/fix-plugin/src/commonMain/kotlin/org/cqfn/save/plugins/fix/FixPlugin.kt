@@ -39,11 +39,9 @@ class FixPlugin : Plugin {
             .also {
                 logInfo("Discovered the following file pairs for comparison: $it")
             }
-
         return sequence {
             files.forEach { (expected, test) ->
                 val executionResult = pb.exec(fixPluginConfig.execCmd.split(" "), null, false)
-
                 val fixedLines = FileSystem.SYSTEM.readLines(
                     if (fixPluginConfig.inPlace) test else test.parent!! / fixPluginConfig.destinationFileFor(test).toPath()
                 )

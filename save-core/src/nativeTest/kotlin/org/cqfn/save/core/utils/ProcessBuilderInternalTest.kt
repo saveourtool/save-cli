@@ -36,7 +36,7 @@ class ProcessBuilderInternalTest {
         val actualResult = processBuilder.exec("cd non_existent_dir".split(" "), null)
         val expectedStdout: List<String> = emptyList()
         lateinit var expectedStderr: List<String>
-        var expectedCode = 0
+        var expectedCode: Int
         when (Platform.osFamily) {
             OsFamily.LINUX, OsFamily.MACOSX -> {
                 expectedCode = 512
@@ -58,7 +58,7 @@ class ProcessBuilderInternalTest {
         val actualResult = processBuilder.exec("cd non_existent_dir 2>/dev/null".split(" "), null)
         val expectedStdout: List<String> = emptyList()
         lateinit var expectedStderr: List<String>
-        var expectedCode = 0
+        var expectedCode: Int
         when (Platform.osFamily) {
             OsFamily.LINUX, OsFamily.MACOSX -> {
                 expectedCode = 512
