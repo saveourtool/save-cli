@@ -6,6 +6,8 @@ import org.cqfn.save.core.config.ResultOutputType
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.result.Pass
+import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.isCurrentOsWindows
 
 import okio.FileSystem
@@ -15,6 +17,8 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Ignore
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 private val mockConfig = SaveProperties(
     testConfig = ".",
@@ -69,7 +73,10 @@ class WarnPluginTest {
                 Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
                 true, true, 1, 2, 3
             )
-        )
+        ) { results ->
+            assertEquals(1, results.size)
+            assertTrue(results.single().status is Pass)
+        }
     }
 
     @Test
@@ -90,7 +97,10 @@ class WarnPluginTest {
                 true, true, 1, 2, 3
             ),
             mockConfig.copy(ignoreSaveComments = true)
-        )
+        ) { results ->
+            assertEquals(1, results.size)
+            assertTrue(results.single().status is Pass)
+        }
     }
 
     @Test
@@ -121,7 +131,10 @@ class WarnPluginTest {
                 Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
                 true, true, 1, 2, 3
             )
-        )
+        ) { results ->
+            assertEquals(1, results.size)
+            assertTrue(results.single().status is Pass)
+        }
         fs.delete(tmpDir / "resource")
     }
 
@@ -155,7 +168,10 @@ class WarnPluginTest {
                 true, true, 1, 2, 3
             ),
             mockConfig.copy(ignoreSaveComments = true)
-        )
+        ) { results ->
+            assertEquals(1, results.size)
+            assertTrue(results.single().status is Pass)
+        }
         fs.delete(tmpDir / "resource")
     }
 
@@ -187,7 +203,12 @@ class WarnPluginTest {
                 Regex("[\\w\\d.-]+: (.+)"),
                 false, false, null, null, 1
             )
-        )
+        ) { results ->
+            assertEquals(1, results.size)
+            results.single().status.let {
+                assertTrue(it is Pass, "Expected test to pass, but actually got status $it")
+            }
+        }
         fs.delete(tmpDir / "resource")
     }
 
@@ -199,15 +220,19 @@ class WarnPluginTest {
     private fun performTest(
         text: String,
         warnPluginConfig: WarnPluginConfig,
-        saveProperties: SaveProperties = mockConfig) {
+        saveProperties: SaveProperties = mockConfig,
+        assertion: (List<TestResult>) -> Unit) {
         val testFile = fs.createFile(tmpDir / "Test1Test.java")
         fs.write(testFile) {
             write(text.encodeToByteArray())
         }
 
-        WarnPlugin().execute(
+        val results = WarnPlugin().execute(
             saveProperties,
             TestConfig(".".toPath(), null, listOf(warnPluginConfig.copy(testResources = listOf(testFile))))
         )
+            .toList()
+        println(results)
+        assertion(results)
     }
 }
