@@ -6,8 +6,8 @@ import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.logInfo
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.DebugInfo
-import org.cqfn.save.core.result.Failure
-import org.cqfn.save.core.result.Success
+import org.cqfn.save.core.result.Fail
+import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.ProcessBuilder
 
@@ -48,9 +48,9 @@ class FixPlugin : Plugin {
                 val expectedLines = FileSystem.SYSTEM.readLines(expected)
                 val status = diff(expectedLines, fixedLines).let { patch ->
                     if (patch.deltas.isEmpty()) {
-                        Success
+                        Pass
                     } else {
-                        Failure(patch.formatToString())
+                        Fail(patch.formatToString())
                     }
                 }
                 yield(TestResult(

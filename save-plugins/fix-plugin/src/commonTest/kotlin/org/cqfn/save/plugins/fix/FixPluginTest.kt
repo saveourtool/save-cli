@@ -8,7 +8,7 @@ import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.result.DebugInfo
-import org.cqfn.save.core.result.Success
+import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 
 import io.github.petertrr.diffutils.diff
@@ -100,7 +100,7 @@ class FixPluginTest {
         )
 
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
-        assertEquals(TestResult(listOf(expectedFile, testFile), Success, DebugInfo("", null, null)), results.single())
+        assertEquals(TestResult(listOf(expectedFile, testFile), Pass, DebugInfo("", null, null)), results.single())
 
         assertTrue("Files should be identical") {
             diff(fs.readLines(testFile), fs.readLines(expectedFile))
@@ -128,7 +128,7 @@ class FixPluginTest {
         )
 
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
-        assertEquals(TestResult(listOf(expectedFile, testFile), Success, DebugInfo("", null, null)), results.single())
+        assertEquals(TestResult(listOf(expectedFile, testFile), Pass, DebugInfo("", null, null)), results.single())
 
         assertTrue("Files should be identical") {
             diff(fs.readLines(tmpDir / "Test3Test_copy.java"), fs.readLines(expectedFile))

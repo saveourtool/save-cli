@@ -9,12 +9,12 @@ package org.cqfn.save.core.result
  */
 sealed class TestStatus
 
-object Success : TestStatus()
+object Pass : TestStatus()
 
 /**
  * @property reason reason of failure
  */
-data class Failure(val reason: String) : TestStatus()
+data class Fail(val reason: String) : TestStatus()
 
 /**
  * @property reason reason of test ignoring

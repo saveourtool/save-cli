@@ -8,9 +8,9 @@ import org.cqfn.save.core.logging.logInfo
 import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.Crash
-import org.cqfn.save.core.result.Failure
+import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.Ignored
-import org.cqfn.save.core.result.Success
+import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 
 import okio.Path.Companion.toPath
@@ -42,8 +42,8 @@ class Save(
     @Suppress("WHEN_WITHOUT_ELSE")  // TestResult is a sealed class
     private fun handleResult(testResult: TestResult) {
         when (testResult.status) {
-            is Success -> logDebug("Test on resources [${testResult.resources}] has completed successfully")
-            is Failure -> logWarn("Test on resources [${testResult.resources}] has failed: ${testResult.status.reason}")
+            is Pass -> logDebug("Test on resources [${testResult.resources}] has completed successfully")
+            is Fail -> logWarn("Test on resources [${testResult.resources}] has failed: ${testResult.status.reason}")
             is Ignored -> logWarn("Test on resources [${testResult.resources}] has been ignored: ${testResult.status.reason}")
             is Crash -> logError("Test on resources [${testResult.resources}] has crashed: ${testResult.status.throwable.message}." +
                     "Please report an issue at https://github.com/cqfn/save")
