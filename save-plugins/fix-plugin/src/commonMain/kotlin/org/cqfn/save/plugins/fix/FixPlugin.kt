@@ -56,7 +56,8 @@ class FixPlugin : Plugin {
                 yield(TestResult(
                     listOf(expected, test),
                     status,
-                    DebugInfo(executionResult.stdout.joinToString("\n"), null)
+                    // todo: fill debug info
+                    DebugInfo(executionResult.stdout.joinToString("\n"), null, null)
                 ))
             }
         }
