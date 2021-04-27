@@ -48,8 +48,6 @@ class Save(
             is Crash -> logError("Test on resources [${testResult.resources}] has crashed: ${testResult.status.throwable.message}." +
                     "Please report an issue at https://github.com/cqfn/save")
         }
-        if (saveProperties.debug == true) {
-            logDebug("Completed test execution for resources [${testResult.resources}]. Additional info: ${testResult.debugInfo}")
-        }
+        logDebug("Completed test execution for resources [${testResult.resources}]. Additional info: ${testResult.debugInfo}")
     }
 }
