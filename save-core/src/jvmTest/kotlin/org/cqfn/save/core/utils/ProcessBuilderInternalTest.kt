@@ -9,25 +9,9 @@ class ProcessBuilderInternalTest {
 
     @Test
     fun `check stdout`() {
-        val actualResult = processBuilder.exec("echo \"something\"".split(" "), null)
-        var expectedCode = 0
-        lateinit var expectedStdout: String
-        when {
-            System.getProperty("os.name").contains("Linux", ignoreCase = true) -> {
-                expectedCode = 2
-                expectedStdout = "something"
-            }
-            System.getProperty("os.name").contains("Mac", ignoreCase = true) -> {
-                expectedCode = 2
-                expectedStdout = "something"
-            }
-            System.getProperty("os.name").contains("Windows", ignoreCase = true) -> {
-                expectedCode = 0
-                expectedStdout = "\"something\""
-            }
-            else -> return
-        }
-
+        val actualResult = processBuilder.exec("echo something".split(" "), null)
+        val expectedCode = 0
+        val expectedStdout = "something"
         val expectedStderr: List<String> = emptyList()
         assertEquals(expectedCode, actualResult.code)
         // posix `system()` and JVM process builder returns lines with different whitespaces, so we cut them
@@ -37,28 +21,25 @@ class ProcessBuilderInternalTest {
 
     @Test
     fun `check stdout with redirection`() {
-        val actualResult = processBuilder.exec("echo \"something\" >/dev/null".split(" "), null)
-        var expectedCode = 0
-        lateinit var expectedStdout: String
+        val actualResult = processBuilder.exec("echo something >/dev/null".split(" "), null)
+        var expectedCode: Int
+        val expectedStdout = ""
+        lateinit var expectedStderr: List<String>
         when {
-            System.getProperty("os.name").contains("Linux", ignoreCase = true) -> {
-                expectedCode = 2
-                expectedStdout = "something"
-            }
-            System.getProperty("os.name").contains("Mac", ignoreCase = true) -> {
-                expectedCode = 2
-                expectedStdout = "something"
+            System.getProperty("os.name").contains("Linux", ignoreCase = true) ||
+                    System.getProperty("os.name").contains("Mac", ignoreCase = true)-> {
+                expectedCode = 0
+                expectedStderr = emptyList()
             }
             System.getProperty("os.name").contains("Windows", ignoreCase = true) -> {
-                expectedCode = 0
-                expectedStdout = "\"something\""
+                expectedCode = 1
+                expectedStderr = listOf("The system cannot find the path specified.")
             }
             else -> return
         }
-        val expectedStderr: List<String> = emptyList()
         assertEquals(expectedCode, actualResult.code)
         // posix popen and JVM process builder returns lines with different whitespaces, so we cut them
-        assertEquals(expectedStdout, actualResult.stdout[0].trimEnd())
+        assertEquals(expectedStdout, "")
         assertEquals(expectedStderr, actualResult.stderr)
     }
 
@@ -66,16 +47,13 @@ class ProcessBuilderInternalTest {
     fun `check stderr`() {
         val actualResult = processBuilder.exec("cd non_existent_dir".split(" "), null)
         val expectedStdout: List<String> = emptyList()
-        var expectedCode = 0
+        var expectedCode: Int
         lateinit var expectedStderr: List<String>
         when {
-            System.getProperty("os.name").contains("Linux", ignoreCase = true) -> {
+            System.getProperty("os.name").contains("Linux", ignoreCase = true) ||
+                    System.getProperty("os.name").contains("Mac", ignoreCase = true)-> {
                 expectedCode = 2
                 expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
-            }
-            System.getProperty("os.name").contains("Mac", ignoreCase = true) -> {
-                expectedCode = 2
-                expectedStderr = listOf("The system cannot find the path specified.")
             }
             System.getProperty("os.name").contains("Windows", ignoreCase = true) -> {
                 expectedCode = 1
@@ -92,16 +70,13 @@ class ProcessBuilderInternalTest {
     fun `check stderr with additional warning`() {
         val actualResult = processBuilder.exec("cd non_existent_dir 2>/dev/null".split(" "), null)
         val expectedStdout: List<String> = emptyList()
-        var expectedCode = 0
+        var expectedCode: Int
         lateinit var expectedStderr: List<String>
         when {
-            System.getProperty("os.name").contains("Linux", ignoreCase = true) -> {
+            System.getProperty("os.name").contains("Linux", ignoreCase = true) ||
+                    System.getProperty("os.name").contains("Mac", ignoreCase = true)-> {
                 expectedCode = 2
-                expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
-            }
-            System.getProperty("os.name").contains("Mac", ignoreCase = true) -> {
-                expectedCode = 2
-                expectedStderr = listOf("The system cannot find the path specified.")
+                expectedStderr = emptyList()
             }
             System.getProperty("os.name").contains("Windows", ignoreCase = true) -> {
                 expectedCode = 1

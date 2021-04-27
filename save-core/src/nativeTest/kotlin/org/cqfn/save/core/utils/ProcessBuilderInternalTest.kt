@@ -9,15 +9,9 @@ class ProcessBuilderInternalTest {
 
     @Test
     fun `check stdout`() {
-        val actualResult = processBuilder.exec("echo \"something\"".split(" "), null)
+        val actualResult = processBuilder.exec("echo something".split(" "), null)
         val expectedCode = 0
-        val expectedStdout = when (Platform.osFamily) {
-            OsFamily.LINUX -> "something"
-            OsFamily.MACOSX -> "something"
-            OsFamily.WINDOWS -> "\"something\""
-            else -> return
-        }
-
+        val expectedStdout = "something"
         val expectedStderr: List<String> = emptyList()
         assertEquals(expectedCode, actualResult.code)
         // posix `system()` and JVM process builder returns lines with different whitespaces, so we cut them
@@ -27,14 +21,9 @@ class ProcessBuilderInternalTest {
 
     @Test
     fun `check stdout with redirection`() {
-        val actualResult = processBuilder.exec("echo \"something\" >/dev/null".split(" "), null)
+        val actualResult = processBuilder.exec("echo something >/dev/null".split(" "), null)
         val expectedCode = 0
-        val expectedStdout = when (Platform.osFamily) {
-            OsFamily.LINUX -> "something"
-            OsFamily.MACOSX -> "something"
-            OsFamily.WINDOWS -> "\"something\""
-            else -> return
-        }
+        val expectedStdout = "something"
         val expectedStderr: List<String> = emptyList()
         assertEquals(expectedCode, actualResult.code)
         // posix popen and JVM process builder returns lines with different whitespaces, so we cut them
@@ -49,13 +38,9 @@ class ProcessBuilderInternalTest {
         lateinit var expectedStderr: List<String>
         var expectedCode = 0
         when (Platform.osFamily) {
-            OsFamily.LINUX -> {
+            OsFamily.LINUX, OsFamily.MACOSX -> {
                 expectedCode = 512
                 expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
-            }
-            OsFamily.MACOSX -> {
-                expectedCode = 512
-                expectedStderr = listOf("The system cannot find the path specified.")
             }
             OsFamily.WINDOWS -> {
                 expectedCode = 1
@@ -75,13 +60,9 @@ class ProcessBuilderInternalTest {
         lateinit var expectedStderr: List<String>
         var expectedCode = 0
         when (Platform.osFamily) {
-            OsFamily.LINUX -> {
+            OsFamily.LINUX, OsFamily.MACOSX -> {
                 expectedCode = 512
                 expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
-            }
-            OsFamily.MACOSX -> {
-                expectedCode = 512
-                expectedStderr = listOf("The system cannot find the path specified.")
             }
             OsFamily.WINDOWS -> {
                 expectedCode = 1

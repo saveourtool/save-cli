@@ -76,7 +76,7 @@ class FixPluginTest {
         assertEquals("Test2Expected.java", pairs.single().first.name)
         assertEquals("Test2Test.java", pairs.single().second.name)
     }
-/*
+
     @Test
     fun `should calculate diff of discovered files in inPlace mode`() {
         val testFile = fs.createFile(tmpDir / "Test3Test.java")
@@ -97,7 +97,6 @@ class FixPluginTest {
         )
 
         assertTrue("Files should be identical") {
-            println("Delta: ${diff(fs.readLines(testFile), fs.readLines(expectedFile)).deltas}")
             diff(fs.readLines(testFile), fs.readLines(expectedFile))
                 .deltas.isEmpty()
         }
@@ -127,7 +126,7 @@ class FixPluginTest {
                 .deltas.isEmpty()
         }
     }
-    */
+
     @AfterTest
     fun tearDown() {
         fs.deleteRecursively(tmpDir)
