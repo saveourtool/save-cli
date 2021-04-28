@@ -36,4 +36,4 @@ actual class ProcessBuilder {
 /**
  * @return true if current OS is Windows
  */
-actual fun isCurrentOsWindows() = Platform.osFamily == OsFamily.WINDOWS
+actual fun isCurrentOsWindows() = false
