@@ -15,6 +15,7 @@ import kotlinx.cinterop.toKString
     "MISSING_KDOC_ON_FUNCTION"
 )
 actual class ProcessBuilder {
+    @Suppress("MAGIC_NUMBER")
     actual fun exec(command: List<String>, redirectTo: Path?): ExecutionResult {
         val common = ProcessBuilderInternal()
         val cmd = common.prepareCmd(command)
