@@ -19,7 +19,7 @@ import kotlinx.datetime.Clock
  * A class that is capable of executing processes, specific to different OS and returning their output.
  */
 @Suppress("EMPTY_PRIMARY_CONSTRUCTOR")  // expected class should have explicit default constructor
-expect class ProcessBuilderInternal() {
+expect class ProcessBuilderInternal(stdoutFile: Path, stderrFile: Path, collectStdout: Boolean) {
     /**
      * Modify execution command for popen,
      * stdout and stderr will be redirected to tmp files
@@ -28,7 +28,7 @@ expect class ProcessBuilderInternal() {
      * @param collectStdout whether to collect stdout for future usage
      * @return command with redirection of stderr to tmp file
      */
-    fun prepareCmd(command: String, collectStdout: Boolean, stdoutFile: Path, stderrFile: Path): String
+    fun prepareCmd(command: String): String
 
     /**
      * Execute [cmd] and wait for its completion.
@@ -44,10 +44,6 @@ expect class ProcessBuilderInternal() {
  */
 @Suppress("INLINE_CLASS_CAN_BE_USED")
 class ProcessBuilder {
-    /**
-     * Instance, containing platform-dependent realization of command execution
-     */
-    private val processBuilderInternal = ProcessBuilderInternal()
 
     /**
      * Execute [command] and wait for its completion.
@@ -72,6 +68,9 @@ class ProcessBuilder {
 
         //Path to stderr file
         val stderrFile = tmpDir / "stderr.txt"
+
+        // Instance, containing platform-dependent realization of command execution
+        val processBuilderInternal = ProcessBuilderInternal(stdoutFile, stderrFile, collectStdout)
         fs.createDirectories(tmpDir)
         fs.createFile(stdoutFile)
         fs.createFile(stderrFile)
@@ -81,7 +80,7 @@ class ProcessBuilder {
             logWarn("Found user provided redirections in `$userCmd`. " +
                     "SAVE use own redirections for internal purpose and will redirect all to the $tmpDir")
         }
-        val cmd = processBuilderInternal.prepareCmd(userCmd, collectStdout, stdoutFile, stderrFile)
+        val cmd = processBuilderInternal.prepareCmd(userCmd)
         val status = processBuilderInternal.exec(cmd)
         val stdout = fs.readLines(stdoutFile)
         val stderr = fs.readLines(stderrFile)

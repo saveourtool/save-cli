@@ -6,33 +6,26 @@ import org.cqfn.save.core.logging.logDebug
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
-import java.lang.ProcessBuilder
 import java.util.stream.Collectors
 
 @Suppress("MISSING_KDOC_TOP_LEVEL",
     "MISSING_KDOC_CLASS_ELEMENTS",
     "MISSING_KDOC_ON_FUNCTION"
 )
-actual class ProcessBuilderInternal {
-    private val pb = ProcessBuilder()
-    lateinit var stderrFile: Path
-    lateinit var stdoutFile: Path
-    lateinit var cmdArray: Array<String>
-
-    actual fun prepareCmd(command: String, collectStdout: Boolean, stdoutFile: Path, stderrFile: Path): String {
+actual class ProcessBuilderInternal actual constructor(
+    private val stdoutFile: Path, private val stderrFile: Path,
+    private val collectStdout: Boolean
+) {
+    actual fun prepareCmd(command: String): String {
         val shell = if (System.getProperty("os.name").startsWith("Windows", ignoreCase = true)) arrayOf("CMD", "/C") else arrayOf("sh", "-c")
         val cmd = arrayOf(*shell, command)
-        this.stdoutFile = stdoutFile
-        this.stderrFile = stderrFile
-        this.cmdArray = cmd
         return cmd.joinToString()
     }
 
     actual fun exec(cmd: String): Int {
         logDebug("Executing: $cmd")
         val runTime = Runtime.getRuntime()
-        val tempCmd: Array<String> = cmdArray
-        val process = runTime.exec(cmdArray)//cmd.split(",").toTypedArray())
+        val process = runTime.exec(cmd.split(", ").toTypedArray())
         writeDataFromBufferToFile(process, "stdout", stdoutFile)
         writeDataFromBufferToFile(process, "stderr", stderrFile)
         // TODO: Does waitFor() == -1 responsible for errors like in posix?
@@ -40,6 +33,9 @@ actual class ProcessBuilderInternal {
     }
 
     private fun writeDataFromBufferToFile(process: Process, stream: String, file: Path) {
+        if (!collectStdout && stream == "stdout") {
+            return
+        }
         val br = if (stream == "stdout") {
             BufferedReader(InputStreamReader(process.inputStream))
         }
@@ -50,7 +46,6 @@ actual class ProcessBuilderInternal {
         FileSystem.SYSTEM.write(file) {
             write(data.encodeToByteArray())
         }
-        println("data: $stream $data")
     }
 }
 
