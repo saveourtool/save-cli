@@ -84,12 +84,11 @@ class WarnPlugin : Plugin {
 
     @Suppress("TYPE_ALIAS")
     private fun checkResults(expectedWarningsMap: Map<LineColumn?, List<Warning>>,
-                             actualWarningsMap: Map<LineColumn?, List<Warning>>): TestStatus {
-        return checkCollectionsDiffer(expectedWarningsMap, actualWarningsMap)?.let { message ->
-            Fail(message)
-        }
-            ?: Pass
-    }
+                             actualWarningsMap: Map<LineColumn?, List<Warning>>): TestStatus =
+            checkCollectionsDiffer(expectedWarningsMap, actualWarningsMap)?.let { message ->
+                Fail(message)
+            }
+                ?: Pass
 
     @Suppress("TYPE_ALIAS")
     private fun checkCollectionsDiffer(expectedWarningsMap: Map<LineColumn?, List<Warning>>,
