@@ -18,8 +18,10 @@ actual class ProcessBuilder {
     actual fun exec(command: List<String>, redirectTo: Path?): ExecutionResult {
         val common = ProcessBuilderInternal()
 
+        // FixMe: move it to the common isWindows method
         val shell = if (System.getProperty("os.name").startsWith("Windows", ignoreCase = true)) listOf("PowerShell", "-c") else listOf("sh", "-c")
         val cmd = shell + listOf(command.joinToString(" "))
+        println(cmd)
         logDebug("Executing: ${cmd.joinToString(" ")}")
         val code = pb.command(cmd)
             .let { builder ->

@@ -43,9 +43,15 @@ class FixPlugin : Plugin {
             files.forEach { (expected, test) ->
                 val executionResult = pb.exec(fixPluginConfig.execCmd.split(" "), null)
                 val fixedLines = FileSystem.SYSTEM.readLines(
-                    if (fixPluginConfig.inPlace) test else test.parent!! / fixPluginConfig.destinationFileFor(test).toPath()
+                    if (fixPluginConfig.inPlace) test else  {
+                        println("File Name " + test.parent!! / fixPluginConfig.destinationFileFor(test).toPath())
+                        test.parent!! / fixPluginConfig.destinationFileFor(test).toPath()
+                    }
                 )
                 val expectedLines = FileSystem.SYSTEM.readLines(expected)
+                println("expectedLines: $expectedLines")
+                println("fixedLines: $fixedLines")
+
                 val status = diff(expectedLines, fixedLines).let { patch ->
                     if (patch.deltas.isEmpty()) {
                         Pass
