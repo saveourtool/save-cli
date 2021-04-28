@@ -40,7 +40,7 @@ kotlin {
             dependsOn(commonMain)
             dependencies {
                 implementation(project(":save-core"))
-                implementation( "org.jetbrains.kotlinx:kotlinx-serialization-properties:${Versions.serialization}")
+                implementation( "org.jetbrains.kotlinx:kotlinx-serialization-properties:${Versions.Kotlinx.serialization}")
             }
         }
         getByName("${saveTarget.name}Main").dependsOn(nativeMain)
