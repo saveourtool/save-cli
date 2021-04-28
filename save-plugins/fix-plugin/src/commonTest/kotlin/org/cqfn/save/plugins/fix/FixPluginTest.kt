@@ -90,28 +90,26 @@ class FixPluginTest {
         }
         val expectedFile = fs.createFile(tmpDir / "Test3Expected.java")
         fs.write(expectedFile) {
-            write("Expected file".encodeToByteArray())
-        }
-        val script = if (isCurrentOsWindows()) fs.createFile("execute.bat") else fs.createFile("execute.sh")
-        fs.write(script) {
-            if (!isCurrentOsWindows()) {
-                write("#!/bin/bash\n".encodeToByteArray())
+            if (isCurrentOsWindows()) {
+                write("Expected file \n".encodeToByteArray())
+            } else {
+                write("Expected file".encodeToByteArray())
             }
-            write("cd $tmpDir\n".encodeToByteArray())
-            write("echo Expected file > Test3Test.java\n".encodeToByteArray())
-            write("echo hello world".encodeToByteArray())
         }
+
+        val executionCmd = if (isCurrentOsWindows()) {
+            val diskWithTmpDir = tmpDir.toString().substringBefore("\\").toLowerCase()
+            "$diskWithTmpDir && cd $tmpDir && echo Expected file > Test3Test.java"
+        } else {
+            "cd $tmpDir && echo Expected file > Test3Test.java"
+        }
+        println(executionCmd)
         val results = FixPlugin().execute(
             mockConfig,
-            if (isCurrentOsWindows()) {
-                TestConfig(tmpDir,
-                    null,
-                    listOf(FixPluginConfig(".\\execute.bat", inPlace = true, testResources = listOf(testFile, expectedFile))))
-            } else {
-                TestConfig(tmpDir,
-                    null,
-                    listOf(FixPluginConfig("chmod +x execute.sh; ./execute.sh", inPlace = true, testResources = listOf(testFile, expectedFile))))
-            }
+            TestConfig(tmpDir,
+                null,
+                listOf(FixPluginConfig(executionCmd, inPlace = true, testResources = listOf(testFile, expectedFile)))
+            )
         )
         println("\n-----------\nDebug from execution:[" + results.single().debugInfo?.stdout + "]\n")
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
@@ -121,7 +119,6 @@ class FixPluginTest {
             diff(fs.readLines(testFile), fs.readLines(expectedFile))
                 .deltas.isEmpty()
         }
-        fs.delete(script)
     }
 
     @Test
@@ -133,30 +130,25 @@ class FixPluginTest {
         }
         val expectedFile = fs.createFile(tmpDir / "Test3Expected.java")
         fs.write(expectedFile) {
-            write("Expected file".encodeToByteArray())
-        }
-
-        val script = if (isCurrentOsWindows()) fs.createFile("execute.bat") else fs.createFile("execute.sh")
-        fs.write(script) {
-            if (!isCurrentOsWindows()) {
-                write("#!/bin/bash\n".encodeToByteArray())
+            if (isCurrentOsWindows()) {
+                write("Expected file \n".encodeToByteArray())
+            } else {
+                write("Expected file".encodeToByteArray())
             }
-            write("cd $tmpDir\n".encodeToByteArray())
-            write("echo Expected file > Test3Test_copy.java\n".encodeToByteArray())
-            write("echo hello world".encodeToByteArray())
+        }
+        val executionCmd = if (isCurrentOsWindows()) {
+            val diskWithTmpDir = tmpDir.toString().substringBefore("\\").toLowerCase()
+            "$diskWithTmpDir && cd $tmpDir && echo Expected file > Test3Test_copy.java"
+        } else {
+            "cd $tmpDir && echo Expected file > Test3Test_copy.java"
         }
 
         val results = FixPlugin().execute(
             mockConfig,
-            if (isCurrentOsWindows()) {
-                TestConfig(tmpDir,
-                    null,
-                    listOf(FixPluginConfig(".\\execute.bat", destinationFileSuffix = "_copy", testResources = listOf(testFile, expectedFile))))
-            } else {
-                TestConfig(tmpDir,
-                    null,
-                    listOf(FixPluginConfig("chmod +x execute.sh; ./execute.sh", destinationFileSuffix = "_copy", testResources = listOf(testFile, expectedFile))))
-            }
+            TestConfig(tmpDir,
+                null,
+                listOf(FixPluginConfig(executionCmd, destinationFileSuffix = "_copy", testResources = listOf(testFile, expectedFile)))
+            )
         )
         println("\n-----------\nDebug from execution:[" + results.single().debugInfo?.stdout + "]\n")
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
@@ -166,7 +158,6 @@ class FixPluginTest {
             diff(fs.readLines(tmpDir / "Test3Test_copy.java"), fs.readLines(expectedFile))
                 .deltas.isEmpty()
         }
-        fs.delete(script)
     }
 
     @AfterTest
