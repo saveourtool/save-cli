@@ -98,7 +98,7 @@ class FixPluginTest {
                 write("#!/bin/bash\n".encodeToByteArray())
             }
             write("cd $tmpDir\n".encodeToByteArray())
-            write("echo Expected file> Test3Test.java".encodeToByteArray())
+            write("echo Expected file > Test3Test.java".encodeToByteArray())
         }
         val results = FixPlugin().execute(
             mockConfig,
@@ -141,7 +141,7 @@ class FixPluginTest {
                 write("#!/bin/bash\n".encodeToByteArray())
             }
             write("cd $tmpDir\n".encodeToByteArray())
-            write("echo Expected file> Test3Test_copy.java".encodeToByteArray())
+            write("echo Expected file > Test3Test_copy.java".encodeToByteArray())
         }
         val results = FixPlugin().execute(
             mockConfig,
