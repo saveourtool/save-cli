@@ -37,3 +37,10 @@ actual class ProcessBuilder {
         return common.logAndReturn(stdout, status, redirectTo)
     }
 }
+
+/**
+ * todo: move to nativeMain source set and use `Platform.osFamily`
+ *
+ * @return true if current OS is Windows
+ */
+actual fun isCurrentOsWindows() = true
