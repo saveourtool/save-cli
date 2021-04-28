@@ -33,9 +33,9 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api("com.squareup.okio:okio-multiplatform:${Versions.okio}")
-                implementation( "org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.1")
-                implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.2")
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.1")
+                implementation( "org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
+                implementation("org.jetbrains.kotlinx:kotlinx-cli:${Versions.Kotlinx.cli}")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:${Versions.Kotlinx.datetime}")
             }
         }
         val commonTest by getting {
