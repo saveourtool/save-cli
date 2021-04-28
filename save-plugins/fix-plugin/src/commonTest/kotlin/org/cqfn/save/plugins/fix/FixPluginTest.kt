@@ -113,7 +113,7 @@ class FixPluginTest {
                     listOf(FixPluginConfig("chmod +x execute.sh; ./execute.sh", inPlace = true, testResources = listOf(testFile, expectedFile))))
             }
         )
-
+        println("\n-----------\nDebug from execution:[" + results.single().debugInfo?.stdout + "]\n")
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
         assertEquals(TestResult(listOf(expectedFile, testFile), Pass, DebugInfo(results.single().debugInfo?.stdout, null, null)), results.single())
 
@@ -158,7 +158,7 @@ class FixPluginTest {
                     listOf(FixPluginConfig("chmod +x execute.sh; ./execute.sh", destinationFileSuffix = "_copy", testResources = listOf(testFile, expectedFile))))
             }
         )
-
+        println("\n-----------\nDebug from execution:[" + results.single().debugInfo?.stdout + "]\n")
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
         assertEquals(TestResult(listOf(expectedFile, testFile), Pass, DebugInfo(results.single().debugInfo?.stdout, null, null)), results.single())
 
