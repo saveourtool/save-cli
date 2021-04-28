@@ -98,7 +98,7 @@ class FixPluginTest {
                 write("#!/bin/bash\n".encodeToByteArray())
             }
             write("cd $tmpDir\n".encodeToByteArray())
-            write("echo Expected file > Test3Test.java".encodeToByteArray())
+            write("echo Expected file > Test3Test.java\n".encodeToByteArray())
             write("echo hello world".encodeToByteArray())
         }
         val results = FixPlugin().execute(
