@@ -66,6 +66,7 @@ class WarnPlugin : Plugin {
             }
             .mapValues { it.value.sortedBy { it.message } }
         // todo: create a temp file with technical comments removed and feed it to the tool
+        // todo: do not split the command; change this after https://github.com/cqfn/save/pull/41
         val executionResult = pb.exec(warnPluginConfig.execCmd.split(" "), null)
         val actualWarningsMap = executionResult.stdout.mapNotNull {
             with(warnPluginConfig) {
@@ -84,43 +85,24 @@ class WarnPlugin : Plugin {
     @Suppress("TYPE_ALIAS")
     private fun checkResults(expectedWarningsMap: Map<LineColumn?, List<Warning>>,
                              actualWarningsMap: Map<LineColumn?, List<Warning>>): TestStatus {
-        checkCollectionsDiffer(expectedWarningsMap, actualWarningsMap)?.let { message ->
-            return Fail(message)
+        return checkCollectionsDiffer(expectedWarningsMap, actualWarningsMap)?.let { message ->
+            Fail(message)
         }
-        checkWarningsDiffer(expectedWarningsMap, actualWarningsMap)?.let { message ->
-            return Fail(message)
-        }
-        return Pass
+            ?: Pass
     }
 
     @Suppress("TYPE_ALIAS")
     private fun checkCollectionsDiffer(expectedWarningsMap: Map<LineColumn?, List<Warning>>,
                                        actualWarningsMap: Map<LineColumn?, List<Warning>>): String? {
-        val missingWarnings = expectedWarningsMap.filterValues { it !in actualWarningsMap.values }
-        val unexpectedWarnings = actualWarningsMap.filterValues { it !in expectedWarningsMap.values }
-        return when {
-            missingWarnings.isNotEmpty() && unexpectedWarnings.isEmpty() -> "Some warnings were expected but not received: ${missingWarnings.values}"
-            missingWarnings.isNotEmpty() && unexpectedWarnings.isNotEmpty() -> "Some warnings were expected but not received: ${missingWarnings.values}, " +
-                    "and others were unexpected: ${unexpectedWarnings.values}"
-            missingWarnings.isEmpty() && unexpectedWarnings.isNotEmpty() -> "Some warnings were unexpected: ${unexpectedWarnings.values}"
-            else -> null
+        val missingWarnings = expectedWarningsMap.filterValues { it !in actualWarningsMap.values }.values
+        val unexpectedWarnings = actualWarningsMap.filterValues { it !in expectedWarningsMap.values }.values
+        return when (missingWarnings.isEmpty() to unexpectedWarnings.isEmpty()) {
+            false to true -> "Some warnings were expected but not received: $missingWarnings"
+            false to false -> "Some warnings were expected but not received: $missingWarnings, " +
+                    "and others were unexpected: $unexpectedWarnings"
+            true to false -> "Some warnings were unexpected: $unexpectedWarnings"
+            true to true -> null
+            else -> ""
         }
     }
-
-    @Suppress("TYPE_ALIAS")
-    private fun checkWarningsDiffer(expectedWarningsMap: Map<LineColumn?, List<Warning>>,
-                                    actualWarningsMap: Map<LineColumn?, List<Warning>>): String? = expectedWarningsMap.mapNotNull { (pair, warnings) ->
-        val actualWarnings = actualWarningsMap[pair]
-        when {
-            actualWarnings == null -> "Expected a warning at $pair, but it was not present in actual output"
-            warnings.size != actualWarnings.size -> "Number of expected and actual warnings differ at $pair: expected ${warnings.size} but was ${actualWarnings.size}"
-            else -> warnings.zip(actualWarnings).filter {
-                it.first != it.second
-            }
-                .takeIf { it.isNotEmpty() }
-                ?.joinToString(", ", prefix = "Warnings differ: ") { "expected [${it.first}] but was [${it.second}]" }
-        }
-    }
-        .joinToString(", ")
-        .takeIf { it.isNotEmpty() }
 }

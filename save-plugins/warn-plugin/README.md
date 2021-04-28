@@ -60,9 +60,9 @@ suiteName = "DocsCheck"
 execCmd = "./detekt --build-upon-default-config -i"
 warningsInputPattern = "// ;warn:(\\d+):(\\d+): (.*)"  # warning is set inside the comment in code, `//` marks comment start in Java
 warningsOutputPattern = "\\w+ - (\\d+)/(\\d+) - (.*)$"  # e.g. `WARN - 10/14 - Class name is in incorrect case`
-lineCaptureGroup = 1
-columnCaptureGroup = 2
-messageCaptureGroup = 3
+lineCaptureGroup = 1  # index of regex capture group for line number, used when `warningTextHasLine == false`
+columnCaptureGroup = 2  # index of regex capture group for column number, used when `warningTextHasColumn == false`
+messageCaptureGroup = 3  # index of regex capture group for message text
 warningTextHasColumn = true
 warningTextHasLine = true
 ```
