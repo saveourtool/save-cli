@@ -6,6 +6,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
+@Suppress("MAGIC_NUMBER")
 class UtilsTest {
     @Test
     fun `should extract warnings from different text with line and col`() {
