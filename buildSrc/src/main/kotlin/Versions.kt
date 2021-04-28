@@ -7,7 +7,7 @@ object Versions {
 
     object Kotlinx {
         const val serialization = "1.1.0"
-        const val datetime = "0.2.0"
+        const val datetime = "0.1.1"
         const val cli = "0.3.2"
     }
 }
