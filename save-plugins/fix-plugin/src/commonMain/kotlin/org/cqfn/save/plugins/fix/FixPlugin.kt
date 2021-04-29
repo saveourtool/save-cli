@@ -41,7 +41,7 @@ class FixPlugin : Plugin {
             }
         return sequence {
             files.forEach { (expected, test) ->
-                val executionResult = pb.exec(fixPluginConfig.execCmd.split(" "), null, false)
+                val executionResult = pb.exec(fixPluginConfig.execCmd, null, false)
                 val fixedLines = FileSystem.SYSTEM.readLines(
                     if (fixPluginConfig.inPlace) test else test.parent!! / fixPluginConfig.destinationFileFor(test).toPath()
                 )

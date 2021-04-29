@@ -9,7 +9,7 @@ class ProcessBuilderInternalTest {
 
     @Test
     fun `check stdout`() {
-        val actualResult = processBuilder.exec("echo something".split(" "), null)
+        val actualResult = processBuilder.exec("echo something", null)
         val expectedCode = 0
         val expectedStdout = "something"
         val expectedStderr: List<String> = emptyList()
@@ -21,7 +21,7 @@ class ProcessBuilderInternalTest {
 
     @Test
     fun `check stdout with redirection`() {
-        val actualResult = processBuilder.exec("echo something >/dev/null".split(" "), null)
+        val actualResult = processBuilder.exec("echo something >/dev/null", null)
         val expectedCode = 0
         val expectedStdout = "something"
         val expectedStderr: List<String> = emptyList()
@@ -33,7 +33,7 @@ class ProcessBuilderInternalTest {
 
     @Test
     fun `check stderr`() {
-        val actualResult = processBuilder.exec("cd non_existent_dir".split(" "), null)
+        val actualResult = processBuilder.exec("cd non_existent_dir", null)
         val expectedStdout: List<String> = emptyList()
         lateinit var expectedStderr: List<String>
         var expectedCode: Int
@@ -55,7 +55,7 @@ class ProcessBuilderInternalTest {
 
     @Test
     fun `check stderr with additional warning`() {
-        val actualResult = processBuilder.exec("cd non_existent_dir 2>/dev/null".split(" "), null)
+        val actualResult = processBuilder.exec("cd non_existent_dir 2>/dev/null", null)
         val expectedStdout: List<String> = emptyList()
         lateinit var expectedStderr: List<String>
         var expectedCode: Int

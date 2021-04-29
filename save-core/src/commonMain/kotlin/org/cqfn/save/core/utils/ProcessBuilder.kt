@@ -54,7 +54,7 @@ class ProcessBuilder {
      * @return [ExecutionResult] built from process output
      */
     fun exec(
-        command: List<String>,
+        command: String,
         redirectTo: Path?,
         collectStdout: Boolean = true): ExecutionResult {
         val fs = FileSystem.SYSTEM
@@ -75,13 +75,12 @@ class ProcessBuilder {
         fs.createFile(stdoutFile)
         fs.createFile(stderrFile)
         logDebug("Created temp directory $tmpDir for stderr and stdout of ProcessBuilder")
-        val userCmd = command.joinToString(" ")
-        if (userCmd.contains(">")) {
+        if (command.contains(">")) {
             // TODO: logErrorAndExit?
-            logWarn("Found user provided redirections in `$userCmd`. " +
+            logWarn("Found user provided redirections in `$command`. " +
                     "SAVE use own redirections for internal purpose and will redirect all to the $tmpDir")
         }
-        val cmd = processBuilderInternal.prepareCmd(userCmd)
+        val cmd = processBuilderInternal.prepareCmd(command)
         val status = processBuilderInternal.exec(cmd)
         val stdout = fs.readLines(stdoutFile)
         val stderr = fs.readLines(stderrFile)
