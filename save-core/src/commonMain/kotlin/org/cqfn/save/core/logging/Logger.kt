@@ -8,7 +8,7 @@ package org.cqfn.save.core.logging
 /**
  * todo: configure via --debug option
  */
-val isDebugEnabled = true
+val isDebugEnabled = false
 
 /**
  * Log a message with debug level

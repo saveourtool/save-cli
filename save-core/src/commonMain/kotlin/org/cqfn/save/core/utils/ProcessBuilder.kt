@@ -23,8 +23,8 @@ expect class ProcessBuilderInternal(
     stderrFile: Path,
     collectStdout: Boolean) {
     /**
-     * Modify execution command for posix system(),
-     * stdout and stderr will be redirected to tmp files
+     * Modify execution command according behavior of different OS,
+     * also stdout and stderr will be redirected to tmp files
      *
      * @param command raw command
      * @return command with redirection of stderr to tmp file
