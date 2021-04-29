@@ -2,8 +2,6 @@
 
 package org.cqfn.save.core.utils
 
-import org.cqfn.save.core.logging.logDebug
-
 import okio.FileSystem
 import okio.Path
 import platform.posix.system
@@ -24,7 +22,6 @@ actual class ProcessBuilderInternal actual constructor(
     }
 
     actual fun exec(cmd: String): Int {
-        logDebug("Executing: $cmd")
         val status = system(cmd)
         if (status == -1) {
             stdoutFile.parent?.let { FileSystem.SYSTEM.deleteRecursively(it) }

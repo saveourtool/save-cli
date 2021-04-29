@@ -31,16 +31,14 @@ class ProcessBuilderInternalTest {
         val expectedStdout = ""
         lateinit var expectedStderr: List<String>
         when {
-            System.getProperty("os.name").contains("Linux", ignoreCase = true) ||
-                    System.getProperty("os.name").contains("Mac", ignoreCase = true) -> {
-                expectedCode = 0
-                expectedStderr = emptyList()
-            }
-            System.getProperty("os.name").contains("Windows", ignoreCase = true) -> {
+            isCurrentOsWindows() -> {
                 expectedCode = 1
                 expectedStderr = listOf("The system cannot find the path specified.")
             }
-            else -> return
+            else -> {
+                expectedCode = 0
+                expectedStderr = emptyList()
+            }
         }
         assertEquals(expectedCode, actualResult.code)
         // posix popen and JVM process builder returns lines with different whitespaces, so we cut them

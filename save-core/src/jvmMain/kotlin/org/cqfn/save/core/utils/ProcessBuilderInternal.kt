@@ -1,7 +1,5 @@
 package org.cqfn.save.core.utils
 
-import org.cqfn.save.core.logging.logDebug
-
 import okio.FileSystem
 import okio.Path
 
@@ -25,7 +23,6 @@ actual class ProcessBuilderInternal actual constructor(
     }
 
     actual fun exec(cmd: String): Int {
-        logDebug("Executing: $cmd")
         val runTime = Runtime.getRuntime()
         val process = runTime.exec(cmd.split(", ").toTypedArray())
         writeDataFromBufferToFile(process, "stdout", stdoutFile)
@@ -41,11 +38,15 @@ actual class ProcessBuilderInternal actual constructor(
         if (!collectStdout && stream == "stdout") {
             return
         }
-        val br = if (stream == "stdout") {
-            BufferedReader(InputStreamReader(process.inputStream))
-        } else {
-            BufferedReader(InputStreamReader(process.errorStream))
-        }
+        val br = BufferedReader(
+            InputStreamReader(
+                if (stream == "stdout") {
+                    process.inputStream
+                } else {
+                    process.errorStream
+                }
+            )
+        )
         val data = br.lines().collect(Collectors.joining("\n"))
         FileSystem.SYSTEM.write(file) {
             write(data.encodeToByteArray())

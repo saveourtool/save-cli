@@ -46,6 +46,11 @@ expect class ProcessBuilderInternal(
 @Suppress("INLINE_CLASS_CAN_BE_USED")
 class ProcessBuilder {
     /**
+     * Typealias
+     */
+    val fs = FileSystem.SYSTEM
+
+    /**
      * Execute [command] and wait for its completion.
      *
      * @param command executable command with arguments
@@ -57,8 +62,6 @@ class ProcessBuilder {
         command: String,
         redirectTo: Path?,
         collectStdout: Boolean = true): ExecutionResult {
-        val fs = FileSystem.SYSTEM
-
         // Temporary directory for stderr and stdout (posix `system()` can't separate streams, so we do it ourselves)
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY /
                 ("ProcessBuilder_" + Clock.System.now().toEpochMilliseconds()).toPath())
@@ -78,9 +81,10 @@ class ProcessBuilder {
         if (command.contains(">")) {
             // TODO: logErrorAndExit?
             logWarn("Found user provided redirections in `$command`. " +
-                    "SAVE use own redirections for internal purpose and will redirect all to the $tmpDir")
+                    "SAVE uses own redirections for internal purpose and will redirect all streams to $tmpDir")
         }
         val cmd = processBuilderInternal.prepareCmd(command)
+        logDebug("Executing: $cmd")
         val status = processBuilderInternal.exec(cmd)
         val stdout = fs.readLines(stdoutFile)
         val stderr = fs.readLines(stderrFile)
