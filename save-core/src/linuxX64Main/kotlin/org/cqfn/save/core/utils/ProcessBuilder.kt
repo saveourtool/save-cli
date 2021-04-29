@@ -33,3 +33,8 @@ actual class ProcessBuilder {
         return common.logAndReturn(stdout, status, redirectTo)
     }
 }
+
+/**
+ * @return true if current OS is Windows
+ */
+actual fun isCurrentOsWindows() = false
