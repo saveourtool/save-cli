@@ -82,7 +82,6 @@ class FixPluginTest {
     }
 
     @Test
-    @Suppress("TOO_LONG_FUNCTION")
     fun `should calculate diff of discovered files in inPlace mode`() {
         val testFile = fs.createFile(tmpDir / "Test3Test.java")
         fs.write(testFile) {
@@ -103,7 +102,7 @@ class FixPluginTest {
         } else {
             "cd $tmpDir && echo Expected file > Test3Test.java"
         }
-        println(executionCmd)
+
         val results = FixPlugin().execute(
             mockConfig,
             TestConfig(tmpDir,
@@ -111,7 +110,7 @@ class FixPluginTest {
                 listOf(FixPluginConfig(executionCmd, inPlace = true, testResources = listOf(testFile, expectedFile)))
             )
         )
-        println("\n-----------\nDebug from execution:[" + results.single().debugInfo?.stdout + "]\n")
+
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
         assertEquals(TestResult(listOf(expectedFile, testFile), Pass, DebugInfo(results.single().debugInfo?.stdout, null, null)), results.single())
 
@@ -122,7 +121,6 @@ class FixPluginTest {
     }
 
     @Test
-    @Suppress("TOO_LONG_FUNCTION")
     fun `should calculate diff of discovered files with destinationFileSuffix`() {
         val testFile = fs.createFile(tmpDir / "Test3Test.java")
         fs.write(testFile) {
@@ -150,7 +148,7 @@ class FixPluginTest {
                 listOf(FixPluginConfig(executionCmd, destinationFileSuffix = "_copy", testResources = listOf(testFile, expectedFile)))
             )
         )
-        println("\n-----------\nDebug from execution:[" + results.single().debugInfo?.stdout + "]\n")
+
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
         assertEquals(TestResult(listOf(expectedFile, testFile), Pass, DebugInfo(results.single().debugInfo?.stdout, null, null)), results.single())
 

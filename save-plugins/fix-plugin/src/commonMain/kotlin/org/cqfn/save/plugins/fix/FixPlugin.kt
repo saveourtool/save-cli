@@ -46,8 +46,6 @@ class FixPlugin : Plugin {
                     if (fixPluginConfig.inPlace) test else test.parent!! / fixPluginConfig.destinationFileFor(test).toPath()
                 )
                 val expectedLines = FileSystem.SYSTEM.readLines(expected)
-                println("expectedLines: $expectedLines")
-                println("fixedLines: $fixedLines")
                 val status = diff(expectedLines, fixedLines).let { patch ->
                     if (patch.deltas.isEmpty()) {
                         Pass
