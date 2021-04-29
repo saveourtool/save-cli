@@ -3,7 +3,12 @@ package org.cqfn.save.core.utils
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@Suppress("LOCAL_VARIABLE_EARLY_DECLARATION")
+@Suppress("LOCAL_VARIABLE_EARLY_DECLARATION",
+    "SAY_NO_TO_VAR",
+    "MISSING_KDOC_TOP_LEVEL",
+    "MISSING_KDOC_CLASS_ELEMENTS",
+    "MISSING_KDOC_ON_FUNCTION"
+)
 class ProcessBuilderInternalTest {
     private val processBuilder = ProcessBuilder()
 
@@ -27,7 +32,7 @@ class ProcessBuilderInternalTest {
         lateinit var expectedStderr: List<String>
         when {
             System.getProperty("os.name").contains("Linux", ignoreCase = true) ||
-                    System.getProperty("os.name").contains("Mac", ignoreCase = true)-> {
+                    System.getProperty("os.name").contains("Mac", ignoreCase = true) -> {
                 expectedCode = 0
                 expectedStderr = emptyList()
             }
@@ -51,7 +56,7 @@ class ProcessBuilderInternalTest {
         lateinit var expectedStderr: List<String>
         when {
             System.getProperty("os.name").contains("Linux", ignoreCase = true) ||
-                    System.getProperty("os.name").contains("Mac", ignoreCase = true)-> {
+                    System.getProperty("os.name").contains("Mac", ignoreCase = true) -> {
                 expectedCode = 2
                 expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
             }
@@ -74,7 +79,7 @@ class ProcessBuilderInternalTest {
         lateinit var expectedStderr: List<String>
         when {
             System.getProperty("os.name").contains("Linux", ignoreCase = true) ||
-                    System.getProperty("os.name").contains("Mac", ignoreCase = true)-> {
+                    System.getProperty("os.name").contains("Mac", ignoreCase = true) -> {
                 expectedCode = 2
                 expectedStderr = emptyList()
             }

@@ -1,11 +1,12 @@
 package org.cqfn.save.core.utils
 
+import org.cqfn.save.core.logging.logDebug
+
 import okio.FileSystem
 import okio.Path
-import org.cqfn.save.core.logging.logDebug
+
 import java.io.BufferedReader
 import java.io.InputStreamReader
-
 import java.util.stream.Collectors
 
 @Suppress("MISSING_KDOC_TOP_LEVEL",
@@ -13,7 +14,8 @@ import java.util.stream.Collectors
     "MISSING_KDOC_ON_FUNCTION"
 )
 actual class ProcessBuilderInternal actual constructor(
-    private val stdoutFile: Path, private val stderrFile: Path,
+    private val stdoutFile: Path,
+    private val stderrFile: Path,
     private val collectStdout: Boolean
 ) {
     actual fun prepareCmd(command: String): String {
@@ -32,14 +34,16 @@ actual class ProcessBuilderInternal actual constructor(
         return process.waitFor()
     }
 
-    private fun writeDataFromBufferToFile(process: Process, stream: String, file: Path) {
+    private fun writeDataFromBufferToFile(
+        process: Process,
+        stream: String,
+        file: Path) {
         if (!collectStdout && stream == "stdout") {
             return
         }
         val br = if (stream == "stdout") {
             BufferedReader(InputStreamReader(process.inputStream))
-        }
-        else {
+        } else {
             BufferedReader(InputStreamReader(process.errorStream))
         }
         val data = br.lines().collect(Collectors.joining("\n"))
@@ -48,4 +52,3 @@ actual class ProcessBuilderInternal actual constructor(
         }
     }
 }
-

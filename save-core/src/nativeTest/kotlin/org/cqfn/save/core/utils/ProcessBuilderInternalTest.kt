@@ -3,7 +3,7 @@ package org.cqfn.save.core.utils
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@Suppress("LOCAL_VARIABLE_EARLY_DECLARATION")
+@Suppress("LOCAL_VARIABLE_EARLY_DECLARATION", "SAY_NO_TO_VAR")
 class ProcessBuilderInternalTest {
     private val processBuilder = ProcessBuilder()
 
