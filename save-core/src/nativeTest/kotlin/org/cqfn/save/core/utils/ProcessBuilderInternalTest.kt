@@ -38,8 +38,12 @@ class ProcessBuilderInternalTest {
         lateinit var expectedStderr: List<String>
         var expectedCode: Int
         when (Platform.osFamily) {
-            OsFamily.LINUX, OsFamily.MACOSX -> {
+            OsFamily.LINUX -> {
                 expectedCode = 512
+                expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
+            }
+            OsFamily.MACOSX -> {
+                expectedCode = 256
                 expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
             }
             OsFamily.WINDOWS -> {
@@ -60,8 +64,12 @@ class ProcessBuilderInternalTest {
         lateinit var expectedStderr: List<String>
         var expectedCode: Int
         when (Platform.osFamily) {
-            OsFamily.LINUX, OsFamily.MACOSX -> {
+            OsFamily.LINUX -> {
                 expectedCode = 512
+                expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
+            }
+            OsFamily.MACOSX -> {
+                expectedCode = 256
                 expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
             }
             OsFamily.WINDOWS -> {

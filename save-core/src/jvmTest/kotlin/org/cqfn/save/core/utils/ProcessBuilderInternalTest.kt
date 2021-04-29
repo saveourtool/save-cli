@@ -55,9 +55,12 @@ class ProcessBuilderInternalTest {
         var expectedCode: Int
         lateinit var expectedStderr: List<String>
         when {
-            System.getProperty("os.name").contains("Linux", ignoreCase = true) ||
-                    System.getProperty("os.name").contains("Mac", ignoreCase = true) -> {
+            System.getProperty("os.name").contains("Linux", ignoreCase = true) -> {
                 expectedCode = 2
+                expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
+            }
+            System.getProperty("os.name").contains("Mac", ignoreCase = true) -> {
+                expectedCode = 1
                 expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
             }
             System.getProperty("os.name").contains("Windows", ignoreCase = true) -> {
@@ -78,9 +81,12 @@ class ProcessBuilderInternalTest {
         var expectedCode: Int
         lateinit var expectedStderr: List<String>
         when {
-            System.getProperty("os.name").contains("Linux", ignoreCase = true) ||
-                    System.getProperty("os.name").contains("Mac", ignoreCase = true) -> {
+            System.getProperty("os.name").contains("Linux", ignoreCase = true) -> {
                 expectedCode = 2
+                expectedStderr = emptyList()
+            }
+            System.getProperty("os.name").contains("Mac", ignoreCase = true) -> {
+                expectedCode = 1
                 expectedStderr = emptyList()
             }
             System.getProperty("os.name").contains("Windows", ignoreCase = true) -> {
