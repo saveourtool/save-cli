@@ -58,6 +58,14 @@ class WarnPluginTest {
 
     @Test
     fun `basic warn-plugin test`() {
+        fs.write(fs.createFile(tmpDir / "resource")) {
+            write(
+                """
+                |echo Test1Test.java:4:6: Class name should be in PascalCase
+                """.trimMargin().encodeToByteArray()
+            )
+        }
+        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
             """
                 package org.cqfn.save.example
@@ -68,7 +76,7 @@ class WarnPluginTest {
                 }
             """.trimIndent(),
             WarnPluginConfig(
-                "echo Test1Test.java:4:6: Class name should be in PascalCase",
+                "$catCmd ${tmpDir / "resource"}",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
                 true, true, 1, 2, 3
@@ -77,6 +85,7 @@ class WarnPluginTest {
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
         }
+        fs.delete(tmpDir / "resource")
     }
 
     @Test

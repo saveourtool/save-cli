@@ -10,6 +10,7 @@ import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
+import org.cqfn.save.core.utils.isCurrentOsWindows
 
 import io.github.petertrr.diffutils.diff
 import okio.FileSystem
@@ -88,19 +89,23 @@ class FixPluginTest {
         }
         val expectedFile = fs.createFile(tmpDir / "Test3Expected.java")
         fs.write(expectedFile) {
-            write("Expected file".encodeToByteArray())
+            val textPostfix = if (isCurrentOsWindows()) " \n" else ""
+            write("Expected file$textPostfix".encodeToByteArray())
         }
+
+        val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").toLowerCase()} && " else ""
+        val executionCmd = "${diskWithTmpDir}cd $tmpDir && echo Expected file > Test3Test.java"
 
         val results = FixPlugin().execute(
             mockConfig,
             TestConfig(tmpDir,
                 null,
-                listOf(FixPluginConfig("cd $tmpDir && echo Expected file> Test3Test.java", inPlace = true, testResources = listOf(testFile, expectedFile)))
+                listOf(FixPluginConfig(executionCmd, inPlace = true, testResources = listOf(testFile, expectedFile)))
             )
         )
 
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
-        assertEquals(TestResult(listOf(expectedFile, testFile), Pass, DebugInfo("", null, null)), results.single())
+        assertEquals(TestResult(listOf(expectedFile, testFile), Pass, DebugInfo(results.single().debugInfo?.stdout, null, null)), results.single())
 
         assertTrue("Files should be identical") {
             diff(fs.readLines(testFile), fs.readLines(expectedFile))
@@ -116,19 +121,22 @@ class FixPluginTest {
         }
         val expectedFile = fs.createFile(tmpDir / "Test3Expected.java")
         fs.write(expectedFile) {
-            write("Expected file".encodeToByteArray())
+            val textPostfix = if (isCurrentOsWindows()) " \n" else ""
+            write("Expected file$textPostfix".encodeToByteArray())
         }
+        val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").toLowerCase()} && " else ""
+        val executionCmd = "${diskWithTmpDir}cd $tmpDir && echo Expected file > Test3Test_copy.java"
 
         val results = FixPlugin().execute(
             mockConfig,
             TestConfig(tmpDir,
                 null,
-                listOf(FixPluginConfig("cd $tmpDir && echo Expected file> Test3Test_copy.java", destinationFileSuffix = "_copy", testResources = listOf(testFile, expectedFile)))
+                listOf(FixPluginConfig(executionCmd, destinationFileSuffix = "_copy", testResources = listOf(testFile, expectedFile)))
             )
         )
 
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
-        assertEquals(TestResult(listOf(expectedFile, testFile), Pass, DebugInfo("", null, null)), results.single())
+        assertEquals(TestResult(listOf(expectedFile, testFile), Pass, DebugInfo(results.single().debugInfo?.stdout, null, null)), results.single())
 
         assertTrue("Files should be identical") {
             diff(fs.readLines(tmpDir / "Test3Test_copy.java"), fs.readLines(expectedFile))
