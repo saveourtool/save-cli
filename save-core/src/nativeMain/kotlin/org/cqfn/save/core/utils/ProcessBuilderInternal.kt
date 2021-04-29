@@ -2,7 +2,6 @@
 
 package org.cqfn.save.core.utils
 
-import org.cqfn.save.core.files.parents
 import org.cqfn.save.core.logging.logDebug
 
 import okio.FileSystem
