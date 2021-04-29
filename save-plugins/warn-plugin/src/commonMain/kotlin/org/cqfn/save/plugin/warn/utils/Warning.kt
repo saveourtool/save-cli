@@ -4,6 +4,8 @@
 
 package org.cqfn.save.plugin.warn.utils
 
+import org.cqfn.save.core.plugin.PluginException
+
 /**
  * Class for warnings which should be discovered and compared wit analyzer output
  *
@@ -25,6 +27,7 @@ data class Warning(
  * @param lineGroupIdx index of capture group for line number
  * @param messageGroupIdx index of capture group for waring text
  * @return a [Warning] or null if [this] string doesn't match [warningRegex]
+ * @throws PluginException when parsing a file
  */
 internal fun String.extractWarning(warningRegex: Regex,
                                    columnGroupIdx: Int?,
@@ -32,14 +35,30 @@ internal fun String.extractWarning(warningRegex: Regex,
                                    messageGroupIdx: Int,
 ): Warning? {
     val groups = warningRegex.find(this)?.groups ?: return null
+
     val line = lineGroupIdx?.let {
-        groups[lineGroupIdx]?.value?.toInt()
+        try {
+            groups[lineGroupIdx]!!.value.toInt()
+        } catch (e: Exception) {
+            throw PluginException("Invalid line format in test file")
+        }
     }
+
     val column = columnGroupIdx?.let {
-        groups[columnGroupIdx]?.value?.toInt()
+        try {
+            groups[columnGroupIdx]!!.value.toInt()
+        } catch (e: Exception) {
+            throw PluginException("Invalid column format in test file")
+        }
+    }
+
+    val messege = try {
+        groups[messageGroupIdx]!!.value
+    } catch (e: IndexOutOfBoundsException) {
+        throw PluginException("Warnings in test files cannot be parsed with provided settings")
     }
     return Warning(
-        groups[messageGroupIdx]!!.value,
+        messege,
         line,
         column,
     )
