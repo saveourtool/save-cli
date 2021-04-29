@@ -89,19 +89,12 @@ class FixPluginTest {
         }
         val expectedFile = fs.createFile(tmpDir / "Test3Expected.java")
         fs.write(expectedFile) {
-            if (isCurrentOsWindows()) {
-                write("Expected file \n".encodeToByteArray())
-            } else {
-                write("Expected file".encodeToByteArray())
-            }
+            val textPostfix = if (isCurrentOsWindows()) " \n" else ""
+            write("Expected file$textPostfix".encodeToByteArray())
         }
 
-        val executionCmd = if (isCurrentOsWindows()) {
-            val diskWithTmpDir = tmpDir.toString().substringBefore("\\").toLowerCase()
-            "$diskWithTmpDir && cd $tmpDir && echo Expected file > Test3Test.java"
-        } else {
-            "cd $tmpDir && echo Expected file > Test3Test.java"
-        }
+        val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").toLowerCase()} && " else ""
+        val executionCmd = "${diskWithTmpDir}cd $tmpDir && echo Expected file > Test3Test.java"
 
         val results = FixPlugin().execute(
             mockConfig,
@@ -128,18 +121,11 @@ class FixPluginTest {
         }
         val expectedFile = fs.createFile(tmpDir / "Test3Expected.java")
         fs.write(expectedFile) {
-            if (isCurrentOsWindows()) {
-                write("Expected file \n".encodeToByteArray())
-            } else {
-                write("Expected file".encodeToByteArray())
-            }
+            val textPostfix = if (isCurrentOsWindows()) " \n" else ""
+            write("Expected file$textPostfix".encodeToByteArray())
         }
-        val executionCmd = if (isCurrentOsWindows()) {
-            val diskWithTmpDir = tmpDir.toString().substringBefore("\\").toLowerCase()
-            "$diskWithTmpDir && cd $tmpDir && echo Expected file > Test3Test_copy.java"
-        } else {
-            "cd $tmpDir && echo Expected file > Test3Test_copy.java"
-        }
+        val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").toLowerCase()} && " else ""
+        val executionCmd = "${diskWithTmpDir}cd $tmpDir && echo Expected file > Test3Test_copy.java"
 
         val results = FixPlugin().execute(
             mockConfig,
