@@ -1,6 +1,6 @@
 package org.cqfn.save.core.plugin
 
 /**
- * An [Exception] that can be thrown when parsing a file
+ * General plugin [Exception]
  */
-class PluginException(message: String) : Exception(message)
+open class PluginException(message: String) : Exception(message)
