@@ -66,8 +66,7 @@ class WarnPlugin : Plugin {
             }
             .mapValues { it.value.sortedBy { it.message } }
         // todo: create a temp file with technical comments removed and feed it to the tool
-        // todo: do not split the command; change this after https://github.com/cqfn/save/pull/41
-        val executionResult = pb.exec(warnPluginConfig.execCmd.split(" "), null)
+        val executionResult = pb.exec(warnPluginConfig.execCmd, null)
         val actualWarningsMap = executionResult.stdout.mapNotNull {
             with(warnPluginConfig) {
                 it.extractWarning(warningsOutputPattern, columnCaptureGroup, lineCaptureGroup, messageCaptureGroup)
