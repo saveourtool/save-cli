@@ -7,6 +7,7 @@ package org.cqfn.save.core.utils
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.logDebug
+import org.cqfn.save.core.logging.logError
 import org.cqfn.save.core.logging.logWarn
 
 import okio.FileSystem
@@ -46,9 +47,9 @@ expect class ProcessBuilderInternal(
 @Suppress("INLINE_CLASS_CAN_BE_USED")
 class ProcessBuilder {
     /**
-     * Typealias
+     * Singleton that describes the current file system
      */
-    val fs = FileSystem.SYSTEM
+    private val fs = FileSystem.SYSTEM
 
     /**
      * Execute [command] and wait for its completion.
@@ -58,20 +59,21 @@ class ProcessBuilder {
      * @param collectStdout whether to collect stdout for future usage, if false, [redirectTo] will be ignored
      * @return [ExecutionResult] built from process output
      */
+    @Suppress("TOO_LONG_FUNCTION")
     fun exec(
         command: String,
         redirectTo: Path?,
         collectStdout: Boolean = true): ExecutionResult {
+        if (command.isBlank()) {
+            return exitWithError("Command couldn't be empty!")
+        }
         // Temporary directory for stderr and stdout (posix `system()` can't separate streams, so we do it ourselves)
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY /
                 ("ProcessBuilder_" + Clock.System.now().toEpochMilliseconds()).toPath())
-
         // Path to stdout file
         val stdoutFile = tmpDir / "stdout.txt"
-
         // Path to stderr file
         val stderrFile = tmpDir / "stderr.txt"
-
         // Instance, containing platform-dependent realization of command execution
         val processBuilderInternal = ProcessBuilderInternal(stdoutFile, stderrFile, collectStdout)
         fs.createDirectories(tmpDir)
@@ -79,13 +81,17 @@ class ProcessBuilder {
         fs.createFile(stderrFile)
         logDebug("Created temp directory $tmpDir for stderr and stdout of ProcessBuilder")
         if (command.contains(">")) {
-            // TODO: logErrorAndExit?
             logWarn("Found user provided redirections in `$command`. " +
                     "SAVE uses own redirections for internal purpose and will redirect all streams to $tmpDir")
         }
         val cmd = processBuilderInternal.prepareCmd(command)
         logDebug("Executing: $cmd")
-        val status = processBuilderInternal.exec(cmd)
+        val status = try {
+            processBuilderInternal.exec(cmd)
+        } catch (ex: Exception) {
+            fs.deleteRecursively(tmpDir)
+            return exitWithError(ex.message ?: "Couldn't execute $cmd")
+        }
         val stdout = fs.readLines(stdoutFile)
         val stderr = fs.readLines(stderrFile)
         fs.deleteRecursively(tmpDir)
@@ -99,6 +105,17 @@ class ProcessBuilder {
             }
         } ?: logDebug("Execution output:\n$stdout")
         return ExecutionResult(status, stdout, stderr)
+    }
+
+    /**
+     * Log error message and exit with status = -1
+     *
+     * @param errMsg error message
+     * @return [ExecutionResult] corresponding result with error message and exit code
+     */
+    private fun exitWithError(errMsg: String): ExecutionResult {
+        logError(errMsg)
+        return ExecutionResult(-1, emptyList(), listOf(errMsg))
     }
 }
 

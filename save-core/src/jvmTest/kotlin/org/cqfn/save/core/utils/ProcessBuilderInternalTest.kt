@@ -13,18 +13,6 @@ class ProcessBuilderInternalTest {
     private val processBuilder = ProcessBuilder()
 
     @Test
-    fun `check stdout`() {
-        val actualResult = processBuilder.exec("echo something", null)
-        val expectedCode = 0
-        val expectedStdout = "something"
-        val expectedStderr: List<String> = emptyList()
-        assertEquals(expectedCode, actualResult.code)
-        // posix `system()` and JVM process builder returns lines with different whitespaces, so we cut them
-        assertEquals(expectedStdout, actualResult.stdout[0].trimEnd())
-        assertEquals(expectedStderr, actualResult.stderr)
-    }
-
-    @Test
     fun `check stdout with redirection`() {
         val actualResult = processBuilder.exec("echo something >/dev/null", null)
         var expectedCode: Int

@@ -1,5 +1,5 @@
 /**
- * This file contain platform-dependent utils
+ * This file contains platform-dependent utils
  */
 
 package org.cqfn.save.core.utils

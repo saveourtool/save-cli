@@ -5,7 +5,7 @@ import okio.Path
 
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.util.stream.Collectors
+import kotlin.streams.toList
 
 @Suppress("MISSING_KDOC_TOP_LEVEL",
     "MISSING_KDOC_CLASS_ELEMENTS",
@@ -27,7 +27,6 @@ actual class ProcessBuilderInternal actual constructor(
         val process = runTime.exec(cmd.split(", ").toTypedArray())
         writeDataFromBufferToFile(process, "stdout", stdoutFile)
         writeDataFromBufferToFile(process, "stderr", stderrFile)
-        // TODO: Does waitFor() == -1 responsible for errors like in posix?
         return process.waitFor()
     }
 
@@ -47,7 +46,7 @@ actual class ProcessBuilderInternal actual constructor(
                 }
             )
         )
-        val data = br.lines().collect(Collectors.joining("\n"))
+        val data = br.lines().toList().joinToString("\n")
         FileSystem.SYSTEM.write(file) {
             write(data.encodeToByteArray())
         }

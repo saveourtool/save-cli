@@ -2,7 +2,6 @@
 
 package org.cqfn.save.core.utils
 
-import okio.FileSystem
 import okio.Path
 import platform.posix.system
 
@@ -24,7 +23,6 @@ actual class ProcessBuilderInternal actual constructor(
     actual fun exec(cmd: String): Int {
         val status = system(cmd)
         if (status == -1) {
-            stdoutFile.parent?.let { FileSystem.SYSTEM.deleteRecursively(it) }
             error("Couldn't execute $cmd, exit status: $status")
         }
         return status
