@@ -4,7 +4,7 @@
 
 package org.cqfn.save.plugin.warn.utils
 
-import org.cqfn.save.plugin.warn.ResourceFormatException
+import org.cqfn.save.core.plugin.ResourceFormatException
 
 /**
  * Class for warnings which should be discovered and compared wit analyzer output
@@ -40,7 +40,7 @@ internal fun String.extractWarning(warningRegex: Regex,
         try {
             groups[lineGroupIdx]!!.value.toInt()
         } catch (e: Exception) {
-            throw ResourceFormatException("Invalid line format in test file: $this")
+            throw ResourceFormatException("Could not extract line number from line [$this], cause: ${e.message}")
         }
     }
 
@@ -48,14 +48,14 @@ internal fun String.extractWarning(warningRegex: Regex,
         try {
             groups[columnGroupIdx]!!.value.toInt()
         } catch (e: Exception) {
-            throw ResourceFormatException("Invalid column format in test file: $this")
+            throw ResourceFormatException("Could not extract column number from line [$this], cause: ${e.message}")
         }
     }
 
     val message = try {
         groups[messageGroupIdx]!!.value
     } catch (e: Exception) {
-        throw ResourceFormatException("Invalid warning message in test file: $this")
+        throw ResourceFormatException("Could not extract warning message from line [$this], cause: ${e.message}")
     }
     return Warning(
         message,

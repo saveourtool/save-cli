@@ -1,6 +1,4 @@
-package org.cqfn.save.plugin.warn
-
-import org.cqfn.save.core.plugin.PluginException
+package org.cqfn.save.core.plugin
 
 /**
  * An [Exception] that can be thrown when parsing a file
