@@ -6,9 +6,11 @@ import org.cqfn.save.core.config.ResultOutputType
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.plugin.ResourceFormatException
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.isCurrentOsWindows
+import org.cqfn.save.plugin.warn.utils.extractWarning
 
 import okio.FileSystem
 import okio.Path.Companion.toPath
@@ -18,6 +20,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 private val mockConfig = SaveProperties(
@@ -61,7 +64,7 @@ class WarnPluginTest {
         fs.write(fs.createFile(tmpDir / "resource")) {
             write(
                 """
-                |echo Test1Test.java:4:6: Class name should be in PascalCase
+                |Test1Test.java:4:6: Class name should be in PascalCase
                 """.trimMargin().encodeToByteArray()
             )
         }
@@ -243,5 +246,17 @@ class WarnPluginTest {
             .toList()
         println(results)
         assertion(results)
+    }
+
+    @Test
+    fun `warn-plugin test exception`() {
+        assertFailsWith<ResourceFormatException> {
+            "// ;warn:4:6: Class name should be in PascalCase".extractWarning(
+                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
+                5,
+                2,
+                3
+            )
+        }
     }
 }
