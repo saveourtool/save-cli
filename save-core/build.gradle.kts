@@ -53,11 +53,7 @@ kotlin {
             dependsOn(commonTest)
         }
         getByName("${hostTarget.name}Test").dependsOn(nativeTest)
-
-        val jvmMain by getting {
-            dependsOn(commonMain)
-        }
-
+        
         val jvmTest by getting {
             dependencies {
                 implementation(kotlin("test-junit5"))
