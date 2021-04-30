@@ -5,7 +5,6 @@ import okio.Path
 
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import kotlin.streams.toList
 
 @Suppress("MISSING_KDOC_TOP_LEVEL",
     "MISSING_KDOC_CLASS_ELEMENTS",
@@ -46,7 +45,7 @@ actual class ProcessBuilderInternal actual constructor(
                 }
             )
         )
-        val data = br.lines().toList().joinToString("\n")
+        val data = br.lineSequence().joinToString("\n")
         FileSystem.SYSTEM.write(file) {
             write(data.encodeToByteArray())
         }

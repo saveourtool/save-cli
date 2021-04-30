@@ -65,7 +65,7 @@ class ProcessBuilder {
         redirectTo: Path?,
         collectStdout: Boolean = true): ExecutionResult {
         if (command.isBlank()) {
-            return exitWithError("Command couldn't be empty!")
+            return returnWithError("Command couldn't be empty!")
         }
         // Temporary directory for stderr and stdout (posix `system()` can't separate streams, so we do it ourselves)
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY /
@@ -90,7 +90,7 @@ class ProcessBuilder {
             processBuilderInternal.exec(cmd)
         } catch (ex: Exception) {
             fs.deleteRecursively(tmpDir)
-            return exitWithError(ex.message ?: "Couldn't execute $cmd")
+            return returnWithError(ex.message ?: "Couldn't execute $cmd")
         }
         val stdout = fs.readLines(stdoutFile)
         val stderr = fs.readLines(stderrFile)
@@ -108,12 +108,12 @@ class ProcessBuilder {
     }
 
     /**
-     * Log error message and exit with status = -1
+     * Log error message and return with status = -1
      *
      * @param errMsg error message
      * @return [ExecutionResult] corresponding result with error message and exit code
      */
-    private fun exitWithError(errMsg: String): ExecutionResult {
+    private fun returnWithError(errMsg: String): ExecutionResult {
         logError(errMsg)
         return ExecutionResult(-1, emptyList(), listOf(errMsg))
     }
