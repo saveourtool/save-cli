@@ -87,8 +87,8 @@ class FixPlugin : Plugin {
             is ChangeDelta -> diffGenerator
                 .generateDiffRows(delta.source.lines, delta.target.lines)
                 .joinToString(prefix = "ChangeDelta, position ${delta.source.position}, lines:\n", separator = "\n\n") {
-                    """+${it.newLine}
-                      |-${it.oldLine}
+                    """-${it.oldLine}
+                      |+${it.newLine}
                       |""".trimMargin()
                 }
             else -> delta.toString()
