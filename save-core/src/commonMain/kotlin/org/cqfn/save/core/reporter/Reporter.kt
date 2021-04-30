@@ -4,10 +4,11 @@ import org.cqfn.save.core.config.ReportType
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.TestResult
 
+import okio.BufferedSink
+
 /**
  * A base interface for all reporters, that are capable of formatting results of SAVE execution
  */
-@Suppress("USE_INLINE_CLASS")
 interface Reporter {
     /**
      * A type of this reporter
@@ -15,17 +16,15 @@ interface Reporter {
     val type: ReportType
 
     /**
-     * Writes formatted text in a desired way, e.g. to stdout or into a file
-     *
-     * @param text a string to write
+     * A [Sink] into which this reporter should direct all it's output. Can represent e.g. stdout or a file.
      */
-    fun write(text: String)
+    val out: BufferedSink
 
     /**
      * This function is called before any tests are executed
      */
     fun beforeAll() {
-        write("Initializing reporter ${this::class.qualifiedName} of type $type")
+        out.write("Initializing reporter ${this::class.qualifiedName} of type $type".encodeToByteArray())
     }
 
     /**
