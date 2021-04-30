@@ -2,6 +2,7 @@ package org.cqfn.save.core.reporter
 
 import org.cqfn.save.core.config.ReportType
 import org.cqfn.save.core.plugin.Plugin
+import org.cqfn.save.core.plugin.PluginException
 import org.cqfn.save.core.result.TestResult
 
 import okio.BufferedSink
@@ -65,7 +66,7 @@ interface Reporter {
      *
      * @param ex an [Exception] that has been thrown during plugin execution
      */
-    fun onPluginExecutionError(ex: Exception)  // todo: change to proper exception class when it's introduced
+    fun onPluginExecutionError(ex: PluginException)
 }
 
 /**
@@ -111,4 +112,4 @@ fun Collection<Reporter>.onPluginExecutionEnd(plugin: Plugin): Unit = forEach { 
  *
  * @param ex
  */
-fun Collection<Reporter>.onPluginExecutionError(ex: Exception): Unit = forEach { it.onPluginExecutionError(ex) }
+fun Collection<Reporter>.onPluginExecutionError(ex: PluginException): Unit = forEach { it.onPluginExecutionError(ex) }

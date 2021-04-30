@@ -7,6 +7,7 @@ import org.cqfn.save.core.logging.logError
 import org.cqfn.save.core.logging.logInfo
 import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.plugin.Plugin
+import org.cqfn.save.core.plugin.PluginException
 import org.cqfn.save.core.reporter.Reporter
 import org.cqfn.save.core.reporter.afterAll
 import org.cqfn.save.core.reporter.beforeAll
@@ -54,7 +55,7 @@ class Save(
                 plugin.execute(saveProperties, testConfig)
                     .onEach { event -> reporters.onEvent(event) }
                     .forEach(this::handleResult)
-            } catch (ex: Exception) {
+            } catch (ex: PluginException) {
                 reporters.onPluginExecutionError(ex)
                 logError("${plugin::class.simpleName} has crashed: ${ex.message}")
             }
