@@ -32,7 +32,7 @@ jobs:
           gradle-version: wrapper
       - name: Upload artifact
         id: upload_artifact
-      - uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v2
         with:
           name: save-cli-${{ runner.os }}
           path: save-cli/build/bin/**/releaseExecutable/*
@@ -46,13 +46,13 @@ jobs:
     steps:
 
       - name: Download artifact
-      - uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v2
         with:
           path: tmpFolder
 
       - name: Create Github Release
         id: create_release
-      - uses: actions/create-release@v1
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -63,7 +63,7 @@ jobs:
 
       - name: Upload save-cli
         id: upload-release-asset
-      - uses: alexellis/upload-assets@0.3.0
+        uses: alexellis/upload-assets@0.3.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
