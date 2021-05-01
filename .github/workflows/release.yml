@@ -4,11 +4,11 @@ on:
   push:
     tags:
       - 'v*'
-#env:
-  #GPG_SEC: ${{ secrets.PGP_SEC }}
-  #GPG_PASSWORD: ${{ secrets.PGP_PASSWORD }}
-  #OSSRH_USERNAME: ${{ secrets.SONATYPE_USER }}
-  #OSSRH_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+env:
+  GPG_SEC: ${{ secrets.PGP_SEC }}
+  GPG_PASSWORD: ${{ secrets.PGP_PASSWORD }}
+  OSSRH_USERNAME: ${{ secrets.SONATYPE_USER }}
+  OSSRH_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
 
 jobs:
   release:
@@ -27,8 +27,7 @@ jobs:
       - uses: burrunan/gradle-cache-action@v1
         name: Gradle release with caches caching
         with:
-          #arguments: publishToSonatype closeAndReleaseSonatypeStagingRepository
-          arguments: build
+          arguments: publishToSonatype closeAndReleaseSonatypeStagingRepository
           gradle-version: wrapper
       - name: Upload artifact
         id: upload_artifact
