@@ -37,6 +37,7 @@ kotlin {
                 implementation( "org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
                 implementation("org.jetbrains.kotlinx:kotlinx-cli:${Versions.Kotlinx.cli}")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:${Versions.Kotlinx.datetime}")
+                implementation("com.akuleshov7:ktoml-core:${Versions.ktoml}")
             }
         }
         val commonTest by getting {
