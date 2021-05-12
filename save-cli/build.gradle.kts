@@ -54,6 +54,14 @@ kotlin {
             }
         }
     }
+
+    project.tasks.register("linkReleaseExecutableMultiplatform") {
+        when (saveTarget.name) {
+            "linuxX64" -> dependsOn(tasks.getByName("linkReleaseExecutableLinuxX64"))
+            "mingwX64" -> dependsOn(tasks.getByName("linkReleaseExecutableMingwX64"))
+            "macosX64" -> dependsOn(tasks.getByName("linkReleaseExecutableMacosX64"))
+        }
+    }
 }
 
 configurePublishing()

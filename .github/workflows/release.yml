@@ -27,7 +27,7 @@ jobs:
       - uses: burrunan/gradle-cache-action@v1
         name: Gradle release with caches caching
         with:
-          arguments: publishToSonatype closeAndReleaseSonatypeStagingRepository
+          arguments: linkReleaseExecutableMultiplatform publishToSonatype closeAndReleaseSonatypeStagingRepository
           gradle-version: wrapper
       - name: Upload artifact
         id: upload_artifact
