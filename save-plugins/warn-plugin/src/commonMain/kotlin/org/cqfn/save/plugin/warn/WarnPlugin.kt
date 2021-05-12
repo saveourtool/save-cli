@@ -42,6 +42,7 @@ class WarnPlugin : Plugin {
     internal fun discoverTestFiles(resources: List<Path>) = resources
         .filter { it.name.contains("Test.") }
 
+    @Suppress("UnusedPrivateMember")
     private fun handleTestFile(
         path: Path,
         warnPluginConfig: WarnPluginConfig,

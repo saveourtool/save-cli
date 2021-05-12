@@ -29,6 +29,7 @@ data class Warning(
  * @return a [Warning] or null if [this] string doesn't match [warningRegex]
  * @throws ResourceFormatException when parsing a file
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException", "ThrowsCount")
 internal fun String.extractWarning(warningRegex: Regex,
                                    columnGroupIdx: Int?,
                                    lineGroupIdx: Int?,
