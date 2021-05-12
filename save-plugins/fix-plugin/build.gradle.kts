@@ -1,5 +1,4 @@
 import org.cqfn.save.buildutils.configurePublishing
-import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem
 
 plugins {
     kotlin("multiplatform")
