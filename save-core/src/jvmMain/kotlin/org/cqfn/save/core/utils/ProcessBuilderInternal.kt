@@ -15,9 +15,18 @@ actual class ProcessBuilderInternal actual constructor(
     private val stderrFile: Path,
     private val collectStdout: Boolean
 ) {
+    @OptIn(ExperimentalStdlibApi::class)
     actual fun prepareCmd(command: String): String {
-        val shell = if (isCurrentOsWindows()) arrayOf("CMD", "/C") else arrayOf("sh", "-c")
-        val cmd = arrayOf(*shell, command)
+        val cmd = buildList {
+            if (isCurrentOsWindows()) {
+                add("CMD")
+                add("/C")
+            } else {
+                add("sh")
+                add("-c")
+            }
+            add(command)
+        }
         return cmd.joinToString()
     }
 

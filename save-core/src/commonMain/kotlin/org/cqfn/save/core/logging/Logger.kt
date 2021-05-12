@@ -8,6 +8,7 @@ package org.cqfn.save.core.logging
 /**
  * todo: configure via --debug option
  */
+@Suppress("MayBeConst")
 val isDebugEnabled = false
 
 /**

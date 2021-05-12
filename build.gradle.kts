@@ -8,7 +8,6 @@ import org.cqfn.save.buildutils.installGitHooks
 import org.cqfn.save.generation.generateConfigOptions
 
 plugins {
-    kotlin("multiplatform") version Versions.kotlin apply false
     kotlin("plugin.serialization") version Versions.kotlin apply false
     id("com.github.ben-manes.versions") version "0.38.0"
     id("com.cdsap.talaiot.plugin.base") version "1.4.2"
