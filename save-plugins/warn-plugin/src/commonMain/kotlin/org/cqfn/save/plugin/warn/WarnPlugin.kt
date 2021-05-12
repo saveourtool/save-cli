@@ -29,7 +29,7 @@ class WarnPlugin : Plugin {
     override fun execute(saveProperties: SaveProperties, testConfig: TestConfig): Sequence<TestResult> {
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         return sequence {
-            discoverTestFiles(warnPluginConfig.resourceNamePattern, testConfig.location.parent!!).forEach { testFile ->
+            discoverTestFiles(warnPluginConfig.resourceNamePattern, testConfig.directory).forEach { testFile ->
                 yield(handleTestFile(testFile, warnPluginConfig, saveProperties))
             }
         }

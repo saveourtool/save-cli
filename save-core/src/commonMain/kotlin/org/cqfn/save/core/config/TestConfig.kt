@@ -2,6 +2,7 @@ package org.cqfn.save.core.config
 
 import org.cqfn.save.core.plugin.PluginConfig
 
+import okio.FileSystem
 import okio.Path
 
 /**
@@ -14,12 +15,24 @@ data class TestConfig(
     val location: Path,
     val parentConfig: TestConfig?,
     val pluginConfigs: List<PluginConfig> = emptyList(),
+    private val fs: FileSystem = FileSystem.SYSTEM,
 ) {
     /**
      * List of child configs in the hierarchy of configs, can be empty if this config is at the very bottom.
      * NB: don't move to constructor in order not to break toString into infinite recursion.
      */
     val childConfigs: MutableList<TestConfig> = mutableListOf()
+
+    /**
+     * Directory containing [location] of this config
+     */
+    val directory: Path = location.parent!!
+
+    init {
+        require(!fs.metadata(location).isDirectory) {
+            "Location ${location.name} denotes a directory, but TestConfig should be created from a file"
+        }
+    }
 
     /**
      * @return whether this config file is in the root on the hierarchy

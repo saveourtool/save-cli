@@ -36,9 +36,7 @@ class FixPlugin : Plugin {
 
     override fun execute(saveProperties: SaveProperties, testConfig: TestConfig): Sequence<TestResult> {
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
-        val files = discoverFilePairs(fixPluginConfig.resourceNamePattern, testConfig.location.parent!!.findAllFilesMatching {
-            fixPluginConfig.resourceNamePattern.matches(it.name)
-        })
+        val files = discoverFilePairs(fixPluginConfig.resourceNamePattern, testConfig.directory.findAllFilesMatching { true })
             .also {
                 logInfo("Discovered the following file pairs for comparison: $it")
             }
