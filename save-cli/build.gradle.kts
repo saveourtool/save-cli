@@ -13,14 +13,9 @@ repositories {
 kotlin {
     jvm()
     val os = getCurrentOperatingSystem()
-    val saveTarget = when {
-        os.isMacOsX -> macosX64()
-        os.isLinux -> linuxX64()
-        os.isWindows -> mingwX64()
-        else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
-    }
+    val saveTarget = listOf(macosX64(), linuxX64(), mingwX64())
 
-    configure(listOf(saveTarget)) {
+    configure(saveTarget) {
         binaries {
             executable {
                 entryPoint = "org.cqfn.save.cli.main"
@@ -43,7 +38,9 @@ kotlin {
                 implementation( "org.jetbrains.kotlinx:kotlinx-serialization-properties:${Versions.Kotlinx.serialization}")
             }
         }
-        getByName("${saveTarget.name}Main").dependsOn(nativeMain)
+        saveTarget.forEach {
+            getByName("${it.name}Main").dependsOn(nativeMain)
+        }
         val commonTest by getting
 
 
@@ -56,10 +53,10 @@ kotlin {
     }
 
     project.tasks.register("linkReleaseExecutableMultiplatform") {
-        when (saveTarget.name) {
-            "linuxX64" -> dependsOn(tasks.getByName("linkReleaseExecutableLinuxX64"))
-            "mingwX64" -> dependsOn(tasks.getByName("linkReleaseExecutableMingwX64"))
-            "macosX64" -> dependsOn(tasks.getByName("linkReleaseExecutableMacosX64"))
+        when {
+            os.isLinux -> dependsOn(tasks.getByName("linkReleaseExecutableLinuxX64"))
+            os.isWindows -> dependsOn(tasks.getByName("linkReleaseExecutableMingwX64"))
+            os.isMacOsX -> dependsOn(tasks.getByName("linkReleaseExecutableMacosX64"))
         }
     }
 }

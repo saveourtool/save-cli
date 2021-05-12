@@ -7,13 +7,10 @@ plugins {
 
 kotlin {
     jvm()
-    val os = getCurrentOperatingSystem()
-    val saveTarget = when {
-        os.isMacOsX -> macosX64()
-        os.isLinux -> linuxX64()
-        os.isWindows -> mingwX64()
-        else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
-    }
+
+    macosX64()
+    linuxX64()
+    mingwX64()
 
     sourceSets {
         all {

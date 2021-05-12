@@ -15,11 +15,7 @@ kotlin {
             }
         }
     }
-    val hostTargetName = listOf("linuxX64", "mingwX64", "macosX64")
-
-    linuxX64()
-    mingwX64()
-    macosX64()
+    val hostTarget = listOf(linuxX64(), mingwX64(), macosX64())
 
     sourceSets {
         all {
@@ -44,15 +40,15 @@ kotlin {
         val nativeMain by creating {
             dependsOn(commonMain)
         }
-        hostTargetName.forEach {
-            getByName("${it}Main").dependsOn(nativeMain)
+        hostTarget.forEach {
+            getByName("${it.name}Main").dependsOn(nativeMain)
         }
 
         val nativeTest by creating {
             dependsOn(commonTest)
         }
-        hostTargetName.forEach {
-            getByName("${it}Test").dependsOn(nativeTest)
+        hostTarget.forEach {
+            getByName("${it.name}Test").dependsOn(nativeTest)
         }
 
         val jvmTest by getting {
