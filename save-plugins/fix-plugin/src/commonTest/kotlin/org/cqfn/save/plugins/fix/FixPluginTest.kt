@@ -49,13 +49,14 @@ class FixPluginTest {
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPluginTest::class.simpleName!!).also {
         fs.createDirectory(it)
     }
+    private val defaultPattern = Regex("(.+)(Expected|Test)\\.java")
 
     @Test
     fun `should detect two files`() {
         val testFile = fs.createFile(tmpDir / "Test1Test.java")
         val expectedFile = fs.createFile(tmpDir / "Test1Expected.java")
 
-        val pairs = FixPlugin().discoverFilePairs(listOf(testFile, expectedFile))
+        val pairs = FixPlugin().discoverFilePairs(defaultPattern, listOf(listOf(testFile, expectedFile)))
 
         assertEquals(1, pairs.size)
         assertEquals("Test1Expected.java", pairs.single().first.name)
@@ -74,7 +75,7 @@ class FixPluginTest {
         fs.createFile(tmpDir / "NowCompletelyDifferentExpected.java")
         fs.createFile(tmpDir / "AndNowCompletelyDifferent.java")
 
-        val pairs = FixPlugin().discoverFilePairs(fs.list(tmpDir))
+        val pairs = FixPlugin().discoverFilePairs(defaultPattern, listOf(fs.list(tmpDir)))
 
         assertEquals(1, pairs.size)
         assertEquals("Test2Expected.java", pairs.single().first.name)
@@ -98,9 +99,9 @@ class FixPluginTest {
 
         val results = FixPlugin().execute(
             mockConfig,
-            TestConfig(tmpDir,
+            TestConfig(tmpDir / "save.toml",
                 null,
-                listOf(FixPluginConfig(executionCmd, inPlace = true, testResources = listOf(testFile, expectedFile)))
+                listOf(FixPluginConfig(executionCmd, inPlace = true))
             )
         )
 
@@ -129,9 +130,9 @@ class FixPluginTest {
 
         val results = FixPlugin().execute(
             mockConfig,
-            TestConfig(tmpDir,
+            TestConfig(tmpDir / "save.toml",
                 null,
-                listOf(FixPluginConfig(executionCmd, destinationFileSuffix = "_copy", testResources = listOf(testFile, expectedFile)))
+                listOf(FixPluginConfig(executionCmd, destinationFileSuffix = "_copy"))
             )
         )
 

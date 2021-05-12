@@ -13,7 +13,6 @@ import org.cqfn.save.core.utils.isCurrentOsWindows
 import org.cqfn.save.plugin.warn.utils.extractWarning
 
 import okio.FileSystem
-import okio.Path.Companion.toPath
 
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -235,13 +234,14 @@ class WarnPluginTest {
         saveProperties: SaveProperties = mockConfig,
         assertion: (List<TestResult>) -> Unit) {
         val testFile = fs.createFile(tmpDir / "Test1Test.java")
+        val config = fs.createFile(tmpDir / "save.toml")
         fs.write(testFile) {
             write(text.encodeToByteArray())
         }
 
         val results = WarnPlugin().execute(
             saveProperties,
-            TestConfig(".".toPath(), null, listOf(warnPluginConfig.copy(testResources = listOf(testFile))))
+            TestConfig(config, null, listOf(warnPluginConfig))
         )
             .toList()
         println(results)

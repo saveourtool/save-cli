@@ -2,6 +2,7 @@ package org.cqfn.save.plugin.warn
 
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.TestConfig
+import org.cqfn.save.core.files.findAllFilesMatching
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.DebugInfo
@@ -28,7 +29,7 @@ class WarnPlugin : Plugin {
     override fun execute(saveProperties: SaveProperties, testConfig: TestConfig): Sequence<TestResult> {
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         return sequence {
-            discoverTestFiles(warnPluginConfig.testResources).forEach { testFile ->
+            discoverTestFiles(warnPluginConfig.resourceNamePattern, testConfig.location.parent!!).forEach { testFile ->
                 yield(handleTestFile(testFile, warnPluginConfig, saveProperties))
             }
         }
@@ -39,8 +40,11 @@ class WarnPlugin : Plugin {
      *
      * @param resources a collection of files
      */
-    internal fun discoverTestFiles(resources: List<Path>) = resources
-        .filter { it.name.contains("Test.") }
+    private fun discoverTestFiles(pattern: Regex, root: Path) = root
+        .findAllFilesMatching {
+            pattern.matches(it.name)
+        }
+        .flatten()
 
     @Suppress("UnusedPrivateMember")
     private fun handleTestFile(
