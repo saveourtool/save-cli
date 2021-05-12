@@ -2,3 +2,20 @@
 potential-bugs:
   Deprecation:
     active: true
+formatting:
+  active: true
+  android: false
+  autoCorrect: true
+  MaximumLineLength:
+    active: true
+    maxLineLength: 180
+style:
+  active: true
+  ForbiddenComment:
+    active: false
+  MaxLineLength:
+    active: true
+    maxLineLength: 180
+    excludePackageStatements: true
+    excludeImportStatements: true
+    excludeCommentStatements: false

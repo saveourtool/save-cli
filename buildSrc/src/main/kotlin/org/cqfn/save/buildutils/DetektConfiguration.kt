@@ -4,11 +4,13 @@
 
 package org.cqfn.save.buildutils
 
+import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.DetektPlugin
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.withType
 
 /**
  * Configure Detekt for a single project
@@ -27,7 +29,7 @@ fun Project.configureDetekt() {
 fun Project.createDetektTask() {
     tasks.register("detektAll") {
         allprojects {
-            this@register.dependsOn(tasks.getByName("detekt"))
+            this@register.dependsOn(tasks.withType<Detekt>())
         }
     }
 }

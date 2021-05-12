@@ -1,3 +1,4 @@
+import io.gitlab.arturbosch.detekt.Detekt
 import org.cqfn.save.buildutils.configurePublishing
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem
@@ -36,6 +37,7 @@ kotlin {
                 implementation( "org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
                 implementation("org.jetbrains.kotlinx:kotlinx-cli:${Versions.Kotlinx.cli}")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:${Versions.Kotlinx.datetime}")
+                implementation("com.akuleshov7:ktoml-core:${Versions.ktoml}")
             }
         }
         val commonTest by getting {
@@ -72,4 +74,8 @@ tasks.withType<KotlinJvmTest> {
 // TODO: Remove SaveProperties file and this rule in future commits
 diktat {
     excludes = files("src/commonMain/kotlin/org/cqfn/save/core/config/SaveProperties.kt")
+}
+
+tasks.withType<Detekt>().configureEach {
+    exclude("**/SaveProperties.kt")
 }

@@ -59,7 +59,10 @@ class ProcessBuilder {
      * @param collectStdout whether to collect stdout for future usage, if false, [redirectTo] will be ignored
      * @return [ExecutionResult] built from process output
      */
-    @Suppress("TOO_LONG_FUNCTION")
+    @Suppress(
+        "TOO_LONG_FUNCTION",
+        "TooGenericExceptionCaught",
+        "ReturnCount")
     fun exec(
         command: String,
         redirectTo: Path?,
