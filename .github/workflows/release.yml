@@ -4,11 +4,11 @@ on:
   push:
     tags:
       - 'v*'
-#env:
-  #GPG_SEC: ${{ secrets.PGP_SEC }}
-  #GPG_PASSWORD: ${{ secrets.PGP_PASSWORD }}
-  #OSSRH_USERNAME: ${{ secrets.SONATYPE_USER }}
-  #OSSRH_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+env:
+  GPG_SEC: ${{ secrets.PGP_SEC }}
+  GPG_PASSWORD: ${{ secrets.PGP_PASSWORD }}
+  OSSRH_USERNAME: ${{ secrets.SONATYPE_USER }}
+  OSSRH_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
 
 jobs:
   release:
@@ -27,8 +27,7 @@ jobs:
       - uses: burrunan/gradle-cache-action@v1
         name: Gradle release with caches caching
         with:
-          #arguments: linkReleaseExecutableMultiplatform publishToSonatype closeAndReleaseSonatypeStagingRepository
-          arguments: linkReleaseExecutableMultiplatform
+          arguments: linkReleaseExecutableMultiplatform publishToSonatype closeAndReleaseSonatypeStagingRepository
           gradle-version: wrapper
       - name: Upload artifact
         id: upload_artifact
@@ -60,18 +59,6 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
-
-      - name: Assets
-        working-directory: ./tmpFolder
-        run: ls -l
-
-      - name: Assets 2
-        working-directory: ./tmpFolder/save-cli-Linux
-        run: ls -l
-
-      - name: Assets 3
-        working-directory: ./tmpFolder/save-cli-Windows
-        run: ls -l
 
       - name: Upload save-cli
         id: upload-release-asset
