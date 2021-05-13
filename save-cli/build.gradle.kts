@@ -15,10 +15,12 @@ kotlin {
     val os = getCurrentOperatingSystem()
     val saveTarget = listOf(macosX64(), linuxX64(), mingwX64())
 
-    configure(saveTarget) {
-        binaries {
-            executable {
-                entryPoint = "org.cqfn.save.cli.main"
+    saveTarget.forEach {
+        configure(listOf(it)) {
+            binaries {
+                executable("save-${it.name}") {
+                    entryPoint = "org.cqfn.save.cli.main"
+                }
             }
         }
     }
