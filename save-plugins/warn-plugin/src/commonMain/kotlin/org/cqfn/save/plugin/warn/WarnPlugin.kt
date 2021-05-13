@@ -40,6 +40,7 @@ class WarnPlugin : Plugin {
      *
      * @param resources a collection of files
      */
+    // todo: make it common in Plugin?
     private fun discoverTestFiles(pattern: Regex, root: Path) = root
         .findAllFilesMatching {
             pattern.matches(it.name)

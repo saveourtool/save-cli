@@ -84,6 +84,7 @@ class FixPluginTest {
 
     @Test
     fun `should calculate diff of discovered files in inPlace mode`() {
+        val config = fs.createFile(tmpDir / "save.toml")
         val testFile = fs.createFile(tmpDir / "Test3Test.java")
         fs.write(testFile) {
             write("Original file".encodeToByteArray())
@@ -99,7 +100,7 @@ class FixPluginTest {
 
         val results = FixPlugin().execute(
             mockConfig,
-            TestConfig(tmpDir / "save.toml",
+            TestConfig(config,
                 null,
                 listOf(FixPluginConfig(executionCmd, inPlace = true))
             )
@@ -116,6 +117,7 @@ class FixPluginTest {
 
     @Test
     fun `should calculate diff of discovered files with destinationFileSuffix`() {
+        val config = fs.createFile(tmpDir / "save.toml")
         val testFile = fs.createFile(tmpDir / "Test3Test.java")
         fs.write(testFile) {
             write("Original file".encodeToByteArray())
@@ -130,7 +132,7 @@ class FixPluginTest {
 
         val results = FixPlugin().execute(
             mockConfig,
-            TestConfig(tmpDir / "save.toml",
+            TestConfig(config,
                 null,
                 listOf(FixPluginConfig(executionCmd, destinationFileSuffix = "_copy"))
             )
