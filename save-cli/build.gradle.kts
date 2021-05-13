@@ -17,7 +17,7 @@ kotlin {
 
     configure(saveTarget) {
         binaries {
-            val name = "save-${this@configure.name}"
+            val name = "save-${project.version}-${this@configure.name}"
             executable {
                 this.baseName = name
                 entryPoint = "org.cqfn.save.cli.main"
