@@ -17,7 +17,9 @@ kotlin {
 
     configure(saveTarget) {
         binaries {
-            executable("save-${this@configure.name}") {
+            val name = "save-${this@configure.name}"
+            executable {
+                this.baseName = name
                 entryPoint = "org.cqfn.save.cli.main"
             }
         }
@@ -54,9 +56,9 @@ kotlin {
 
     project.tasks.register("linkReleaseExecutableMultiplatform") {
         when {
-            os.isLinux -> dependsOn(tasks.getByName("linkSave-linuxX64ReleaseExecutableLinuxX64"))
-            os.isWindows -> dependsOn(tasks.getByName("linkSave-mingwX64ReleaseExecutableMingwX64"))
-            os.isMacOsX -> dependsOn(tasks.getByName("linkSave-macosX64ReleaseExecutableMacosX64"))
+            os.isLinux -> dependsOn(tasks.getByName("linkReleaseExecutableLinuxX64"))
+            os.isWindows -> dependsOn(tasks.getByName("linkReleaseExecutableMacosX64"))
+            os.isMacOsX -> dependsOn(tasks.getByName("linkReleaseExecutableMingwX64"))
         }
     }
 }
