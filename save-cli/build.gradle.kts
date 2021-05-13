@@ -57,8 +57,8 @@ kotlin {
     project.tasks.register("linkReleaseExecutableMultiplatform") {
         when {
             os.isLinux -> dependsOn(tasks.getByName("linkReleaseExecutableLinuxX64"))
-            os.isWindows -> dependsOn(tasks.getByName("linkReleaseExecutableMacosX64"))
-            os.isMacOsX -> dependsOn(tasks.getByName("linkReleaseExecutableMingwX64"))
+            os.isWindows -> dependsOn(tasks.getByName("linkReleaseExecutableMingwX64"))
+            os.isMacOsX -> dependsOn(tasks.getByName("linkReleaseExecutableMacosX64"))
         }
     }
 }
