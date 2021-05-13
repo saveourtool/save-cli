@@ -61,6 +61,10 @@ jobs:
           draft: false
           prerelease: false
 
+      - name: Assets
+        working-directory: ./tmpFolder
+        run: ls -l
+
       - name: Upload save-cli
         id: upload-release-asset
         uses: alexellis/upload-assets@0.3.0
