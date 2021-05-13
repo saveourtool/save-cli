@@ -11,7 +11,6 @@ import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.isCurrentOsWindows
-import org.cqfn.save.plugins.fix.FixPluginConfig.Companion.defaultResourceNamePattern
 
 import io.github.petertrr.diffutils.diff
 import okio.FileSystem
@@ -56,7 +55,9 @@ class FixPluginTest {
         val testFile = fs.createFile(tmpDir / "Test1Test.java")
         val expectedFile = fs.createFile(tmpDir / "Test1Expected.java")
 
-        val pairs = FixPlugin().discoverFilePairs(defaultResourceNamePattern, listOf(listOf(testFile, expectedFile)))
+        val pairs = FixPlugin().discoverTestFiles(tmpDir)
+            .map { it.first() to it.last() }
+            .toList()
 
         assertEquals(1, pairs.size)
         assertEquals("Test1Expected.java", pairs.single().first.name)
@@ -75,7 +76,9 @@ class FixPluginTest {
         fs.createFile(tmpDir / "NowCompletelyDifferentExpected.java")
         fs.createFile(tmpDir / "AndNowCompletelyDifferent.java")
 
-        val pairs = FixPlugin().discoverFilePairs(defaultResourceNamePattern, listOf(fs.list(tmpDir)))
+        val pairs = FixPlugin().discoverTestFiles(tmpDir)
+            .map { it.first() to it.last() }
+            .toList()
 
         assertEquals(1, pairs.size)
         assertEquals("Test2Expected.java", pairs.single().first.name)

@@ -14,7 +14,6 @@ import org.cqfn.save.core.plugin.PluginConfig
  * corresponding to the whole string.
  * @property messageCaptureGroup an index of capture group in regular expressions, corresponding to warning text. Indices start at 0 with 0
  * corresponding to the whole string.
- * @property resourceNamePattern pattern by which test resources will be selected
  */
 data class WarnPluginConfig(
     val execCmd: String,
@@ -25,7 +24,6 @@ data class WarnPluginConfig(
     val lineCaptureGroup: Int?,
     val columnCaptureGroup: Int?,
     val messageCaptureGroup: Int,
-    override val resourceNamePattern: Regex = defaultResourceNamePattern,
 ) : PluginConfig {
     init {
         require(warningTextHasLine xor (lineCaptureGroup == null)) {

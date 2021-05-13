@@ -11,6 +11,7 @@ import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.result.TestStatus
 import org.cqfn.save.core.utils.ProcessBuilder
+import org.cqfn.save.plugin.warn.WarnPluginConfig.Companion.defaultResourceNamePattern
 import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
 
@@ -28,22 +29,17 @@ class WarnPlugin : Plugin {
 
     override fun execute(saveProperties: SaveProperties, testConfig: TestConfig): Sequence<TestResult> {
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
-        return sequence {
-            discoverTestFiles(warnPluginConfig.resourceNamePattern, testConfig.directory).forEach { testFile ->
-                yield(handleTestFile(testFile, warnPluginConfig, saveProperties))
-            }
+        return discoverTestFiles(testConfig.directory).map { resources ->
+            handleTestFile(resources.single(), warnPluginConfig, saveProperties)
         }
     }
 
-    /**
-     * Discover test resources for warn-plugin among [resources]
-     *
-     * @param resources a collection of files
-     */
-    private fun discoverTestFiles(pattern: Regex, root: Path) = root
+    override fun discoverTestFiles(root: Path) = root
         .findAllFilesMatching {
-            pattern.matches(it.name)
+            defaultResourceNamePattern.matches(it.name)
         }
+        .asSequence()
+        .map { listOf(it) }
         .flatten()
 
     @Suppress("UnusedPrivateMember")

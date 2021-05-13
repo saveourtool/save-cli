@@ -11,6 +11,7 @@ import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.ProcessBuilder
+import org.cqfn.save.plugins.fix.FixPluginConfig.Companion.defaultResourceNamePattern
 
 import io.github.petertrr.diffutils.diff
 import io.github.petertrr.diffutils.patch.ChangeDelta
@@ -36,12 +37,13 @@ class FixPlugin : Plugin {
 
     override fun execute(saveProperties: SaveProperties, testConfig: TestConfig): Sequence<TestResult> {
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
-        val files = discoverFilePairs(fixPluginConfig.resourceNamePattern, testConfig.directory.findAllFilesMatching { true })
+        val files = discoverTestFiles(testConfig.directory)
             .also {
                 logInfo("Discovered the following file pairs for comparison: $it")
             }
-        return sequence {
-            files.forEach { (expected, test) ->
+        return files
+            .map { it.first() to it.last() }
+            .map { (expected, test) ->
                 val executionResult = pb.exec(fixPluginConfig.execCmd, null, false)
                 val fixedLines = FileSystem.SYSTEM.readLines(
                     if (fixPluginConfig.inPlace) test else test.parent!! / fixPluginConfig.destinationFileFor(test).toPath()
@@ -54,31 +56,30 @@ class FixPlugin : Plugin {
                         Fail(patch.formatToString())
                     }
                 }
-                yield(TestResult(
+                TestResult(
                     listOf(expected, test),
                     status,
                     // todo: fill debug info
                     DebugInfo(executionResult.stdout.joinToString("\n"), null, null)
-                ))
+                )
             }
-        }
     }
 
-    /**
-     * @param resources paths to test resources, where pairs of test/expected files reside. Grouped by directories.
-     * @param pattern pattern by which test resources will be selected from [resources]
-     * @return list of pairs of corresponding test/expected files.
-     */
-    internal fun discoverFilePairs(pattern: Regex, resources: List<List<Path>>): List<Pair<Path, Path>> = resources
+    override fun discoverTestFiles(root: Path): Sequence<List<Path>> = root
+        .findAllFilesMatching { true }
+        .asSequence()
         .flatMap { files ->
             files.groupBy {
-                val matchResult = pattern.matchEntire(it.name)
+                val matchResult = defaultResourceNamePattern.matchEntire(it.name)
                 matchResult?.groupValues?.get(1)  // this is a capture group for the start of file name
             }
                 .filter { it.value.size > 1 && it.key != null }
                 .mapValues { (name, group) ->
                     require(group.size == 2) { "Files should be grouped in pairs, but for name $name these files have been discovered: $group" }
-                    group.first { it.name.contains("Expected.") } to group.first { it.name.contains("Test.") }
+                    listOf(
+                        group.first { it.name.contains("Expected.") },
+                        group.first { it.name.contains("Test.") }
+                    )
                 }
                 .values
         }
