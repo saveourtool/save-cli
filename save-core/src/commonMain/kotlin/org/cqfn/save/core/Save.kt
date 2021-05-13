@@ -40,6 +40,7 @@ class Save(
         requireNotNull(testConfig) { "Provided path ${saveProperties.testConfig} doesn't correspond to a valid save.toml file" }
 
         val reporters: List<Reporter> = emptyList()  // todo: create reporters based on saveProperties.reportType (also it should be a collection?)
+        // todo: provide correct output sink for reporter based on properties.reportOutputType
         reporters.beforeAll()
 
         val plugins: List<Plugin> = emptyList()  // todo: discover plugins (from configuration blocks in TestSuiteConfig?)
