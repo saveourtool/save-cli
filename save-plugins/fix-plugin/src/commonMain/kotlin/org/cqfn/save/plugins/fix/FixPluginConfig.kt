@@ -15,7 +15,7 @@ data class FixPluginConfig(
     val execCmd: String,
     val inPlace: Boolean = false,
     val destinationFileSuffix: String? = null,
-    override val resourceNamePattern: Regex = Regex("""(.+)(Expected|Test)\.[\w\d]+"""),
+    override val resourceNamePattern: Regex = defaultResourceNamePattern,
 ) : PluginConfig {
     init {
         require(inPlace || destinationFileSuffix != null) {
@@ -34,5 +34,9 @@ data class FixPluginConfig(
         return original.name.run {
             substringBeforeLast(".") + destinationFileSuffix + "." + substringAfterLast(".")
         }
+    }
+
+    companion object {
+        internal val defaultResourceNamePattern = Regex("""(.+)(Expected|Test)\.[\w\d]+""")
     }
 }

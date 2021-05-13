@@ -25,7 +25,7 @@ data class WarnPluginConfig(
     val lineCaptureGroup: Int?,
     val columnCaptureGroup: Int?,
     val messageCaptureGroup: Int,
-    override val resourceNamePattern: Regex = Regex("""(.+)Test\.[\w\d]+"""),
+    override val resourceNamePattern: Regex = defaultResourceNamePattern,
 ) : PluginConfig {
     init {
         require(warningTextHasLine xor (lineCaptureGroup == null)) {
@@ -50,5 +50,6 @@ data class WarnPluginConfig(
          * ```[WARN] /path/to/resources/ClassNameTest.java:2:4: Class name in incorrect case```
          */
         internal val defaultOutputPattern = Regex(".*(\\d+):(\\d+): (.+)")
+        internal val defaultResourceNamePattern = Regex("""(.+)Test\.[\w\d]+""")
     }
 }
