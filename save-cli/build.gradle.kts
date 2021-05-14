@@ -58,7 +58,8 @@ kotlin {
         when {
             os.isLinux -> dependsOn(tasks.getByName("linkReleaseExecutableLinuxX64"))
             os.isWindows -> dependsOn(tasks.getByName("linkReleaseExecutableMingwX64"))
-            os.isMacOsX -> dependsOn(tasks.getByName("linkReleaseExecutableMacosX64"))
+            //FixMe https://github.com/cqfn/save/issues/53
+            //os.isMacOsX -> dependsOn(tasks.getByName("linkReleaseExecutableMacosX64"))
         }
     }
 }
