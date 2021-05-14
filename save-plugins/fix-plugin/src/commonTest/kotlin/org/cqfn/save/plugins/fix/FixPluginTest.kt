@@ -89,8 +89,7 @@ class FixPluginTest {
         }
         val expectedFile = fs.createFile(tmpDir / "Test3Expected.java")
         fs.write(expectedFile) {
-            val textPostfix = if (isCurrentOsWindows()) " \n" else ""
-            write("Expected file$textPostfix".encodeToByteArray())
+            write("Expected file".encodeToByteArray())
         }
 
         val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").toLowerCase()} && " else ""
@@ -121,8 +120,7 @@ class FixPluginTest {
         }
         val expectedFile = fs.createFile(tmpDir / "Test3Expected.java")
         fs.write(expectedFile) {
-            val textPostfix = if (isCurrentOsWindows()) " \n" else ""
-            write("Expected file$textPostfix".encodeToByteArray())
+            write("Expected file".encodeToByteArray())
         }
         val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").toLowerCase()} && " else ""
         val executionCmd = "${diskWithTmpDir}cd $tmpDir && echo Expected file > Test3Test_copy.java"
