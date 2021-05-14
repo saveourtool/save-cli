@@ -13,7 +13,8 @@ repositories {
 kotlin {
     jvm()
     val os = getCurrentOperatingSystem()
-    val saveTarget = listOf(macosX64(), linuxX64(), mingwX64())
+    //FixMe https://github.com/cqfn/save/issues/53
+    val saveTarget = listOf(/*macosX64(),*/ linuxX64(), mingwX64())
 
     configure(saveTarget) {
         binaries {
