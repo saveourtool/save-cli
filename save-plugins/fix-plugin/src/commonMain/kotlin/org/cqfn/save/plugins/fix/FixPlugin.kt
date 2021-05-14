@@ -1,6 +1,5 @@
 package org.cqfn.save.plugins.fix
 
-import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.logInfo
@@ -33,7 +32,7 @@ class FixPlugin : Plugin {
         .newTag { start -> if (start) "<" else ">" }
         .build()
 
-    override fun execute(saveProperties: SaveProperties, testConfig: TestConfig): Sequence<TestResult> {
+    override fun execute(testConfig: TestConfig): Sequence<TestResult> {
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
         val files = discoverFilePairs(fixPluginConfig.testResources)
             .also {
@@ -53,12 +52,14 @@ class FixPlugin : Plugin {
                         Fail(patch.formatToString())
                     }
                 }
-                yield(TestResult(
-                    listOf(expected, test),
-                    status,
-                    // todo: fill debug info
-                    DebugInfo(executionResult.stdout.joinToString("\n"), null, null)
-                ))
+                yield(
+                    TestResult(
+                        listOf(expected, test),
+                        status,
+                        // todo: fill debug info
+                        DebugInfo(executionResult.stdout.joinToString("\n"), null, null)
+                    )
+                )
             }
         }
     }

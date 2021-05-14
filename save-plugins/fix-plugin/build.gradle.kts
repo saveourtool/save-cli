@@ -18,7 +18,7 @@ kotlin {
         }
         val commonMain by getting {
             dependencies {
-                implementation(project(":save-core"))
+                implementation(project(":save-common"))
                 implementation("io.github.petertrr:kotlin-multiplatform-diff:0.1.0")
             }
         }

@@ -1,4 +1,3 @@
-import io.gitlab.arturbosch.detekt.Detekt
 import org.cqfn.save.buildutils.configurePublishing
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 
@@ -15,7 +14,7 @@ kotlin {
             }
         }
     }
-    val hostTarget = listOf(linuxX64(), mingwX64()/*, macosX64()*/)
+    val hostTarget = listOf(linuxX64(), mingwX64(), macosX64())
 
     sourceSets {
         all {
@@ -24,11 +23,9 @@ kotlin {
         }
         val commonMain by getting {
             dependencies {
-                implementation(project(":save-common"))
                 api("com.squareup.okio:okio-multiplatform:${Versions.okio}")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
-                implementation("org.jetbrains.kotlinx:kotlinx-cli:${Versions.Kotlinx.cli}")
-                implementation("com.akuleshov7:ktoml-core:${Versions.ktoml}")
+                implementation( "org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:${Versions.Kotlinx.datetime}")
             }
         }
         val commonTest by getting {
@@ -64,13 +61,4 @@ configurePublishing()
 
 tasks.withType<KotlinJvmTest> {
     useJUnitPlatform()
-}
-
-// TODO: Remove SaveProperties file and this rule in future commits
-diktat {
-    excludes = files("src/commonMain/kotlin/org/cqfn/save/core/config/SaveProperties.kt")
-}
-
-tasks.withType<Detekt>().configureEach {
-    exclude("**/SaveProperties.kt")
 }

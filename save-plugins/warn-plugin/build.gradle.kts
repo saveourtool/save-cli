@@ -16,7 +16,7 @@ kotlin {
         }
         val commonMain by getting {
             dependencies {
-                implementation(project(":save-core"))
+                implementation(project(":save-common"))
             }
         }
         val commonTest by getting {
