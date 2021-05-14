@@ -1,9 +1,5 @@
 package org.cqfn.save.plugin.warn
 
-import org.cqfn.save.core.config.LanguageType
-import org.cqfn.save.core.config.ReportType
-import org.cqfn.save.core.config.ResultOutputType
-import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.plugin.ResourceFormatException
@@ -22,25 +18,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
-
-private val mockConfig = SaveProperties(
-    testConfig = ".",
-    parallelMode = false,
-    threads = 1,
-    propertiesFile = ".",
-    debug = true,
-    quiet = false,
-    reportType = ReportType.PLAIN,
-    baseline = null,
-    excludeSuites = null,
-    includeSuites = null,
-    language = LanguageType.KOTLIN,
-    testRootPath = ".",
-    resultOutput = ResultOutputType.STDOUT,
-    configInheritance = true,
-    ignoreSaveComments = false,
-    reportDir = "."
-)
 
 /**
  * Needed tests:
@@ -108,7 +85,6 @@ class WarnPluginTest {
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"), Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
                 true, true, 1, 2, 3
             ),
-            mockConfig.copy(ignoreSaveComments = true)
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -179,7 +155,6 @@ class WarnPluginTest {
                 Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
                 true, true, 1, 2, 3
             ),
-            mockConfig.copy(ignoreSaveComments = true)
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -232,7 +207,6 @@ class WarnPluginTest {
     private fun performTest(
         text: String,
         warnPluginConfig: WarnPluginConfig,
-        saveProperties: SaveProperties = mockConfig,
         assertion: (List<TestResult>) -> Unit) {
         val testFile = fs.createFile(tmpDir / "Test1Test.java")
         fs.write(testFile) {
@@ -240,7 +214,6 @@ class WarnPluginTest {
         }
 
         val results = WarnPlugin().execute(
-            saveProperties,
             TestConfig(".".toPath(), null, listOf(warnPluginConfig.copy(testResources = listOf(testFile))))
         )
             .toList()
