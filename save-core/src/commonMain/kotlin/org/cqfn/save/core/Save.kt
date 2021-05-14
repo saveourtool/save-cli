@@ -2,6 +2,7 @@ package org.cqfn.save.core
 
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.files.ConfigDetector
+import org.cqfn.save.core.logging.isDebugEnabled
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
 import org.cqfn.save.core.logging.logInfo
@@ -14,7 +15,6 @@ import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 
 import okio.Path.Companion.toPath
-import org.cqfn.save.core.logging.isDebugEnabled
 
 /**
  * @property saveProperties an instance of [SaveProperties]

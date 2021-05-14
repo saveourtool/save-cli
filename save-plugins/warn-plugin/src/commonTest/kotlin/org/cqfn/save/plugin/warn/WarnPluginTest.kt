@@ -1,8 +1,5 @@
 package org.cqfn.save.plugin.warn
 
-import org.cqfn.save.core.config.LanguageType
-import org.cqfn.save.core.config.ReportType
-import org.cqfn.save.core.config.ResultOutputType
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.plugin.ResourceFormatException
