@@ -1,4 +1,5 @@
 import org.cqfn.save.buildutils.configurePublishing
+import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 
 plugins {
     kotlin("multiplatform")
@@ -6,14 +7,9 @@ plugins {
 
 kotlin {
     jvm()
-    val os = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem()
-    // Create a target for the host platform.
-    val hostTarget = when {
-        os.isLinux -> linuxX64()
-        os.isWindows -> mingwX64()
-        os.isMacOsX -> macosX64()
-        else -> throw GradleException("Host OS '${os.name}' is not supported in Kotlin/Native $project.")
-    }
+    linuxX64()
+    mingwX64()
+    macosX64()
 
     sourceSets {
         val commonMain by getting {
@@ -26,6 +22,6 @@ kotlin {
 
 configurePublishing()
 
-tasks.withType<org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest> {
+tasks.withType<KotlinJvmTest> {
     useJUnitPlatform()
 }
