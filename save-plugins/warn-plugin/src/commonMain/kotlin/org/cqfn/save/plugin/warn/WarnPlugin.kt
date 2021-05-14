@@ -1,6 +1,5 @@
 package org.cqfn.save.plugin.warn
 
-import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.plugin.Plugin
@@ -25,11 +24,11 @@ class WarnPlugin : Plugin {
     private val fs = FileSystem.SYSTEM
     private val pb = ProcessBuilder()
 
-    override fun execute(saveProperties: SaveProperties, testConfig: TestConfig): Sequence<TestResult> {
+    override fun execute(testConfig: TestConfig): Sequence<TestResult> {
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         return sequence {
             discoverTestFiles(warnPluginConfig.testResources).forEach { testFile ->
-                yield(handleTestFile(testFile, warnPluginConfig, saveProperties))
+                yield(handleTestFile(testFile, warnPluginConfig))
             }
         }
     }
@@ -45,8 +44,7 @@ class WarnPlugin : Plugin {
     @Suppress("UnusedPrivateMember")
     private fun handleTestFile(
         path: Path,
-        warnPluginConfig: WarnPluginConfig,
-        saveProperties: SaveProperties): TestResult {
+        warnPluginConfig: WarnPluginConfig): TestResult {
         val expectedWarnings = fs.readLines(path)
             .mapNotNull {
                 with(warnPluginConfig) {

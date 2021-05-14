@@ -6,10 +6,9 @@
 package org.cqfn.save.core.logging
 
 /**
- * todo: configure via --debug option
+ * Is debug logging enabled
  */
-@Suppress("MayBeConst")
-val isDebugEnabled = false
+var isDebugEnabled: Boolean = false
 
 /**
  * Log a message with debug level
