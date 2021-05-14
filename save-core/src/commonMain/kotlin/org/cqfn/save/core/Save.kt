@@ -1,5 +1,7 @@
 package org.cqfn.save.core
 
+import org.cqfn.save.core.config.ReportType
+import org.cqfn.save.core.config.ResultOutputType
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.logging.isDebugEnabled
@@ -22,8 +24,11 @@ import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.Ignored
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
+import org.cqfn.save.reporter.plain.PlainTextReporter
 
+import okio.FileSystem
 import okio.Path.Companion.toPath
+import okio.buffer
 
 /**
  * @property saveProperties an instance of [SaveProperties]
@@ -32,6 +37,8 @@ import okio.Path.Companion.toPath
 class Save(
     private val saveProperties: SaveProperties
 ) {
+    private val fs = FileSystem.SYSTEM
+
     init {
         isDebugEnabled = saveProperties.debug ?: false
     }
@@ -44,32 +51,39 @@ class Save(
         val testConfig = ConfigDetector().configFromFile(saveProperties.testConfig!!.toPath())
         requireNotNull(testConfig) { "Provided path ${saveProperties.testConfig} doesn't correspond to a valid save.toml file" }
 
-        val reporters: List<Reporter> = emptyList()  // todo: create reporters based on saveProperties.reportType (also it should be a collection?)
-        // todo: provide correct output sink for reporter based on properties.reportOutputType
-        reporters.beforeAll()
+        val out = when (saveProperties.resultOutput) {
+            ResultOutputType.FILE -> fs.sink("save.out".toPath()).buffer()
+            else -> TODO("Type ${saveProperties.resultOutput} is not yet supported")
+        }
+        // todo: make `saveProperties.reportType` a collection
+        val reporter: Reporter = when (saveProperties.reportType) {
+            ReportType.PLAIN -> PlainTextReporter(out)
+            else -> TODO("Reporter for type ${saveProperties.reportType} is not yet supported")
+        }
+        reporter.beforeAll()
 
         val plugins: List<Plugin> = emptyList()  // todo: discover plugins (from configuration blocks in TestSuiteConfig?)
         logInfo("Discovered plugins: $plugins")
         plugins.forEach { plugin ->
-            reporters.onPluginInitialization(plugin)
+            reporter.onPluginInitialization(plugin)
         }
 
         plugins.forEach { plugin ->
             logInfo("Execute plugin: ${plugin::class.simpleName}")
-            reporters.onPluginExecutionStart(plugin)
+            reporter.onPluginExecutionStart(plugin)
             try {
                 plugin.execute(testConfig)
-                    .onEach { event -> reporters.onEvent(event) }
+                    .onEach { event -> reporter.onEvent(event) }
                     .forEach(this::handleResult)
             } catch (ex: PluginException) {
-                reporters.onPluginExecutionError(ex)
+                reporter.onPluginExecutionError(ex)
                 logError("${plugin::class.simpleName} has crashed: ${ex.message}")
             }
             logInfo("${plugin::class.simpleName} successfully executed!")
-            reporters.onPluginExecutionEnd(plugin)
+            reporter.onPluginExecutionEnd(plugin)
         }
 
-        reporters.afterAll()
+        reporter.afterAll()
     }
 
     @Suppress("WHEN_WITHOUT_ELSE")  // TestResult is a sealed class
