@@ -10,12 +10,12 @@ class ProcessBuilderInternalTest {
     @Test
     fun `check stdout with redirection`() {
         val actualResult = processBuilder.exec("echo something >/dev/null", null)
-        val expectedCode = 0
-        val expectedStdout = "something"
+        val expectedCode = if (isCurrentOsWindows()) 1 else 0
+        val expectedStdout = listOf("something")
         val expectedStderr: List<String> = emptyList()
         assertEquals(expectedCode, actualResult.code)
         // posix popen and JVM process builder returns lines with different whitespaces, so we cut them
-        assertEquals(expectedStdout, actualResult.stdout[0].trimEnd())
+        assertEquals(expectedStdout, actualResult.stdout)
         assertEquals(expectedStderr, actualResult.stderr)
     }
 

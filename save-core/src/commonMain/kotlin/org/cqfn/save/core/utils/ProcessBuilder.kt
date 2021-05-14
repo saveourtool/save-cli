@@ -87,7 +87,12 @@ class ProcessBuilder {
             logWarn("Found user provided redirections in `$command`. " +
                     "SAVE uses own redirections for internal purpose and will redirect all streams to $tmpDir")
         }
-        val cmd = processBuilderInternal.prepareCmd(command)
+        val commandWithEcho = if (isCurrentOsWindows()) {
+            processCommandWithEcho(command)
+        } else {
+            command
+        }
+        val cmd = processBuilderInternal.prepareCmd(commandWithEcho)
         logDebug("Executing: $cmd")
         val status = try {
             processBuilderInternal.exec(cmd)
@@ -119,6 +124,61 @@ class ProcessBuilder {
     private fun returnWithError(errMsg: String): ExecutionResult {
         logError(errMsg)
         return ExecutionResult(-1, emptyList(), listOf(errMsg))
+    }
+
+    companion object {
+        /**
+         * Check whether there are exists `echo` commands, and process them, since in Windows
+         * `echo` adds extra whitespaces and newlines. This method will remove them
+         *
+         * @param command command to process
+         * @return unmodified command, if there is no `echo` subcommands, otherwise add parameter `set /p=` to `echo`
+         */
+        @Suppress("ReturnCount")
+        fun processCommandWithEcho(command: String): String {
+            if (!command.contains("echo")) {
+                return command
+            }
+            // Command already contains correct signature.
+            // We also believe not to met complex cases: `echo a; echo | set /p="a && echo b"`
+            val cmdWithoutWhitespaces = command.replace(" ", "")
+            if (cmdWithoutWhitespaces.contains("echo|set")) {
+                return command
+            }
+            if (cmdWithoutWhitespaces.contains("echo\"")) {
+                logWarn("You can use echo | set /p\"your command\" to avoid extra whitespaces on Windows")
+                return command
+            }
+            // If command is complex (have `&&` or `;`), we need to modify only `echo` subcommands
+            val separator = if (command.contains("&&")) {
+                "&&"
+            } else if (command.contains(";")) {
+                ";"
+            } else {
+                ""
+            }
+            val listOfCommands = if (separator != "") command.split(separator) as MutableList<String> else mutableListOf(command)
+            listOfCommands.forEachIndexed { index, cmd ->
+                if (cmd.contains("echo")) {
+                    var newEchoCommand = cmd.trim(' ').replace("echo ", " echo | set /p=\"")
+                    // Now we need to add closing `"` in proper place
+                    // Despite the fact, that we don't expect user redirections, for out internal tests we use them,
+                    // so we need to process such cases
+                    // There are three different cases, where we need to insert closing `"`.
+                    // 1) Before stdout redirection
+                    // 2) Before stderr redirection
+                    // 3) At the end of string, if there is no redirections
+                    val indexOfStdoutRedirection = if (newEchoCommand.indexOf(">") != -1) newEchoCommand.indexOf(">") else newEchoCommand.length
+                    val indexOfStderrRedirection = if (newEchoCommand.indexOf("2>") != -1) newEchoCommand.indexOf("2>") else newEchoCommand.length
+                    val insertIndex = minOf(indexOfStdoutRedirection, indexOfStderrRedirection)
+                    newEchoCommand = newEchoCommand.substring(0, insertIndex).trimEnd(' ') + "\" " + newEchoCommand.substring(insertIndex, newEchoCommand.length) + " "
+                    listOfCommands[index] = newEchoCommand
+                }
+            }
+            val modifiedCommand = listOfCommands.joinToString(separator).trim(' ')
+            logDebug("Modify command:`$command` to `$modifiedCommand` because of `echo` on Windows add extra newlines")
+            return modifiedCommand
+        }
     }
 }
 
