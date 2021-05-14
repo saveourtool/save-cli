@@ -1,6 +1,5 @@
 package org.cqfn.save.plugins.fix
 
-import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.findAllFilesMatching
 import org.cqfn.save.core.files.readLines
@@ -35,7 +34,7 @@ class FixPlugin : Plugin {
         .newTag { start -> if (start) "<" else ">" }
         .build()
 
-    override fun execute(saveProperties: SaveProperties, testConfig: TestConfig): Sequence<TestResult> {
+    override fun execute(testConfig: TestConfig): Sequence<TestResult> {
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
         val files = discoverTestFiles(testConfig.directory)
             .also {

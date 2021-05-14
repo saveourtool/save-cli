@@ -8,7 +8,7 @@ import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
 
-internal val testResourceFilePattern = Regex(".*Test\\.\\w+")
+val testResourceFilePattern = Regex(".*Test\\.\\w+")
 
 /**
  * Find all descendant files in the directory denoted by [this] [Path], that match [condition].

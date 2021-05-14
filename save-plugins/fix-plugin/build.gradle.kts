@@ -1,5 +1,4 @@
 import org.cqfn.save.buildutils.configurePublishing
-import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem
 
 plugins {
     kotlin("multiplatform")
@@ -7,13 +6,11 @@ plugins {
 
 kotlin {
     jvm()
-    val os = getCurrentOperatingSystem()
-    val saveTarget = when {
-        os.isMacOsX -> macosX64()
-        os.isLinux -> linuxX64()
-        os.isWindows -> mingwX64()
-        else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
-    }
+
+    //FixMe https://github.com/cqfn/save/issues/53
+    //macosX64()
+    linuxX64()
+    mingwX64()
 
     sourceSets {
         all {
@@ -22,7 +19,7 @@ kotlin {
         }
         val commonMain by getting {
             dependencies {
-                implementation(project(":save-core"))
+                implementation(project(":save-common"))
                 implementation("io.github.petertrr:kotlin-multiplatform-diff:0.1.0")
             }
         }

@@ -1,9 +1,5 @@
 package org.cqfn.save.plugins.fix
 
-import org.cqfn.save.core.config.LanguageType
-import org.cqfn.save.core.config.ReportType
-import org.cqfn.save.core.config.ResultOutputType
-import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
@@ -19,25 +15,6 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-
-private val mockConfig = SaveProperties(
-    testConfig = ".",
-    parallelMode = false,
-    threads = 1,
-    propertiesFile = ".",
-    debug = true,
-    quiet = false,
-    reportType = ReportType.PLAIN,
-    baseline = null,
-    excludeSuites = null,
-    includeSuites = null,
-    language = LanguageType.KOTLIN,
-    testRootPath = ".",
-    resultOutput = ResultOutputType.STDOUT,
-    configInheritance = true,
-    ignoreSaveComments = true,
-    reportDir = "."
-)
 
 /**
  * Needed tests:
@@ -94,15 +71,13 @@ class FixPluginTest {
         }
         val expectedFile = fs.createFile(tmpDir / "Test3Expected.java")
         fs.write(expectedFile) {
-            val textPostfix = if (isCurrentOsWindows()) " \n" else ""
-            write("Expected file$textPostfix".encodeToByteArray())
+            write("Expected file".encodeToByteArray())
         }
 
         val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").toLowerCase()} && " else ""
         val executionCmd = "${diskWithTmpDir}cd $tmpDir && echo Expected file > Test3Test.java"
 
         val results = FixPlugin().execute(
-            mockConfig,
             TestConfig(config,
                 null,
                 listOf(FixPluginConfig(executionCmd, inPlace = true))
@@ -127,14 +102,12 @@ class FixPluginTest {
         }
         val expectedFile = fs.createFile(tmpDir / "Test3Expected.java")
         fs.write(expectedFile) {
-            val textPostfix = if (isCurrentOsWindows()) " \n" else ""
-            write("Expected file$textPostfix".encodeToByteArray())
+            write("Expected file".encodeToByteArray())
         }
         val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").toLowerCase()} && " else ""
         val executionCmd = "${diskWithTmpDir}cd $tmpDir && echo Expected file > Test3Test_copy.java"
 
         val results = FixPlugin().execute(
-            mockConfig,
             TestConfig(config,
                 null,
                 listOf(FixPluginConfig(executionCmd, destinationFileSuffix = "_copy"))
