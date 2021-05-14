@@ -13,16 +13,14 @@ repositories {
 kotlin {
     jvm()
     val os = getCurrentOperatingSystem()
-    val saveTarget = when {
-        os.isMacOsX -> macosX64()
-        os.isLinux -> linuxX64()
-        os.isWindows -> mingwX64()
-        else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
-    }
+    //FixMe https://github.com/cqfn/save/issues/53
+    val saveTarget = listOf(/*macosX64(),*/ linuxX64(), mingwX64())
 
-    configure(listOf(saveTarget)) {
+    configure(saveTarget) {
         binaries {
+            val name = "save-${project.version}-${this@configure.name}"
             executable {
+                this.baseName = name
                 entryPoint = "org.cqfn.save.cli.main"
             }
         }
@@ -43,7 +41,9 @@ kotlin {
                 implementation( "org.jetbrains.kotlinx:kotlinx-serialization-properties:${Versions.Kotlinx.serialization}")
             }
         }
-        getByName("${saveTarget.name}Main").dependsOn(nativeMain)
+        saveTarget.forEach {
+            getByName("${it.name}Main").dependsOn(nativeMain)
+        }
         val commonTest by getting
 
 
@@ -52,6 +52,15 @@ kotlin {
                 implementation(kotlin("test-junit5"))
                 implementation("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
             }
+        }
+    }
+
+    project.tasks.register("linkReleaseExecutableMultiplatform") {
+        when {
+            os.isLinux -> dependsOn(tasks.getByName("linkReleaseExecutableLinuxX64"))
+            os.isWindows -> dependsOn(tasks.getByName("linkReleaseExecutableMingwX64"))
+            //FixMe https://github.com/cqfn/save/issues/53
+            //os.isMacOsX -> dependsOn(tasks.getByName("linkReleaseExecutableMacosX64"))
         }
     }
 }
