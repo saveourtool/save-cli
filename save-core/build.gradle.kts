@@ -15,7 +15,8 @@ kotlin {
             }
         }
     }
-    val hostTarget = listOf(linuxX64(), mingwX64(), macosX64())
+    //FixMe https://github.com/cqfn/save/issues/53
+    val hostTarget = listOf(linuxX64(), mingwX64()/*, macosX64()*/)
 
     sourceSets {
         all {

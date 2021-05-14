@@ -7,7 +7,8 @@ plugins {
 kotlin {
     jvm()
 
-    macosX64()
+    //FixMe https://github.com/cqfn/save/issues/53
+    //macosX64()
     linuxX64()
     mingwX64()
 

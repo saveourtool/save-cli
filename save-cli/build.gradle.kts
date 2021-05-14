@@ -13,7 +13,8 @@ repositories {
 kotlin {
     jvm()
     val os = getCurrentOperatingSystem()
-    val saveTarget = listOf(macosX64(), linuxX64(), mingwX64())
+    //FixMe https://github.com/cqfn/save/issues/53
+    val saveTarget = listOf(/*macosX64(),*/ linuxX64(), mingwX64())
 
     configure(saveTarget) {
         binaries {
@@ -58,7 +59,8 @@ kotlin {
         when {
             os.isLinux -> dependsOn(tasks.getByName("linkReleaseExecutableLinuxX64"))
             os.isWindows -> dependsOn(tasks.getByName("linkReleaseExecutableMingwX64"))
-            os.isMacOsX -> dependsOn(tasks.getByName("linkReleaseExecutableMacosX64"))
+            //FixMe https://github.com/cqfn/save/issues/53
+            //os.isMacOsX -> dependsOn(tasks.getByName("linkReleaseExecutableMacosX64"))
         }
     }
 }
