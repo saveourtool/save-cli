@@ -1,6 +1,7 @@
 package org.cqfn.save.plugin.warn
 
 import org.cqfn.save.core.config.TestConfig
+import org.cqfn.save.core.files.findAllFilesMatching
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.DebugInfo
@@ -9,6 +10,7 @@ import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.result.TestStatus
 import org.cqfn.save.core.utils.ProcessBuilder
+import org.cqfn.save.plugin.warn.WarnPluginConfig.Companion.defaultResourceNamePattern
 import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
 
@@ -26,20 +28,18 @@ class WarnPlugin : Plugin {
 
     override fun execute(testConfig: TestConfig): Sequence<TestResult> {
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
-        return sequence {
-            discoverTestFiles(warnPluginConfig.testResources).forEach { testFile ->
-                yield(handleTestFile(testFile, warnPluginConfig))
-            }
+        return discoverTestFiles(testConfig.directory).map { resources ->
+            handleTestFile(resources.single(), warnPluginConfig)
         }
     }
 
-    /**
-     * Discover test resources for warn-plugin among [resources]
-     *
-     * @param resources a collection of files
-     */
-    internal fun discoverTestFiles(resources: List<Path>) = resources
-        .filter { it.name.contains("Test.") }
+    override fun discoverTestFiles(root: Path) = root
+        .findAllFilesMatching {
+            defaultResourceNamePattern.matches(it.name)
+        }
+        .asSequence()
+        .map { listOf(it) }
+        .flatten()
 
     @Suppress("UnusedPrivateMember")
     private fun handleTestFile(

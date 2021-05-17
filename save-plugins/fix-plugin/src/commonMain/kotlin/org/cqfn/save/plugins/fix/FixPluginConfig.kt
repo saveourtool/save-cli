@@ -9,13 +9,11 @@ import okio.Path
  * @property inPlace whether the [execCmd] mutates the file in-place
  * @property destinationFileSuffix [execCmd] should append this suffix to the file name after mutating it.
  * Required when `inPlace` is `false`, not used otherwise.
- * @property testResources list of paths to test resources
  */
 data class FixPluginConfig(
     val execCmd: String,
     val inPlace: Boolean = false,
     val destinationFileSuffix: String? = null,
-    val testResources: List<Path> = emptyList(),
 ) : PluginConfig {
     init {
         require(inPlace || destinationFileSuffix != null) {
@@ -34,5 +32,9 @@ data class FixPluginConfig(
         return original.name.run {
             substringBeforeLast(".") + destinationFileSuffix + "." + substringAfterLast(".")
         }
+    }
+
+    companion object {
+        internal val defaultResourceNamePattern = Regex("""(.+)(Expected|Test)\.[\w\d]+""")
     }
 }
