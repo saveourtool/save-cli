@@ -47,7 +47,7 @@ class ProcessBuilderInternalTest {
             }
             System.getProperty("os.name").contains("Mac", ignoreCase = true) -> {
                 expectedCode = 1
-                expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
+                expectedStderr = listOf("sh: line 0: cd: non_existent_dir: No such file or directory")
             }
             System.getProperty("os.name").contains("Windows", ignoreCase = true) -> {
                 expectedCode = 1

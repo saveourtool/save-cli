@@ -30,7 +30,6 @@ fun Path.findAllFilesMatching(condition: (Path) -> Boolean): List<List<Path>> = 
  * @return a matching child file or null
  */
 fun Path.findChildByOrNull(condition: (Path) -> Boolean): Path? {
-    //require(FileSystem.SYSTEM.metadata(this).isDirectory)
     return FileSystem.SYSTEM.list(this).firstOrNull(condition)
 }
 
