@@ -35,7 +35,8 @@ jobs:
         with:
           arguments: |
             build
-            -x detekt
+          # FixMe: https://github.com/cqfn/save/issues/67
+          #  -x detekt
           properties: |
             org.gradle.caching=false
           gradle-version: wrapper
