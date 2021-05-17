@@ -4,6 +4,9 @@
 
 package org.cqfn.save.core.files
 
+import org.cqfn.save.core.utils.CurrentOs
+import org.cqfn.save.core.utils.getCurrentOs
+
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
@@ -30,6 +33,10 @@ fun Path.findAllFilesMatching(condition: (Path) -> Boolean): List<List<Path>> = 
  * @return a matching child file or null
  */
 fun Path.findChildByOrNull(condition: (Path) -> Boolean): Path? {
+    // E.g. Parent directory /tmp in MacOS isn't actually a directory
+    if (getCurrentOs() != CurrentOs.MACOS) {
+        require(FileSystem.SYSTEM.metadata(this).isDirectory)
+    }
     return FileSystem.SYSTEM.list(this).firstOrNull(condition)
 }
 

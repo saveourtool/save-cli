@@ -4,4 +4,9 @@
 
 package org.cqfn.save.core.utils
 
-actual fun isCurrentOsWindows() = Platform.osFamily == OsFamily.WINDOWS
+actual fun getCurrentOs() = when (Platform.osFamily) {
+    OsFamily.LINUX -> CurrentOs.LINUX
+    OsFamily.MACOSX -> CurrentOs.MACOS
+    OsFamily.WINDOWS -> CurrentOs.WINDOWS
+    else -> CurrentOs.UNDEFINED
+}

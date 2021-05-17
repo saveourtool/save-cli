@@ -5,8 +5,8 @@
 package org.cqfn.save.core.utils
 
 /**
- * Checks if the current OS is windows.
+ * Get type of current OS
  *
- * @return true if current OS is Windows
+ * @return type of current OS
  */
-expect fun isCurrentOsWindows(): Boolean
+expect fun getCurrentOs(): CurrentOs
