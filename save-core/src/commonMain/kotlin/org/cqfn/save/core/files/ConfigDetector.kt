@@ -26,7 +26,7 @@ class ConfigDetector {
                     parent.childConfigs.add(child)
                 }
             // discover all descendant configs of [config]
-            val locationsFlattened = config.location.parent!!.findAllFilesMatching { it.isSaveTomlConfig() }.flatten()
+            val locationsFlattened = config.directory.findAllFilesMatching { it.isSaveTomlConfig() }.flatten()
             val configs = mutableListOf(config)
             locationsFlattened
                 .drop(1)  // because [config] will be discovered too

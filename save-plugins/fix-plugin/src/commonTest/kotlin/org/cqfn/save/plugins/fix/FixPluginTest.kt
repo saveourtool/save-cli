@@ -32,7 +32,9 @@ class FixPluginTest {
         val testFile = fs.createFile(tmpDir / "Test1Test.java")
         val expectedFile = fs.createFile(tmpDir / "Test1Expected.java")
 
-        val pairs = FixPlugin().discoverFilePairs(listOf(testFile, expectedFile))
+        val pairs = FixPlugin().discoverTestFiles(tmpDir)
+            .map { it.first() to it.last() }
+            .toList()
 
         assertEquals(1, pairs.size)
         assertEquals("Test1Expected.java", pairs.single().first.name)
@@ -51,7 +53,9 @@ class FixPluginTest {
         fs.createFile(tmpDir / "NowCompletelyDifferentExpected.java")
         fs.createFile(tmpDir / "AndNowCompletelyDifferent.java")
 
-        val pairs = FixPlugin().discoverFilePairs(fs.list(tmpDir))
+        val pairs = FixPlugin().discoverTestFiles(tmpDir)
+            .map { it.first() to it.last() }
+            .toList()
 
         assertEquals(1, pairs.size)
         assertEquals("Test2Expected.java", pairs.single().first.name)
@@ -60,6 +64,7 @@ class FixPluginTest {
 
     @Test
     fun `should calculate diff of discovered files in inPlace mode`() {
+        val config = fs.createFile(tmpDir / "save.toml")
         val testFile = fs.createFile(tmpDir / "Test3Test.java")
         fs.write(testFile) {
             write("Original file".encodeToByteArray())
@@ -73,9 +78,9 @@ class FixPluginTest {
         val executionCmd = "${diskWithTmpDir}cd $tmpDir && echo Expected file > Test3Test.java"
 
         val results = FixPlugin().execute(
-            TestConfig(tmpDir,
+            TestConfig(config,
                 null,
-                listOf(FixPluginConfig(executionCmd, inPlace = true, testResources = listOf(testFile, expectedFile)))
+                listOf(FixPluginConfig(executionCmd, inPlace = true))
             )
         )
 
@@ -90,6 +95,7 @@ class FixPluginTest {
 
     @Test
     fun `should calculate diff of discovered files with destinationFileSuffix`() {
+        val config = fs.createFile(tmpDir / "save.toml")
         val testFile = fs.createFile(tmpDir / "Test3Test.java")
         fs.write(testFile) {
             write("Original file".encodeToByteArray())
@@ -102,9 +108,9 @@ class FixPluginTest {
         val executionCmd = "${diskWithTmpDir}cd $tmpDir && echo Expected file > Test3Test_copy.java"
 
         val results = FixPlugin().execute(
-            TestConfig(tmpDir,
+            TestConfig(config,
                 null,
-                listOf(FixPluginConfig(executionCmd, destinationFileSuffix = "_copy", testResources = listOf(testFile, expectedFile)))
+                listOf(FixPluginConfig(executionCmd, destinationFileSuffix = "_copy"))
             )
         )
 

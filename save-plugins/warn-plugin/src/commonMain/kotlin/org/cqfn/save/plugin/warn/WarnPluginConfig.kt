@@ -2,8 +2,6 @@ package org.cqfn.save.plugin.warn
 
 import org.cqfn.save.core.plugin.PluginConfig
 
-import okio.Path
-
 /**
  * @property execCmd a command that will be executed to check resources and emit warnings
  * @property warningsInputPattern a regular expression by which expected warnings will be discovered in test resources
@@ -16,7 +14,6 @@ import okio.Path
  * corresponding to the whole string.
  * @property messageCaptureGroup an index of capture group in regular expressions, corresponding to warning text. Indices start at 0 with 0
  * corresponding to the whole string.
- * @property testResources resources which this plugin will analyze
  */
 data class WarnPluginConfig(
     val execCmd: String,
@@ -27,7 +24,6 @@ data class WarnPluginConfig(
     val lineCaptureGroup: Int?,
     val columnCaptureGroup: Int?,
     val messageCaptureGroup: Int,
-    val testResources: List<Path> = emptyList(),
 ) : PluginConfig {
     init {
         require(warningTextHasLine xor (lineCaptureGroup == null)) {
@@ -52,5 +48,6 @@ data class WarnPluginConfig(
          * ```[WARN] /path/to/resources/ClassNameTest.java:2:4: Class name in incorrect case```
          */
         internal val defaultOutputPattern = Regex(".*(\\d+):(\\d+): (.+)")
+        internal val defaultResourceNamePattern = Regex("""(.+)Test\.[\w\d]+""")
     }
 }
