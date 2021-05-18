@@ -38,7 +38,7 @@ jobs:
           # FixMe: https://github.com/cqfn/save/issues/67
           #  -x detekt
           properties: |
-            org.gradle.caching=false
+            org.gradle.caching=true
           gradle-version: wrapper
           # additional files to calculate key for dependency cache
           gradle-dependencies-cache-key: |
