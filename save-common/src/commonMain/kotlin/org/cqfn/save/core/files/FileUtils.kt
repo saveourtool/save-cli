@@ -30,15 +30,12 @@ fun Path.findAllFilesMatching(condition: (Path) -> Boolean): List<List<Path>> = 
  * @return a matching child file or null
  */
 fun Path.findChildByOrNull(condition: (Path) -> Boolean): Path? {
-    // Directory /tmp in Linux and MacOS is actually a sticky directory (`okio` does not allow us to check it)
-    // Although, in Linux all is ok, but in MacOS not
-    // In case of other sticky directories, we don't consider it for now
+    // Some top-level directories, like /tmp and /var in Linux and MacOS are actually a sticky directories (`okio` can't check it)
+    // Although, in Linux all is ok, but in MacOS not, so we check not `isDirectory`, but `!isRegularFile`
     println("Path: $this")
-    println("${this != FileSystem.SYSTEM_TEMPORARY_DIRECTORY}")
+    println("${FileSystem.SYSTEM.metadata(this).isRegularFile}")
     println("${FileSystem.SYSTEM.metadata(this).isDirectory}")
-    if (this != FileSystem.SYSTEM_TEMPORARY_DIRECTORY) {
-        require(FileSystem.SYSTEM.metadata(this).isDirectory)
-    }
+    require(!FileSystem.SYSTEM.metadata(this).isRegularFile)
     return FileSystem.SYSTEM.list(this).firstOrNull(condition)
 }
 
