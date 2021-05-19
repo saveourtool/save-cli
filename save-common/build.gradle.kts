@@ -14,7 +14,7 @@ kotlin {
             }
         }
     }
-    val hostTarget = listOf(linuxX64(), mingwX64()/*, macosX64()*/)
+    val hostTarget = listOf(linuxX64(), mingwX64(), macosX64())
 
     sourceSets {
         all {

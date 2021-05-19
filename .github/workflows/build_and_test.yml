@@ -13,7 +13,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest ] #, macos-latest ]
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
 
     steps:
       # actions/checkout v1.* is needed for correct codecov upload, see https://github.com/actions/checkout/issues/237 for details
@@ -36,7 +36,8 @@ jobs:
         with:
           arguments: |
             build
-            -x detekt
+          # FixMe: https://github.com/cqfn/save/issues/67
+          #  -x detekt
           properties: |
             org.gradle.caching=true
           gradle-version: wrapper

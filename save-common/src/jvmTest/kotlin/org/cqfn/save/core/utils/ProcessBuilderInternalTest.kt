@@ -16,7 +16,7 @@ class ProcessBuilderInternalTest {
     fun `check stdout with redirection`() {
         val actualResult = processBuilder.exec("echo something >/dev/null", null)
         var expectedCode: Int
-        val expectedStdout = ""
+        val expectedStdout: List<String> = emptyList()
         lateinit var expectedStderr: List<String>
         when {
             isCurrentOsWindows() -> {
@@ -29,8 +29,7 @@ class ProcessBuilderInternalTest {
             }
         }
         assertEquals(expectedCode, actualResult.code)
-        // posix popen and JVM process builder returns lines with different whitespaces, so we cut them
-        assertEquals(expectedStdout, "")
+        assertEquals(expectedStdout, actualResult.stdout)
         assertEquals(expectedStderr, actualResult.stderr)
     }
 
@@ -40,16 +39,16 @@ class ProcessBuilderInternalTest {
         val expectedStdout: List<String> = emptyList()
         var expectedCode: Int
         lateinit var expectedStderr: List<String>
-        when {
-            System.getProperty("os.name").contains("Linux", ignoreCase = true) -> {
+        when (getCurrentOs()) {
+            CurrentOs.LINUX -> {
                 expectedCode = 2
                 expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
             }
-            System.getProperty("os.name").contains("Mac", ignoreCase = true) -> {
+            CurrentOs.MACOS -> {
                 expectedCode = 1
-                expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
+                expectedStderr = listOf("sh: line 0: cd: non_existent_dir: No such file or directory")
             }
-            System.getProperty("os.name").contains("Windows", ignoreCase = true) -> {
+            CurrentOs.WINDOWS -> {
                 expectedCode = 1
                 expectedStderr = listOf("The system cannot find the path specified.")
             }
@@ -66,16 +65,16 @@ class ProcessBuilderInternalTest {
         val expectedStdout: List<String> = emptyList()
         var expectedCode: Int
         lateinit var expectedStderr: List<String>
-        when {
-            System.getProperty("os.name").contains("Linux", ignoreCase = true) -> {
+        when (getCurrentOs()) {
+            CurrentOs.LINUX -> {
                 expectedCode = 2
                 expectedStderr = emptyList()
             }
-            System.getProperty("os.name").contains("Mac", ignoreCase = true) -> {
+            CurrentOs.MACOS -> {
                 expectedCode = 1
                 expectedStderr = emptyList()
             }
-            System.getProperty("os.name").contains("Windows", ignoreCase = true) -> {
+            CurrentOs.WINDOWS -> {
                 expectedCode = 1
                 expectedStderr = listOf("The system cannot find the path specified.")
             }
