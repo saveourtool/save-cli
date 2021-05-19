@@ -11,5 +11,9 @@ interface PluginConfig
 
 /**
  * General configuration for test suite.
+ * @property suiteName name of the test suite
  */
-class GeneralConfig : PluginConfig
+@Suppress("INLINE_CLASS_CAN_BE_USED")
+class GeneralConfig(
+    val suiteName: String,
+) : PluginConfig

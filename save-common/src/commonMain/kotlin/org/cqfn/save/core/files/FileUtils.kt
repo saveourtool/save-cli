@@ -93,12 +93,12 @@ fun FileSystem.readLines(path: Path): List<String> = this.read(path) {
  * @return a sequence of matching directories
  */
 fun Path.findDescendantDirectoriesBy(directoryPredicate: (Path) -> Boolean): Sequence<Path> =
-    sequence {
-        yield(this@findDescendantDirectoriesBy)
-        FileSystem.SYSTEM.list(this@findDescendantDirectoriesBy)
-            .asSequence()
-            .filter { FileSystem.SYSTEM.metadata(it).isDirectory }
-            .filter(directoryPredicate)
-            .flatMap { it.findDescendantDirectoriesBy(directoryPredicate) }
-            .let { yieldAll(it) }
-    }
+        sequence {
+            yield(this@findDescendantDirectoriesBy)
+            FileSystem.SYSTEM.list(this@findDescendantDirectoriesBy)
+                .asSequence()
+                .filter { FileSystem.SYSTEM.metadata(it).isDirectory }
+                .filter(directoryPredicate)
+                .flatMap { it.findDescendantDirectoriesBy(directoryPredicate) }
+                .let { yieldAll(it) }
+        }
