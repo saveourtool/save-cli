@@ -8,7 +8,7 @@ package org.cqfn.save.core.logging
 /**
  * Is debug logging enabled
  */
-var isDebugEnabled: Boolean = true
+var isDebugEnabled: Boolean = false
 
 /**
  * Log a message with debug level
