@@ -42,7 +42,7 @@ jobs:
       - name: Run gradle command
         run: |
           chmod +x gradlew
-          ./gradlew build -x detekt 2>&1 | sed 's/error:/e:/'
+          ./gradlew build -x detekt
       - name: Upload gradle reports
         if: ${{ always() }}
         uses: actions/upload-artifact@v2

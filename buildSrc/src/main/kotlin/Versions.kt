@@ -6,7 +6,7 @@ object Versions {
     const val okio = "3.0.0-alpha.1"
     const val ktoml = "0.2.4"
 
-    // kek wait
+    // kek waitttt
     object Kotlinx {
         const val serialization = "1.1.0"
         const val datetime = "0.1.1"
