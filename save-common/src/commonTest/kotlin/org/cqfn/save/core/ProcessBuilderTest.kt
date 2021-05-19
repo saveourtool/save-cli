@@ -4,8 +4,10 @@
 
 package org.cqfn.save.core
 
+import org.cqfn.save.core.utils.CurrentOs
 import org.cqfn.save.core.utils.ProcessBuilder
 import org.cqfn.save.core.utils.ProcessBuilder.Companion.processCommandWithEcho
+import org.cqfn.save.core.utils.getCurrentOs
 import org.cqfn.save.core.utils.isCurrentOsWindows
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -23,13 +25,21 @@ class ProcessBuilderTest {
     }
 
     @Test
+    fun `debug`() {
+        processBuilder.exec("file /tmp", null)
+        processBuilder.exec("ls ~/", null)
+        if (getCurrentOs() == CurrentOs.MACOS) {
+            assertEquals(1, 0)
+        }
+    }
+
+    @Test
     fun `check stdout`() {
         val actualResult = processBuilder.exec("echo something", null)
         val expectedCode = if (isCurrentOsWindows()) 1 else 0
         val expectedStdout = listOf("something")
         val expectedStderr: List<String> = emptyList()
         assertEquals(expectedCode, actualResult.code)
-        // posix `system()` and JVM process builder returns lines with different whitespaces, so we cut them
         assertEquals(expectedStdout, actualResult.stdout)
         assertEquals(expectedStderr, actualResult.stderr)
     }
