@@ -31,7 +31,7 @@ class FixPluginTest {
     fun `should detect two files`() {
         val testFile = fs.createFile(tmpDir / "Test1Test.java")
         val expectedFile = fs.createFile(tmpDir / "Test1Expected.java")
-        
+
         val pairs = FixPlugin().discoverTestFiles(tmpDir)
             .map { it.first() to it.last() }
             .toList()
