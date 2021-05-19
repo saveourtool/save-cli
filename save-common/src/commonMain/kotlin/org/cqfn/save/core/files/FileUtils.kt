@@ -33,6 +33,9 @@ fun Path.findChildByOrNull(condition: (Path) -> Boolean): Path? {
     // Directory /tmp in Linux and MacOS is actually a sticky directory (`okio` does not allow us to check it)
     // Although, in Linux all is ok, but in MacOS not
     // In case of other sticky directories, we don't consider it for now
+    println("Path: $this")
+    println("${this != FileSystem.SYSTEM_TEMPORARY_DIRECTORY}")
+    println("${FileSystem.SYSTEM.metadata(this).isDirectory}")
     if (this != FileSystem.SYSTEM_TEMPORARY_DIRECTORY) {
         require(FileSystem.SYSTEM.metadata(this).isDirectory)
     }
