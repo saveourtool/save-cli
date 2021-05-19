@@ -31,7 +31,7 @@ class ProcessBuilderInternalTest {
             }
             CurrentOs.MACOS -> {
                 expectedCode = 256
-                expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
+                expectedStderr = listOf("sh: line 0: cd: non_existent_dir: No such file or directory")
             }
             CurrentOs.WINDOWS -> {
                 expectedCode = 1
@@ -57,7 +57,7 @@ class ProcessBuilderInternalTest {
             }
             CurrentOs.MACOS -> {
                 expectedCode = 256
-                expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
+                expectedStderr = listOf("sh: line 0: cd: non_existent_dir: No such file or directory")
             }
             CurrentOs.WINDOWS -> {
                 expectedCode = 1
