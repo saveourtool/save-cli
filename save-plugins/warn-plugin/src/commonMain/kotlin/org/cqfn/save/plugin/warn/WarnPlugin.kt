@@ -34,8 +34,10 @@ class WarnPlugin : Plugin {
     }
 
     override fun discoverTestFiles(root: Path) = root
-        .findAllFilesMatching {
-            defaultResourceNamePattern.matches(it.name)
+        .resourceDirectories()
+        .map { directory ->
+            FileSystem.SYSTEM.list(directory)
+                .filter { defaultResourceNamePattern.matches(it.name) }
         }
         .asSequence()
         .map { listOf(it) }

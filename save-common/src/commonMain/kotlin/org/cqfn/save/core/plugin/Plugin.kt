@@ -1,9 +1,12 @@
 package org.cqfn.save.core.plugin
 
+import okio.FileSystem
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.result.TestResult
 
 import okio.Path
+import org.cqfn.save.core.config.isSaveTomlConfig
+import org.cqfn.save.core.files.findDescendantDirectoriesBy
 
 /**
  * Plugin that can be injected into SAVE during execution. Plugins accept contents of configuration file and then perform some work.
@@ -24,4 +27,16 @@ interface Plugin {
      * @return a sequence of files, grouped by test
      */
     fun discoverTestFiles(root: Path): Sequence<List<Path>>
+
+    /**
+     * Returns a sequence of directories, where resources for this plugin may be located.
+     * This takes into account, that if underlying directory contains it's own SAVE config,
+     * then this plugin shouldn't touch these resources; it should be done by plugins from that config.
+     *
+     * @param fs a [FileSystem] which is used to traverse the directory hierarchy
+     */
+    fun Path.resourceDirectories(fs: FileSystem = FileSystem.SYSTEM): Sequence<Path> = findDescendantDirectoriesBy { file ->
+        // this matches directories which contain their own SAVE config
+        fs.metadata(file).isRegularFile || fs.list(file).none { it.isSaveTomlConfig() }
+    }
 }

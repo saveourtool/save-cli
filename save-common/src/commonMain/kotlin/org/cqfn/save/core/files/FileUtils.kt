@@ -70,3 +70,35 @@ fun FileSystem.createFile(path: Path): Path {
 fun FileSystem.readLines(path: Path): List<String> = this.read(path) {
     generateSequence { readUtf8Line() }.toList()
 }
+
+/**
+ * Returns a sequence of underlying directories, filtering on every level by [directoryPredicate].
+ * Example:
+ * ```
+ * | directory1
+ * |_ file1
+ * | | directory11
+ * | |_ file2
+ * | |_ directory21
+ * | | directory12
+ * | | directory13
+ * | |_ directory23
+ * | | |_ file33
+ * ```
+ * If predicate returns `true` when `Path` is a directory which contains only other directories, then `directory11` will be filtered, as well as
+ * `directory21`, which is empty, but is a descendant of already filtered out one, and `directory 23`, which is not empty.
+ * So, the result would be `sequence(directory12, directory13)`
+ *
+ * @param directoryPredicate a predicate to match directories
+ * @return a sequence of matching directories
+ */
+fun Path.findDescendantDirectoriesBy(directoryPredicate: (Path) -> Boolean): Sequence<Path> =
+    sequence {
+        yield(this@findDescendantDirectoriesBy)
+        FileSystem.SYSTEM.list(this@findDescendantDirectoriesBy)
+            .asSequence()
+            .filter { FileSystem.SYSTEM.metadata(it).isDirectory }
+            .filter(directoryPredicate)
+            .flatMap { it.findDescendantDirectoriesBy(directoryPredicate) }
+            .let { yieldAll(it) }
+    }
