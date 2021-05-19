@@ -29,7 +29,6 @@ class ProcessBuilderTest {
         val expectedStdout = listOf("something")
         val expectedStderr: List<String> = emptyList()
         assertEquals(expectedCode, actualResult.code)
-        // posix `system()` and JVM process builder returns lines with different whitespaces, so we cut them
         assertEquals(expectedStdout, actualResult.stdout)
         assertEquals(expectedStderr, actualResult.stderr)
     }
