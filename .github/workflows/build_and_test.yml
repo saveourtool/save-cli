@@ -8,6 +8,7 @@ on:
 
 jobs:
   build_and_test_with_code_coverage:
+    if: ${{ false }}
     name: Build and test
     runs-on: ${{ matrix.os }}
     strategy:
@@ -33,16 +34,15 @@ jobs:
       - name: Gradle build with remote cache
         uses: burrunan/gradle-cache-action@v1
         with:
+          arguments: |
+            build
+            -x detekt
           properties: |
             org.gradle.caching=true
           gradle-version: wrapper
           # additional files to calculate key for dependency cache
           gradle-dependencies-cache-key: |
             buildSrc/**/Versions.kt
-      - name: Run gradle command
-        run: |
-          chmod +x gradlew
-          ./gradlew build -x detekt
       - name: Upload gradle reports
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
