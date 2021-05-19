@@ -4,9 +4,6 @@
 
 package org.cqfn.save.core.files
 
-import org.cqfn.save.core.utils.CurrentOs
-import org.cqfn.save.core.utils.getCurrentOs
-
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
@@ -33,8 +30,10 @@ fun Path.findAllFilesMatching(condition: (Path) -> Boolean): List<List<Path>> = 
  * @return a matching child file or null
  */
 fun Path.findChildByOrNull(condition: (Path) -> Boolean): Path? {
-    // E.g. Parent directory /tmp in MacOS isn't actually a directory
-    if (getCurrentOs() != CurrentOs.MACOS) {
+    // Directory /tmp in Linux and MacOS is actually a sticky directory (`okio` does not allow us to check it)
+    // Although, in Linux all is ok, but in MacOS not
+    // In case of other sticky directories, we don't consider it for now
+    if (this != FileSystem.SYSTEM_TEMPORARY_DIRECTORY) {
         require(FileSystem.SYSTEM.metadata(this).isDirectory)
     }
     return FileSystem.SYSTEM.list(this).firstOrNull(condition)

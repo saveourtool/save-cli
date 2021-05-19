@@ -4,10 +4,8 @@
 
 package org.cqfn.save.core
 
-import org.cqfn.save.core.utils.CurrentOs
 import org.cqfn.save.core.utils.ProcessBuilder
 import org.cqfn.save.core.utils.ProcessBuilder.Companion.processCommandWithEcho
-import org.cqfn.save.core.utils.getCurrentOs
 import org.cqfn.save.core.utils.isCurrentOsWindows
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -22,15 +20,6 @@ class ProcessBuilderTest {
         assertEquals(-1, actualResult.code)
         assertEquals(emptyList(), actualResult.stdout)
         assertEquals(listOf("Command couldn't be empty!"), actualResult.stderr)
-    }
-
-    @Test
-    fun `debug`() {
-        processBuilder.exec("file /tmp", null)
-        processBuilder.exec("ls ~/", null)
-        if (getCurrentOs() == CurrentOs.MACOS) {
-            assertEquals(1, 0)
-        }
     }
 
     @Test
