@@ -63,6 +63,4 @@ fun Path.isSaveTomlConfig() = name == "save.toml"
  */
 enum class TestConfigSections {
     FIX, WARN, GENERAL;
-
-    fun getByName(s: String) = values().find { it.name == s.toLowerCase() }
 }

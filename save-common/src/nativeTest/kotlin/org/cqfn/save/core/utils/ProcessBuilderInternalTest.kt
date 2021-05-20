@@ -14,7 +14,6 @@ class ProcessBuilderInternalTest {
         val expectedStdout = listOf("something")
         val expectedStderr: List<String> = emptyList()
         assertEquals(expectedCode, actualResult.code)
-        // posix popen and JVM process builder returns lines with different whitespaces, so we cut them
         assertEquals(expectedStdout, actualResult.stdout)
         assertEquals(expectedStderr, actualResult.stderr)
     }
@@ -30,9 +29,9 @@ class ProcessBuilderInternalTest {
                 expectedCode = 512
                 expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
             }
-            CurrentOs.MACOSX -> {
+            CurrentOs.MACOS -> {
                 expectedCode = 256
-                expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
+                expectedStderr = listOf("sh: line 0: cd: non_existent_dir: No such file or directory")
             }
             CurrentOs.WINDOWS -> {
                 expectedCode = 1
@@ -56,9 +55,9 @@ class ProcessBuilderInternalTest {
                 expectedCode = 512
                 expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
             }
-            CurrentOs.MACOSX -> {
+            CurrentOs.MACOS -> {
                 expectedCode = 256
-                expectedStderr = listOf("sh: 1: cd: can't cd to non_existent_dir")
+                expectedStderr = listOf("sh: line 0: cd: non_existent_dir: No such file or directory")
             }
             CurrentOs.WINDOWS -> {
                 expectedCode = 1
