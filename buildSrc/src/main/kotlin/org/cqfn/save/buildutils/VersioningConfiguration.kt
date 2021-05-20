@@ -31,9 +31,10 @@ fun Project.configureVersioning() {
     val isRelease = hasProperty("release") && (property("release") as String != "false")
     if (isRelease) {
         val grgit = project.findProperty("grgit") as Grgit  // grgit property is added by reckon plugin
-        val isClean = grgit.repository.jgit.status().call().isClean
-        if (!isClean) {
-            throw GradleException("Release build will be performed with not clean git tree; aborting.")
+        val status = grgit.repository.jgit.status().call()
+        if (!status.isClean) {
+            throw GradleException("Release build will be performed with not clean git tree; aborting. " +
+                    "Untracked files: ${status.untracked}, uncommitted changes: ${status.uncommittedChanges}")
         }
     }
 }
