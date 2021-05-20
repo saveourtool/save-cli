@@ -32,7 +32,7 @@ jobs:
           gradle-version: wrapper
       # Until https://github.com/burrunan/gradle-cache-action/issues/42 is addressed, gradle should be run as a separate step
       - name: Run gradle command
-        run: ./gradlew linkReleaseExecutableMultiplatform publishToSonatype closeSonatypeStagingRepository
+        run: ./gradlew --build-cache linkReleaseExecutableMultiplatform publishToSonatype closeSonatypeStagingRepository
       - name: Upload artifact
         id: upload_artifact
         uses: actions/upload-artifact@v2

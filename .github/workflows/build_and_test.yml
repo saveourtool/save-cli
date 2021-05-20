@@ -33,15 +33,13 @@ jobs:
       - name: Start Gradle remote cache server
         uses: burrunan/gradle-cache-action@v1
         with:
-          properties: |
-            org.gradle.caching=true
           gradle-version: wrapper
           # additional files to calculate key for dependency cache
           gradle-dependencies-cache-key: |
             buildSrc/**/Versions.kt
       # Until https://github.com/burrunan/gradle-cache-action/issues/42 is addressed, gradle should be run as a separate step
       - name: Run gradle command
-        run: ./gradlew build
+        run: ./gradlew build --build-cache
       - name: Upload gradle reports
         if: ${{ always() }}
         uses: actions/upload-artifact@v2

@@ -20,13 +20,9 @@ jobs:
       - name: Start Gradle remote cache server
         uses: burrunan/gradle-cache-action@v1
         with:
-          properties: |
-            org.gradle.caching=true
           gradle-version: wrapper
           # additional files to calculate key for dependency cache
           gradle-dependencies-cache-key: |
             buildSrc/**/Versions.kt
       - name: Run gradle command
-        run: |
-          chmod +x gradlew
-          ./gradlew detektAll
+        run: ./gradlew detektAll --build-cache
