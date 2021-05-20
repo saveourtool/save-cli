@@ -74,7 +74,7 @@ class FixPluginTest {
             write("Expected file".encodeToByteArray())
         }
 
-        val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").toLowerCase()} && " else ""
+        val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").lowercase()} && " else ""
         val executionCmd = "${diskWithTmpDir}cd $tmpDir && echo Expected file > Test3Test.java"
 
         val results = FixPlugin().execute(
@@ -104,7 +104,7 @@ class FixPluginTest {
         fs.write(expectedFile) {
             write("Expected file".encodeToByteArray())
         }
-        val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").toLowerCase()} && " else ""
+        val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").lowercase()} && " else ""
         val executionCmd = "${diskWithTmpDir}cd $tmpDir && echo Expected file > Test3Test_copy.java"
 
         val results = FixPlugin().execute(
