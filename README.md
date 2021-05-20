@@ -45,7 +45,7 @@ Save can be used not only with static analyzers, but can be used as a test frame
 <img src="/readme/static-analysis-process.png" width="500px"/>
 
 ## How to start
-1. Prepare and conigure your test base in the proper format. See [test_detection](#test_detection) and [plugins](#plugins)
+1. Prepare and configure your test base in the proper format. See [test_detection](#test_detection) and [plugins](#plugins)
 2. Run the following: TBD (FixMe)
 
 ## How to configure 
@@ -165,4 +165,3 @@ In case you would like to have several plugins to work in your directory with sa
 ## Contribution
 You can always contribute to the main SAVE framework or to a dashboard - just create a PR for it. But to contribute or change tests in categories you will need get approvals from 
 the maintainer of the test package/analysis category. Please see the list of them.  
-
