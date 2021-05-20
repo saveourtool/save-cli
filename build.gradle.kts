@@ -21,11 +21,9 @@ allprojects {
         maven(url = "https://kotlin.bintray.com/kotlinx/")
     }
     configureDiktat()
-    // FixMe: https://github.com/cqfn/save/issues/67
     configureDetekt()
 }
 createDiktatTask()
-// FixMe: https://github.com/cqfn/save/issues/67
 createDetektTask()
 installGitHooks()
 
