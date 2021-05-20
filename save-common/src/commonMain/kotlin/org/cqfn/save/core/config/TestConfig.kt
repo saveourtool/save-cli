@@ -23,7 +23,7 @@ data class TestConfig(
      * -- currentConfig
      * -- neighbourConfig
      */
-    val neighbourConfigs: MutableList<TestConfig>? = this.parentConfig?.childConfigs
+     * Getting all neighbour configs to the current config (i.e. all configs with the same parent config)
     /**
      * List of child configs in the hierarchy of configs, can be empty if this config is at the very bottom.
      * NB: don't move to constructor in order not to break toString into infinite recursion.
