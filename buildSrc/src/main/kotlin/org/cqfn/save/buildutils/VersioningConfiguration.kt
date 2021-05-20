@@ -32,8 +32,8 @@ fun Project.configureVersioning() {
     val versionDetails: Closure<VersionDetails> by extra
     val details = versionDetails.invoke()
 
-    require(tagPattern.matches(details.lastTag)) {
-        "Git tag ${details.lastTag} doesn't match the required pattern ${tagPattern.pattern}"
+    require(details.commitDistance > 0 || tagPattern.matches(details.lastTag)) {
+        "Git tag ${details.lastTag} on the last commit doesn't match the required pattern ${tagPattern.pattern}"
     }
 
     allprojects {
