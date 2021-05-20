@@ -25,3 +25,4 @@ interface Plugin {
      */
     fun discoverTestFiles(root: Path): Sequence<List<Path>>
 }
+

@@ -18,6 +18,13 @@ data class TestConfig(
     private val fs: FileSystem = FileSystem.SYSTEM,
 ) {
     /**
+     * Getting all neighbour configs to the current config
+     * - parentConfig
+     * -- currentConfig
+     * -- neighbourConfig
+     */
+    val neighbourConfigs: MutableList<TestConfig>? = this.parentConfig?.childConfigs
+    /**
      * List of child configs in the hierarchy of configs, can be empty if this config is at the very bottom.
      * NB: don't move to constructor in order not to break toString into infinite recursion.
      */
@@ -50,3 +57,12 @@ data class TestConfig(
  * @return whether a file denoted by this [Path] is a default save configuration file (save.toml)
  */
 fun Path.isSaveTomlConfig() = name == "save.toml"
+
+/**
+ * Sections of a toml configuration for tests (including standard plugins)
+ */
+enum class TestConfigSections {
+    FIX, WARN, GENERAL;
+
+    fun getByName(s: String) = values().find { it.name == s.toLowerCase() }
+}

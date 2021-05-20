@@ -14,8 +14,6 @@ import org.cqfn.save.core.result.Ignored
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 
-import okio.Path.Companion.toPath
-
 /**
  * @property saveProperties an instance of [SaveProperties]
  */
@@ -32,8 +30,7 @@ class Save(
      */
     fun performAnalysis() {
         // get all toml configs in file system
-        val testConfig = ConfigDetector().configFromFile(saveProperties.testConfig!!.toPath())
-        requireNotNull(testConfig) { "Provided path ${saveProperties.testConfig} doesn't correspond to a valid save.toml file" }
+        val testConfig = ConfigDetector().configFromFile(saveProperties.testConfig)
 
         val plugins: List<Plugin> = emptyList()  // todo: discover plugins (from configuration blocks in TestSuiteConfig?)
         logInfo("Discovered plugins: $plugins")

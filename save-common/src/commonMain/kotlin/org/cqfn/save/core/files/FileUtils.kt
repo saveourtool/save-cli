@@ -8,8 +8,6 @@ import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
 
-val testResourceFilePattern = Regex(".*Test\\.\\w+")
-
 /**
  * Find all descendant files in the directory denoted by [this] [Path], that match [condition].
  * This method uses BFS, so files will appear in the returned list in order of directory levels.
@@ -30,9 +28,7 @@ fun Path.findAllFilesMatching(condition: (Path) -> Boolean): List<List<Path>> = 
  * @return a matching child file or null
  */
 fun Path.findChildByOrNull(condition: (Path) -> Boolean): Path? {
-    // Some top-level directories, like /tmp and /var in Linux and MacOS are actually a sticky directories
-    // Although, in Linux all is ok, but `okio` can't check it in MacOS by `isDirectory`, so we use `!isRegularFile` instead
-    require(!FileSystem.SYSTEM.metadata(this).isRegularFile)
+    require(FileSystem.SYSTEM.metadata(this).isDirectory)
     return FileSystem.SYSTEM.list(this).firstOrNull(condition)
 }
 

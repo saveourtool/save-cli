@@ -44,6 +44,10 @@ Save can be used not only with static analyzers, but can be used as a test frame
 
 <img src="/readme/static-analysis-process.png" width="500px"/>
 
+## How to start
+1. Prepare and conigure your test base in the proper format. See [test_detection](#test_detection) and [plugins](#plugins)
+2. Run the following: 
+
 ## How to configure 
 SAVE has a command line interface that runs the framework and your executable. What you need is simply to configure the output of your static analyzer so SAVE will be able to
 check if the proper error was raised on the proper line of test code.

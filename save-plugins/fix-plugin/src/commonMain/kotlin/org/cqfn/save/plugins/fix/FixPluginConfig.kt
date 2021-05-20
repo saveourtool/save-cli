@@ -1,5 +1,6 @@
 package org.cqfn.save.plugins.fix
 
+import kotlinx.serialization.Serializable
 import org.cqfn.save.core.plugin.PluginConfig
 
 import okio.Path
@@ -10,6 +11,7 @@ import okio.Path
  * @property destinationFileSuffix [execCmd] should append this suffix to the file name after mutating it.
  * Required when `inPlace` is `false`, not used otherwise.
  */
+@Serializable
 data class FixPluginConfig(
     val execCmd: String,
     val inPlace: Boolean = false,

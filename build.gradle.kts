@@ -22,11 +22,11 @@ allprojects {
     }
     configureDiktat()
     // FixMe: https://github.com/cqfn/save/issues/67
-    //configureDetekt()
+    // configureDetekt()
 }
 createDiktatTask()
 // FixMe: https://github.com/cqfn/save/issues/67
-//createDetektTask()
+// createDetektTask()
 installGitHooks()
 
 configurePublishing()

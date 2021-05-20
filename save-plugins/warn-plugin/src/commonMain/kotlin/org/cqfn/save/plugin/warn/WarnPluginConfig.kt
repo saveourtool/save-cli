@@ -1,5 +1,12 @@
+@file:UseSerializers(RegexSerializer::class)
 package org.cqfn.save.plugin.warn
 
+import kotlinx.serialization.*
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import org.cqfn.save.core.plugin.PluginConfig
 
 /**
@@ -15,6 +22,7 @@ import org.cqfn.save.core.plugin.PluginConfig
  * @property messageCaptureGroup an index of capture group in regular expressions, corresponding to warning text. Indices start at 0 with 0
  * corresponding to the whole string.
  */
+@Serializable
 data class WarnPluginConfig(
     val execCmd: String,
     val warningsInputPattern: Regex,
@@ -50,4 +58,17 @@ data class WarnPluginConfig(
         internal val defaultOutputPattern = Regex(".*(\\d+):(\\d+): (.+)")
         internal val defaultResourceNamePattern = Regex("""(.+)Test\.[\w\d]+""")
     }
+}
+
+@ExperimentalSerializationApi
+@Serializer(forClass = Regex::class)
+object RegexSerializer: KSerializer<Regex> {
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("regex", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, obj: Regex) {
+        encoder.encodeString(obj.pattern)
+    }
+
+    override fun deserialize(decoder: Decoder): Regex = Regex(decoder.decodeString())
 }

@@ -1,6 +1,6 @@
 /**
- * This file contains platform-dependent utils
- */
+* This file contains platform-dependent utils
+*/
 
 @file:Suppress("FILE_NAME_MATCH_CLASS")
 
