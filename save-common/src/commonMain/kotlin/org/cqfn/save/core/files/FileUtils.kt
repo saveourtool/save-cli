@@ -77,30 +77,33 @@ fun FileSystem.readLines(path: Path): List<String> = this.read(path) {
  * Returns a sequence of underlying directories, filtering on every level by [directoryPredicate].
  * Example:
  * ```
- * | directory1
- * |_ file1
- * | | directory11
- * | |_ file2
- * | |_ directory21
- * | | directory12
- * | | directory13
- * | |_ directory23
- * | | |_ file33
+ * directory1
+ * |-- file1
+ * |-- directory11
+ * |   |-- file2
+ * |   `-- directory21
+ * |-- directory12
+ * |-- directory13
+ * |   |-- directory23
+ * |   |   `-- file33
  * ```
  * If predicate returns `true` when `Path` is a directory which contains only other directories, then `directory11` will be filtered, as well as
  * `directory21`, which is empty, but is a descendant of already filtered out one, and `directory 23`, which is not empty.
  * So, the result would be `sequence(directory12, directory13)`
  *
+ * @param withSelf whether [this] path should be included in the resulting sequence
  * @param directoryPredicate a predicate to match directories
  * @return a sequence of matching directories
  */
-fun Path.findDescendantDirectoriesBy(directoryPredicate: (Path) -> Boolean): Sequence<Path> =
+fun Path.findDescendantDirectoriesBy(withSelf: Boolean = false, directoryPredicate: (Path) -> Boolean): Sequence<Path> =
         sequence {
-            yield(this@findDescendantDirectoriesBy)
+            if (withSelf) {
+                yield(this@findDescendantDirectoriesBy)
+            }
             FileSystem.SYSTEM.list(this@findDescendantDirectoriesBy)
                 .asSequence()
                 .filter { FileSystem.SYSTEM.metadata(it).isDirectory }
                 .filter(directoryPredicate)
-                .flatMap { it.findDescendantDirectoriesBy(directoryPredicate) }
+                .flatMap { it.findDescendantDirectoriesBy(withSelf = true, directoryPredicate) }
                 .let { yieldAll(it) }
         }
