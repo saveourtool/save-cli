@@ -23,11 +23,20 @@ import org.gradle.kotlin.dsl.provideDelegate
  * @throws GradleException if there was an attempt to run release build with dirty working tree
  */
 fun Project.configureVersioning() {
+    require(this == rootProject) { "Versioning should be configured for the root project" }
+
     apply<GitVersionPlugin>()
 
     val versionDetails: Closure<VersionDetails> by extra
     val details = versionDetails.invoke()
-    logger.lifecycle("Discovered version ${details.version}, working tree is ${if (details.isCleanTag) "clean" else "dirty"}")
+
+    version = details.version.let {
+        if (it.startsWith("v")) it.trim('v') else it
+    }
+    subprojects.forEach {
+        it.version = this.version
+    }
+    logger.lifecycle("Discovered version $version, working tree is ${if (details.isCleanTag) "clean" else "dirty"}")
 
     // to activate release, provide `-Prelease` or `-Prelease=true`. To deactivate, either omit the property, or set `-Prelease=false`.
     val isRelease = hasProperty("release") && (property("release") as String != "false")
