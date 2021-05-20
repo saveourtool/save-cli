@@ -27,7 +27,6 @@ jobs:
       - name: Status git beforeafter
         run: git status
       - uses: burrunan/gradle-cache-action@v1
-        name: Start Gradle remote cache server
         with:
           gradle-version: wrapper
       # Until https://github.com/burrunan/gradle-cache-action/issues/42 is addressed, gradle should be run as a separate step

@@ -30,8 +30,7 @@ jobs:
           key: ${{ runner.os }}-gradle-konan
           restore-keys: |
             ${{ runner.os }}-gradle-konan
-      - name: Start Gradle remote cache server
-        uses: burrunan/gradle-cache-action@v1
+      - uses: burrunan/gradle-cache-action@v1
         with:
           gradle-version: wrapper
           # additional files to calculate key for dependency cache

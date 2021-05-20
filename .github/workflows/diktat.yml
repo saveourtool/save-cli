@@ -17,8 +17,7 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.11
-      - name: Start Gradle remote cache server
-        uses: burrunan/gradle-cache-action@v1
+      - uses: burrunan/gradle-cache-action@v1
         with:
           gradle-version: wrapper
           # additional files to calculate key for dependency cache
