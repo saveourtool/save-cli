@@ -18,6 +18,8 @@ If `ignore-save-comments` is set to `true` in `save.properties`, than line numbe
 // this is line 3, but will be treated as line 2
 ```
 
+If `exactWarningsMatch` is set to `true` in `save.toml`, then an exact match of expected and actual warnings is required.
+
 ## Configuration
 Assuming you want to run your tool on input file `path/to/example/ExampleTest1.kt`,
 and you have directory structure like this
