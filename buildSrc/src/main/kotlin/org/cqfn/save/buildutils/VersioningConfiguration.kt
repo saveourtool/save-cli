@@ -2,6 +2,8 @@
  * Version configuration file.
  */
 
+@file:Suppress("UNUSED_IMPORT")
+
 package org.cqfn.save.buildutils
 
 import com.palantir.gradle.gitversion.GitVersionPlugin
@@ -17,6 +19,8 @@ import org.gradle.kotlin.dsl.provideDelegate
 /**
  * Configures how project version is determined. We are using `git-version` plugin to get a version from git repo.
  * If working tree is dirty (i.e. there are uncommitted or untracked changes) and release build is attempted, build will fail.
+ *
+ * @throws GradleException if there was an attempt to run release build with dirty working tree
  */
 fun Project.configureVersioning() {
     apply<GitVersionPlugin>()
