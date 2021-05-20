@@ -2,6 +2,7 @@ package org.cqfn.save.core
 
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.files.ConfigDetector
+import org.cqfn.save.core.files.MergeConfigs
 import org.cqfn.save.core.logging.isDebugEnabled
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
@@ -31,7 +32,8 @@ class Save(
     fun performAnalysis() {
         // get all toml configs in file system
         val testConfig = ConfigDetector().configFromFile(saveProperties.testConfig)
-
+        // TODO process it
+        MergeConfigs().merge(testConfig)
         val plugins: List<Plugin> = emptyList()  // todo: discover plugins (from configuration blocks in TestSuiteConfig?)
         logInfo("Discovered plugins: $plugins")
         plugins.forEach { plugin ->

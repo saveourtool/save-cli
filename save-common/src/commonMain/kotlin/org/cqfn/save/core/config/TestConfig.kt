@@ -52,10 +52,10 @@ data class TestConfig(
     fun isRoot() = parentConfig == null
 
     /**
-     * @param wihSelf if true, include this config as the first element of the sequence or start with parent config otherwise
+     * @param withSelf if true, include this config as the first element of the sequence or start with parent config otherwise
      * @return a [Sequence] of parent config files
      */
-    fun parentConfigs(wihSelf: Boolean = false) = generateSequence(if (wihSelf) this else parentConfig) { it.parentConfig }
+    fun parentConfigs(withSelf: Boolean = false) = generateSequence(if (withSelf) this else parentConfig) { it.parentConfig }
 }
 
 /**

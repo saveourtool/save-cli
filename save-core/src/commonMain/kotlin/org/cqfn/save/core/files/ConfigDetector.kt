@@ -28,7 +28,7 @@ class ConfigDetector {
                 // After `discoverConfigWithParents` we successfully created TestConfig instances for all save.toml files
                 // from given [testConfig] to the top-level save.toml in file tree. Also hierarchy of parents were provided
                 // Now fill children for parent configs
-                config.parentConfigs(wihSelf = true)
+                config.parentConfigs(withSelf = true)
                     .toList()
                     .reversed()
                     .zipWithNext()
@@ -71,7 +71,6 @@ class ConfigDetector {
 
                     logDebug("Found config file at $path, adding as a child for ${parentConfig.location}")
                     newChildConfig.neighbourConfigs?.add(newChildConfig)
-                    //newChildConfig.parentConfig!!.childConfigs.add(newChildConfig)
                 }
 
     /**
