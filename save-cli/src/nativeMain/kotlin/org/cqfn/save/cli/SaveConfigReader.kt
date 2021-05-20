@@ -27,6 +27,9 @@ fun SaveProperties.validate(): SaveProperties {
     } catch (e: FileNotFoundException) {
         logErrorAndExit(ExitCodes.INVALID_CONFIGURATION, "Not able to find file '${this.testConfig}'." +
                 " Please provide a valid path to the test config via command-line or using the file with properties.")
+    } catch (e: NullPointerException) {
+        logErrorAndExit(ExitCodes.INVALID_CONFIGURATION, "`testConfig` option is missing or null. " +
+                "Save is not able to start processing without an information about the tests that should be run.")
     }
 
     return this
