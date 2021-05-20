@@ -30,11 +30,10 @@ fun Project.configureVersioning() {
     val versionDetails: Closure<VersionDetails> by extra
     val details = versionDetails.invoke()
 
-    version = details.version.let {
-        if (it.startsWith("v")) it.trim('v') else it
-    }
-    subprojects.forEach {
-        it.version = this.version
+    allprojects {
+        version = details.version.let {
+            if (it.startsWith("v")) it.trim('v') else it
+        }
     }
     logger.lifecycle("Discovered version $version, working tree is ${if (details.isCleanTag) "clean" else "dirty"}")
 
