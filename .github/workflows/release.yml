@@ -24,22 +24,23 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.11
-      - name: Status git beforeafter
+      - name: Status git before
         run: git status
       - uses: burrunan/gradle-cache-action@v1
         with:
           gradle-version: wrapper
       # Until https://github.com/burrunan/gradle-cache-action/issues/42 is addressed, gradle should be run as a separate step
       - name: Run gradle command
-        run: ./gradlew --build-cache linkReleaseExecutableMultiplatform publishToSonatype closeSonatypeStagingRepository
+        run: ./gradlew --build-cache -Prelease linkReleaseExecutableMultiplatform publishToSonatype closeSonatypeStagingRepository
+      - name: Status git after
+        if: ${{ true }}
+        run: git status
       - name: Upload artifact
         id: upload_artifact
         uses: actions/upload-artifact@v2
         with:
           name: save-cli-${{ runner.os }}
           path: save-cli/build/bin/**/releaseExecutable/*
-      - name: Status git after
-        run: git status
 
   github_release:
 
