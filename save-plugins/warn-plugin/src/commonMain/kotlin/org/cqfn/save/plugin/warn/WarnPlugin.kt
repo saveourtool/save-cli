@@ -93,15 +93,16 @@ class WarnPlugin : Plugin {
         val missingWarnings = expectedWarningsMap.filterValues { it !in actualWarningsMap.values }.values
         val unexpectedWarnings = actualWarningsMap.filterValues { it !in expectedWarningsMap.values }.values
 
-        val isMissingWarnings = missingWarnings.isEmpty()
-        val isUnexpectedWarnings = unexpectedWarnings.isEmpty()
-        return when {
-            !isMissingWarnings && isUnexpectedWarnings -> Fail("Some warnings were expected but not received: $missingWarnings")
-            !isMissingWarnings && !isUnexpectedWarnings -> Fail("Some warnings were expected but not received: $missingWarnings, " +
+        return when (missingWarnings.isEmpty() to unexpectedWarnings.isEmpty()) {
+            false to true -> Fail("Some warnings were expected but not received: $missingWarnings")
+            false to false -> Fail("Some warnings were expected but not received: $missingWarnings, " +
                     "and others were unexpected: $unexpectedWarnings")
-            isMissingWarnings && !isUnexpectedWarnings && !warnPluginConfig.exactWarningsMatch -> Pass("Some warnings were unexpected: $unexpectedWarnings")
-            isMissingWarnings && !isUnexpectedWarnings -> Fail("Some warnings were unexpected: $unexpectedWarnings")
-            isMissingWarnings && isUnexpectedWarnings -> Pass(null)
+            true to false -> return if (!warnPluginConfig.exactWarningsMatch) {
+                Pass("Some warnings were unexpected: $unexpectedWarnings")
+            } else {
+                Fail("Some warnings were unexpected: $unexpectedWarnings")
+            }
+            true to true -> Pass(null)
             else -> Fail("")
         }
     }
