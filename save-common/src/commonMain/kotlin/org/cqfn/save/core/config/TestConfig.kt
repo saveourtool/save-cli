@@ -1,3 +1,7 @@
+/**
+ * this file contains all data structures that are related to test configuraion  (save.toml)
+ */
+
 package org.cqfn.save.core.config
 
 import org.cqfn.save.core.plugin.PluginConfig
@@ -26,7 +30,7 @@ data class TestConfig(
     val neighbourConfigs: MutableList<TestConfig>? = this.parentConfig?.childConfigs
 
     /**
-     * List of child configs in the hierarchy of configs, can be empty if this config is at the very bottom.
+     * List of child configs in the hierarchy oConfigDetectorf configs, can be empty if this config is at the very bottom.
      * NB: don't move to constructor in order not to break toString into infinite recursion.
      */
     val childConfigs: MutableList<TestConfig> = mutableListOf()
@@ -55,13 +59,13 @@ data class TestConfig(
 }
 
 /**
- * @return whether a file denoted by this [Path] is a default save configuration file (save.toml)
- */
-fun Path.isSaveTomlConfig() = name == "save.toml"
-
-/**
  * Sections of a toml configuration for tests (including standard plugins)
  */
 enum class TestConfigSections {
-    FIX, WARN, GENERAL;
+    FIX, GENERAL, WARN;
 }
+
+/**
+ * @return whether a file denoted by this [Path] is a default save configuration file (save.toml)
+ */
+fun Path.isSaveTomlConfig() = name == "save.toml"

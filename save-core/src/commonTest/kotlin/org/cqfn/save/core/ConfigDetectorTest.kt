@@ -4,8 +4,13 @@ import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.files.createFile
 
 import okio.FileSystem
-import kotlin.reflect.KClass
-import kotlin.test.*
+
+import kotlin.test.AfterTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class ConfigDetectorTest {
     // windowsLimitations = true, because SAVE should be cross-platform

@@ -1,5 +1,9 @@
+@file:Suppress("HEADER_MISSING_IN_NON_SINGLE_CLASS_FILE")
 @file:UseSerializers(RegexSerializer::class)
+
 package org.cqfn.save.plugin.warn
+
+import org.cqfn.save.core.plugin.PluginConfig
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
@@ -11,7 +15,6 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import org.cqfn.save.core.plugin.PluginConfig
 
 /**
  * @property execCmd a command that will be executed to check resources and emit warnings
@@ -66,9 +69,9 @@ data class WarnPluginConfig(
 
 @ExperimentalSerializationApi
 @Serializer(forClass = Regex::class)
-object RegexSerializer: KSerializer<Regex> {
+object RegexSerializer : KSerializer<Regex> {
     override val descriptor: SerialDescriptor =
-        PrimitiveSerialDescriptor("regex", PrimitiveKind.STRING)
+            PrimitiveSerialDescriptor("regex", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: Regex) {
         encoder.encodeString(value.pattern)

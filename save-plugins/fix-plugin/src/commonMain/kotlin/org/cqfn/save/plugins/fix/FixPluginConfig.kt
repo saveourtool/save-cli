@@ -1,9 +1,10 @@
 package org.cqfn.save.plugins.fix
 
-import kotlinx.serialization.Serializable
 import org.cqfn.save.core.plugin.PluginConfig
 
 import okio.Path
+
+import kotlinx.serialization.Serializable
 
 /**
  * @property execCmd a command that will be executed to mutate test file contents
