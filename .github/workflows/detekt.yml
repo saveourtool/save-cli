@@ -17,14 +17,11 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.11
-      # FixMe: https://github.com/cqfn/save/issues/67
-      #- name: Gradle build with remote cache
-      #  uses: burrunan/gradle-cache-action@v1
-      #  with:
-      #    arguments: detektAll
-      #    properties: |
-      #      org.gradle.caching=true
-      #    gradle-version: wrapper
+      - uses: burrunan/gradle-cache-action@v1
+        with:
+          gradle-version: wrapper
           # additional files to calculate key for dependency cache
-      #    gradle-dependencies-cache-key: |
-      #      buildSrc/**/Versions.kt
+          gradle-dependencies-cache-key: |
+            buildSrc/**/Versions.kt
+      - name: Run gradle command
+        run: ./gradlew detektAll --build-cache
