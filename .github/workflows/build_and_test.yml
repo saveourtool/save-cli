@@ -8,7 +8,6 @@ on:
 
 jobs:
   build_and_test_with_code_coverage:
-    if: ${{ false }}
     name: Build and test
     runs-on: ${{ matrix.os }}
     strategy:
@@ -31,19 +30,18 @@ jobs:
           key: ${{ runner.os }}-gradle-konan
           restore-keys: |
             ${{ runner.os }}-gradle-konan
-      - name: Gradle build with remote cache
+      - name: Start Gradle remote cache server
         uses: burrunan/gradle-cache-action@v1
         with:
-          arguments: |
-            build
-          # FixMe: https://github.com/cqfn/save/issues/67
-          #  -x detekt
           properties: |
             org.gradle.caching=true
           gradle-version: wrapper
           # additional files to calculate key for dependency cache
           gradle-dependencies-cache-key: |
             buildSrc/**/Versions.kt
+      # Until https://github.com/burrunan/gradle-cache-action/issues/42 is addressed, gradle should be run as a separate step
+      - name: Run gradle command
+        run: ./gradlew build
       - name: Upload gradle reports
         if: ${{ always() }}
         uses: actions/upload-artifact@v2

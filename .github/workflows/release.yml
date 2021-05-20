@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest ] #, macos-latest ]
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
     steps:
       - name: Checkout
         uses: actions/checkout@v2.3.3
@@ -27,10 +27,12 @@ jobs:
       - name: Status git beforeafter
         run: git status
       - uses: burrunan/gradle-cache-action@v1
-        name: Gradle release with caches caching
+        name: Start Gradle remote cache server
         with:
-          arguments: linkReleaseExecutableMultiplatform publishToSonatype closeSonatypeStagingRepository
           gradle-version: wrapper
+      # Until https://github.com/burrunan/gradle-cache-action/issues/42 is addressed, gradle should be run as a separate step
+      - name: Run gradle command
+        run: ./gradlew linkReleaseExecutableMultiplatform publishToSonatype closeSonatypeStagingRepository
       - name: Upload artifact
         id: upload_artifact
         uses: actions/upload-artifact@v2

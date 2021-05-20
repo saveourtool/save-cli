@@ -17,13 +17,15 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.11
-      - name: Gradle build with remote cache
+      - name: Start Gradle remote cache server
         uses: burrunan/gradle-cache-action@v1
         with:
-          arguments: diktatCheckAll
           properties: |
             org.gradle.caching=true
           gradle-version: wrapper
           # additional files to calculate key for dependency cache
           gradle-dependencies-cache-key: |
             buildSrc/**/Versions.kt
+      # Until https://github.com/burrunan/gradle-cache-action/issues/42 is addressed, gradle should be run as a separate step
+      - name: Run gradle command
+        run: ./gradlew diktatCheckAll
