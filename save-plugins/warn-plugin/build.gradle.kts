@@ -1,12 +1,12 @@
 plugins {
     kotlin("multiplatform")
+    kotlin("plugin.serialization")
 }
 
 kotlin {
     jvm()
 
-    //FixMe https://github.com/cqfn/save/issues/53
-    //macosX64()
+    macosX64()
     linuxX64()
     mingwX64()
 
@@ -18,6 +18,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(":save-common"))
+                implementation( "org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
             }
         }
         val commonTest by getting {

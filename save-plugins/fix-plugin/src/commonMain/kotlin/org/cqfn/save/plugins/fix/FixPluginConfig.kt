@@ -4,12 +4,15 @@ import org.cqfn.save.core.plugin.PluginConfig
 
 import okio.Path
 
+import kotlinx.serialization.Serializable
+
 /**
  * @property execCmd a command that will be executed to mutate test file contents
  * @property inPlace whether the [execCmd] mutates the file in-place
  * @property destinationFileSuffix [execCmd] should append this suffix to the file name after mutating it.
  * Required when `inPlace` is `false`, not used otherwise.
  */
+@Serializable
 data class FixPluginConfig(
     val execCmd: String,
     val inPlace: Boolean = false,
