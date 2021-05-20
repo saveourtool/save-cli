@@ -36,7 +36,7 @@ interface Plugin {
      * @param fs a [FileSystem] which is used to traverse the directory hierarchy
      * @return a sequence of directories possibly containing this plugin's test resources
      */
-    fun Path.resourceDirectories(fs: FileSystem = FileSystem.SYSTEM): Sequence<Path> = findDescendantDirectoriesBy { file ->
+    fun Path.resourceDirectories(fs: FileSystem = FileSystem.SYSTEM): Sequence<Path> = findDescendantDirectoriesBy(true) { file ->
         // this matches directories which contain their own SAVE config
         fs.metadata(file).isRegularFile || fs.list(file).none { it.isSaveTomlConfig() }
     }

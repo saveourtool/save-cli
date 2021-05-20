@@ -87,7 +87,7 @@ fun FileSystem.readLines(path: Path): List<String> = this.read(path) {
  * |   |-- directory23
  * |   |   `-- file33
  * ```
- * If predicate returns `true` when `Path` is a directory which contains only other directories, then `directory11` will be filtered, as well as
+ * If predicate returns `true` when `Path` is a directory which contains only other directories or is empty, then `directory11` will be filtered, as well as
  * `directory21`, which is empty, but is a descendant of already filtered out one, and `directory 23`, which is not empty.
  * So, the result would be `sequence(directory12, directory13)`
  *
