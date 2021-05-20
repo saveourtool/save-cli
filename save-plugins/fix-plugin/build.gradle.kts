@@ -19,7 +19,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(":save-common"))
-                implementation("io.github.petertrr:kotlin-multiplatform-diff:0.1.0")
+                implementation("io.github.petertrr:kotlin-multiplatform-diff:0.2.0")
             }
         }
         val commonTest by getting {
