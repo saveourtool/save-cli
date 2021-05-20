@@ -92,20 +92,17 @@ class WarnPlugin : Plugin {
                                        warnPluginConfig: WarnPluginConfig): TestStatus {
         val missingWarnings = expectedWarningsMap.filterValues { it !in actualWarningsMap.values }.values
         val unexpectedWarnings = actualWarningsMap.filterValues { it !in expectedWarningsMap.values }.values
-        if (!warnPluginConfig.exactWarningsMatch && missingWarnings.isEmpty() && unexpectedWarnings.isNotEmpty()) {
-            return Pass("Some warnings were unexpected: $unexpectedWarnings")
+
+        val isMissingWarnings = missingWarnings.isEmpty()
+        val isUnexpectedWarnings = unexpectedWarnings.isEmpty()
+        return when {
+            !isMissingWarnings && isUnexpectedWarnings -> Fail("Some warnings were expected but not received: $missingWarnings")
+            !isMissingWarnings && !isUnexpectedWarnings -> Fail("Some warnings were expected but not received: $missingWarnings, " +
+                    "and others were unexpected: $unexpectedWarnings")
+            isMissingWarnings && !isUnexpectedWarnings && !warnPluginConfig.exactWarningsMatch -> Pass("Some warnings were unexpected: $unexpectedWarnings")
+            isMissingWarnings && !isUnexpectedWarnings -> Fail("Some warnings were unexpected: $unexpectedWarnings")
+            isMissingWarnings && isUnexpectedWarnings -> Pass(null)
+            else -> Fail("")
         }
-        val message: String? =
-                when (missingWarnings.isEmpty() to unexpectedWarnings.isEmpty()) {
-                    false to true -> "Some warnings were expected but not received: $missingWarnings"
-                    false to false -> "Some warnings were expected but not received: $missingWarnings, " +
-                            "and others were unexpected: $unexpectedWarnings"
-                    true to false -> "Some warnings were unexpected: $unexpectedWarnings"
-                    true to true -> null
-                    else -> ""
-                }
-        return message?.let { mess ->
-            Fail(mess)
-        } ?: Pass(null)
     }
 }

@@ -10,7 +10,7 @@ package org.cqfn.save.core.result
 sealed class TestStatus
 
 /**
- * @property message if exactWarningsMatch = false
+ * @property message Optional message about test passing
  */
 data class Pass(val message: String?) : TestStatus()
 
