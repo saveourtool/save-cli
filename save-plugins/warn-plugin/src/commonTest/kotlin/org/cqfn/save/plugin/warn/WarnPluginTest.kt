@@ -68,6 +68,41 @@ class WarnPluginTest {
     }
 
     @Test
+    fun `basic warn-plugin test with exactWarningsMatch = false`() {
+        fs.write(fs.createFile(tmpDir / "resource")) {
+            write(
+                """
+                |Test1Test.java:4:6: Class name should be in PascalCase
+                |Test1Test.java:5:8: Variable name should be in lowerCamelCase
+                """.trimMargin().encodeToByteArray()
+            )
+        }
+        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
+        performTest(
+            """
+                package org.cqfn.save.example
+                
+                // ;warn:4:6: Class name should be in PascalCase
+                class example {
+                    int Foo = 42;
+                }
+            """.trimIndent(),
+            WarnPluginConfig(
+                "$catCmd ${tmpDir / "resource"}",
+                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
+                Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
+                true, true, 1, 2, 3, false
+            )
+        ) { results ->
+            assertEquals(1, results.size)
+            assertTrue(results.single().status is Pass)
+            val nameWarn = "Some warnings were unexpected: [[Warning(message=Variable name should be in lowerCamelCase, line=5, column=8)]]"
+            assertEquals((results.single().status as Pass).message, nameWarn)
+        }
+        fs.delete(tmpDir / "resource")
+    }
+
+    @Test
     @Ignore  // this logic is todo
     fun `basic warn-plugin test with ignoreTechnicalComments=true`() {
         performTest(

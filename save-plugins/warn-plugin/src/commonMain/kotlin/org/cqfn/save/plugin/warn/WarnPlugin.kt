@@ -76,31 +76,35 @@ class WarnPlugin : Plugin {
             .mapValues { (_, warning) -> warning.sortedBy { it.message } }
         return TestResult(
             listOf(path),
-            checkResults(expectedWarnings, actualWarningsMap),
+            checkResults(expectedWarnings, actualWarningsMap, warnPluginConfig),
             DebugInfo(executionResult.stdout.joinToString("\n"), executionResult.stderr.joinToString("\n"), null)
         )
     }
 
     @Suppress("TYPE_ALIAS")
     private fun checkResults(expectedWarningsMap: Map<LineColumn?, List<Warning>>,
-                             actualWarningsMap: Map<LineColumn?, List<Warning>>): TestStatus =
-            checkCollectionsDiffer(expectedWarningsMap, actualWarningsMap)?.let { message ->
-                Fail(message)
-            }
-                ?: Pass
+                             actualWarningsMap: Map<LineColumn?, List<Warning>>,
+                             warnPluginConfig: WarnPluginConfig): TestStatus =
+            checkCollectionsDiffer(expectedWarningsMap, actualWarningsMap, warnPluginConfig)
 
     @Suppress("TYPE_ALIAS")
     private fun checkCollectionsDiffer(expectedWarningsMap: Map<LineColumn?, List<Warning>>,
-                                       actualWarningsMap: Map<LineColumn?, List<Warning>>): String? {
+                                       actualWarningsMap: Map<LineColumn?, List<Warning>>,
+                                       warnPluginConfig: WarnPluginConfig): TestStatus {
         val missingWarnings = expectedWarningsMap.filterValues { it !in actualWarningsMap.values }.values
         val unexpectedWarnings = actualWarningsMap.filterValues { it !in expectedWarningsMap.values }.values
+
         return when (missingWarnings.isEmpty() to unexpectedWarnings.isEmpty()) {
-            false to true -> "Some warnings were expected but not received: $missingWarnings"
-            false to false -> "Some warnings were expected but not received: $missingWarnings, " +
-                    "and others were unexpected: $unexpectedWarnings"
-            true to false -> "Some warnings were unexpected: $unexpectedWarnings"
-            true to true -> null
-            else -> ""
+            false to true -> Fail("Some warnings were expected but not received: $missingWarnings")
+            false to false -> Fail("Some warnings were expected but not received: $missingWarnings, " +
+                    "and others were unexpected: $unexpectedWarnings")
+            true to false -> if (!warnPluginConfig.exactWarningsMatch) {
+                Pass("Some warnings were unexpected: $unexpectedWarnings")
+            } else {
+                Fail("Some warnings were unexpected: $unexpectedWarnings")
+            }
+            true to true -> Pass(null)
+            else -> Fail("")
         }
     }
 }
