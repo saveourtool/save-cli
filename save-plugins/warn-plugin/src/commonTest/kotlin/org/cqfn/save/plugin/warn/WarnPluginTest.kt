@@ -96,7 +96,8 @@ class WarnPluginTest {
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
-            assertEquals((results.single().status as Pass).message, NAME_WARN)
+            val nameWarn = "Some warnings were unexpected: [[Warning(message=Variable name should be in lowerCamelCase, line=5, column=8)]]"
+            assertEquals((results.single().status as Pass).message, nameWarn)
         }
         fs.delete(tmpDir / "resource")
     }
@@ -265,9 +266,5 @@ class WarnPluginTest {
                 3
             )
         }
-    }
-
-    companion object {
-        private const val NAME_WARN = "Some warnings were unexpected: [[Warning(message=Variable name should be in lowerCamelCase, line=5, column=8)]]"
     }
 }
