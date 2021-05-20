@@ -48,8 +48,7 @@ class Save(
      */
     fun performAnalysis() {
         // get all toml configs in file system
-        val testConfig = ConfigDetector().configFromFile(saveProperties.testConfig!!.toPath())
-        requireNotNull(testConfig) { "Provided path ${saveProperties.testConfig} doesn't correspond to a valid save.toml file" }
+        val testConfig = ConfigDetector().configFromFile(saveProperties.testConfig)
 
         val out = when (saveProperties.resultOutput) {
             ResultOutputType.FILE -> fs.sink("save.out".toPath()).buffer()
