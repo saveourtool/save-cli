@@ -58,21 +58,22 @@ class MergeConfigs {
             parentConfig.getAllChildTomlTables().forEach { parentTable ->
                 val parentTableName = parentTable.fullTableName
                 val childTable = childConfig.getAllChildTomlTables().find { it.fullTableName == parentTableName }
-                if (childTable != null) {
+                childTable?.let {
                     val childTableContent = childTable.children
-                    val childKeys = mutableListOf<String>()
+                    val childKeys: MutableList<String> = mutableListOf()
                     childTableContent.forEach { childKeys.add((it as TomlKeyValue).key.content) }
                     parentTable.children.forEach {
                         if ((it as TomlKeyValue).key.content !in childKeys) {
                             childTableContent.add(it)
                         }
                     }
-                } else {
-                    childConfig.appendChild(parentTable)
                 }
+                    ?: run {
+                        childConfig.appendChild(parentTable)
+                    }
             }
             val newConfig = childConfig.asString()
-            //logDebug("Merged config:\n----\n${newConfig}\n----")
+            // logDebug("Merged config:\n----\n${newConfig}\n----")
             FileSystem.SYSTEM.write(child.location) {
                 write(newConfig.encodeToByteArray())
             }
@@ -80,10 +81,19 @@ class MergeConfigs {
     }
 }
 
-fun TomlNode.asString(): String {
-    return tomlNodeToString(this).trimEnd()
-}
+/**
+ * Function extension. Returns a string representation of the object.
+ *
+ * @return corresponding representation
+ */
+fun TomlNode.asString() = tomlNodeToString(this).trimEnd()
 
+/**
+ * Returns a string representation of the object.
+ *
+ * @param node [node] to be represented by string
+ * @return corresponding representation
+ */
 fun tomlNodeToString(node: TomlNode): String {
     var tomlData = ""
     if (node.name != "rootNode") {

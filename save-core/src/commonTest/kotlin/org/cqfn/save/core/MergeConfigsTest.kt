@@ -1,16 +1,18 @@
 package org.cqfn.save.core
 
-import okio.FileSystem
 import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.files.MergeConfigs
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
+
+import io.github.petertrr.diffutils.diff
+import okio.FileSystem
+
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
-import io.github.petertrr.diffutils.diff
-
+@Suppress("TOO_LONG_FUNCTION", "LOCAL_VARIABLE_EARLY_DECLARATION")
 class MergeConfigsTest {
     private val fs = FileSystem.SYSTEM
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / MergeConfigsTest::class.simpleName!!).also {
@@ -79,7 +81,6 @@ class MergeConfigsTest {
                 .deltas.isEmpty()
         }
     }
-
 
     @Test
     fun `merge many configs`() {

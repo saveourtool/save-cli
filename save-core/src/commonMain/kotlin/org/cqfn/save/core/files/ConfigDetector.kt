@@ -32,8 +32,8 @@ class ConfigDetector {
                     .toList()
                     .reversed()
                     .zipWithNext()
-                    .forEach {
-                        (parent, child) -> parent.childConfigs.add(child)
+                    .forEach { (parent, child) ->
+                        parent.childConfigs.add(child)
                         logDebug("Add child ${child.location} for ${parent.location}")
                     }
 
@@ -54,7 +54,7 @@ class ConfigDetector {
     }
 
     private fun createTestConfigs(descendantConfigLocations: List<Path>, configs: MutableList<TestConfig>) =
-        descendantConfigLocations
+            descendantConfigLocations
                 .drop(1)  // because [config] will be discovered too
                 .forEachIndexed { index, path ->
                     val parentConfig = configs.find {
