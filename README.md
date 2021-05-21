@@ -46,7 +46,7 @@ Save can be used not only with static analyzers, but can be used as a test frame
 
 ## How to start
 1. Prepare and configure your test base in the proper format. See [test_detection](#test_detection) and [plugins](#plugins)
-2. Run the following: TBD (FixMe)
+2. Run the following: save --testConfig = "/my/path/to-test/save.toml"
 
 ## How to configure 
 SAVE has a command line interface that runs the framework and your executable. What you need is simply to configure the output of your static analyzer so SAVE will be able to
@@ -116,7 +116,7 @@ In this section we will give information only about the `[general]` table that c
 
 ```text
 [general]
-# your custom tags that will be used to detect groups of tests (optional)
+# your custom tags that will be used to detect groups of tests (required)
 tags = parsing, null-pointer, e.t.c
 
 # custom free text that describes the test suite (required)

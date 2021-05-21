@@ -4,6 +4,8 @@
 
 package org.cqfn.save.core.plugin
 
+import kotlinx.serialization.Serializable
+
 /**
  * Core interface for plugin configuration
  */
@@ -12,4 +14,13 @@ interface PluginConfig
 /**
  * General configuration for test suite.
  */
-class GeneralConfig : PluginConfig
+@Serializable
+data class GeneralConfig(
+    // FixMe: after ktoml will support lists we should change it
+    val tags: String,
+    val description: String,
+    // FixMe: after ktoml will support lists we should change it
+    val excludedTests: String,
+    // FixMe: after ktoml will support lists we should change it
+    val includedTests: String,
+) : PluginConfig
