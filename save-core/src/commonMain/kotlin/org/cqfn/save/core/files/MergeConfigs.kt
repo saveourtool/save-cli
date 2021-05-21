@@ -3,6 +3,7 @@ package org.cqfn.save.core.files
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.logging.logDebug
 import com.akuleshov7.ktoml.parsers.TomlParser
+import com.akuleshov7.ktoml.parsers.node.TomlFile
 import com.akuleshov7.ktoml.parsers.node.TomlKeyValue
 import com.akuleshov7.ktoml.parsers.node.TomlNode
 import com.akuleshov7.ktoml.parsers.node.TomlTable
@@ -20,9 +21,9 @@ class MergeConfigs {
     fun merge(testConfig: TestConfig) {
         logDebug("Start merge configs for ${testConfig.location}")
         val parentConfigs = collectParentConfigs(testConfig)
-        mergeConfigs(parentConfigs)
+        mergeConfigList(parentConfigs)
         val childConfigs = collectChildConfigs(testConfig)
-        mergeConfigs(childConfigs)
+        mergeConfigList(childConfigs)
     }
 
     // Create the list of parent configs
@@ -40,11 +41,11 @@ class MergeConfigs {
     // Create the list of child configs
     private fun collectChildConfigs(testConfig: TestConfig): MutableList<TestConfig> {
         // TODO:
-        return mutableListOf()
+        return mutableListOf(testConfig)
     }
 
     // Merge configurations
-    private fun mergeConfigs(configList: MutableList<TestConfig>) {
+    private fun mergeConfigList(configList: MutableList<TestConfig>) {
         if (configList.size == 1) {
             return
         }
@@ -54,28 +55,39 @@ class MergeConfigs {
             logDebug("Merging ${parent.location} with ${child.location}")
             val parentConfig = TomlParser(parent.location.toString()).readAndParseFile()
             val childConfig = TomlParser(child.location.toString()).readAndParseFile()
-
-            parentConfig.getAllChildTomlTables().forEach { parentTable ->
-                val parentTableName = parentTable.fullTableName
-                val childTable = childConfig.getAllChildTomlTables().find { it.fullTableName == parentTableName }
-                childTable?.let {
-                    val childTableContent = childTable.children
-                    val childKeys: MutableList<String> = mutableListOf()
-                    childTableContent.forEach { childKeys.add((it as TomlKeyValue).key.content) }
-                    parentTable.children.forEach {
-                        if ((it as TomlKeyValue).key.content !in childKeys) {
-                            childTableContent.add(it)
-                        }
-                    }
-                }
-                    ?: run {
-                        childConfig.appendChild(parentTable)
-                    }
-            }
+            mergeChildConfigWithParent(parentConfig, childConfig)
             val newConfig = childConfig.asString()
             // logDebug("Merged config:\n----\n${newConfig}\n----")
             FileSystem.SYSTEM.write(child.location) {
                 write(newConfig.encodeToByteArray())
+            }
+        }
+    }
+
+    private fun mergeChildConfigWithParent(parentConfig: TomlFile, childConfig: TomlFile) {
+        parentConfig.getAllChildTomlTables().forEach { parentTable ->
+            val parentTableName = parentTable.fullTableName
+            // If there will be found table in child config with the same name, than content should be merged
+            val childTable = childConfig.getAllChildTomlTables().find { it.fullTableName == parentTableName }
+            childTable?.let {
+                mergeFieldsFromTomlTable(parentTable, childTable)
+            }
+            // There is now such table in child config, just add it whole
+                ?: run {
+                    childConfig.appendChild(parentTable)
+                }
+        }
+    }
+
+    private fun mergeFieldsFromTomlTable(parentTable: TomlTable, childTable: TomlTable) {
+        // Looking for fields from parent config, which are absent in child config, they should be added
+        // We will compare fields by keys from TomlKeyValue
+        val childTableFields = childTable.children
+        val childKeys: MutableList<String> = mutableListOf()
+        childTableFields.forEach { childKeys.add((it as TomlKeyValue).key.content) }
+        parentTable.children.forEach {
+            if ((it as TomlKeyValue).key.content !in childKeys) {
+                childTableFields.add(it)
             }
         }
     }
