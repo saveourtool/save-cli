@@ -35,6 +35,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
+                implementation("io.github.petertrr:kotlin-multiplatform-diff:0.2.0")
             }
         }
         val nativeMain by creating {
