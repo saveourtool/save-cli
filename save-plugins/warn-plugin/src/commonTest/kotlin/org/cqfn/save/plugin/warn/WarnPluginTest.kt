@@ -2,6 +2,7 @@ package org.cqfn.save.plugin.warn
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.plugin.ResourceFormatException
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
@@ -264,6 +265,28 @@ class WarnPluginTest {
                 2,
                 3
             )
+        }
+    }
+
+    @Test
+    fun `warn-plugin test create test file`() {
+        fs.write(fs.createFile(tmpDir / "resource")) {
+            write(
+                """
+                package org.cqfn.save.example
+                
+                // ;warn:3:6: Class name should be in PascalCase
+                class example {
+                    int foo = 42;
+                }
+            """.trimIndent().encodeToByteArray()
+            )
+        }
+
+        WarnPlugin().createTestFile(tmpDir / "resource")
+        val tmpDirTest = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPlugin::class.simpleName!!)
+        fs.readLines(tmpDirTest / "test_file").forEach {
+            assertTrue(!it.contains("// ;warn:"))
         }
     }
 }

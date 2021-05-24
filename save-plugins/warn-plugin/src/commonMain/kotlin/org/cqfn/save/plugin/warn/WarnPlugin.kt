@@ -1,7 +1,10 @@
 package org.cqfn.save.plugin.warn
 
 import org.cqfn.save.core.config.TestConfig
+import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.files.findAllFilesMatching
 import org.cqfn.save.core.files.readLines
+import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Fail
@@ -28,8 +31,9 @@ class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
 
     override fun execute(): Sequence<TestResult> {
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
+        val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
         return discoverTestFiles(testConfig.directory).map { resources ->
-            handleTestFile(resources.single(), warnPluginConfig)
+            handleTestFile(resources.single(), warnPluginConfig, generalConfig)
         }
     }
 
@@ -41,10 +45,14 @@ class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
         }
         .filter { it.isNotEmpty() }
 
-    @Suppress("UnusedPrivateMember")
+    @Suppress(
+        "UnusedPrivateMember",
+        "TOO_LONG_FUNCTION",
+        "SAY_NO_TO_VAR")
     private fun handleTestFile(
         path: Path,
-        warnPluginConfig: WarnPluginConfig): TestResult {
+        warnPluginConfig: WarnPluginConfig,
+        generalConfig: GeneralConfig): TestResult {
         val expectedWarnings = fs.readLines(path)
             .mapNotNull {
                 with(warnPluginConfig) {
@@ -64,8 +72,15 @@ class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
                 }
             }
             .mapValues { it.value.sortedBy { it.message } }
-        // todo: create a temp file with technical comments removed and feed it to the tool
-        val executionResult = pb.exec(warnPluginConfig.execCmd, null)
+
+        var execCmd: String = warnPluginConfig.execCmd
+
+        if (generalConfig.ignoreSaveComments) {
+            createTestFile(path)
+            execCmd = warnPluginConfig.execCmd + " test_file"
+        }
+
+        val executionResult = pb.exec(execCmd, null)
         val actualWarningsMap = executionResult.stdout.mapNotNull {
             with(warnPluginConfig) {
                 it.extractWarning(warningsOutputPattern, columnCaptureGroup, lineCaptureGroup, messageCaptureGroup)
@@ -80,16 +95,32 @@ class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
         )
     }
 
+    /**
+     * @param path
+     */
+    internal fun createTestFile(path: Path) {
+        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPlugin::class.simpleName!!)
+
+        if (fs.exists(tmpDir)) {
+            fs.deleteRecursively(tmpDir)
+        }
+        fs.createDirectory(tmpDir)
+
+        fs.write(fs.createFile(tmpDir / "test_file")) {
+            fs.readLines(path).forEach {
+                if (!it.contains("// ;warn:")) {
+                    write(
+                        (it + "\n").encodeToByteArray()
+                    )
+                }
+            }
+        }
+    }
+
     @Suppress("TYPE_ALIAS")
     private fun checkResults(expectedWarningsMap: Map<LineColumn?, List<Warning>>,
                              actualWarningsMap: Map<LineColumn?, List<Warning>>,
-                             warnPluginConfig: WarnPluginConfig): TestStatus =
-            checkCollectionsDiffer(expectedWarningsMap, actualWarningsMap, warnPluginConfig)
-
-    @Suppress("TYPE_ALIAS")
-    private fun checkCollectionsDiffer(expectedWarningsMap: Map<LineColumn?, List<Warning>>,
-                                       actualWarningsMap: Map<LineColumn?, List<Warning>>,
-                                       warnPluginConfig: WarnPluginConfig): TestStatus {
+                             warnPluginConfig: WarnPluginConfig): TestStatus {
         val missingWarnings = expectedWarningsMap.filterValues { it !in actualWarningsMap.values }.values
         val unexpectedWarnings = actualWarningsMap.filterValues { it !in expectedWarningsMap.values }.values
 
