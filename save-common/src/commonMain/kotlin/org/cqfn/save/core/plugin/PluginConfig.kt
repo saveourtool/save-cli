@@ -6,8 +6,6 @@ package org.cqfn.save.core.plugin
 
 import kotlinx.serialization.Serializable
 
-import kotlin.jvm.JvmInline
-
 /**
  * Core interface for plugin configuration
  */
@@ -23,7 +21,6 @@ interface PluginConfig
  * @property ignoreSaveComments if true then ignore warning comments
  */
 @Serializable
-@JvmInline
 data class GeneralConfig(
     val tags: String,
     val description: String,
