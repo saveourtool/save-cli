@@ -18,7 +18,7 @@ import okio.Path
 data class TestConfig(
     val location: Path,
     val parentConfig: TestConfig?,
-    val pluginConfigs: List<PluginConfig> = emptyList(),
+    val pluginConfigs: MutableList<PluginConfig> = mutableListOf(),
     private val fs: FileSystem = FileSystem.SYSTEM,
 ) {
     /**

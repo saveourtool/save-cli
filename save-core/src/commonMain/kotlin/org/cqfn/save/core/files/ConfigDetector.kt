@@ -20,9 +20,9 @@ class ConfigDetector {
      * @return [TestConfig] or null if no suitable config file has been found.
      * @throws IllegalArgumentException - in case of invalid testConfig file
      */
-    fun configFromFile(testConfig: String?): TestConfig {
+    fun configFromFile(testConfig: Path): TestConfig {
         // testConfig is validated in the beginning and cannot be null
-        val file = testConfig!!.toPath()
+        val file = testConfig
         return discoverConfigWithParents(file)
             ?.also { config ->
                 // fill children for parent configs

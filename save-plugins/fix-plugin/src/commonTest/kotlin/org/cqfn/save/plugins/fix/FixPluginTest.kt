@@ -77,12 +77,11 @@ class FixPluginTest {
         val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").lowercase()} && " else ""
         val executionCmd = "${diskWithTmpDir}cd $tmpDir && echo Expected file > Test3Test.java"
 
-        val results = FixPlugin().execute(
+        val results = FixPlugin(
             TestConfig(config,
-                null,
-                listOf(FixPluginConfig(executionCmd, inPlace = true))
-            )
-        )
+            null,
+            mutableListOf(FixPluginConfig(executionCmd, inPlace = true))
+        )).execute()
 
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
         assertEquals(TestResult(listOf(expectedFile, testFile), Pass(null), DebugInfo(results.single().debugInfo?.stdout, null, null)), results.single())
@@ -107,12 +106,10 @@ class FixPluginTest {
         val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").lowercase()} && " else ""
         val executionCmd = "${diskWithTmpDir}cd $tmpDir && echo Expected file > Test3Test_copy.java"
 
-        val results = FixPlugin().execute(
-            TestConfig(config,
-                null,
-                listOf(FixPluginConfig(executionCmd, destinationFileSuffix = "_copy"))
-            )
-        )
+        val results = FixPlugin(           TestConfig(config,
+            null,
+            mutableListOf(FixPluginConfig(executionCmd, destinationFileSuffix = "_copy"))
+        )).execute()
 
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
         assertEquals(TestResult(listOf(expectedFile, testFile), Pass(null), DebugInfo(results.single().debugInfo?.stdout, null, null)), results.single())

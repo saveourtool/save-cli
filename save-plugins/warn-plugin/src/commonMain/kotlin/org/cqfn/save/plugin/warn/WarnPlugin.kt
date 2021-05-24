@@ -16,17 +16,18 @@ import org.cqfn.save.plugin.warn.utils.extractWarning
 
 import okio.FileSystem
 import okio.Path
+import org.cqfn.save.core.logging.logWarn
 
 private typealias LineColumn = Pair<Int, Int>
 
 /**
  * A plugin that runs an executable and verifies that it produces required warning messages.
  */
-class WarnPlugin : Plugin {
+class WarnPlugin(override val testConfig: TestConfig) : Plugin(testConfig) {
     private val fs = FileSystem.SYSTEM
     private val pb = ProcessBuilder()
 
-    override fun execute(testConfig: TestConfig): Sequence<TestResult> {
+    override fun execute(): Sequence<TestResult> {
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         return discoverTestFiles(testConfig.directory).map { resources ->
             handleTestFile(resources.single(), warnPluginConfig)
@@ -38,8 +39,7 @@ class WarnPlugin : Plugin {
             defaultResourceNamePattern.matches(it.name)
         }
         .asSequence()
-        .map { listOf(it) }
-        .flatten()
+        .filterNot { it.isEmpty() }
 
     @Suppress("UnusedPrivateMember")
     private fun handleTestFile(

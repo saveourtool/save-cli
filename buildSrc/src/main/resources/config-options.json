@@ -1,5 +1,5 @@
 {
-    "testConfig" : {
+    "testConfigName" : {
       "argType" : "ArgType.String",
       "kotlinType": "kotlin.String",
       "fullName" : "test-config",

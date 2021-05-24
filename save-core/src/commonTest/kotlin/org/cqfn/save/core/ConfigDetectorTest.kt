@@ -25,7 +25,7 @@ class ConfigDetectorTest {
     fun `should detect single file`() {
         val file = fs.createFile(tmpDir / "save.toml")
 
-        val result = configDetector.configFromFile(file.toString())
+        val result = configDetector.configFromFile(file)
 
         assertNotNull(result)
     }
@@ -34,7 +34,7 @@ class ConfigDetectorTest {
     fun `should fail on the invalid file`() {
         val file = fs.createFile(tmpDir / "random.text")
         assertFailsWith<IllegalArgumentException> {
-            configDetector.configFromFile(file.toString())
+            configDetector.configFromFile(file)
         }
     }
 
@@ -42,7 +42,7 @@ class ConfigDetectorTest {
     fun `should detect single file from a directory`() {
         fs.createFile(tmpDir / "save.toml")
 
-        val result = configDetector.configFromFile(tmpDir.toString())
+        val result = configDetector.configFromFile(tmpDir)
 
         assertNotNull(result)
     }
@@ -54,7 +54,7 @@ class ConfigDetectorTest {
         fs.createDirectory(nestedDir)
         val file = fs.createFile(nestedDir / "save.toml")
 
-        val result = configDetector.configFromFile(file.toString())
+        val result = configDetector.configFromFile(file)
 
         assertNotNull(result)
         assertNotNull(result.parentConfig)
@@ -71,7 +71,7 @@ class ConfigDetectorTest {
         fs.createDirectory(nestedDir2)
         val file = fs.createFile(nestedDir2 / "save.toml")
 
-        val result = configDetector.configFromFile(file.toString())
+        val result = configDetector.configFromFile(file)
 
         assertNotNull(result)
         assertEquals(2, result.parentConfigs().count())
@@ -87,7 +87,7 @@ class ConfigDetectorTest {
         fs.createDirectory(nestedDir)
         fs.createFile(nestedDir / "save.toml")
 
-        val result = configDetector.configFromFile(parentFile.toString())
+        val result = configDetector.configFromFile(parentFile)
 
         assertNotNull(result)
         assertTrue(result.childConfigs.isNotEmpty())
@@ -113,7 +113,7 @@ class ConfigDetectorTest {
         fs.createDirectory(nestedDir1 / "nestedDir3" / "nestedDir4")
         fs.createFile(nestedDir1 / "nestedDir3" / "nestedDir4" / "save.toml")
 
-        val result = configDetector.configFromFile(file.toString())
+        val result = configDetector.configFromFile(file)
 
         assertNotNull(result)
         assertEquals(1, result.parentConfigs().count())
@@ -125,7 +125,7 @@ class ConfigDetectorTest {
         val file = fs.createFile(tmpDir / "Feature1Test.java")
         fs.createFile(tmpDir / "save.toml")
 
-        val result = configDetector.configFromFile(file.toString())
+        val result = configDetector.configFromFile(file)
 
         assertNotNull(result)
     }
