@@ -7,12 +7,12 @@ import okio.Path
 
 /**
  * Plugin that can be injected into SAVE during execution. Plugins accept contents of configuration file and then perform some work.
+ * @property testConfig
  */
 abstract class Plugin(open val testConfig: TestConfig) {
     /**
      * Perform plugin's work.
      *
-     * @param testConfig configuration of current test suite
      * @return a sequence of [TestResult]s for each group of test resources
      */
     abstract fun execute(): Sequence<TestResult>

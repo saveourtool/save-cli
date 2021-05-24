@@ -12,13 +12,12 @@ import org.cqfn.save.core.logging.logInfo
 import okio.FileNotFoundException
 import okio.FileSystem
 import okio.IOException
+import okio.Path.Companion.DIRECTORY_SEPARATOR
 import okio.Path.Companion.toPath
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.properties.Properties
 import kotlinx.serialization.serializer
-import okio.Path
-import okio.Path.Companion.DIRECTORY_SEPARATOR
 
 /**
  * @return this config in case we have valid configuration
@@ -28,7 +27,7 @@ fun SaveProperties.validate(): SaveProperties {
     try {
         this.testRootPath ?: logErrorAndExit(ExitCodes.INVALID_CONFIGURATION,
             "`testRootPath` option is missing or null. " +
-                "Save is not able to start processing without an information about the tests that should be run.")
+                    "Save is not able to start processing without an information about the tests that should be run.")
 
         FileSystem.SYSTEM.metadata(fullConfigPath.toPath())
     } catch (e: FileNotFoundException) {

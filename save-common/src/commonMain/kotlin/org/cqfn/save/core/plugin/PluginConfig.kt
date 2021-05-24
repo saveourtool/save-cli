@@ -13,15 +13,17 @@ interface PluginConfig
 
 /**
  * General configuration for test suite.
+ * @property tags FixMe: after ktoml will support lists we should change it
+ * @property description
+ * @property suiteName
+ * @property excludedTests FixMe: after ktoml will support lists we should change it
+ * @property includedTests FixMe: after ktoml will support lists we should change it
  */
 @Serializable
 data class GeneralConfig(
-    // FixMe: after ktoml will support lists we should change it
     val tags: String,
     val description: String,
     val suiteName: String,
-    // FixMe: after ktoml will support lists we should change it
     val excludedTests: String = "",
-    // FixMe: after ktoml will support lists we should change it
     val includedTests: String = "",
 ) : PluginConfig

@@ -1,19 +1,11 @@
 package org.cqfn.save.core
 
-import com.akuleshov7.ktoml.decoders.DecoderConf
-import com.akuleshov7.ktoml.decoders.TomlDecoder
-import com.akuleshov7.ktoml.exceptions.KtomlException
-import com.akuleshov7.ktoml.parsers.TomlParser
-import com.akuleshov7.ktoml.parsers.node.TomlFile
-import com.akuleshov7.ktoml.parsers.node.TomlNode
-import kotlinx.serialization.serializer
-import okio.Path.Companion.toPath
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.TestConfig
-import org.cqfn.save.core.config.TestConfigSections.FIX
-import org.cqfn.save.core.config.TestConfigSections.WARN
-import org.cqfn.save.core.config.TestConfigSections.GENERAL
 import org.cqfn.save.core.config.TestConfigSections
+import org.cqfn.save.core.config.TestConfigSections.FIX
+import org.cqfn.save.core.config.TestConfigSections.GENERAL
+import org.cqfn.save.core.config.TestConfigSections.WARN
 import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.logging.isDebugEnabled
 import org.cqfn.save.core.logging.logDebug
@@ -34,6 +26,16 @@ import org.cqfn.save.plugin.warn.WarnPluginConfig
 import org.cqfn.save.plugins.fix.FixPlugin
 import org.cqfn.save.plugins.fix.FixPluginConfig
 
+import com.akuleshov7.ktoml.decoders.DecoderConf
+import com.akuleshov7.ktoml.decoders.TomlDecoder
+import com.akuleshov7.ktoml.exceptions.KtomlException
+import com.akuleshov7.ktoml.parsers.TomlParser
+import com.akuleshov7.ktoml.parsers.node.TomlFile
+import com.akuleshov7.ktoml.parsers.node.TomlNode
+import okio.Path.Companion.toPath
+
+import kotlinx.serialization.serializer
+
 /**
  * @property saveProperties an instance of [SaveProperties]
  */
@@ -47,6 +49,8 @@ class Save(
 
     /**
      * Main entrypoint for SAVE framework. Discovers plugins and calls their execution.
+     *
+     * @throws PluginException when we receive invalid type of fixPluginConfig
      */
     fun performAnalysis() {
         // FixMe: now we work only with the save.toml config and it's hierarchy, but we should work properly here with directories as well
@@ -78,14 +82,14 @@ class Save(
     private fun discoverPluginsAndUpdateTestConfig(testConfig: TestConfig): TestConfig {
         val testConfigPath = testConfig.location.toString()
         val parsedTomlConfig = TomlParser(testConfigPath).readAndParseFile()
-        parsedTomlConfig.getRealTomlTables().forEach {
+        parsedTomlConfig.getRealTomlTables().forEach { tomlPluginSection ->
             // adding a fake file node to restore the structure and parse only the part of te toml
             val fakeFileNode = TomlFile()
-            it.children.forEach {
-                fakeFileNode.appendChild(it)
+            tomlPluginSection.children.forEach {
+                fakeFileNode.appendChild(tomlPluginSection)
             }
 
-            val sectionName = it.name.toUpperCase()
+            val sectionName = tomlPluginSection.name.toUpperCase()
             val sectionPluginConfig: PluginConfig = when (val configName = TestConfigSections.valueOf(sectionName)) {
                 FIX -> createPluginConfig<FixPluginConfig>(testConfigPath, fakeFileNode, sectionName)
                 WARN -> createPluginConfig<WarnPluginConfig>(testConfigPath, fakeFileNode, sectionName)
@@ -104,19 +108,19 @@ class Save(
         fakeFileNode: TomlNode,
         pluginSectionName: String
     ) =
-        try {
-            TomlDecoder.decode<T>(
-                serializer(),
-                fakeFileNode,
-                DecoderConf()
-            )
-        } catch (e: KtomlException) {
-            logError(
-                "Plugin extraction failed for $testConfigPath and [$pluginSectionName] section." +
-                        " This file has incorrect toml format."
-            )
-            throw e
-        }
+            try {
+                TomlDecoder.decode<T>(
+                    serializer(),
+                    fakeFileNode,
+                    DecoderConf()
+                )
+            } catch (e: KtomlException) {
+                logError(
+                    "Plugin extraction failed for $testConfigPath and [$pluginSectionName] section." +
+                            " This file has incorrect toml format."
+                )
+                throw e
+            }
 
     @Suppress("WHEN_WITHOUT_ELSE")  // TestResult is a sealed class
     private fun handleResult(testResult: TestResult) {
