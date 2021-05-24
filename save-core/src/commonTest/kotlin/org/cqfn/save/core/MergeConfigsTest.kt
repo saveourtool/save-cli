@@ -1,19 +1,18 @@
 package org.cqfn.save.core
 
-import io.github.petertrr.diffutils.diff
-import okio.FileSystem
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.files.MergeConfigs
 import org.cqfn.save.core.files.createFile
-import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.plugin.warn.WarnPluginConfig
 import org.cqfn.save.plugins.fix.FixPluginConfig
+
+import okio.FileSystem
+
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 @Suppress("TOO_LONG_FUNCTION", "LOCAL_VARIABLE_EARLY_DECLARATION")
 class MergeConfigsTest {
@@ -73,7 +72,7 @@ class MergeConfigsTest {
         val warningsOutputPattern = Regex("\\w+ - (\\d+)/(\\d+) - (.*)$")
 
         val warnConfig2 = WarnPluginConfig("execCmd2", warningsInputPattern, warningsOutputPattern,
-            warningTextHasColumn = true, lineCaptureGroup = 2, columnCaptureGroup =  2, messageCaptureGroup = 2)
+            warningTextHasColumn = true, lineCaptureGroup = 2, columnCaptureGroup = 2, messageCaptureGroup = 2)
         val expectedWarnConfig = WarnPluginConfig("execCmd2", warningsInputPattern, warningsOutputPattern,
             false, true, 2, 2, 2)
 
@@ -121,16 +120,16 @@ class MergeConfigsTest {
         val warnConfig1 = WarnPluginConfig("execCmd1", Regex(".*"), Regex(".*"),
             true, true, 1, 1, 1)
         val warnConfig2 = WarnPluginConfig("execCmd2", Regex(".* \\w"), Regex(".* \\w"),
-            warningTextHasColumn = false, lineCaptureGroup = 2, columnCaptureGroup =  2, messageCaptureGroup = 2)
+            warningTextHasColumn = false, lineCaptureGroup = 2, columnCaptureGroup = 2, messageCaptureGroup = 2)
 
         val warnConfig3 = WarnPluginConfig("execCmd3", Regex(".* foo \\w"), Regex(".* foo \\w"),
-            warningTextHasColumn = true, lineCaptureGroup = 3, columnCaptureGroup =  3, messageCaptureGroup = 3)
+            warningTextHasColumn = true, lineCaptureGroup = 3, columnCaptureGroup = 3, messageCaptureGroup = 3)
 
         val warningsInputPattern = Regex("// ;warn:(\\d+):(\\d+): (.*)")
         val warningsOutputPattern = Regex("\\w+ - (\\d+)/(\\d+) - (.*)$")
 
         val warnConfig4 = WarnPluginConfig("execCmd4", warningsInputPattern, warningsOutputPattern,
-            lineCaptureGroup = 4, columnCaptureGroup =  4, messageCaptureGroup = 4)
+            lineCaptureGroup = 4, columnCaptureGroup = 4, messageCaptureGroup = 4)
 
         val expectedWarnConfig = WarnPluginConfig("execCmd4", warningsInputPattern, warningsOutputPattern,
             true, true, 4, 4, 4)
@@ -172,9 +171,7 @@ class MergeConfigsTest {
         fs.createDirectory(nestedDir2)
         val toml3 = fs.createFile(nestedDir2 / "save.toml")
 
-
-        //mergeConfigs.merge(config2)
-
+        // mergeConfigs.merge(config2)
     }
 
     @AfterTest
