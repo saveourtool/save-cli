@@ -2,12 +2,10 @@ package org.cqfn.save.core.files
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.logging.logDebug
-import com.akuleshov7.ktoml.parsers.TomlParser
-import com.akuleshov7.ktoml.parsers.node.TomlFile
-import com.akuleshov7.ktoml.parsers.node.TomlKeyValue
-import com.akuleshov7.ktoml.parsers.node.TomlNode
-import com.akuleshov7.ktoml.parsers.node.TomlTable
-import okio.FileSystem
+import org.cqfn.save.core.plugin.GeneralConfig
+import org.cqfn.save.core.plugin.PluginConfig
+import org.cqfn.save.plugin.warn.WarnPluginConfig
+import org.cqfn.save.plugins.fix.FixPluginConfig
 
 /**
  * A class that is capable for merging inherited configurations
@@ -23,7 +21,7 @@ class MergeConfigs {
         val parentConfigs = collectParentConfigs(testConfig)
         mergeConfigList(parentConfigs)
         val childConfigs = collectChildConfigs(testConfig)
-        mergeConfigList(childConfigs)
+        //mergeConfigList(childConfigs)
     }
 
     // Create the list of parent configs
@@ -39,9 +37,10 @@ class MergeConfigs {
     }
 
     // Create the list of child configs
-    private fun collectChildConfigs(testConfig: TestConfig): MutableList<TestConfig> {
-        // TODO:
-        return mutableListOf(testConfig)
+    private fun collectChildConfigs(testConfig: TestConfig): MutableList<MutableList<TestConfig>> {
+        val configBranches = mutableListOf<MutableList<TestConfig>>()
+        val currentBranch = mutableListOf(testConfig)
+        return mutableListOf(mutableListOf(testConfig))
     }
 
     // Merge configurations
@@ -51,71 +50,65 @@ class MergeConfigs {
         }
         val pairs = configList.zipWithNext()
 
-        pairs.forEach { (parent, child) ->
-            logDebug("Merging ${parent.location} with ${child.location}")
-            val parentConfig = TomlParser(parent.location.toString()).readAndParseFile()
-            val childConfig = TomlParser(child.location.toString()).readAndParseFile()
-            mergeChildConfigWithParent(parentConfig, childConfig)
-            val newConfig = childConfig.asString()
-            // logDebug("Merged config:\n----\n${newConfig}\n----")
-            FileSystem.SYSTEM.write(child.location) {
-                write(newConfig.encodeToByteArray())
-            }
+        pairs.forEach { (parentConfig, childConfig) ->
+            logDebug("Merging ${parentConfig.location} with ${childConfig.location}")
+            mergeChildConfigWithParent(parentConfig.pluginConfigs, childConfig.pluginConfigs)
         }
     }
 
-    private fun mergeChildConfigWithParent(parentConfig: TomlFile, childConfig: TomlFile) {
-        parentConfig.getAllChildTomlTables().forEach { parentTable ->
-            val parentTableName = parentTable.fullTableName
-            // If there will be found table in child config with the same name, than content should be merged
-            val childTable = childConfig.getAllChildTomlTables().find { it.fullTableName == parentTableName }
-            childTable?.let {
-                mergeFieldsFromTomlTable(parentTable, childTable)
-            }
-            // There is now such table in child config, just add it whole
-                ?: run {
-                    childConfig.appendChild(parentTable)
-                }
-        }
+    private fun mergeChildConfigWithParent(parentConfig: MutableList<PluginConfig>, childConfig: MutableList<PluginConfig>) {
+        // Create the list of corresponding configs, if some of them will be null -> list will contain only one element,
+        // which we apply as final config, otherwise we will merge configs
+        val generalConfigs = listOfNotNull(
+            parentConfig.filterIsInstance<GeneralConfig>().firstOrNull(),
+            childConfig.filterIsInstance<GeneralConfig>().firstOrNull()
+        )
+        val newGeneralConfig: GeneralConfig? = if (generalConfigs.size != 2) generalConfigs.firstOrNull() else mergeGeneralConfigs(generalConfigs.first(), generalConfigs.last())
+
+        val warnConfigs = listOfNotNull(
+            parentConfig.filterIsInstance<WarnPluginConfig>().firstOrNull(),
+            childConfig.filterIsInstance<WarnPluginConfig>().firstOrNull()
+        )
+        val newWarnConfig: WarnPluginConfig? = if (warnConfigs.size != 2) warnConfigs.firstOrNull() else mergeWarnConfigs(warnConfigs.first(), warnConfigs.last())
+
+        val fixConfigs = listOfNotNull(
+            parentConfig.filterIsInstance<FixPluginConfig>().firstOrNull(),
+            childConfig.filterIsInstance<FixPluginConfig>().firstOrNull()
+        )
+        val newFixConfig: FixPluginConfig? = if (fixConfigs.size != 2) fixConfigs.firstOrNull() else mergeFixConfigs(fixConfigs.first(), fixConfigs.last())
+
+        childConfig.clear()
+        val result = listOfNotNull(newGeneralConfig, newWarnConfig, newFixConfig)
+        result.forEach { childConfig.add(it) }
     }
 
-    private fun mergeFieldsFromTomlTable(parentTable: TomlTable, childTable: TomlTable) {
-        // Looking for fields from parent config, which are absent in child config, they should be added
-        // We will compare fields by keys from TomlKeyValue
-        val childTableFields = childTable.children
-        val childKeys: MutableList<String> = mutableListOf()
-        childTableFields.forEach { childKeys.add((it as TomlKeyValue).key.content) }
-        parentTable.children.forEach {
-            if ((it as TomlKeyValue).key.content !in childKeys) {
-                childTableFields.add(it)
-            }
-        }
+    private fun mergeGeneralConfigs(parentConfig: GeneralConfig, childConfig: GeneralConfig): GeneralConfig {
+        return GeneralConfig(
+            if (childConfig.tags != null) childConfig.tags else parentConfig.tags,
+            if (childConfig.description != null) childConfig.description else parentConfig.description,
+            if (childConfig.excludedTests != null) childConfig.excludedTests else parentConfig.excludedTests,
+            if (childConfig.includedTests != null) childConfig.includedTests else parentConfig.includedTests,
+        )
     }
-}
 
-/**
- * Function extension. Returns a string representation of the object.
- *
- * @return corresponding representation
- */
-fun TomlNode.asString() = tomlNodeToString(this).trimEnd()
+    private fun mergeWarnConfigs(parentConfig: WarnPluginConfig, childConfig: WarnPluginConfig): WarnPluginConfig {
+        return WarnPluginConfig(
+            if (childConfig.execCmd != null) childConfig.execCmd else parentConfig.execCmd,
+            if (childConfig.warningsInputPattern != null) childConfig.warningsInputPattern else parentConfig.warningsInputPattern,
+            if (childConfig.warningsOutputPattern != null) childConfig.warningsOutputPattern else parentConfig.warningsOutputPattern,
+            if (childConfig.warningTextHasLine != null) childConfig.warningTextHasLine else parentConfig.warningTextHasLine,
+            if (childConfig.warningTextHasColumn != null) childConfig.warningTextHasColumn else parentConfig.warningTextHasColumn,
+            if (childConfig.lineCaptureGroup != null) childConfig.lineCaptureGroup else parentConfig.lineCaptureGroup,
+            if (childConfig.columnCaptureGroup != null) childConfig.columnCaptureGroup else parentConfig.columnCaptureGroup,
+            if (childConfig.messageCaptureGroup != null) childConfig.messageCaptureGroup else parentConfig.messageCaptureGroup,
+        )
+    }
 
-/**
- * Returns a string representation of the object.
- *
- * @param node [node] to be represented by string
- * @return corresponding representation
- */
-fun tomlNodeToString(node: TomlNode): String {
-    var tomlData = ""
-    if (node.name != "rootNode") {
-        tomlData += (node.content) + "\n"
+    private fun mergeFixConfigs(parentConfig: FixPluginConfig, childConfig: FixPluginConfig): FixPluginConfig {
+        return FixPluginConfig(
+            if (childConfig.execCmd != null) childConfig.execCmd else parentConfig.execCmd,
+            if (childConfig.inPlace != null) childConfig.inPlace else parentConfig.inPlace,
+            if (childConfig.destinationFileSuffix != null) childConfig.destinationFileSuffix else parentConfig.destinationFileSuffix,
+        )
     }
-    node.children.forEach { child ->
-        tomlData += tomlNodeToString(child)
-    }
-    if (node is TomlTable) {
-        tomlData += "\n"
-    }
-    return tomlData
 }

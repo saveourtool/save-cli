@@ -18,7 +18,7 @@ import okio.Path
 data class TestConfig(
     val location: Path,
     val parentConfig: TestConfig?,
-    val pluginConfigs: List<PluginConfig> = emptyList(),
+    val pluginConfigs: MutableList<PluginConfig> = mutableListOf(),
     private val fs: FileSystem = FileSystem.SYSTEM,
 ) {
     /**
@@ -30,7 +30,7 @@ data class TestConfig(
     val neighbourConfigs: MutableList<TestConfig>? = this.parentConfig?.childConfigs
 
     /**
-     * List of child configs in the hierarchy oConfigDetectorf configs, can be empty if this config is at the very bottom.
+     * List of child configs in the hierarchy of ConfigDetector configs, can be empty if this config is at the very bottom.
      * NB: don't move to constructor in order not to break toString into infinite recursion.
      */
     val childConfigs: MutableList<TestConfig> = mutableListOf()
