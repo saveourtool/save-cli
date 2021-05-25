@@ -32,8 +32,6 @@ class Save(
     fun performAnalysis() {
         // get all toml configs in file system
         val testConfig = ConfigDetector().configFromFile(saveProperties.testConfig)
-        // TODO process it
-        MergeConfigs().merge(testConfig)
         val plugins: List<Plugin> = emptyList()  // todo: discover plugins (from configuration blocks in TestSuiteConfig?)
         logInfo("Discovered plugins: $plugins")
         plugins.forEach { plugin ->

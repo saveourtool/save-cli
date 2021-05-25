@@ -15,15 +15,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class FixPluginConfig(
     val execCmd: String,
-    val inPlace: Boolean = false,
+    val inPlace: Boolean? = null,
     val destinationFileSuffix: String? = null,
 ) : PluginConfig {
-    init {
-        require(inPlace || destinationFileSuffix != null) {
-            "Plugin ${FixPlugin::class.simpleName} should either be configured with inPlace=true or have destinationFileSuffix"
-        }
-    }
-
     /**
      * Constructs a name of destination file from original file name and [destinationFileSuffix]
      *

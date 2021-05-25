@@ -34,23 +34,12 @@ data class WarnPluginConfig(
     val execCmd: String,
     val warningsInputPattern: Regex,
     val warningsOutputPattern: Regex,
-    val warningTextHasLine: Boolean = true,
-    val warningTextHasColumn: Boolean = true,
+    val warningTextHasLine: Boolean? = null,
+    val warningTextHasColumn: Boolean? = null,
     val lineCaptureGroup: Int?,
     val columnCaptureGroup: Int?,
     val messageCaptureGroup: Int,
 ) : PluginConfig {
-    init {
-        require(warningTextHasLine xor (lineCaptureGroup == null)) {
-            "warn-plugin configuration error: either warningTextHasLine should be false (actual: $warningTextHasLine) " +
-                    "or lineCaptureGroup should be provided (actual: $lineCaptureGroup}"
-        }
-        require(warningTextHasColumn xor (columnCaptureGroup == null)) {
-            "warn-plugin configuration error: either warningTextHasColumn should be false (actual: $warningTextHasColumn) " +
-                    "or columnCaptureGroup should be provided (actual: $columnCaptureGroup}"
-        }
-    }
-
     companion object {
         /**
          * Default regex for expected warnings in test resources, e.g.

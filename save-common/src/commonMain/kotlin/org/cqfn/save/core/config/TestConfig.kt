@@ -8,6 +8,7 @@ import org.cqfn.save.core.plugin.PluginConfig
 
 import okio.FileSystem
 import okio.Path
+import org.cqfn.save.core.logging.logDebug
 
 /**
  * Configuration for a test suite, that is read from test suite configuration file (toml config)
@@ -21,6 +22,12 @@ data class TestConfig(
     val pluginConfigs: MutableList<PluginConfig> = mutableListOf(),
     private val fs: FileSystem = FileSystem.SYSTEM,
 ) {
+    init {
+        parentConfig?.let {
+            logDebug("Add child ${this.location} for ${parentConfig.location}")
+            parentConfig.childConfigs.add(this)
+        }
+    }
     /**
      * Getting all neighbour configs to the current config (i.e. all configs with the same parent config)
      * - parentConfig

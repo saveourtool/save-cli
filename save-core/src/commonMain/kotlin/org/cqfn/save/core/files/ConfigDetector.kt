@@ -25,19 +25,7 @@ class ConfigDetector {
         val file = testConfig!!.toPath()
         return discoverConfigWithParents(file)
             ?.also { config ->
-                // After `discoverConfigWithParents` we successfully created TestConfig instances for all save.toml files
-                // from given [testConfig] to the top-level save.toml in file tree. Also hierarchy of parents were provided
-                // Now fill children for parent configs
-                config.parentConfigs(withSelf = true)
-                    .toList()
-                    .reversed()
-                    .zipWithNext()
-                    .forEach { (parent, child) ->
-                        parent.childConfigs.add(child)
-                        logDebug("Add child ${child.location} for ${parent.location}")
-                    }
-
-                // Now go down the file tree and
+                // Go down through the file tree and
                 // discover all descendant configs of [config]
                 val descendantConfigLocations = config
                     .directory
@@ -56,21 +44,15 @@ class ConfigDetector {
     private fun createTestConfigs(descendantConfigLocations: List<Path>, configs: MutableList<TestConfig>) =
             descendantConfigLocations
                 .drop(1)  // because [config] will be discovered too
-                .forEachIndexed { index, path ->
+                .mapIndexed { index, path ->
                     val parentConfig = configs.find {
                         it.location ==
                                 descendantConfigLocations.take(index + 1)
                                     .reversed()
                                     .find { it.parent in path.parents() }!!
                     }!!
-
-                    val newChildConfig = TestConfig(
-                        path,
-                        parentConfig,
-                    )
-
-                    logDebug("Found config file at $path, adding as a child for ${parentConfig.location}")
-                    newChildConfig.neighbourConfigs?.add(newChildConfig)
+                    // Actually, we don't interested in return value, just need to create proper config
+                    TestConfig(path, parentConfig)
                 }
 
     /**

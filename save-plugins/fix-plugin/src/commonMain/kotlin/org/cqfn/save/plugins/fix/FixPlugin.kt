@@ -45,7 +45,7 @@ class FixPlugin : Plugin {
             .map { (expected, test) ->
                 val executionResult = pb.exec(fixPluginConfig.execCmd, null, false)
                 val fixedLines = FileSystem.SYSTEM.readLines(
-                    if (fixPluginConfig.inPlace) test else test.parent!! / fixPluginConfig.destinationFileFor(test).toPath()
+                    if (fixPluginConfig.inPlace == true) test else test.parent!! / fixPluginConfig.destinationFileFor(test).toPath()
                 )
                 val expectedLines = FileSystem.SYSTEM.readLines(expected)
                 val status = diff(expectedLines, fixedLines).let { patch ->

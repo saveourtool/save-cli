@@ -17,11 +17,10 @@ class MergeConfigs {
      * @param testConfig - testing SAVE config (save.toml) which should be merged
      */
     fun merge(testConfig: TestConfig) {
-        logDebug("Start merge configs for ${testConfig.location}")
+        logDebug("Start merging configs for ${testConfig.location}")
         val parentConfigs = collectParentConfigs(testConfig)
         mergeConfigList(parentConfigs)
-        val childConfigs = collectChildConfigs(testConfig)
-        // mergeConfigList(childConfigs)
+        mergeChildConfigs(testConfig)
     }
 
     // Create the list of parent configs
@@ -37,10 +36,11 @@ class MergeConfigs {
     }
 
     // Create the list of child configs
-    private fun collectChildConfigs(testConfig: TestConfig): MutableList<MutableList<TestConfig>> {
-        val configBranches = mutableListOf<MutableList<TestConfig>>()
-        val currentBranch = mutableListOf(testConfig)
-        return mutableListOf(mutableListOf(testConfig))
+    private fun mergeChildConfigs(testConfig: TestConfig) {
+        for (child in testConfig.childConfigs) {
+            mergeChildConfigWithParent(testConfig.pluginConfigs, child.pluginConfigs)
+            mergeChildConfigs(child)
+        }
     }
 
     // Merge configurations
@@ -57,7 +57,7 @@ class MergeConfigs {
     }
 
     private fun mergeChildConfigWithParent(parentConfig: MutableList<PluginConfig>, childConfig: MutableList<PluginConfig>) {
-        // Create the list of corresponding configs, if some of them will be null -> list will contain only one element,
+        // Create the list of corresponding configs, if one of them will be null -> list will contain only one element,
         // which we apply as final config, otherwise we will merge configs
         val generalConfigs = listOfNotNull(
             parentConfig.filterIsInstance<GeneralConfig>().firstOrNull(),
