@@ -15,6 +15,7 @@ import okio.Path.Companion.toPath
  * @param condition a condition to match
  * @return a list of files, grouped by directory
  */
+// FixMe: need to filter empty lists here
 fun Path.findAllFilesMatching(condition: (Path) -> Boolean): List<List<Path>> = FileSystem.SYSTEM.list(this)
     .partition { FileSystem.SYSTEM.metadata(it).isDirectory }
     .let { (directories, files) ->
