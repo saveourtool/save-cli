@@ -7,7 +7,6 @@ import org.cqfn.save.core.logging.logError
 
 import okio.FileSystem
 import okio.Path
-import okio.Path.Companion.toPath
 
 /**
  * A class that is capable of discovering config files hierarchy.
@@ -20,10 +19,9 @@ class ConfigDetector {
      * @return [TestConfig] or null if no suitable config file has been found.
      * @throws IllegalArgumentException - in case of invalid testConfig file
      */
-    fun configFromFile(testConfig: String?): TestConfig {
+    fun configFromFile(testConfig: Path): TestConfig {
         // testConfig is validated in the beginning and cannot be null
-        val file = testConfig!!.toPath()
-        return discoverConfigWithParents(file)
+        return discoverConfigWithParents(testConfig)
             ?.also { config ->
                 // fill children for parent configs
                 config.parentConfigs(wihSelf = true)
@@ -41,7 +39,7 @@ class ConfigDetector {
                 createTestConfigs(locationsFlattened, mutableListOf(config))
             }
             ?: run {
-                logError("Config file was not found in $file")
+                logError("Config file was not found in $testConfig")
                 throw IllegalArgumentException("Provided option '--test-config' $testConfig doesn't correspond" +
                         " to a valid save.toml file")
             }

@@ -18,7 +18,7 @@ import okio.Path
 data class TestConfig(
     val location: Path,
     val parentConfig: TestConfig?,
-    val pluginConfigs: List<PluginConfig> = emptyList(),
+    val pluginConfigs: MutableList<PluginConfig> = mutableListOf(),
     private val fs: FileSystem = FileSystem.SYSTEM,
 ) {
     /**
@@ -42,7 +42,7 @@ data class TestConfig(
 
     init {
         require(fs.metadata(location).isRegularFile) {
-            "Location ${location.name} denotes a directory, but TestConfig should be created from a file"
+            "Location <${location.name}> denotes a directory, but TestConfig should be created from a file"
         }
     }
 
