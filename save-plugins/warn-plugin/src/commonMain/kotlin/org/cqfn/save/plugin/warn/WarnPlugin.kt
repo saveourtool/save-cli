@@ -1,7 +1,6 @@
 package org.cqfn.save.plugin.warn
 
 import org.cqfn.save.core.config.TestConfig
-import org.cqfn.save.core.files.findAllFilesMatching
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.DebugInfo
@@ -35,8 +34,10 @@ class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
     }
 
     override fun discoverTestFiles(root: Path) = root
-        .findAllFilesMatching {
-            defaultResourceNamePattern.matches(it.name)
+        .resourceDirectories()
+        .map { directory ->
+            FileSystem.SYSTEM.list(directory)
+                .filter { defaultResourceNamePattern.matches(it.name) }
         }
         .asSequence()
 

@@ -1,7 +1,6 @@
 package org.cqfn.save.plugins.fix
 
 import org.cqfn.save.core.config.TestConfig
-import org.cqfn.save.core.files.findAllFilesMatching
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.logInfo
 import org.cqfn.save.core.plugin.Plugin
@@ -46,7 +45,7 @@ class FixPlugin(testConfig: TestConfig) : Plugin(testConfig) {
             .map { (expected, test) ->
                 val executionResult = pb.exec(fixPluginConfig.execCmd, null, false)
                 val fixedLines = FileSystem.SYSTEM.readLines(
-                    if (fixPluginConfig.inPlace) test else test.parent!! / fixPluginConfig.destinationFileFor(test).toPath()
+                    test.parent!! / fixPluginConfig.destinationFileFor(test).toPath()
                 )
                 val expectedLines = FileSystem.SYSTEM.readLines(expected)
                 val status = diff(expectedLines, fixedLines).let { patch ->
@@ -66,8 +65,8 @@ class FixPlugin(testConfig: TestConfig) : Plugin(testConfig) {
     }
 
     override fun discoverTestFiles(root: Path): Sequence<List<Path>> = root
-        .findAllFilesMatching { true }
-        .asSequence()
+        .resourceDirectories()
+        .map { FileSystem.SYSTEM.list(it) }
         .flatMap { files ->
             files.groupBy {
                 val matchResult = defaultResourceNamePattern.matchEntire(it.name)
