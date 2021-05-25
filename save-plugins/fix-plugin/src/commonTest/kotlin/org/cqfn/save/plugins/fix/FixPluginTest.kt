@@ -65,36 +65,6 @@ class FixPluginTest {
     }
 
     @Test
-    fun `should calculate diff of discovered files in inPlace mode`() {
-        val config = fs.createFile(tmpDir / "save.toml")
-        val testFile = fs.createFile(tmpDir / "Test3Test.java")
-        fs.write(testFile) {
-            write("Original file".encodeToByteArray())
-        }
-        val expectedFile = fs.createFile(tmpDir / "Test3Expected.java")
-        fs.write(expectedFile) {
-            write("Expected file".encodeToByteArray())
-        }
-
-        val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").lowercase()} && " else ""
-        val executionCmd = "${diskWithTmpDir}cd $tmpDir && echo Expected file > Test3Test.java"
-
-        val results = FixPlugin(
-            TestConfig(config,
-                null,
-                mutableListOf(FixPluginConfig(executionCmd, inPlace = true))
-            )).execute()
-
-        assertEquals(1, results.count(), "Size of results should equal number of pairs")
-        assertEquals(TestResult(listOf(expectedFile, testFile), Pass(null), DebugInfo(results.single().debugInfo?.stdout, null, null)), results.single())
-
-        assertTrue("Files should be identical") {
-            diff(fs.readLines(testFile), fs.readLines(expectedFile))
-                .deltas.isEmpty()
-        }
-    }
-
-    @Test
     fun `should calculate diff of discovered files with destinationFileSuffix`() {
         val config = fs.createFile(tmpDir / "save.toml")
         val testFile = fs.createFile(tmpDir / "Test3Test.java")
