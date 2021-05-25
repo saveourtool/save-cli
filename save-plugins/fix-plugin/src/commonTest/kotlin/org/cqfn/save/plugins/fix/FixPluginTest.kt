@@ -80,12 +80,12 @@ class FixPluginTest {
         val results = FixPlugin().execute(
             TestConfig(config,
                 null,
-                listOf(FixPluginConfig(executionCmd, inPlace = true))
+                mutableListOf(FixPluginConfig(executionCmd, inPlace = true))
             )
         )
 
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
-        assertEquals(TestResult(listOf(expectedFile, testFile), Pass, DebugInfo(results.single().debugInfo?.stdout, null, null)), results.single())
+        assertEquals(TestResult(listOf(expectedFile, testFile), Pass(null), DebugInfo(results.single().debugInfo?.stdout, null, null)), results.single())
 
         assertTrue("Files should be identical") {
             diff(fs.readLines(testFile), fs.readLines(expectedFile))
@@ -110,12 +110,12 @@ class FixPluginTest {
         val results = FixPlugin().execute(
             TestConfig(config,
                 null,
-                listOf(FixPluginConfig(executionCmd, destinationFileSuffix = "_copy"))
+                mutableListOf(FixPluginConfig(executionCmd, destinationFileSuffix = "_copy"))
             )
         )
 
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
-        assertEquals(TestResult(listOf(expectedFile, testFile), Pass, DebugInfo(results.single().debugInfo?.stdout, null, null)), results.single())
+        assertEquals(TestResult(listOf(expectedFile, testFile), Pass(null), DebugInfo(results.single().debugInfo?.stdout, null, null)), results.single())
 
         assertTrue("Files should be identical") {
             diff(fs.readLines(tmpDir / "Test3Test_copy.java"), fs.readLines(expectedFile))

@@ -44,7 +44,10 @@ class Save(
     private fun handleResult(testResult: TestResult) {
         val status = testResult.status
         when (status) {
-            is Pass -> logDebug("Test on resources [${testResult.resources}] has completed successfully")
+            is Pass -> {
+                val passMessage = "Test on resources [${testResult.resources}] has completed successfully"
+                status.message?.let { logDebug("$passMessage. $it") } ?: logDebug(passMessage)
+            }
             is Fail -> logWarn("Test on resources [${testResult.resources}] has failed: ${status.reason}")
             is Ignored -> logWarn("Test on resources [${testResult.resources}] has been ignored: ${status.reason}")
             is Crash -> logError("Test on resources [${testResult.resources}] has crashed: ${status.throwable.message}." +

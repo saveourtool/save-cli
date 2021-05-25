@@ -28,6 +28,7 @@ import kotlinx.serialization.encoding.Encoder
  * corresponding to the whole string.
  * @property messageCaptureGroup an index of capture group in regular expressions, corresponding to warning text. Indices start at 0 with 0
  * corresponding to the whole string.
+ * @property exactWarningsMatch exact match of errors
  */
 @Serializable
 data class WarnPluginConfig(
@@ -39,6 +40,7 @@ data class WarnPluginConfig(
     val lineCaptureGroup: Int?,
     val columnCaptureGroup: Int?,
     val messageCaptureGroup: Int,
+    val exactWarningsMatch: Boolean = true,
 ) : PluginConfig {
     companion object {
         /**

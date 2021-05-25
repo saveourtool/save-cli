@@ -50,7 +50,7 @@ class FixPlugin : Plugin {
                 val expectedLines = FileSystem.SYSTEM.readLines(expected)
                 val status = diff(expectedLines, fixedLines).let { patch ->
                     if (patch.deltas.isEmpty()) {
-                        Pass
+                        Pass(null)
                     } else {
                         Fail(patch.formatToString())
                     }
