@@ -1,4 +1,5 @@
 [general]
+tags = test
 description = "My suite description"
 suiteName = "DocsCheck"
 

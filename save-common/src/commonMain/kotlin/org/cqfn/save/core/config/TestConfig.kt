@@ -46,7 +46,7 @@ data class TestConfig(
             parentConfig.childConfigs.add(this)
         }
         require(fs.metadata(location).isRegularFile) {
-            "Location ${location.name} denotes a directory, but TestConfig should be created from a file"
+            "Location <${location.name}> denotes a directory, but TestConfig should be created from a file"
         }
     }
 

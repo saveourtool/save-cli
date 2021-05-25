@@ -1,7 +1,6 @@
 package org.cqfn.save.plugins.fix
 
 import org.cqfn.save.core.config.TestConfig
-import org.cqfn.save.core.files.findAllFilesMatching
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.logInfo
 import org.cqfn.save.core.plugin.Plugin
@@ -22,9 +21,10 @@ import okio.Path.Companion.toPath
 
 /**
  * A plugin that runs an executable on a file and compares output with expected output.
+ * @property testConfig
  */
 @Suppress("INLINE_CLASS_CAN_BE_USED")
-class FixPlugin : Plugin {
+class FixPlugin(testConfig: TestConfig) : Plugin(testConfig) {
     private val pb = ProcessBuilder()
     private val diffGenerator = DiffRowGenerator.create()
         .showInlineDiffs(true)
@@ -34,7 +34,7 @@ class FixPlugin : Plugin {
         .newTag { start -> if (start) "<" else ">" }
         .build()
 
-    override fun execute(testConfig: TestConfig): Sequence<TestResult> {
+    override fun execute(): Sequence<TestResult> {
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
         val files = discoverTestFiles(testConfig.directory)
             .also {
@@ -65,8 +65,8 @@ class FixPlugin : Plugin {
     }
 
     override fun discoverTestFiles(root: Path): Sequence<List<Path>> = root
-        .findAllFilesMatching { true }
-        .asSequence()
+        .resourceDirectories()
+        .map { FileSystem.SYSTEM.list(it) }
         .flatMap { files ->
             files.groupBy {
                 val matchResult = defaultResourceNamePattern.matchEntire(it.name)

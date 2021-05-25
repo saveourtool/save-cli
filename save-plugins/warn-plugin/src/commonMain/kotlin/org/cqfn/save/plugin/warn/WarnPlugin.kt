@@ -1,7 +1,6 @@
 package org.cqfn.save.plugin.warn
 
 import org.cqfn.save.core.config.TestConfig
-import org.cqfn.save.core.files.findAllFilesMatching
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.DebugInfo
@@ -21,12 +20,13 @@ private typealias LineColumn = Pair<Int, Int>
 
 /**
  * A plugin that runs an executable and verifies that it produces required warning messages.
+ * @property testConfig
  */
-class WarnPlugin : Plugin {
+class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
     private val fs = FileSystem.SYSTEM
     private val pb = ProcessBuilder()
 
-    override fun execute(testConfig: TestConfig): Sequence<TestResult> {
+    override fun execute(): Sequence<TestResult> {
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         return discoverTestFiles(testConfig.directory).map { resources ->
             handleTestFile(resources.single(), warnPluginConfig)
@@ -34,12 +34,13 @@ class WarnPlugin : Plugin {
     }
 
     override fun discoverTestFiles(root: Path) = root
-        .findAllFilesMatching {
-            defaultResourceNamePattern.matches(it.name)
+        .resourceDirectories()
+        .map { directory ->
+            FileSystem.SYSTEM.list(directory)
+                .filter { defaultResourceNamePattern.matches(it.name) }
         }
         .asSequence()
-        .map { listOf(it) }
-        .flatten()
+        .filterNot { it.isEmpty() }
 
     @Suppress("UnusedPrivateMember")
     private fun handleTestFile(

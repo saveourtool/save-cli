@@ -248,9 +248,8 @@ class WarnPluginTest {
             write(text.encodeToByteArray())
         }
 
-        val results = WarnPlugin().execute(
-            TestConfig(config, null, mutableListOf(warnPluginConfig))
-        )
+        val results = WarnPlugin(TestConfig(config, null, mutableListOf(warnPluginConfig)))
+            .execute()
             .toList()
         println(results)
         assertion(results)
