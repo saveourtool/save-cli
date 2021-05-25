@@ -86,6 +86,7 @@ class MergeConfigs {
     private fun mergeGeneralConfigs(parentConfig: GeneralConfig, childConfig: GeneralConfig) = GeneralConfig(
         if (childConfig.tags != null) childConfig.tags else parentConfig.tags,
         if (childConfig.description != null) childConfig.description else parentConfig.description,
+        if (childConfig.suiteName != null) childConfig.suiteName else parentConfig.suiteName,
         if (childConfig.excludedTests != null) childConfig.excludedTests else parentConfig.excludedTests,
         if (childConfig.includedTests != null) childConfig.includedTests else parentConfig.includedTests,
     )

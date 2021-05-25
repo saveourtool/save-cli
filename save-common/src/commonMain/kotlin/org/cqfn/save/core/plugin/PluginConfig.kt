@@ -24,6 +24,6 @@ data class GeneralConfig(
     val tags: String,
     val description: String,
     val suiteName: String,
-    val excludedTests: String = "",
-    val includedTests: String = "",
+    val excludedTests: String? = null,
+    val includedTests: String? = null,
 ) : PluginConfig
