@@ -20,6 +20,26 @@ class MergeConfigsTest {
         fs.createDirectory(it)
     }
     private val mergeConfigs = MergeConfigs()
+    private val generalConfig1 = GeneralConfig("Tag1", "Description1", "excludedTests: test1", "includedTests: test2")
+    private val generalConfig2 = GeneralConfig("Tag2", "Description2", "excludedTests: test3", "includedTests: test4")
+    private val generalConfig3 = GeneralConfig("Tag3", "Description2", "excludedTests: test5", "includedTests: test6")
+    private val generalConfig4 = GeneralConfig("Tag4", "Description2", "excludedTests: test7", "includedTests: test8")
+    private val warningsInputPattern1 = Regex(".*")
+    private val warningsInputPattern2 = Regex("// ;warn:(\\d+):(\\d+): (.*)")
+    private val warningsOutputPattern1 = Regex(".*")
+    private val warningsOutputPattern2 = Regex("\\w+ - (\\d+)/(\\d+) - (.*)$")
+    private val warnConfig1 = WarnPluginConfig("execCmd1", warningsInputPattern2, warningsOutputPattern2,
+        false, false, 1, 1, 1)
+    private val warnConfig2 = WarnPluginConfig("execCmd2", warningsInputPattern1, warningsOutputPattern1,
+        true, true, 2, 2, 2)
+    private val warnConfig3 = WarnPluginConfig("execCmd3", warningsInputPattern2, warningsOutputPattern2,
+        warningTextHasColumn = false, lineCaptureGroup = 3, columnCaptureGroup = 3, messageCaptureGroup = 3)
+    private val warnConfig4 = WarnPluginConfig("execCmd4", warningsInputPattern2, warningsOutputPattern2,
+        lineCaptureGroup = 4, columnCaptureGroup = 4, messageCaptureGroup = 4)
+    private val fixConfig1 = FixPluginConfig("fixCmd1", destinationFileSuffix = "some suffix")
+    private val fixConfig2 = FixPluginConfig("fixCmd2", true)
+    private val fixConfig3 = FixPluginConfig("fixCmd3", null, null)
+    private val fixConfig4 = FixPluginConfig("fixCmd4")
 
     @Test
     fun `merge two incomplete configs`() {
@@ -28,15 +48,6 @@ class MergeConfigsTest {
         val nestedDir1 = tmpDir / "nestedDir1"
         fs.createDirectory(nestedDir1)
         val toml2 = fs.createFile(nestedDir1 / "save.toml")
-
-        val generalConfig1 = GeneralConfig("Tag1", "Description1", "excludedTests: test1", "includedTests: test2")
-        val generalConfig2 = GeneralConfig("Tag2", "Description2", "excludedTests: test3", "includedTests: test4")
-
-        val warningsInputPattern = Regex("// ;warn:(\\d+):(\\d+): (.*)")
-        val warningsOutputPattern = Regex("\\w+ - (\\d+)/(\\d+) - (.*)$")
-
-        val warnConfig1 = WarnPluginConfig("execCmd1", warningsInputPattern, warningsOutputPattern,
-            false, false, 1, 1, 1)
 
         val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig1))
         val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2))
@@ -60,30 +71,16 @@ class MergeConfigsTest {
         fs.createDirectory(nestedDir1)
         val toml2 = fs.createFile(nestedDir1 / "save.toml")
 
-        val generalConfig1 = GeneralConfig("Tag1", "Description1", "excludedTests: test1", "includedTests: test2")
-        val generalConfig2 = GeneralConfig("Tag2", "Description2", "excludedTests: test3", "includedTests: test4")
-
-        val warnConfig1 = WarnPluginConfig("execCmd1", Regex(".*"), Regex(".*"),
-            false, false, 1, 1, 1)
-
-        val warningsInputPattern = Regex("// ;warn:(\\d+):(\\d+): (.*)")
-        val warningsOutputPattern = Regex("\\w+ - (\\d+)/(\\d+) - (.*)$")
-
-        val warnConfig2 = WarnPluginConfig("execCmd2", warningsInputPattern, warningsOutputPattern,
-            warningTextHasColumn = true, lineCaptureGroup = 2, columnCaptureGroup = 2, messageCaptureGroup = 2)
-        val expectedWarnConfig = WarnPluginConfig("execCmd2", warningsInputPattern, warningsOutputPattern,
-            false, true, 2, 2, 2)
-
-        val fixConfig1 = FixPluginConfig("fixCmd1", false, "some suffix")
-        val fixConfig2 = FixPluginConfig("fixCmd2", true, null)
-        val expectedFixConfig = FixPluginConfig("fixCmd2", true, "some suffix")
-
-        val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig1, fixConfig1))
-        val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, warnConfig2, fixConfig2))
+        val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig2, fixConfig1))
+        val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, warnConfig3, fixConfig2))
 
         mergeConfigs.merge(config2)
 
         assertEquals(3, config2.pluginConfigs.size)
+
+        val expectedWarnConfig = WarnPluginConfig("execCmd3", warningsInputPattern2, warningsOutputPattern2,
+            true, false, 3, 3, 3)
+        val expectedFixConfig = FixPluginConfig("fixCmd2", true, "some suffix")
 
         val actualGeneralConfig = config2.pluginConfigs.filterIsInstance<GeneralConfig>().first()
         val actualWarnConfig = config2.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
@@ -110,34 +107,6 @@ class MergeConfigsTest {
         fs.createDirectory(nestedDir2 / "nestedDir3" / "nestedDir4")
         val toml4 = fs.createFile(nestedDir2 / "nestedDir3" / "nestedDir4" / "save.toml")
 
-        val generalConfig1 = GeneralConfig("Tag1", "Description1", "excludedTests: test1", "includedTests: test2")
-        val generalConfig2 = GeneralConfig("Tag2", "Description2", "excludedTests: test3", "includedTests: test4")
-        val generalConfig3 = GeneralConfig("Tag3", "Description2", "excludedTests: test5", "includedTests: test6")
-        val generalConfig4 = GeneralConfig("Tag4", "Description2", "excludedTests: test7", "includedTests: test8")
-
-        val warnConfig1 = WarnPluginConfig("execCmd1", Regex(".*"), Regex(".*"),
-            true, true, 1, 1, 1)
-        val warnConfig2 = WarnPluginConfig("execCmd2", Regex(".* \\w"), Regex(".* \\w"),
-            warningTextHasColumn = false, lineCaptureGroup = 2, columnCaptureGroup = 2, messageCaptureGroup = 2)
-
-        val warnConfig3 = WarnPluginConfig("execCmd3", Regex(".* foo \\w"), Regex(".* foo \\w"),
-            warningTextHasColumn = true, lineCaptureGroup = 3, columnCaptureGroup = 3, messageCaptureGroup = 3)
-
-        val warningsInputPattern = Regex("// ;warn:(\\d+):(\\d+): (.*)")
-        val warningsOutputPattern = Regex("\\w+ - (\\d+)/(\\d+) - (.*)$")
-
-        val warnConfig4 = WarnPluginConfig("execCmd4", warningsInputPattern, warningsOutputPattern,
-            lineCaptureGroup = 4, columnCaptureGroup = 4, messageCaptureGroup = 4)
-
-        val expectedWarnConfig = WarnPluginConfig("execCmd4", warningsInputPattern, warningsOutputPattern,
-            true, true, 4, 4, 4)
-
-        val fixConfig1 = FixPluginConfig("fixCmd1", destinationFileSuffix = "some suffix")
-        val fixConfig2 = FixPluginConfig("fixCmd2", true)
-        val fixConfig3 = FixPluginConfig("fixCmd3", null, null)
-        val fixConfig4 = FixPluginConfig("fixCmd4")
-        val expectedFixConfig = FixPluginConfig("fixCmd4", true, "some suffix")
-
         val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig1, fixConfig1))
         val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, warnConfig2, fixConfig2))
         val config3 = TestConfig(toml3, config2, mutableListOf(generalConfig3, warnConfig3, fixConfig3))
@@ -146,6 +115,10 @@ class MergeConfigsTest {
         mergeConfigs.merge(config4)
 
         assertEquals(3, config4.pluginConfigs.size)
+
+        val expectedWarnConfig = WarnPluginConfig("execCmd4", warningsInputPattern2, warningsOutputPattern2,
+            true, false, 4, 4, 4)
+        val expectedFixConfig = FixPluginConfig("fixCmd4", true, "some suffix")
 
         val actualGeneralConfig = config4.pluginConfigs.filterIsInstance<GeneralConfig>().first()
         val actualWarnConfig = config4.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
@@ -167,32 +140,17 @@ class MergeConfigsTest {
         fs.createDirectory(nestedDir2)
         val toml3 = fs.createFile(nestedDir2 / "save.toml")
 
-        val generalConfig1 = GeneralConfig("Tag1", "Description1", "excludedTests: test1", "includedTests: test2")
-        val generalConfig2 = GeneralConfig("Tag2", "Description2", "excludedTests: test3", "includedTests: test4")
-        val generalConfig3 = GeneralConfig("Tag3", "Description2", "excludedTests: test5", "includedTests: test6")
-
-        val warningsInputPattern = Regex("// ;warn:(\\d+):(\\d+): (.*)")
-        val warningsOutputPattern = Regex("\\w+ - (\\d+)/(\\d+) - (.*)$")
-
-        val warnConfig1 = WarnPluginConfig("execCmd1", Regex(".*"), Regex(".*"),
-            true, true, 1, 1, 1)
-        val warnConfig2 = WarnPluginConfig("execCmd2", warningsInputPattern, warningsOutputPattern,
-            warningTextHasColumn = false, lineCaptureGroup = 2, columnCaptureGroup = 2, messageCaptureGroup = 2)
-
-        val fixConfig1 = FixPluginConfig("fixCmd1", destinationFileSuffix = "some suffix")
-        val fixConfig2 = FixPluginConfig("fixCmd2", true)
-
         val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig1, fixConfig1))
         val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, warnConfig2, fixConfig2))
         val config3 = TestConfig(toml3, config2, mutableListOf(generalConfig3))
 
         mergeConfigs.merge(config2)
 
-        val expectedWarnConfig2 = WarnPluginConfig("execCmd2", warningsInputPattern, warningsOutputPattern,
-            true, false, 2, 2, 2)
-        val expectedFixConfig2 = FixPluginConfig("fixCmd2", true, "some suffix")
-
         assertEquals(3, config2.pluginConfigs.size)
+
+        val expectedWarnConfig2 = WarnPluginConfig("execCmd2", warningsInputPattern1, warningsOutputPattern1,
+            true, true, 2, 2, 2)
+        val expectedFixConfig2 = FixPluginConfig("fixCmd2", true, "some suffix")
 
         val actualGeneralConfig2 = config2.pluginConfigs.filterIsInstance<GeneralConfig>().first()
         val actualWarnConfig2 = config2.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
@@ -210,6 +168,8 @@ class MergeConfigsTest {
         assertEquals(expectedWarnConfig2, actualWarnConfig3)
         assertEquals(expectedFixConfig2, actualFixConfig3)
     }
+
+    // TODO: test with multiple childs
 
     @AfterTest
     fun tearDown() {
