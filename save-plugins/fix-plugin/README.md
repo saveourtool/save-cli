@@ -45,6 +45,7 @@ suiteName = "DocsCheck"
 exec_cmd="./ktlint -R diktat-0.4.2.jar -F"
 testFilePattern="*Test.kt"
 expectedFilePattern="*Expected.kt"
+output = "stdout"
 batchMode = false
 ```
 
