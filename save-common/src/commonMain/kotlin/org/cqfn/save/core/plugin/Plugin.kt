@@ -10,15 +10,15 @@ import okio.Path
 
 /**
  * Plugin that can be injected into SAVE during execution. Plugins accept contents of configuration file and then perform some work.
+ * @property testConfig
  */
-interface Plugin {
+abstract class Plugin(open val testConfig: TestConfig) {
     /**
      * Perform plugin's work.
      *
-     * @param testConfig configuration of current test suite
      * @return a sequence of [TestResult]s for each group of test resources
      */
-    fun execute(testConfig: TestConfig): Sequence<TestResult>
+    abstract fun execute(): Sequence<TestResult>
 
     /**
      * Discover groups of resource files which will be used to run tests.
@@ -26,7 +26,7 @@ interface Plugin {
      * @param root root [Path], from where discovering should be started
      * @return a sequence of files, grouped by test
      */
-    fun discoverTestFiles(root: Path): Sequence<List<Path>>
+    abstract fun discoverTestFiles(root: Path): Sequence<List<Path>>
 
     /**
      * Returns a sequence of directories, where resources for this plugin may be located.

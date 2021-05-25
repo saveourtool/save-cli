@@ -29,6 +29,8 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
                 implementation("org.jetbrains.kotlinx:kotlinx-cli:${Versions.Kotlinx.cli}")
                 implementation("com.akuleshov7:ktoml-core:${Versions.ktoml}")
+                implementation(project(":save-plugins:fix-plugin"))
+                implementation(project(":save-plugins:warn-plugin"))
             }
         }
         val commonTest by getting {
