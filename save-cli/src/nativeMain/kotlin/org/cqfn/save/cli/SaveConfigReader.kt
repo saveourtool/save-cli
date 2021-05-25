@@ -23,7 +23,7 @@ import kotlinx.serialization.serializer
  * @return this config in case we have valid configuration
  */
 fun SaveProperties.validate(): SaveProperties {
-    val fullConfigPath = testRootPath + DIRECTORY_SEPARATOR + testConfigName
+    val fullConfigPath = testRootPath + DIRECTORY_SEPARATOR + testConfigPath
     try {
         this.testRootPath ?: logErrorAndExit(ExitCodes.INVALID_CONFIGURATION,
             "`testRootPath` option is missing or null. " +

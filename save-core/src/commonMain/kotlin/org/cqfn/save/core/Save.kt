@@ -50,12 +50,12 @@ class Save(
     /**
      * Main entrypoint for SAVE framework. Discovers plugins and calls their execution.
      *
-     * @throws PluginException when we receive invalid type of fixPluginConfig
+     * @throws PluginException when we receive invalid type of PluginConfig
      */
     fun performAnalysis() {
         // FixMe: now we work only with the save.toml config and it's hierarchy, but we should work properly here with directories as well
         // constructing the file path to the configuration file
-        val fullPathToConfig = saveProperties.testRootPath!!.toPath() / saveProperties.testConfigName!!.toPath()
+        val fullPathToConfig = saveProperties.testRootPath!!.toPath() / saveProperties.testConfigPath!!.toPath()
         // get all toml configs in file system
         val testConfig = ConfigDetector().configFromFile(fullPathToConfig)
 
@@ -86,7 +86,7 @@ class Save(
             // adding a fake file node to restore the structure and parse only the part of te toml
             val fakeFileNode = TomlFile()
             tomlPluginSection.children.forEach {
-                fakeFileNode.appendChild(tomlPluginSection)
+                fakeFileNode.appendChild(it)
             }
 
             val sectionName = tomlPluginSection.name.toUpperCase()

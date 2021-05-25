@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
 /**
  * Configuration properties of save application, retrieved either from properties file
  * or from CLI args.
- * @property testConfigName Path to a configuration of a test suite
+ * @property testConfigPath Path to a configuration of a test suite
  * @property parallelMode Whether to enable parallel mode
  * @property threads Number of threads
  * @property propertiesFile Path to the file with configuration properties of save application aka
@@ -38,7 +38,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 public data class SaveProperties(
-    public var testConfigName: String? = "save.toml",
+    public var testConfigPath: String? = "save.toml",
     public var parallelMode: Boolean? = false,
     public var threads: Int? = 1,
     public var propertiesFile: String? = "save.properties",
@@ -170,7 +170,7 @@ public data class SaveProperties(
                 )
 
         parser.parse(args)
-        this.testConfigName = testConfigName
+        this.testConfigPath = testConfigName
         this.parallelMode = parallelMode
         this.threads = threads
         this.propertiesFile = propertiesFile
@@ -195,7 +195,7 @@ public data class SaveProperties(
      */
     public fun mergeConfigWithPriorityToThis(configFromPropertiesFile: SaveProperties):
             SaveProperties {
-        testConfigName = testConfigName ?: configFromPropertiesFile.testConfigName
+        testConfigPath = testConfigPath ?: configFromPropertiesFile.testConfigPath
                 parallelMode = parallelMode ?: configFromPropertiesFile.parallelMode
                 threads = threads ?: configFromPropertiesFile.threads
                 propertiesFile = propertiesFile ?: configFromPropertiesFile.propertiesFile

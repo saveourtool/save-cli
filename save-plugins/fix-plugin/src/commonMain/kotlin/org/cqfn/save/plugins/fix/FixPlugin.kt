@@ -25,7 +25,7 @@ import okio.Path.Companion.toPath
  * @property testConfig
  */
 @Suppress("INLINE_CLASS_CAN_BE_USED")
-class FixPlugin(override val testConfig: TestConfig) : Plugin(testConfig) {
+class FixPlugin(testConfig: TestConfig) : Plugin(testConfig) {
     private val pb = ProcessBuilder()
     private val diffGenerator = DiffRowGenerator.create()
         .showInlineDiffs(true)

@@ -23,7 +23,7 @@ private typealias LineColumn = Pair<Int, Int>
  * A plugin that runs an executable and verifies that it produces required warning messages.
  * @property testConfig
  */
-class WarnPlugin(override val testConfig: TestConfig) : Plugin(testConfig) {
+class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
     private val fs = FileSystem.SYSTEM
     private val pb = ProcessBuilder()
 
