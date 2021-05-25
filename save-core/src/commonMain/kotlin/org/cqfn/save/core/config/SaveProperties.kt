@@ -57,7 +57,7 @@ public data class SaveProperties(
 ) {
     public constructor(args: Array<String>) : this() {
         val parser = ArgParser("save")
-        val testConfigName by parser.option(
+        val testConfigPath by parser.option(
                 ArgType.String,
                 fullName = "test-config",
                 shortName = "c",
@@ -170,7 +170,7 @@ public data class SaveProperties(
                 )
 
         parser.parse(args)
-        this.testConfigPath = testConfigName
+        this.testConfigPath = testConfigPath
         this.parallelMode = parallelMode
         this.threads = threads
         this.propertiesFile = propertiesFile
