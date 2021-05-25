@@ -106,7 +106,6 @@ class MergeConfigs {
     @Suppress("AVOID_NULL_CHECKS")
     private fun mergeFixConfigs(parentConfig: FixPluginConfig, childConfig: FixPluginConfig) = FixPluginConfig(
         if (childConfig.execCmd != null) childConfig.execCmd else parentConfig.execCmd,
-        if (childConfig.inPlace != null) childConfig.inPlace else parentConfig.inPlace,
         if (childConfig.destinationFileSuffix != null) childConfig.destinationFileSuffix else parentConfig.destinationFileSuffix,
     )
 }

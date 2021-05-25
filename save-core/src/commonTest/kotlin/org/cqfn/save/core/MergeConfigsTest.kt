@@ -36,9 +36,9 @@ class MergeConfigsTest {
         warningTextHasColumn = false, lineCaptureGroup = 3, columnCaptureGroup = 3, messageCaptureGroup = 3)
     private val warnConfig4 = WarnPluginConfig("execCmd4", warningsInputPattern2, warningsOutputPattern2,
         lineCaptureGroup = 4, columnCaptureGroup = 4, messageCaptureGroup = 4)
-    private val fixConfig1 = FixPluginConfig("fixCmd1", destinationFileSuffix = "some suffix")
-    private val fixConfig2 = FixPluginConfig("fixCmd2", true)
-    private val fixConfig3 = FixPluginConfig("fixCmd3", null, null)
+    private val fixConfig1 = FixPluginConfig("fixCmd1", "some suffix")
+    private val fixConfig2 = FixPluginConfig("fixCmd2")
+    private val fixConfig3 = FixPluginConfig("fixCmd3", null)
     private val fixConfig4 = FixPluginConfig("fixCmd4")
 
     @Test
@@ -80,7 +80,7 @@ class MergeConfigsTest {
 
         val expectedWarnConfig = WarnPluginConfig("execCmd3", warningsInputPattern2, warningsOutputPattern2,
             true, false, 3, 3, 3)
-        val expectedFixConfig = FixPluginConfig("fixCmd2", true, "some suffix")
+        val expectedFixConfig = FixPluginConfig("fixCmd2","some suffix")
 
         val actualGeneralConfig = config2.pluginConfigs.filterIsInstance<GeneralConfig>().first()
         val actualWarnConfig = config2.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
@@ -118,7 +118,7 @@ class MergeConfigsTest {
 
         val expectedWarnConfig = WarnPluginConfig("execCmd4", warningsInputPattern2, warningsOutputPattern2,
             true, false, 4, 4, 4)
-        val expectedFixConfig = FixPluginConfig("fixCmd4", true, "some suffix")
+        val expectedFixConfig = FixPluginConfig("fixCmd4","some suffix")
 
         val actualGeneralConfig = config4.pluginConfigs.filterIsInstance<GeneralConfig>().first()
         val actualWarnConfig = config4.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
@@ -150,7 +150,7 @@ class MergeConfigsTest {
 
         val expectedWarnConfig2 = WarnPluginConfig("execCmd2", warningsInputPattern1, warningsOutputPattern1,
             true, true, 2, 2, 2)
-        val expectedFixConfig2 = FixPluginConfig("fixCmd2", true, "some suffix")
+        val expectedFixConfig2 = FixPluginConfig("fixCmd2","some suffix")
 
         val actualGeneralConfig2 = config2.pluginConfigs.filterIsInstance<GeneralConfig>().first()
         val actualWarnConfig2 = config2.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
