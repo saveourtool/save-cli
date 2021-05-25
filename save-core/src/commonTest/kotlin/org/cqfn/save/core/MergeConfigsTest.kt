@@ -1,7 +1,6 @@
 package org.cqfn.save.core
 
 import org.cqfn.save.core.config.TestConfig
-import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.files.MergeConfigs
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.plugin.GeneralConfig
@@ -20,7 +19,6 @@ class MergeConfigsTest {
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / MergeConfigsTest::class.simpleName!!).also {
         fs.createDirectory(it)
     }
-
     private val mergeConfigs = MergeConfigs()
 
     @Test
@@ -180,7 +178,6 @@ class MergeConfigsTest {
             true, true, 1, 1, 1)
         val warnConfig2 = WarnPluginConfig("execCmd2", warningsInputPattern, warningsOutputPattern,
             warningTextHasColumn = false, lineCaptureGroup = 2, columnCaptureGroup = 2, messageCaptureGroup = 2)
-
 
         val fixConfig1 = FixPluginConfig("fixCmd1", destinationFileSuffix = "some suffix")
         val fixConfig2 = FixPluginConfig("fixCmd2", true)

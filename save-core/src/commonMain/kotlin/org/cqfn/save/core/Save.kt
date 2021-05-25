@@ -2,7 +2,6 @@ package org.cqfn.save.core
 
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.files.ConfigDetector
-import org.cqfn.save.core.files.MergeConfigs
 import org.cqfn.save.core.logging.isDebugEnabled
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
