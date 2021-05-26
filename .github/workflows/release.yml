@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - 'v*'
+    branches:
+      - main
 env:
   GPG_SEC: ${{ secrets.PGP_SEC }}
   GPG_PASSWORD: ${{ secrets.PGP_PASSWORD }}
@@ -30,8 +32,14 @@ jobs:
         with:
           gradle-version: wrapper
       # Until https://github.com/burrunan/gradle-cache-action/issues/42 is addressed, gradle should be run as a separate step
-      - name: Run gradle command
+      - name: gradle release from tag
+        # if workflow is triggered after push of a tag, deploy full release
+        if: ${{ contains(github.ref, 'refs/tags/') }}
         run: ./gradlew --build-cache -Prelease linkReleaseExecutableMultiplatform publishToSonatype closeSonatypeStagingRepository
+      - name: gradle snapshot from branch
+        # if workflow is triggered after push to a branch, deploy snapshot
+        if: ${{ contains(github.ref, 'refs/heads/') }}
+        run: ./gradlew --build-cache -Prelease -Preckon.stage=snapshot linkReleaseExecutableMultiplatform publishToSonatype
       - name: Status git after
         if: ${{ true }}
         run: git status
@@ -43,17 +51,16 @@ jobs:
           path: save-cli/build/bin/**/releaseExecutable/*
 
   github_release:
-
     needs: release
+    # release is created only for tags
+    if: ${{ contains(github.ref, 'refs/tags/') }}
     name: Create Github Release
     runs-on: ubuntu-latest
     steps:
-
       - name: Download artifact
         uses: actions/download-artifact@v2
         with:
           path: tmpFolder
-
       - name: Create Github Release
         id: create_release
         uses: actions/create-release@v1
@@ -64,7 +71,6 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
-
       - name: Upload save-cli
         id: upload-release-asset
         uses: svenstaro/upload-release-action@v2

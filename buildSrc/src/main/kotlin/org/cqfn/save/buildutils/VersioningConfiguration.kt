@@ -24,7 +24,7 @@ fun Project.configureVersioning() {
 
     configure<ReckonExtension> {
         scopeFromProp()
-        stageFromProp("alpha", "rc", "final")  // version string will be based on last commit; when checking out a tag, that tag will be used
+        snapshotFromProp()
     }
 
     // to activate release, provide `-Prelease` or `-Prelease=true`. To deactivate, either omit the property, or set `-Prelease=false`.
