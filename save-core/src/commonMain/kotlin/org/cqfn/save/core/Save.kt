@@ -9,6 +9,7 @@ import org.cqfn.save.core.config.TestConfigSections.FIX
 import org.cqfn.save.core.config.TestConfigSections.GENERAL
 import org.cqfn.save.core.config.TestConfigSections.WARN
 import org.cqfn.save.core.files.ConfigDetector
+import org.cqfn.save.core.files.StdoutSink
 import org.cqfn.save.core.logging.isDebugEnabled
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
@@ -74,15 +75,7 @@ class Save(
         // get all toml configs in file system
         val testConfig = ConfigDetector().configFromFile(fullPathToConfig)
 
-        val out = when (saveProperties.resultOutput) {
-            ResultOutputType.FILE -> fs.sink("save.out".toPath()).buffer()
-            else -> TODO("Type ${saveProperties.resultOutput} is not yet supported")
-        }
-        // todo: make `saveProperties.reportType` a collection
-        val reporter: Reporter = when (saveProperties.reportType) {
-            ReportType.PLAIN -> PlainTextReporter(out)
-            else -> TODO("Reporter for type ${saveProperties.reportType} is not yet supported")
-        }
+        val reporter = getReporter(saveProperties)
         reporter.beforeAll()
 
         val plugins: List<Plugin> = discoverPluginsAndUpdateTestConfig(testConfig)
@@ -130,7 +123,7 @@ class Save(
                 fakeFileNode.appendChild(it)
             }
 
-            val sectionName = tomlPluginSection.name.toUpperCase()
+            val sectionName = tomlPluginSection.name.uppercase()
             val sectionPluginConfig: PluginConfig = when (val configName = TestConfigSections.valueOf(sectionName)) {
                 FIX -> createPluginConfig<FixPluginConfig>(testConfigPath, fakeFileNode, sectionName)
                 WARN -> createPluginConfig<WarnPluginConfig>(testConfigPath, fakeFileNode, sectionName)
@@ -162,6 +155,19 @@ class Save(
                 )
                 throw e
             }
+
+    private fun getReporter(saveProperties: SaveProperties): Reporter {
+        val out = when (saveProperties.resultOutput) {
+            ResultOutputType.FILE -> fs.sink("save.out".toPath()).buffer()
+            ResultOutputType.STDOUT -> StdoutSink().buffer()
+            else -> TODO("Type ${saveProperties.resultOutput} is not yet supported")
+        }
+        // todo: make `saveProperties.reportType` a collection
+        return when (saveProperties.reportType) {
+            ReportType.PLAIN -> PlainTextReporter(out)
+            else -> TODO("Reporter for type ${saveProperties.reportType} is not yet supported")
+        }
+    }
 
     @Suppress("WHEN_WITHOUT_ELSE")  // TestResult is a sealed class
     private fun handleResult(testResult: TestResult) {

@@ -2,11 +2,34 @@
  * Utility methods for common operations with file system using okio.
  */
 
+@file:Suppress("FILE_NAME_MATCH_CLASS")
+
 package org.cqfn.save.core.files
 
+import okio.Buffer
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
+import okio.Sink
+import okio.Timeout
+
+/**
+ * A simple okio [Sink] that writes it's input to stdout
+ */
+class StdoutSink : Sink {
+    override fun close() = Unit
+
+    override fun flush() = Unit
+
+    override fun timeout(): Timeout = Timeout.NONE
+
+    /**
+     * Writes a UTF-8 representation of [source] to stdout
+     */
+    override fun write(source: Buffer, byteCount: Long) {
+        print(source.readByteString(byteCount).utf8())
+    }
+}
 
 /**
  * Find all descendant files in the directory denoted by [this] [Path], that match [condition].
