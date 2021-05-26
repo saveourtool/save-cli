@@ -48,8 +48,8 @@ class MergeConfigs {
         val childConfig = child.pluginConfigs
         // Create the list of corresponding configs, if only one of them will be null -> list will contain another element,
         // which we apply as final config.
-        // If both of them will be null, then we should do nothing and return null
-        // otherwise we will merge configs
+        // If both of them will be null, then we should do nothing and return null.
+        // Otherwise we will merge configs
         val generalConfigs = listOfNotNull(
             parentConfig.filterIsInstance<GeneralConfig>().firstOrNull(),
             childConfig.filterIsInstance<GeneralConfig>().firstOrNull()
@@ -91,6 +91,7 @@ class MergeConfigs {
         childConfig.lineCaptureGroup ?: parentConfig.lineCaptureGroup,
         childConfig.columnCaptureGroup ?: parentConfig.columnCaptureGroup,
         childConfig.messageCaptureGroup ?: parentConfig.messageCaptureGroup,
+        childConfig.exactWarningsMatch ?: parentConfig.exactWarningsMatch,
     )
 
     private fun mergeFixConfigs(parentConfig: FixPluginConfig, childConfig: FixPluginConfig) = FixPluginConfig(

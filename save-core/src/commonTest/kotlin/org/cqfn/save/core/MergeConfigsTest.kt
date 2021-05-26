@@ -35,9 +35,9 @@ class MergeConfigsTest {
     private val warningsOutputPattern1 = Regex(".*")
     private val warningsOutputPattern2 = Regex("\\w+ - (\\d+)/(\\d+) - (.*)$")
     private val warnConfig1 = WarnPluginConfig("execCmd1", warningsInputPattern2, warningsOutputPattern2,
-        false, false, 1, 1, 1)
+        false, false, 1, 1, 1, false)
     private val warnConfig2 = WarnPluginConfig("execCmd2", warningsInputPattern1, warningsOutputPattern1,
-        true, true, 2, 2, 2)
+        true, true, 2, 2, 2, true)
     private val warnConfig3 = WarnPluginConfig("execCmd3", warningsInputPattern2, warningsOutputPattern2,
         warningTextHasColumn = false, lineCaptureGroup = 3, columnCaptureGroup = 3, messageCaptureGroup = 3)
     private val warnConfig4 = WarnPluginConfig("execCmd4", warningsInputPattern2, warningsOutputPattern2,
@@ -86,7 +86,7 @@ class MergeConfigsTest {
         assertEquals(3, config2.pluginConfigs.size)
 
         val expectedWarnConfig = WarnPluginConfig("execCmd3", warningsInputPattern2, warningsOutputPattern2,
-            true, false, 3, 3, 3)
+            true, false, 3, 3, 3, true)
         val expectedFixConfig = FixPluginConfig("fixCmd2", "some suffix")
 
         val actualGeneralConfig = config2.pluginConfigs.filterIsInstance<GeneralConfig>().first()
@@ -111,7 +111,7 @@ class MergeConfigsTest {
         assertEquals(3, config4.pluginConfigs.size)
 
         val expectedWarnConfig = WarnPluginConfig("execCmd4", warningsInputPattern2, warningsOutputPattern2,
-            true, false, 4, 4, 4)
+            true, false, 4, 4, 4, true)
         val expectedFixConfig = FixPluginConfig("fixCmd4", "some suffix")
 
         val actualGeneralConfig = config4.pluginConfigs.filterIsInstance<GeneralConfig>().first()
@@ -136,7 +136,7 @@ class MergeConfigsTest {
         assertEquals(3, config4.pluginConfigs.size)
 
         val expectedWarnConfig = WarnPluginConfig("execCmd3", warningsInputPattern2, warningsOutputPattern2,
-            false, false, 3, 3, 3)
+            false, false, 3, 3, 3, false)
         val expectedFixConfig = FixPluginConfig("fixCmd3", "some suffix")
 
         val actualGeneralConfig = config4.pluginConfigs.filterIsInstance<GeneralConfig>().first()
@@ -160,7 +160,7 @@ class MergeConfigsTest {
         assertEquals(3, config2.pluginConfigs.size)
 
         val expectedWarnConfig = WarnPluginConfig("execCmd2", warningsInputPattern1, warningsOutputPattern1,
-            true, true, 2, 2, 2)
+            true, true, 2, 2, 2, true)
         val expectedFixConfig = FixPluginConfig("fixCmd2", "some suffix")
 
         val actualGeneralConfig = config2.pluginConfigs.filterIsInstance<GeneralConfig>().first()

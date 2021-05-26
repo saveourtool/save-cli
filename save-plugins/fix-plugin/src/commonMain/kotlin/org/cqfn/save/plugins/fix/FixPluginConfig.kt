@@ -7,6 +7,10 @@ import okio.Path
 import kotlinx.serialization.Serializable
 
 /**
+ * Some fields by default are null, instead of some natural value, because of the fact, that in stage of merging
+ * of nested configs, we can't detect whether the value are passed by user, or taken from default.
+ * This logic of the default value processing will be provided in stage of validation
+ *
  * @property execCmd a command that will be executed to mutate test file contents
  * @property destinationFileSuffix [execCmd] should append this suffix to the file name after mutating it.
  */
