@@ -46,8 +46,10 @@ class MergeConfigs {
         logDebug("Merging ${parent.location} with ${child.location}")
         val parentConfig = parent.pluginConfigs
         val childConfig = child.pluginConfigs
-        // Create the list of corresponding configs, if one of them will be null -> list will contain only one element,
-        // which we apply as final config, otherwise we will merge configs
+        // Create the list of corresponding configs, if only one of them will be null -> list will contain another element,
+        // which we apply as final config.
+        // If both of them will be null, then we should do nothing and return null
+        // otherwise we will merge configs
         val generalConfigs = listOfNotNull(
             parentConfig.filterIsInstance<GeneralConfig>().firstOrNull(),
             childConfig.filterIsInstance<GeneralConfig>().firstOrNull()
