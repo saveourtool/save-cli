@@ -17,25 +17,13 @@ class MergeConfigs {
      */
     fun merge(testConfig: TestConfig) {
         logDebug("Start merging configs for ${testConfig.location}")
-        val parentConfigs = collectParentConfigs(testConfig)
+        val parentConfigs = testConfig.parentConfigs(withSelf = true).toList().asReversed()
         mergeConfigList(parentConfigs)
         mergeChildConfigs(testConfig)
     }
 
-    // Create the list of parent configs
-    private fun collectParentConfigs(testConfig: TestConfig): MutableList<TestConfig> {
-        val configList = mutableListOf(testConfig)
-        var parentConfig = testConfig.parentConfig
-        while (parentConfig != null) {
-            configList.add(parentConfig)
-            parentConfig = parentConfig.parentConfig
-        }
-        configList.reverse()
-        return configList
-    }
-
     // Merge list of configs pairwise
-    private fun mergeConfigList(configList: MutableList<TestConfig>) {
+    private fun mergeConfigList(configList: List<TestConfig>) {
         if (configList.size == 1) {
             return
         }
@@ -78,35 +66,33 @@ class MergeConfigs {
         )
         val newFixConfig: FixPluginConfig? = if (fixConfigs.size != 2) fixConfigs.firstOrNull() else mergeFixConfigs(fixConfigs.first(), fixConfigs.last())
 
+        // Now we update child config in place
         childConfig.clear()
         val result = listOfNotNull(newGeneralConfig, newWarnConfig, newFixConfig)
         result.forEach { childConfig.add(it) }
     }
 
-    @Suppress("AVOID_NULL_CHECKS")
     private fun mergeGeneralConfigs(parentConfig: GeneralConfig, childConfig: GeneralConfig) = GeneralConfig(
-        if (childConfig.tags != null) childConfig.tags else parentConfig.tags,
-        if (childConfig.description != null) childConfig.description else parentConfig.description,
-        if (childConfig.suiteName != null) childConfig.suiteName else parentConfig.suiteName,
-        if (childConfig.excludedTests != null) childConfig.excludedTests else parentConfig.excludedTests,
-        if (childConfig.includedTests != null) childConfig.includedTests else parentConfig.includedTests,
+        childConfig.tags ?: parentConfig.tags,
+        childConfig.description ?: parentConfig.description,
+        childConfig.suiteName ?: parentConfig.suiteName,
+        childConfig.excludedTests ?: parentConfig.excludedTests,
+        childConfig.includedTests ?: parentConfig.includedTests,
     )
 
-    @Suppress("AVOID_NULL_CHECKS")
     private fun mergeWarnConfigs(parentConfig: WarnPluginConfig, childConfig: WarnPluginConfig) = WarnPluginConfig(
-        if (childConfig.execCmd != null) childConfig.execCmd else parentConfig.execCmd,
-        if (childConfig.warningsInputPattern != null) childConfig.warningsInputPattern else parentConfig.warningsInputPattern,
-        if (childConfig.warningsOutputPattern != null) childConfig.warningsOutputPattern else parentConfig.warningsOutputPattern,
-        if (childConfig.warningTextHasLine != null) childConfig.warningTextHasLine else parentConfig.warningTextHasLine,
-        if (childConfig.warningTextHasColumn != null) childConfig.warningTextHasColumn else parentConfig.warningTextHasColumn,
-        if (childConfig.lineCaptureGroup != null) childConfig.lineCaptureGroup else parentConfig.lineCaptureGroup,
-        if (childConfig.columnCaptureGroup != null) childConfig.columnCaptureGroup else parentConfig.columnCaptureGroup,
-        if (childConfig.messageCaptureGroup != null) childConfig.messageCaptureGroup else parentConfig.messageCaptureGroup,
+        childConfig.execCmd ?: parentConfig.execCmd,
+        childConfig.warningsInputPattern ?: parentConfig.warningsInputPattern,
+        childConfig.warningsOutputPattern ?: parentConfig.warningsOutputPattern,
+        childConfig.warningTextHasLine ?: parentConfig.warningTextHasLine,
+        childConfig.warningTextHasColumn ?: parentConfig.warningTextHasColumn,
+        childConfig.lineCaptureGroup ?: parentConfig.lineCaptureGroup,
+        childConfig.columnCaptureGroup ?: parentConfig.columnCaptureGroup,
+        childConfig.messageCaptureGroup ?: parentConfig.messageCaptureGroup,
     )
 
-    @Suppress("AVOID_NULL_CHECKS")
     private fun mergeFixConfigs(parentConfig: FixPluginConfig, childConfig: FixPluginConfig) = FixPluginConfig(
-        if (childConfig.execCmd != null) childConfig.execCmd else parentConfig.execCmd,
-        if (childConfig.destinationFileSuffix != null) childConfig.destinationFileSuffix else parentConfig.destinationFileSuffix,
+        childConfig.execCmd ?: parentConfig.execCmd,
+        childConfig.destinationFileSuffix ?: parentConfig.destinationFileSuffix,
     )
 }
