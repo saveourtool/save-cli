@@ -19,6 +19,12 @@ class MergeConfigsTest {
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / MergeConfigsTest::class.simpleName!!).also {
         fs.createDirectory(it)
     }
+    private val toml1 = tmpDir / "save.toml"
+    private val nestedDir1 = tmpDir / "nestedDir1"
+    private val toml2 = nestedDir1 / "save.toml"
+    private val nestedDir2 = tmpDir / "nestedDir1" / "nestedDir2"
+    private val toml3 = nestedDir2 / "save.toml"
+    private val toml4 = nestedDir2 / "nestedDir3" / "nestedDir4" / "save.toml"
     private val mergeConfigs = MergeConfigs()
     private val generalConfig1 = GeneralConfig("Tag1", "Description1", "suiteName1", "excludedTests: test1", "includedTests: test2")
     private val generalConfig2 = GeneralConfig("Tag2", "Description2", "suiteName2", "excludedTests: test3", "includedTests: test4")
@@ -41,14 +47,20 @@ class MergeConfigsTest {
     private val fixConfig3 = FixPluginConfig("fixCmd3", null)
     private val fixConfig4 = FixPluginConfig("fixCmd4")
 
+    fun createTomlFiles() {
+        fs.createFile(toml1)
+        fs.createDirectory(nestedDir1)
+        fs.createFile(toml2)
+        fs.createDirectory(nestedDir2)
+        fs.createFile(toml3)
+        fs.createDirectory(nestedDir2 / "nestedDir3")
+        fs.createDirectory(nestedDir2 / "nestedDir3" / "nestedDir4")
+        fs.createFile(toml4)
+    }
+
     @Test
     fun `merge two incomplete configs`() {
-        val toml1 = fs.createFile(tmpDir / "save.toml")
-
-        val nestedDir1 = tmpDir / "nestedDir1"
-        fs.createDirectory(nestedDir1)
-        val toml2 = fs.createFile(nestedDir1 / "save.toml")
-
+        createTomlFiles()
         val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig1))
         val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2))
 
@@ -65,12 +77,7 @@ class MergeConfigsTest {
 
     @Test
     fun `merge two configs with different fields`() {
-        val toml1 = fs.createFile(tmpDir / "save.toml")
-
-        val nestedDir1 = tmpDir / "nestedDir1"
-        fs.createDirectory(nestedDir1)
-        val toml2 = fs.createFile(nestedDir1 / "save.toml")
-
+        createTomlFiles()
         val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig2, fixConfig1))
         val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, warnConfig3, fixConfig2))
 
@@ -93,20 +100,7 @@ class MergeConfigsTest {
 
     @Test
     fun `merge configs starting from bottom`() {
-        val toml1 = fs.createFile(tmpDir / "save.toml")
-
-        val nestedDir1 = tmpDir / "nestedDir1"
-        fs.createDirectory(nestedDir1)
-        val toml2 = fs.createFile(nestedDir1 / "save.toml")
-
-        val nestedDir2 = tmpDir / "nestedDir1" / "nestedDir2"
-        fs.createDirectory(nestedDir2)
-        val toml3 = fs.createFile(nestedDir2 / "save.toml")
-
-        fs.createDirectory(nestedDir2 / "nestedDir3")
-        fs.createDirectory(nestedDir2 / "nestedDir3" / "nestedDir4")
-        val toml4 = fs.createFile(nestedDir2 / "nestedDir3" / "nestedDir4" / "save.toml")
-
+        createTomlFiles()
         val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig1, fixConfig1))
         val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, warnConfig2, fixConfig2))
         val config3 = TestConfig(toml3, config2, mutableListOf(generalConfig3, warnConfig3, fixConfig3))
@@ -130,16 +124,33 @@ class MergeConfigsTest {
     }
 
     @Test
+    fun `merge configs starting from top`() {
+        createTomlFiles()
+        val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig1, fixConfig1))
+        val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, fixConfig2))
+        val config3 = TestConfig(toml3, config2, mutableListOf(generalConfig3, warnConfig3, fixConfig3))
+        val config4 = TestConfig(toml4, config3, mutableListOf(generalConfig4))
+
+        mergeConfigs.merge(config1)
+
+        assertEquals(3, config4.pluginConfigs.size)
+
+        val expectedWarnConfig = WarnPluginConfig("execCmd3", warningsInputPattern2, warningsOutputPattern2,
+            false, false, 3, 3, 3)
+        val expectedFixConfig = FixPluginConfig("fixCmd3", "some suffix")
+
+        val actualGeneralConfig = config4.pluginConfigs.filterIsInstance<GeneralConfig>().first()
+        val actualWarnConfig = config4.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
+        val actualFixConfig = config4.pluginConfigs.filterIsInstance<FixPluginConfig>().first()
+
+        assertEquals(generalConfig4, actualGeneralConfig)
+        assertEquals(expectedWarnConfig, actualWarnConfig)
+        assertEquals(expectedFixConfig, actualFixConfig)
+    }
+
+    @Test
     fun `merge configs starting from the middle`() {
-        val toml1 = fs.createFile(tmpDir / "save.toml")
-        val nestedDir1 = tmpDir / "nestedDir1"
-        fs.createDirectory(nestedDir1)
-        val toml2 = fs.createFile(nestedDir1 / "save.toml")
-
-        val nestedDir2 = tmpDir / "nestedDir1" / "nestedDir2"
-        fs.createDirectory(nestedDir2)
-        val toml3 = fs.createFile(nestedDir2 / "save.toml")
-
+        createTomlFiles()
         val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig1, fixConfig1))
         val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, warnConfig2, fixConfig2))
         val config3 = TestConfig(toml3, config2, mutableListOf(generalConfig3))
@@ -168,8 +179,6 @@ class MergeConfigsTest {
         assertEquals(expectedWarnConfig, actualWarnConfig2)
         assertEquals(expectedFixConfig, actualFixConfig2)
     }
-
-    // TODO: test with multiple childs
 
     @AfterTest
     fun tearDown() {

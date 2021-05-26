@@ -3,7 +3,6 @@ package org.cqfn.save.core.files
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.plugin.GeneralConfig
-import org.cqfn.save.core.plugin.PluginConfig
 import org.cqfn.save.plugin.warn.WarnPluginConfig
 import org.cqfn.save.plugins.fix.FixPluginConfig
 
@@ -35,14 +34,7 @@ class MergeConfigs {
         return configList
     }
 
-    private fun mergeChildConfigs(testConfig: TestConfig) {
-        for (child in testConfig.childConfigs) {
-            mergeChildConfigWithParent(testConfig, child)
-            mergeChildConfigs(child)
-        }
-    }
-
-    // Merge configurations
+    // Merge list of configs pairwise
     private fun mergeConfigList(configList: MutableList<TestConfig>) {
         if (configList.size == 1) {
             return
@@ -51,6 +43,14 @@ class MergeConfigs {
 
         pairs.forEach { (parent, child) ->
             mergeChildConfigWithParent(parent, child)
+        }
+    }
+
+    // Merge child configs recursively
+    private fun mergeChildConfigs(testConfig: TestConfig) {
+        for (child in testConfig.childConfigs) {
+            mergeChildConfigWithParent(testConfig, child)
+            mergeChildConfigs(child)
         }
     }
 

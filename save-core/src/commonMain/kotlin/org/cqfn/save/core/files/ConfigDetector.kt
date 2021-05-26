@@ -22,6 +22,9 @@ class ConfigDetector {
     fun configFromFile(testConfig: Path): TestConfig {
         // testConfig is validated in the beginning and cannot be null
         return discoverConfigWithParents(testConfig)
+            // After `discoverConfigWithParents` we successfully created TestConfig instances for all save.toml files
+            // starting from the given [testConfig] to the top-level save.toml in file tree.
+            // Now do the same for children configs
             ?.also { config ->
                 // Go down through the file tree and
                 // discover all descendant configs of [config]
