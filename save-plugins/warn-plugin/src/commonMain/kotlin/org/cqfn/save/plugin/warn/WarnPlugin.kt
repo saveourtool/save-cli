@@ -1,7 +1,6 @@
 package org.cqfn.save.plugin.warn
 
 import org.cqfn.save.core.config.TestConfig
-import org.cqfn.save.core.files.findAllFilesMatching
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.DebugInfo
@@ -21,12 +20,13 @@ private typealias LineColumn = Pair<Int, Int>
 
 /**
  * A plugin that runs an executable and verifies that it produces required warning messages.
+ * @property testConfig
  */
-class WarnPlugin : Plugin {
+class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
     private val fs = FileSystem.SYSTEM
     private val pb = ProcessBuilder()
 
-    override fun execute(testConfig: TestConfig): Sequence<TestResult> {
+    override fun execute(): Sequence<TestResult> {
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         return discoverTestFiles(testConfig.directory).map { resources ->
             handleTestFile(resources.single(), warnPluginConfig)
@@ -34,12 +34,13 @@ class WarnPlugin : Plugin {
     }
 
     override fun discoverTestFiles(root: Path) = root
-        .findAllFilesMatching {
-            defaultResourceNamePattern.matches(it.name)
+        .resourceDirectories()
+        .map { directory ->
+            FileSystem.SYSTEM.list(directory)
+                .filter { defaultResourceNamePattern.matches(it.name) }
         }
         .asSequence()
-        .map { listOf(it) }
-        .flatten()
+        .filterNot { it.isEmpty() }
 
     @Suppress("UnusedPrivateMember")
     private fun handleTestFile(
@@ -75,31 +76,35 @@ class WarnPlugin : Plugin {
             .mapValues { (_, warning) -> warning.sortedBy { it.message } }
         return TestResult(
             listOf(path),
-            checkResults(expectedWarnings, actualWarningsMap),
+            checkResults(expectedWarnings, actualWarningsMap, warnPluginConfig),
             DebugInfo(executionResult.stdout.joinToString("\n"), executionResult.stderr.joinToString("\n"), null)
         )
     }
 
     @Suppress("TYPE_ALIAS")
     private fun checkResults(expectedWarningsMap: Map<LineColumn?, List<Warning>>,
-                             actualWarningsMap: Map<LineColumn?, List<Warning>>): TestStatus =
-            checkCollectionsDiffer(expectedWarningsMap, actualWarningsMap)?.let { message ->
-                Fail(message)
-            }
-                ?: Pass
+                             actualWarningsMap: Map<LineColumn?, List<Warning>>,
+                             warnPluginConfig: WarnPluginConfig): TestStatus =
+            checkCollectionsDiffer(expectedWarningsMap, actualWarningsMap, warnPluginConfig)
 
     @Suppress("TYPE_ALIAS")
     private fun checkCollectionsDiffer(expectedWarningsMap: Map<LineColumn?, List<Warning>>,
-                                       actualWarningsMap: Map<LineColumn?, List<Warning>>): String? {
+                                       actualWarningsMap: Map<LineColumn?, List<Warning>>,
+                                       warnPluginConfig: WarnPluginConfig): TestStatus {
         val missingWarnings = expectedWarningsMap.filterValues { it !in actualWarningsMap.values }.values
         val unexpectedWarnings = actualWarningsMap.filterValues { it !in expectedWarningsMap.values }.values
+
         return when (missingWarnings.isEmpty() to unexpectedWarnings.isEmpty()) {
-            false to true -> "Some warnings were expected but not received: $missingWarnings"
-            false to false -> "Some warnings were expected but not received: $missingWarnings, " +
-                    "and others were unexpected: $unexpectedWarnings"
-            true to false -> "Some warnings were unexpected: $unexpectedWarnings"
-            true to true -> null
-            else -> ""
+            false to true -> Fail("Some warnings were expected but not received: $missingWarnings")
+            false to false -> Fail("Some warnings were expected but not received: $missingWarnings, " +
+                    "and others were unexpected: $unexpectedWarnings")
+            true to false -> if (!warnPluginConfig.exactWarningsMatch) {
+                Pass("Some warnings were unexpected: $unexpectedWarnings")
+            } else {
+                Fail("Some warnings were unexpected: $unexpectedWarnings")
+            }
+            true to true -> Pass(null)
+            else -> Fail("")
         }
     }
 }
