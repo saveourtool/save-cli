@@ -92,7 +92,7 @@ class MergeConfigsTest {
     }
 
     @Test
-    fun `merge many configs`() {
+    fun `merge configs starting from bottom`() {
         val toml1 = fs.createFile(tmpDir / "save.toml")
 
         val nestedDir1 = tmpDir / "nestedDir1"
@@ -148,25 +148,25 @@ class MergeConfigsTest {
 
         assertEquals(3, config2.pluginConfigs.size)
 
-        val expectedWarnConfig2 = WarnPluginConfig("execCmd2", warningsInputPattern1, warningsOutputPattern1,
+        val expectedWarnConfig = WarnPluginConfig("execCmd2", warningsInputPattern1, warningsOutputPattern1,
             true, true, 2, 2, 2)
-        val expectedFixConfig2 = FixPluginConfig("fixCmd2", "some suffix")
+        val expectedFixConfig = FixPluginConfig("fixCmd2", "some suffix")
 
-        val actualGeneralConfig2 = config2.pluginConfigs.filterIsInstance<GeneralConfig>().first()
-        val actualWarnConfig2 = config2.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
-        val actualFixConfig2 = config2.pluginConfigs.filterIsInstance<FixPluginConfig>().first()
+        val actualGeneralConfig = config2.pluginConfigs.filterIsInstance<GeneralConfig>().first()
+        val actualWarnConfig = config2.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
+        val actualFixConfig = config2.pluginConfigs.filterIsInstance<FixPluginConfig>().first()
 
-        assertEquals(generalConfig2, actualGeneralConfig2)
-        assertEquals(expectedWarnConfig2, actualWarnConfig2)
-        assertEquals(expectedFixConfig2, actualFixConfig2)
+        assertEquals(generalConfig2, actualGeneralConfig)
+        assertEquals(expectedWarnConfig, actualWarnConfig)
+        assertEquals(expectedFixConfig, actualFixConfig)
 
-        val actualGeneralConfig3 = config3.pluginConfigs.filterIsInstance<GeneralConfig>().first()
-        val actualWarnConfig3 = config3.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
-        val actualFixConfig3 = config3.pluginConfigs.filterIsInstance<FixPluginConfig>().first()
+        val actualGeneralConfig2 = config3.pluginConfigs.filterIsInstance<GeneralConfig>().first()
+        val actualWarnConfig2 = config3.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
+        val actualFixConfig2 = config3.pluginConfigs.filterIsInstance<FixPluginConfig>().first()
 
-        assertEquals(generalConfig3, actualGeneralConfig3)
-        assertEquals(expectedWarnConfig2, actualWarnConfig3)
-        assertEquals(expectedFixConfig2, actualFixConfig3)
+        assertEquals(generalConfig3, actualGeneralConfig2)
+        assertEquals(expectedWarnConfig, actualWarnConfig2)
+        assertEquals(expectedFixConfig, actualFixConfig2)
     }
 
     // TODO: test with multiple childs

@@ -54,7 +54,7 @@ class ConfigDetector {
                 }
 
     /**
-     * Depends to type of entry point, start to create the hierarchy of TestConfig's, from [file] to top in the file tree
+     * Depends to type of entry point, start to create the hierarchy of TestConfig's, starting from the [file] till the top in the file tree
      *
      * @param file entry point from which SAVE should create hierarchy of [TestConfig]'s.
      * @return [TestConfig] or null if no suitable config file has been found.

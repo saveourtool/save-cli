@@ -35,10 +35,9 @@ class MergeConfigs {
         return configList
     }
 
-    // Create the list of child configs
     private fun mergeChildConfigs(testConfig: TestConfig) {
         for (child in testConfig.childConfigs) {
-            mergeChildConfigWithParent(testConfig.pluginConfigs, child.pluginConfigs)
+            mergeChildConfigWithParent(testConfig, child)
             mergeChildConfigs(child)
         }
     }
@@ -50,13 +49,15 @@ class MergeConfigs {
         }
         val pairs = configList.zipWithNext()
 
-        pairs.forEach { (parentConfig, childConfig) ->
-            logDebug("Merging ${parentConfig.location} with ${childConfig.location}")
-            mergeChildConfigWithParent(parentConfig.pluginConfigs, childConfig.pluginConfigs)
+        pairs.forEach { (parent, child) ->
+            mergeChildConfigWithParent(parent, child)
         }
     }
 
-    private fun mergeChildConfigWithParent(parentConfig: MutableList<PluginConfig>, childConfig: MutableList<PluginConfig>) {
+    private fun mergeChildConfigWithParent(parent: TestConfig, child: TestConfig) {
+        logDebug("Merging ${parent.location} with ${child.location}")
+        val parentConfig = parent.pluginConfigs
+        val childConfig = child.pluginConfigs
         // Create the list of corresponding configs, if one of them will be null -> list will contain only one element,
         // which we apply as final config, otherwise we will merge configs
         val generalConfigs = listOfNotNull(
