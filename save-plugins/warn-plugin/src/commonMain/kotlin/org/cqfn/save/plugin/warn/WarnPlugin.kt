@@ -17,6 +17,7 @@ import org.cqfn.save.plugin.warn.utils.extractWarning
 
 import okio.FileSystem
 import okio.Path
+import kotlin.jvm.JvmStatic
 
 private typealias LineColumn = Pair<Int, Int>
 
@@ -45,7 +46,6 @@ class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
         .filter { it.isNotEmpty() }
 
     @Suppress(
-        "UnusedPrivateMember",
         "TOO_LONG_FUNCTION",
         "SAY_NO_TO_VAR")
     private fun handleTestFile(
@@ -72,11 +72,11 @@ class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
             }
             .mapValues { it.value.sortedBy { it.message } }
 
-        var execCmd: String = warnPluginConfig.execCmd
-
-        if (generalConfig.ignoreSaveComments) {
-            createTestFile(path)
-            execCmd = warnPluginConfig.execCmd + " test_file"
+        val execCmd: String = if (generalConfig.ignoreSaveComments) {
+            val fileName = createTestFile(path)
+            warnPluginConfig.execCmd + " $fileName"
+        } else {
+            warnPluginConfig.execCmd + " ${path.name}"
         }
 
         val executionResult = pb.exec(execCmd, null)
@@ -96,8 +96,9 @@ class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
 
     /**
      * @param path
+     * @return name of the temporary file
      */
-    internal fun createTestFile(path: Path) {
+    internal fun createTestFile(path: Path): String {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPlugin::class.simpleName!!)
 
         if (fs.exists(tmpDir)) {
@@ -105,15 +106,17 @@ class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
         }
         fs.createDirectory(tmpDir)
 
-        fs.write(fs.createFile(tmpDir / "test_file")) {
+        val fileName = testFileName()
+        fs.write(fs.createFile(tmpDir / fileName)) {
             fs.readLines(path).forEach {
-                if (!it.contains("// ;warn:")) {
+                if (!it.contains(";warn:")) {
                     write(
                         (it + "\n").encodeToByteArray()
                     )
                 }
             }
         }
+        return fileName
     }
 
     @Suppress("TYPE_ALIAS")
@@ -135,5 +138,11 @@ class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
             true to true -> Pass(null)
             else -> Fail("")
         }
+    }
+
+    private fun testFileName(): String = "test_file${numFile++}"
+
+    companion object {
+        @JvmStatic var numFile = 0
     }
 }
