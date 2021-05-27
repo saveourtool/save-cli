@@ -9,7 +9,15 @@ import kotlinx.serialization.Serializable
 /**
  * Core interface for plugin configuration
  */
-interface PluginConfig
+interface PluginConfig<T : PluginConfig<T>> {
+    /**
+     * Function which is capable for merging inherited configurations
+     *
+     * @param parentConfig config which will be merged with [this]
+     * @return corresponding merged config
+     */
+    fun mergePluginConfig(parentConfig: T): T
+}
 
 /**
  * General configuration for test suite.
@@ -26,4 +34,13 @@ data class GeneralConfig(
     val suiteName: String,
     val excludedTests: String? = null,
     val includedTests: String? = null,
-) : PluginConfig
+) : PluginConfig<GeneralConfig> {
+    override fun mergePluginConfig(parentConfig: GeneralConfig) = GeneralConfig(
+        // TODO split and merge tags
+        this.tags ?: parentConfig.tags,
+        this.description ?: parentConfig.description,
+        this.suiteName ?: parentConfig.suiteName,
+        this.excludedTests ?: parentConfig.excludedTests,
+        this.includedTests ?: parentConfig.includedTests
+    )
+}

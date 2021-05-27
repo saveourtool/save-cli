@@ -54,48 +54,23 @@ class MergeConfigs {
             parentConfig.filterIsInstance<GeneralConfig>().firstOrNull(),
             childConfig.filterIsInstance<GeneralConfig>().firstOrNull()
         )
-        val newGeneralConfig: GeneralConfig? = if (generalConfigs.size != 2) generalConfigs.firstOrNull() else mergeGeneralConfigs(generalConfigs.first(), generalConfigs.last())
+        val newGeneralConfig: GeneralConfig? = if (generalConfigs.size != 2) generalConfigs.firstOrNull() else generalConfigs.last().mergePluginConfig(generalConfigs.first())
 
         val warnConfigs = listOfNotNull(
             parentConfig.filterIsInstance<WarnPluginConfig>().firstOrNull(),
             childConfig.filterIsInstance<WarnPluginConfig>().firstOrNull()
         )
-        val newWarnConfig: WarnPluginConfig? = if (warnConfigs.size != 2) warnConfigs.firstOrNull() else mergeWarnConfigs(warnConfigs.first(), warnConfigs.last())
+        val newWarnConfig: WarnPluginConfig? = if (warnConfigs.size != 2) warnConfigs.firstOrNull() else warnConfigs.last().mergePluginConfig(warnConfigs.first())
 
         val fixConfigs = listOfNotNull(
             parentConfig.filterIsInstance<FixPluginConfig>().firstOrNull(),
             childConfig.filterIsInstance<FixPluginConfig>().firstOrNull()
         )
-        val newFixConfig: FixPluginConfig? = if (fixConfigs.size != 2) fixConfigs.firstOrNull() else mergeFixConfigs(fixConfigs.first(), fixConfigs.last())
+        val newFixConfig: FixPluginConfig? = if (fixConfigs.size != 2) fixConfigs.firstOrNull() else fixConfigs.last().mergePluginConfig(fixConfigs.first())
 
         // Now we update child config in place
         childConfig.clear()
         val result = listOfNotNull(newGeneralConfig, newWarnConfig, newFixConfig)
         result.forEach { childConfig.add(it) }
     }
-
-    private fun mergeGeneralConfigs(parentConfig: GeneralConfig, childConfig: GeneralConfig) = GeneralConfig(
-        childConfig.tags ?: parentConfig.tags,
-        childConfig.description ?: parentConfig.description,
-        childConfig.suiteName ?: parentConfig.suiteName,
-        childConfig.excludedTests ?: parentConfig.excludedTests,
-        childConfig.includedTests ?: parentConfig.includedTests,
-    )
-
-    private fun mergeWarnConfigs(parentConfig: WarnPluginConfig, childConfig: WarnPluginConfig) = WarnPluginConfig(
-        childConfig.execCmd ?: parentConfig.execCmd,
-        childConfig.warningsInputPattern ?: parentConfig.warningsInputPattern,
-        childConfig.warningsOutputPattern ?: parentConfig.warningsOutputPattern,
-        childConfig.warningTextHasLine ?: parentConfig.warningTextHasLine,
-        childConfig.warningTextHasColumn ?: parentConfig.warningTextHasColumn,
-        childConfig.lineCaptureGroup ?: parentConfig.lineCaptureGroup,
-        childConfig.columnCaptureGroup ?: parentConfig.columnCaptureGroup,
-        childConfig.messageCaptureGroup ?: parentConfig.messageCaptureGroup,
-        childConfig.exactWarningsMatch ?: parentConfig.exactWarningsMatch,
-    )
-
-    private fun mergeFixConfigs(parentConfig: FixPluginConfig, childConfig: FixPluginConfig) = FixPluginConfig(
-        childConfig.execCmd ?: parentConfig.execCmd,
-        childConfig.destinationFileSuffix ?: parentConfig.destinationFileSuffix,
-    )
 }

@@ -19,7 +19,7 @@ import kotlinx.serialization.encoding.Encoder
 /**
  * Some fields by default are null, instead of some natural value, because of the fact, that in stage of merging
  * of nested configs, we can't detect whether the value are passed by user, or taken from default.
- * This logic of the default value processing will be provided in stage of validation
+ * The logic of the default value processing will be provided in stage of validation
  *
  * @property execCmd a command that will be executed to check resources and emit warnings
  * @property warningsInputPattern a regular expression by which expected warnings will be discovered in test resources
@@ -45,7 +45,19 @@ data class WarnPluginConfig(
     val columnCaptureGroup: Int?,
     val messageCaptureGroup: Int,
     val exactWarningsMatch: Boolean? = null,
-) : PluginConfig {
+) : PluginConfig<WarnPluginConfig> {
+    override fun mergePluginConfig(parentConfig: WarnPluginConfig) = WarnPluginConfig(
+        this.execCmd ?: parentConfig.execCmd,
+        this.warningsInputPattern ?: parentConfig.warningsInputPattern,
+        this.warningsOutputPattern ?: parentConfig.warningsOutputPattern,
+        this.warningTextHasLine ?: parentConfig.warningTextHasLine,
+        this.warningTextHasColumn ?: parentConfig.warningTextHasColumn,
+        this.lineCaptureGroup ?: parentConfig.lineCaptureGroup,
+        this.columnCaptureGroup ?: parentConfig.columnCaptureGroup,
+        this.messageCaptureGroup ?: parentConfig.messageCaptureGroup,
+        this.exactWarningsMatch ?: parentConfig.exactWarningsMatch
+    )
+
     companion object {
         /**
          * Default regex for expected warnings in test resources, e.g.

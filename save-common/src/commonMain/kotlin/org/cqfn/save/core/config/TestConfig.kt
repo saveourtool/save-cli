@@ -16,10 +16,11 @@ import okio.Path
  * @property parentConfig parent config in the hierarchy of configs, `null` if this config is root.
  * @property pluginConfigs list of configurations for plugins that are active in this config
  */
+@Suppress("TYPE_ALIAS")
 data class TestConfig(
     val location: Path,
     val parentConfig: TestConfig?,
-    val pluginConfigs: MutableList<PluginConfig> = mutableListOf(),
+    val pluginConfigs: MutableList<PluginConfig<*>> = mutableListOf(),
     private val fs: FileSystem = FileSystem.SYSTEM,
 ) {
     /**
