@@ -33,9 +33,6 @@ private val autoGenerationComment =
             | ---------------------------------------------------------------------
         """.trimMargin()
 
-// Path to config file
-fun Project.configFilePath() = "$rootDir/buildSrc/src/main/resources/config-options.json"
-
 // Paths, where to store generated files
 val generatedOptionsTablePath = "."
 
@@ -57,6 +54,11 @@ class Option {
     lateinit var description: String
     lateinit var default: String
 }
+
+/**
+ * Path to config file
+ */
+fun Project.configFilePath() = "$rootDir/buildSrc/src/main/resources/config-options.json"
 
 /**
  * Generate options for ArgParser
@@ -98,6 +100,8 @@ fun FunSpec.Builder.assignMembersToOptions(jsonObject: Map<String, Option>): Fun
 
 /**
  * General function for auto generation of config options and readme table
+ *
+ * @param destination a destination file for generated code
  */
 @Suppress("EMPTY_BLOCK_STRUCTURE_ERROR")
 fun Project.generateConfigOptions(destination: File) {
@@ -114,6 +118,7 @@ fun Project.generateConfigOptions(destination: File) {
  * Generate SaveProperties class which represents configuration properties of SAVE application
  *
  * @param jsonObject map of cli option names to [Option] objects
+ * @param destination
  */
 fun generateSaveProperties(jsonObject: Map<String, Option>, destination: File) {
     val builder = FileSpec.builder("org.cqfn.save.core.config", "SaveProperties")
