@@ -1,8 +1,9 @@
 package org.cqfn.save.core
 
-import okio.Path.Companion.toPath
-import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.files.ConfigDetector
+
+import okio.Path.Companion.toPath
+
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
