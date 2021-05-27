@@ -34,5 +34,3 @@ talaiot {
         timelinePublisher = true
     }
 }
-
-tasks.register("generateConfigOptions") { generateConfigOptions() }
