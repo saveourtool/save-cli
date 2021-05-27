@@ -6,9 +6,12 @@ package org.cqfn.save.core.config
 import kotlin.Array
 import kotlin.Boolean
 import kotlin.Int
+import kotlin.collections.List
 import kotlin.String
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
+import kotlinx.cli.`vararg`
+import kotlinx.cli.optional
 import kotlinx.serialization.Serializable
 
 /**
@@ -53,7 +56,8 @@ public data class SaveProperties(
     public var resultOutput: ResultOutputType? = ResultOutputType.STDOUT,
     public var configInheritance: Boolean? = true,
     public var ignoreSaveComments: Boolean? = false,
-    public var reportDir: String? = "save-reports"
+    public var reportDir: String? = "save-reports",
+    public var testFiles: List<String> = emptyList()
 ) {
     public constructor(args: Array<String>) : this() {
         val parser = ArgParser("save")
@@ -169,6 +173,12 @@ public data class SaveProperties(
                         "Path to directory, where to store output (when `resultOutput` is set to `FILE`)"
                 )
 
+        val testFiles by parser.argument(
+                    ArgType.String,
+                    description = "Paths to individual test files, can be provided to execute only them"
+                )
+                    .optional()
+                    .vararg()
         parser.parse(args)
         this.testConfigPath = testConfigPath
         this.parallelMode = parallelMode

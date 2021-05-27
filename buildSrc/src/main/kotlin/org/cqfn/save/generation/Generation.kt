@@ -83,6 +83,22 @@ fun FunSpec.Builder.generateOptions(jsonObject: Map<String, Option>): FunSpec.Bu
 }
 
 /**
+ * Adds statement with vararg CLI argument for testFiles
+ *
+ * @return builder
+ */
+fun FunSpec.Builder.addTestsVararg(): FunSpec.Builder = apply {
+    addStatement("""
+        val testFiles by parser.argument(
+            ArgType.String,
+            description = "Paths to individual test files, can be provided to execute only them"
+        )
+            .optional()
+            .vararg()
+    """.trimIndent())
+}
+
+/**
  * Assign class members to options
  *
  * @param jsonObject map of cli option names to [Option] objects
@@ -93,6 +109,7 @@ fun FunSpec.Builder.assignMembersToOptions(jsonObject: Map<String, Option>): Fun
         val assign = "this.${it.key} = ${it.key}"
         this.addStatement(assign)
     }
+    addStatement("this.testFiles = testFiles")
     return this
 }
 
@@ -120,6 +137,8 @@ fun generateSaveProperties(jsonObject: Map<String, Option>) {
     builder.addComment(autoGenerationComment)
     builder.addImport("kotlinx.cli", "ArgParser")
     builder.addImport("kotlinx.cli", "ArgType")
+    builder.addImport("kotlinx.cli", "optional")
+    builder.addImport("kotlinx.cli", "vararg")
     val classBuilder = generateSavePropertiesClass(jsonObject)
     val mergeFunc = generateMergeConfigFunc(jsonObject)
     classBuilder.addFunction(mergeFunc.build())
@@ -144,6 +163,7 @@ fun generateSavePropertiesClass(jsonObject: Map<String, Option>): TypeSpec.Build
                """.trimMargin()
     classBuilder.addKdoc(kdoc)
     classBuilder.addAnnotation(AnnotationSpec.builder(ClassName("kotlinx.serialization", "Serializable")).build())
+
     // Generate primary ctor
     val primaryCtor = FunSpec.constructorBuilder()
     for ((name, value) in jsonObject) {
@@ -161,7 +181,19 @@ fun generateSavePropertiesClass(jsonObject: Map<String, Option>): TypeSpec.Build
             .mutable()
         classBuilder.addProperty(property.build())
     }
+    primaryCtor.addParameter(
+        ParameterSpec.builder(
+            "testFiles", ClassName("kotlin.collections", "List").parameterizedBy(ClassName("kotlin", "String"))
+        )
+            .defaultValue("emptyList()")
+            .build()
+    )
+    val property = PropertySpec.builder("testFiles", ClassName("kotlin.collections", "List").parameterizedBy(ClassName("kotlin", "String")))
+        .initializer("testFiles")
+        .mutable()
+    classBuilder.addProperty(property.build())
     classBuilder.primaryConstructor(primaryCtor.build())
+
     // Generate secondary ctor
     val secondaryCtor = FunSpec.constructorBuilder()
     secondaryCtor.addParameter("args", ClassName("kotlin", "Array")
@@ -169,9 +201,11 @@ fun generateSavePropertiesClass(jsonObject: Map<String, Option>): TypeSpec.Build
     secondaryCtor.callThisConstructor()
     secondaryCtor.addStatement("val parser = ArgParser(\"save\")")
         .generateOptions(jsonObject)
+        .addTestsVararg()
         .addStatement("parser.parse(args)")
         .assignMembersToOptions(jsonObject)
     classBuilder.addFunction(secondaryCtor.build())
+
     return classBuilder
 }
 

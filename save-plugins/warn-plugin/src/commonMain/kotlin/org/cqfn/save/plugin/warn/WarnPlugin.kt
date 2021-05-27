@@ -22,19 +22,18 @@ private typealias LineColumn = Pair<Int, Int>
  * A plugin that runs an executable and verifies that it produces required warning messages.
  * @property testConfig
  */
-class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
+class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) : Plugin(testConfig, testFiles) {
     private val fs = FileSystem.SYSTEM
     private val pb = ProcessBuilder()
 
-    override fun execute(): Sequence<TestResult> {
+    override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         return discoverTestFiles(testConfig.directory).map { resources ->
             handleTestFile(resources.single(), warnPluginConfig)
         }
     }
 
-    override fun discoverTestFiles(root: Path) = root
-        .resourceDirectories()
+    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> = resourceDirectories
         .map { directory ->
             FileSystem.SYSTEM.list(directory)
                 .filter { defaultResourceNamePattern.matches(it.name) }

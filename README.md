@@ -46,7 +46,7 @@ Save can be used not only with static analyzers, but can be used as a test frame
 
 ## How to start
 1. Prepare and configure your test base in the proper format. See [test_detection](#test_detection) and [plugins](#plugins)
-2. Run the following: save --testConfig "/my/path/to-test/save.toml"
+2. Run the following: `save --testConfig "/my/path/to/test/save.toml"`
 
 ## How to configure 
 SAVE has a command line interface that runs the framework and your executable. What you need is simply to configure the output of your static analyzer so SAVE will be able to
@@ -108,6 +108,17 @@ For example, the following example is invalid and will cause an error, because S
 As described above, `save.toml` is needed to configure tests. The idea is to have only one configuration file for a directory with tests (one to many relation). 
 Such directories we will call `test suites`. We decided to have only one configuration file as we have many times seen that for such tests there is a duplication of configuration in the same test suite.
 
+## Executing specific tests
+It can be useful to execute only a number of tests instead of all tests under a particular `save.toml` config.
+To do so, you want to pass a test file name:
+```bash
+$ save /path/to/tests/Test1
+```
+or a list of comma-separated names
+```bash
+$ save /path/to/tests/Test1,/path/to/tests/Test2
+```
+SAVE will detect the closest `save.toml` file and use configuration from there.
 
 ## save.toml configuration file
 Save configuration uses [toml](https://toml.io/en/) format. As it was told [above](#test_detection), save.toml can be imported from the directory hierarchy.
