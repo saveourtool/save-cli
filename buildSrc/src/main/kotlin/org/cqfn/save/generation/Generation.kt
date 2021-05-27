@@ -70,7 +70,7 @@ fun Project.configFilePath() = "$rootDir/buildSrc/src/main/resources/config-opti
 fun FunSpec.Builder.generateOptions(jsonObject: Map<String, Option>): FunSpec.Builder {
     jsonObject.forEach {
         val option = StringBuilder().apply {
-            append("val ${it.key} by parser.option\n")
+            append("val ${it.key} by parser.option(\n")
             append("${it.value.argType},\n")
             append("fullName = \"${it.value.fullName}\",\n")
             if (it.value.shortName.isNotEmpty()) {
