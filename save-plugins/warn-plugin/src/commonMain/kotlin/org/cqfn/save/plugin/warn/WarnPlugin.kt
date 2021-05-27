@@ -39,8 +39,7 @@ class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
             FileSystem.SYSTEM.list(directory)
                 .filter { defaultResourceNamePattern.matches(it.name) }
         }
-        .asSequence()
-        .filterNot { it.isEmpty() }
+        .filter { it.isNotEmpty() }
 
     @Suppress("UnusedPrivateMember")
     private fun handleTestFile(

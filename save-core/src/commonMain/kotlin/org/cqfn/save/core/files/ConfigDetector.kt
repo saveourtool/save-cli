@@ -49,20 +49,22 @@ class ConfigDetector {
             locationsFlattened
                 .drop(1)  // because [config] will be discovered too
                 .forEachIndexed { index, path ->
-                    val parentConfig = configs.find {
-                        it.location ==
+                    val parentConfig = configs.find { config ->
+                        config.location ==
                                 locationsFlattened.take(index + 1)
                                     .reversed()
                                     .find { it.parent in path.parents() }!!
                     }!!
 
-                    val newChildConfig = TestConfig(
-                        path,
-                        parentConfig,
+                    configs.add(
+                        TestConfig(
+                            path,
+                            parentConfig,
+                        ).also {
+                            logDebug("Found config file at $path, adding as a child for ${parentConfig.location}")
+                            it.neighbourConfigs?.add(it)
+                        }
                     )
-
-                    logDebug("Found config file at $path, adding as a child for ${parentConfig.location}")
-                    newChildConfig.neighbourConfigs?.add(newChildConfig)
                 }
 
     /**

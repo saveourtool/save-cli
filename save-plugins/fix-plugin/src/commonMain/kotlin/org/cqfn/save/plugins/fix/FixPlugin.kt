@@ -82,6 +82,7 @@ class FixPlugin(testConfig: TestConfig) : Plugin(testConfig) {
                 }
                 .values
         }
+        .filter { it.isNotEmpty() }
 
     private fun Patch<String>.formatToString() = deltas.joinToString("\n") { delta ->
         when (delta) {
