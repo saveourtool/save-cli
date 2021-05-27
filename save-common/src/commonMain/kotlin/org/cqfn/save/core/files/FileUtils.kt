@@ -10,18 +10,21 @@ import okio.Path.Companion.toPath
 
 /**
  * Find all descendant files in the directory denoted by [this] [Path], that match [condition].
- * This method uses BFS, so files will appear in the returned list in order of directory levels.
+ * Files will appear in the returned list grouped by directories, while directories are visited in depth-first manner.
  *
  * @param condition a condition to match
- * @return a list of files
+ * @return a list of files, grouped by directory
  */
-// FixMe: need to filter empty lists here
 fun Path.findAllFilesMatching(condition: (Path) -> Boolean): List<List<Path>> = FileSystem.SYSTEM.list(this)
     .partition { FileSystem.SYSTEM.metadata(it).isDirectory }
     .let { (directories, files) ->
-        listOf(files.filter(condition)) + directories.flatMap {
+        val filesInCurrentDir = files.filter(condition).takeIf { it.isNotEmpty() }
+        val resultFromNestedDirs = directories.flatMap {
             it.findAllFilesMatching(condition)
         }
+        filesInCurrentDir?.let {
+            listOf(it) + resultFromNestedDirs
+        } ?: resultFromNestedDirs
     }
 
 /**

@@ -41,6 +41,7 @@ data class TestConfig(
      * Directory containing [location] of this config
      */
     val directory: Path = location.parent!!
+
     init {
         parentConfig?.let {
             logDebug("Add child ${this.location} for ${parentConfig.location}")

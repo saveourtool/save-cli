@@ -46,14 +46,19 @@ class ConfigDetector {
             descendantConfigLocations
                 .drop(1)  // because [config] will be discovered too
                 .mapIndexed { index, path ->
-                    val parentConfig = configs.find {
-                        it.location ==
+                    val parentConfig = configs.find { config ->
+                        config.location ==
                                 descendantConfigLocations.take(index + 1)
                                     .reversed()
                                     .find { it.parent in path.parents() }!!
                     }!!
-                    // Actually, we don't interested in return value, just need to create proper config
-                    TestConfig(path, parentConfig)
+
+                    configs.add(
+                        TestConfig(
+                            path,
+                            parentConfig,
+                        )
+                    )
                 }
 
     /**
@@ -97,6 +102,7 @@ class ConfigDetector {
             ?.let { getTestConfigFromTomlFile(it) }
         // Now process current config
         logDebug("Processing test config from the toml file: $file")
+
         return TestConfig(
             file,
             parentConfig
