@@ -1,5 +1,8 @@
 import io.gitlab.arturbosch.detekt.Detekt
 import org.cqfn.save.buildutils.configurePublishing
+import org.cqfn.save.generation.configFilePath
+import org.cqfn.save.generation.generateConfigOptions
+import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 
 plugins {
@@ -25,6 +28,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(":save-common"))
+                implementation(project(":save-reporters"))
                 api("com.squareup.okio:okio-multiplatform:${Versions.okio}")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
                 implementation("org.jetbrains.kotlinx:kotlinx-cli:${Versions.Kotlinx.cli}")
@@ -68,11 +72,18 @@ tasks.withType<KotlinJvmTest> {
     useJUnitPlatform()
 }
 
-// TODO: Remove SaveProperties file and this rule in future commits
-diktat {
-    excludes = files("src/commonMain/kotlin/org/cqfn/save/core/config/SaveProperties.kt")
+val generateCodeTaskProvider = tasks.register("generateConfigOptions") {
+    inputs.file(configFilePath())
+    val generatedFile = File("$buildDir/generated/src/org/cqfn/save/core/config/SaveProperties.kt")
+    outputs.file(generatedFile)
+    doFirst {
+        generateConfigOptions(generatedFile)
+    }
 }
-
-tasks.withType<Detekt>().configureEach {
-    exclude("**/SaveProperties.kt")
+val generatedKotlinSrc = kotlin.sourceSets.create("generated") {
+    kotlin.srcDir("$buildDir/generated/src")
+}
+kotlin.sourceSets.getByName("commonMain").dependsOn(generatedKotlinSrc)
+tasks.withType<KotlinCompile<*>>().forEach {
+    it.dependsOn(generateCodeTaskProvider)
 }

@@ -173,6 +173,13 @@ In case you would like to have several plugins to work in your directory with sa
 ## SAVE output
 // FixMe: add output formats and a link to a dashboard from save-cloud
 
+## Development
+### Build
+The project uses gradle as a build system and can be built with the command `./gradlew build`.
+To compile native artifacts, you will need to install prerequisites as described in Kotlin/Native documentation.
+
+Because of generated code, you will need to run the build once to correctly import project in IDE with resolved imports.
+
 ## Contribution
-You can always contribute to the main SAVE framework or to a dashboard - just create a PR for it. But to contribute or change tests in categories you will need get approvals from 
+You can always contribute to the main SAVE framework - just create a PR for it. But to contribute or change tests in categories you will need get approvals from 
 the maintainer of the test package/analysis category. Please see the list of them.  

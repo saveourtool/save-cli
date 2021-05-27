@@ -18,6 +18,7 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.TypeSpec
+import org.gradle.api.Project
 
 import java.io.BufferedReader
 import java.io.File
@@ -32,11 +33,7 @@ private val autoGenerationComment =
             | ---------------------------------------------------------------------
         """.trimMargin()
 
-// Path to config file
-val configFilePath = "buildSrc/src/main/resources/config-options.json"
-
 // Paths, where to store generated files
-val generatedSaveSavePropertiesPath = "save-core/src/commonMain/kotlin/org/cqfn/save/core/config/"
 val generatedOptionsTablePath = "."
 
 /**
@@ -57,6 +54,11 @@ class Option {
     lateinit var description: String
     lateinit var default: String
 }
+
+/**
+ * Path to config file
+ */
+fun Project.configFilePath() = "$rootDir/buildSrc/src/main/resources/config-options.json"
 
 /**
  * Generate options for ArgParser
@@ -115,15 +117,17 @@ fun FunSpec.Builder.assignMembersToOptions(jsonObject: Map<String, Option>): Fun
 
 /**
  * General function for auto generation of config options and readme table
+ *
+ * @param destination a destination file for generated code
  */
 @Suppress("EMPTY_BLOCK_STRUCTURE_ERROR")
-fun generateConfigOptions() {
-    val configFile = configFilePath
+fun Project.generateConfigOptions(destination: File) {
+    val configFile = configFilePath()
     val gson = Gson()
     val bufferedReader: BufferedReader = File(configFile).bufferedReader()
     val jsonString = bufferedReader.use { it.readText() }
     val jsonObject: Map<String, Option> = gson.fromJson(jsonString, object : TypeToken<Map<String, Option>>() {}.type)
-    generateSaveProperties(jsonObject)
+    generateSaveProperties(jsonObject, destination)
     generateReadme(jsonObject)
 }
 
@@ -131,8 +135,9 @@ fun generateConfigOptions() {
  * Generate SaveProperties class which represents configuration properties of SAVE application
  *
  * @param jsonObject map of cli option names to [Option] objects
+ * @param destination
  */
-fun generateSaveProperties(jsonObject: Map<String, Option>) {
+fun generateSaveProperties(jsonObject: Map<String, Option>, destination: File) {
     val builder = FileSpec.builder("org.cqfn.save.core.config", "SaveProperties")
     builder.addComment(autoGenerationComment)
     builder.addImport("kotlinx.cli", "ArgParser")
@@ -143,7 +148,7 @@ fun generateSaveProperties(jsonObject: Map<String, Option>) {
     val mergeFunc = generateMergeConfigFunc(jsonObject)
     classBuilder.addFunction(mergeFunc.build())
     builder.addType(classBuilder.build()).indent("    ")
-    File("$generatedSaveSavePropertiesPath/SaveProperties.kt").writeText(builder.build().toString())
+    destination.writeText(builder.build().toString())
 }
 
 /**
