@@ -32,6 +32,12 @@ data class FixPluginConfig(
         }
     }
 
+    @Suppress("TYPE_ALIAS")
+    override fun createNewPluginConfig(childConfig: MutableList<PluginConfig<*>>): FixPluginConfig {
+        val childFixConfig = childConfig.filterIsInstance<FixPluginConfig>().firstOrNull()
+        return childFixConfig?.mergePluginConfig(this) ?: this
+    }
+
     override fun mergePluginConfig(parentConfig: FixPluginConfig) = FixPluginConfig(
         this.execCmd ?: parentConfig.execCmd,
         this.destinationFileSuffix ?: parentConfig.destinationFileSuffix

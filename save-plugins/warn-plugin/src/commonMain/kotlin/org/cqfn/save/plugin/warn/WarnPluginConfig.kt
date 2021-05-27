@@ -46,6 +46,12 @@ data class WarnPluginConfig(
     val messageCaptureGroup: Int,
     val exactWarningsMatch: Boolean? = null,
 ) : PluginConfig<WarnPluginConfig> {
+    @Suppress("TYPE_ALIAS")
+    override fun createNewPluginConfig(childConfig: MutableList<PluginConfig<*>>): WarnPluginConfig {
+        val childWarnConfig = childConfig.filterIsInstance<WarnPluginConfig>().firstOrNull()
+        return childWarnConfig?.mergePluginConfig(this) ?: this
+    }
+
     override fun mergePluginConfig(parentConfig: WarnPluginConfig) = WarnPluginConfig(
         this.execCmd ?: parentConfig.execCmd,
         this.warningsInputPattern ?: parentConfig.warningsInputPattern,

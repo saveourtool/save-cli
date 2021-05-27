@@ -1,7 +1,6 @@
 package org.cqfn.save.core
 
 import org.cqfn.save.core.config.TestConfig
-import org.cqfn.save.core.files.MergeConfigs
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.plugin.warn.WarnPluginConfig
@@ -25,7 +24,6 @@ class MergeConfigsTest {
     private val nestedDir2 = tmpDir / "nestedDir1" / "nestedDir2"
     private val toml3 = nestedDir2 / "save.toml"
     private val toml4 = nestedDir2 / "nestedDir3" / "nestedDir4" / "save.toml"
-    private val mergeConfigs = MergeConfigs()
     private val generalConfig1 = GeneralConfig("Tag1", "Description1", "suiteName1", "excludedTests: test1", "includedTests: test2")
     private val generalConfig2 = GeneralConfig("Tag2", "Description2", "suiteName2", "excludedTests: test3", "includedTests: test4")
     private val generalConfig3 = GeneralConfig("Tag3", "Description2", "suiteName3", "excludedTests: test5", "includedTests: test6")
@@ -64,7 +62,7 @@ class MergeConfigsTest {
         val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig1))
         val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2))
 
-        mergeConfigs.merge(config2)
+        config2.merge()
 
         assertEquals(2, config2.pluginConfigs.size)
 
@@ -81,7 +79,7 @@ class MergeConfigsTest {
         val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig2, fixConfig1))
         val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, warnConfig3, fixConfig2))
 
-        mergeConfigs.merge(config2)
+        config2.merge()
 
         assertEquals(3, config2.pluginConfigs.size)
 
@@ -106,7 +104,7 @@ class MergeConfigsTest {
         val config3 = TestConfig(toml3, config2, mutableListOf(generalConfig3, warnConfig3, fixConfig3))
         val config4 = TestConfig(toml4, config3, mutableListOf(generalConfig4, warnConfig4, fixConfig4))
 
-        mergeConfigs.merge(config4)
+        config4.merge()
 
         assertEquals(3, config4.pluginConfigs.size)
 
@@ -131,7 +129,7 @@ class MergeConfigsTest {
         val config3 = TestConfig(toml3, config2, mutableListOf(generalConfig3, warnConfig3, fixConfig3))
         val config4 = TestConfig(toml4, config3, mutableListOf(generalConfig4))
 
-        mergeConfigs.merge(config1)
+        config1.merge()
 
         assertEquals(3, config4.pluginConfigs.size)
 
@@ -155,7 +153,7 @@ class MergeConfigsTest {
         val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, warnConfig2, fixConfig2))
         val config3 = TestConfig(toml3, config2, mutableListOf(generalConfig3))
 
-        mergeConfigs.merge(config2)
+        config2.merge()
 
         assertEquals(3, config2.pluginConfigs.size)
 

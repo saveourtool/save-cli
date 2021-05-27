@@ -61,6 +61,56 @@ data class TestConfig(
      * @return a [Sequence] of parent config files
      */
     fun parentConfigs(withSelf: Boolean = false) = generateSequence(if (withSelf) this else parentConfig) { it.parentConfig }
+
+    /**
+     * Merge parent configurations with current and prolong it for all child configs
+     */
+    fun merge() {
+        logDebug("Start merging configs for ${this.location}")
+        val parentConfigs = parentConfigs(withSelf = true).toList().asReversed()
+        mergeConfigList(parentConfigs)
+        mergeChildConfigs()
+    }
+
+    // Merge list of configs pairwise
+    private fun mergeConfigList(configList: List<TestConfig>) {
+        if (configList.size == 1) {
+            return
+        }
+        val pairs = configList.zipWithNext()
+
+        pairs.forEach { (parent, child) ->
+            child.mergeChildConfigWithParent(parent)
+        }
+    }
+
+    // Merge child configs recursively
+    private fun mergeChildConfigs() {
+        for (child in childConfigs) {
+            child.mergeChildConfigWithParent(parent = this)
+            child.mergeChildConfigs()
+        }
+    }
+
+    private fun mergeChildConfigWithParent(parent: TestConfig) {
+        logDebug("Merging ${parent.location} with ${this.location}")
+        val parentPluginConfigs = parent.pluginConfigs
+        val childPluginConfigs = this.pluginConfigs
+
+        // Going through parent configs and:
+        // If some config is absent in parent, but exists is child, leave it as it is
+        // If some config is absent in child, but exists in parent, just take it from parent
+        // Otherwise we will merge configs
+        val result: MutableList<PluginConfig<*>> = mutableListOf()
+        for (config in parentPluginConfigs) {
+            val newPluginConfig = config.createNewPluginConfig(childPluginConfigs)
+            result.add(newPluginConfig)
+        }
+
+        // Now we update child config in place
+        childPluginConfigs.clear()
+        result.forEach { childPluginConfigs.add(it) }
+    }
 }
 
 /**

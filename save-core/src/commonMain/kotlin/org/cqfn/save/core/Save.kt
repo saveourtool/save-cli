@@ -7,7 +7,6 @@ import org.cqfn.save.core.config.TestConfigSections.FIX
 import org.cqfn.save.core.config.TestConfigSections.GENERAL
 import org.cqfn.save.core.config.TestConfigSections.WARN
 import org.cqfn.save.core.files.ConfigDetector
-import org.cqfn.save.core.files.MergeConfigs
 import org.cqfn.save.core.logging.isDebugEnabled
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
@@ -61,7 +60,7 @@ class Save(
         val testConfig = ConfigDetector().configFromFile(fullPathToConfig)
 
         val plugins: List<Plugin> = discoverPluginsAndUpdateTestConfig(testConfig)
-            .also { MergeConfigs().merge(testConfig) }
+            .also { it.merge() }
             // ignoring the section with general configuration as it is not needed to create plugin processors
             .pluginConfigs.filterNot { it is GeneralConfig }
             .map {

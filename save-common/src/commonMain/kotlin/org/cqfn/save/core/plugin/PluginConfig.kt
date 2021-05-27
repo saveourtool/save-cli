@@ -11,6 +11,15 @@ import kotlinx.serialization.Serializable
  */
 interface PluginConfig<T : PluginConfig<T>> {
     /**
+     * Create new config by merging of [this] and corresponding config from [childConfig]
+     *
+     * @param childConfig list of child configs, which will be filtered for merging
+     * @return new config
+     */
+    @Suppress("TYPE_ALIAS")
+    fun createNewPluginConfig(childConfig: MutableList<PluginConfig<*>>): T
+
+    /**
      * Function which is capable for merging inherited configurations
      *
      * @param parentConfig config which will be merged with [this]
@@ -35,6 +44,12 @@ data class GeneralConfig(
     val excludedTests: String? = null,
     val includedTests: String? = null,
 ) : PluginConfig<GeneralConfig> {
+    @Suppress("TYPE_ALIAS")
+    override fun createNewPluginConfig(childConfig: MutableList<PluginConfig<*>>): GeneralConfig {
+        val childGeneralConfig = childConfig.filterIsInstance<GeneralConfig>().firstOrNull()
+        return childGeneralConfig?.mergePluginConfig(this) ?: this
+    }
+
     override fun mergePluginConfig(parentConfig: GeneralConfig) = GeneralConfig(
         // TODO split and merge tags
         this.tags ?: parentConfig.tags,
