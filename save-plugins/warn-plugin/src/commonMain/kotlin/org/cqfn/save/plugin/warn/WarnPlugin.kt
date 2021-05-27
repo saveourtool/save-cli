@@ -101,7 +101,7 @@ class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
     internal fun createTestFile(path: Path): String {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPlugin::class.simpleName!!)
 
-        if (fs.exists(tmpDir) && atomicInt.value == 0) {
+        if (fs.exists(tmpDir) && atomicInt.get() == 0) {
             fs.deleteRecursively(tmpDir)
             fs.createDirectory(tmpDir)
         } else if (!fs.exists(tmpDir)) {

@@ -17,11 +17,11 @@ enum class CurrentOs {
  * Atomic values
  */
 @Suppress("VARIABLE_NAME_INCORRECT_FORMAT", "ConstructorParameterNaming")
-expect class AtomicInt(value_: Int) {
+expect class AtomicInt(value: Int) {
     /**
-     * @param value the value being held by this class.
+     * @return value
      */
-    var value: Int
+    fun get(): Int
 
     /**
      * @param delta increments the value_ by delta
