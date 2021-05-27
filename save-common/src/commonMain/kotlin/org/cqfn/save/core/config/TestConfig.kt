@@ -61,6 +61,7 @@ data class TestConfig(
      * recursively (till leafs) return all configs from the configuration Tree
      *
      */
+    @Suppress("WRONG_NEWLINES")
     fun getAllTestConfigs(): List<TestConfig> {
         return listOf(this) + this.childConfigs.flatMap { it.getAllTestConfigs() }
     }
