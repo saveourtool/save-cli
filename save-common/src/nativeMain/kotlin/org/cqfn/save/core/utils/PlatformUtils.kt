@@ -9,7 +9,6 @@ package org.cqfn.save.core.utils
  * Atomic values
  */
 actual class AtomicInt actual constructor(value: Int) {
-
     private val atomicInt = kotlin.native.concurrent.AtomicInt(value)
 
     /**
@@ -30,4 +29,3 @@ actual fun getCurrentOs() = when (Platform.osFamily) {
     OsFamily.WINDOWS -> CurrentOs.WINDOWS
     else -> CurrentOs.UNDEFINED
 }
-
