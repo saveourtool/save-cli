@@ -124,8 +124,7 @@ class Save(
 
     @Suppress("WHEN_WITHOUT_ELSE")  // TestResult is a sealed class
     private fun handleResult(testResult: TestResult) {
-        val status = testResult.status
-        when (status) {
+        when (val status = testResult.status) {
             is Pass -> {
                 val passMessage = "Test on resources [${testResult.resources}] has completed successfully"
                 status.message?.let { logDebug("$passMessage. $it") } ?: logDebug(passMessage)
