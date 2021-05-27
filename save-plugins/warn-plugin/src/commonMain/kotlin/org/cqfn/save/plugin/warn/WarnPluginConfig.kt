@@ -47,9 +47,13 @@ data class WarnPluginConfig(
     val exactWarningsMatch: Boolean? = null,
 ) : PluginConfig<WarnPluginConfig> {
     @Suppress("TYPE_ALIAS")
-    override fun createNewPluginConfig(childConfig: MutableList<PluginConfig<*>>): WarnPluginConfig {
+    override fun mergeConfigInto(childConfig: MutableList<PluginConfig<*>>) {
         val childWarnConfig = childConfig.filterIsInstance<WarnPluginConfig>().firstOrNull()
-        return childWarnConfig?.mergePluginConfig(this) ?: this
+        val newChildWarnConfig = childWarnConfig?.mergePluginConfig(this) ?: this
+        // Now we update child config in place
+        childWarnConfig?.let {
+            childConfig.set(childConfig.indexOf(childWarnConfig), newChildWarnConfig)
+        } ?: childConfig.add(newChildWarnConfig)
     }
 
     override fun mergePluginConfig(parentConfig: WarnPluginConfig) = WarnPluginConfig(

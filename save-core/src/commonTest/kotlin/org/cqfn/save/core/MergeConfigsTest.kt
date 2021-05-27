@@ -93,6 +93,23 @@ class MergeConfigsTest {
     }
 
     @Test
+    fun `merge two incomplete configs 2`() {
+        createTomlFiles()
+        val config1 = TestConfig(toml1, null, mutableListOf())
+        val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, warnConfig1))
+
+        config2.merge()
+
+        assertEquals(2, config2.pluginConfigs.size)
+
+        val actualGeneralConfig = config2.pluginConfigs.filterIsInstance<GeneralConfig>().first()
+        val actualWarnConfig = config2.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
+
+        assertEquals(generalConfig2, actualGeneralConfig)
+        assertEquals(warnConfig1, actualWarnConfig)
+    }
+
+    @Test
     fun `merge two configs with different fields`() {
         createTomlFiles()
         val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig2, fixConfig1))

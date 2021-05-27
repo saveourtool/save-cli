@@ -108,18 +108,13 @@ data class TestConfig(
         val childPluginConfigs = this.pluginConfigs
 
         // Going through parent configs and:
-        // If some config is absent in parent, but exists is child, leave it as it is
-        // If some config is absent in child, but exists in parent, just take it from parent
-        // Otherwise we will merge configs
-        val result: MutableList<PluginConfig<*>> = mutableListOf()
+        // 1) If some config is absent in parent, but exists is child, leave it as it is. In this case, we will not enter the loop,
+        // therefore won't modify child config
+        // 2) If some config is absent in child, but exists in parent, just take it from parent
+        // 3) Otherwise we will merge configs
         for (config in parentPluginConfigs) {
-            val newPluginConfig = config.createNewPluginConfig(childPluginConfigs)
-            result.add(newPluginConfig)
+            config.mergeConfigInto(childPluginConfigs)
         }
-
-        // Now we update child config in place
-        childPluginConfigs.clear()
-        result.forEach { childPluginConfigs.add(it) }
     }
 }
 

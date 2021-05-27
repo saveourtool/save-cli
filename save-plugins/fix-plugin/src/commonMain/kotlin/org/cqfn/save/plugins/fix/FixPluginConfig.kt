@@ -33,9 +33,13 @@ data class FixPluginConfig(
     }
 
     @Suppress("TYPE_ALIAS")
-    override fun createNewPluginConfig(childConfig: MutableList<PluginConfig<*>>): FixPluginConfig {
+    override fun mergeConfigInto(childConfig: MutableList<PluginConfig<*>>) {
         val childFixConfig = childConfig.filterIsInstance<FixPluginConfig>().firstOrNull()
-        return childFixConfig?.mergePluginConfig(this) ?: this
+        val newChildFixConfig = childFixConfig?.mergePluginConfig(this) ?: this
+        // Now we update child config in place
+        childFixConfig?.let {
+            childConfig.set(childConfig.indexOf(childFixConfig), newChildFixConfig)
+        } ?: childConfig.add(newChildFixConfig)
     }
 
     override fun mergePluginConfig(parentConfig: FixPluginConfig) = FixPluginConfig(
