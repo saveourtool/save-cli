@@ -63,6 +63,15 @@ data class TestConfig(
     fun parentConfigs(withSelf: Boolean = false) = generateSequence(if (withSelf) this else parentConfig) { it.parentConfig }
 
     /**
+     * recursively (till leafs) return all configs from the configuration Tree
+     *
+     */
+    @Suppress("WRONG_NEWLINES")
+    fun getAllTestConfigs(): List<TestConfig> {
+        return listOf(this) + this.childConfigs.flatMap { it.getAllTestConfigs() }
+    }
+    
+    /**
      * Merge parent configurations with current and prolong it for all child configs
      */
     fun merge() {
