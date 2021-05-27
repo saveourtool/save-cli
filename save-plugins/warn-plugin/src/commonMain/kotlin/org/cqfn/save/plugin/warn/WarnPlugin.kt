@@ -31,7 +31,7 @@ class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
 
     override fun execute(): Sequence<TestResult> {
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
-        val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
+        val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
         return discoverTestFiles(testConfig.directory).map { resources ->
             handleTestFile(resources.single(), warnPluginConfig, generalConfig)
         }
@@ -51,7 +51,7 @@ class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
     private fun handleTestFile(
         path: Path,
         warnPluginConfig: WarnPluginConfig,
-        generalConfig: GeneralConfig): TestResult {
+        generalConfig: GeneralConfig?): TestResult {
         val expectedWarnings = fs.readLines(path)
             .mapNotNull {
                 with(warnPluginConfig) {
@@ -72,7 +72,7 @@ class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
             }
             .mapValues { it.value.sortedBy { it.message } }
 
-        val execCmd: String = if (generalConfig.ignoreSaveComments) {
+        val execCmd: String = if (generalConfig?.ignoreSaveComments == true) {
             val fileName = createTestFile(path)
             warnPluginConfig.execCmd + " $fileName"
         } else {
@@ -101,10 +101,12 @@ class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
     internal fun createTestFile(path: Path): String {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPlugin::class.simpleName!!)
 
-        if (fs.exists(tmpDir)) {
+        if (fs.exists(tmpDir) && atomicInt.value == 0) {
             fs.deleteRecursively(tmpDir)
+            fs.createDirectory(tmpDir)
+        } else if (!fs.exists(tmpDir)) {
+            fs.createDirectory(tmpDir)
         }
-        fs.createDirectory(tmpDir)
 
         val fileName = testFileName()
         fs.write(fs.createFile(tmpDir / fileName)) {

@@ -19,6 +19,11 @@ enum class CurrentOs {
 @Suppress("VARIABLE_NAME_INCORRECT_FORMAT", "ConstructorParameterNaming")
 expect class AtomicInt(value_: Int) {
     /**
+     * @param value the value being held by this class.
+     */
+    var value: Int
+
+    /**
      * @param delta increments the value_ by delta
      * @return the new value
      */
