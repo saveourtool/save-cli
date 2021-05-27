@@ -30,6 +30,10 @@ interface PluginConfig<T : PluginConfig<T>> {
 
 /**
  * General configuration for test suite.
+ * Some fields by default are null, instead of some natural value, because of the fact, that in stage of merging
+ * of nested configs, we can't detect whether the value are passed by user, or taken from default.
+ * The logic of the default value processing will be provided in stage of validation
+ *
  * @property tags FixMe: after ktoml will support lists we should change it
  * @property description
  * @property suiteName
@@ -50,8 +54,8 @@ data class GeneralConfig(
         return childGeneralConfig?.mergePluginConfig(this) ?: this
     }
 
-    override fun mergePluginConfig(parentConfig: GeneralConfig): GeneralConfig  {
-        val mergedTag = parentConfig.tags?.let{
+    override fun mergePluginConfig(parentConfig: GeneralConfig): GeneralConfig {
+        val mergedTag = parentConfig.tags?.let {
             val parentTags = parentConfig.tags.split(", ")
             val childTags = this.tags.split(", ")
             parentTags.union(childTags).joinToString(", ")

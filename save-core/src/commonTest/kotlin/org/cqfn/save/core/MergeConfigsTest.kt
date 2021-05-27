@@ -73,7 +73,6 @@ class MergeConfigsTest {
         assertEquals(expectedGeneralConfig, actualGeneralConfig)
     }
 
-
     @Test
     fun `merge two incomplete configs`() {
         createTomlFiles()

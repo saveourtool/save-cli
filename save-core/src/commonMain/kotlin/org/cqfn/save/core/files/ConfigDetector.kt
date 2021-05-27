@@ -45,7 +45,7 @@ class ConfigDetector {
     private fun createTestConfigs(descendantConfigLocations: List<Path>, configs: MutableList<TestConfig>) =
             descendantConfigLocations
                 .drop(1)  // because [config] will be discovered too
-                .mapIndexed { index, path ->
+                .forEachIndexed { index, path ->
                     val parentConfig = configs.find { config ->
                         config.location ==
                                 descendantConfigLocations.take(index + 1)
