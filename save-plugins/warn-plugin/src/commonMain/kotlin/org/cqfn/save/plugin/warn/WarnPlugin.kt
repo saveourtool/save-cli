@@ -73,7 +73,7 @@ class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
             .mapValues { it.value.sortedBy { it.message } }
 
         val execCmd: String = if (generalConfig?.ignoreSaveComments == true) {
-            val fileName = createTestFile(path)
+            val fileName = createTestFile(path, warnPluginConfig.warningsInputPattern)
             warnPluginConfig.execCmd + " $fileName"
         } else {
             warnPluginConfig.execCmd + " ${path.name}"
@@ -96,9 +96,10 @@ class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
 
     /**
      * @param path
+     * @param warningsInputPattern
      * @return name of the temporary file
      */
-    internal fun createTestFile(path: Path): String {
+    internal fun createTestFile(path: Path, warningsInputPattern: Regex): String {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPlugin::class.simpleName!!)
 
         if (fs.exists(tmpDir) && atomicInt.get() == 0) {
@@ -111,7 +112,7 @@ class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
         val fileName = testFileName()
         fs.write(fs.createFile(tmpDir / fileName)) {
             fs.readLines(path).forEach {
-                if (!it.contains(";warn:")) {
+                if (!warningsInputPattern.matches(it)) {
                     write(
                         (it + "\n").encodeToByteArray()
                     )

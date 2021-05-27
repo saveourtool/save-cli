@@ -16,7 +16,6 @@ enum class CurrentOs {
 /**
  * Atomic values
  */
-@Suppress("VARIABLE_NAME_INCORRECT_FORMAT", "ConstructorParameterNaming")
 expect class AtomicInt(value: Int) {
     /**
      * @return value
