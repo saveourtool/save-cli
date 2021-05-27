@@ -84,7 +84,7 @@ data class WarnPluginConfig(
     }
 }
 
-@ExperimentalSerializationApi
+@OptIn(ExperimentalSerializationApi::class)
 @Serializer(forClass = Regex::class)
 object RegexSerializer : KSerializer<Regex> {
     override val descriptor: SerialDescriptor =
