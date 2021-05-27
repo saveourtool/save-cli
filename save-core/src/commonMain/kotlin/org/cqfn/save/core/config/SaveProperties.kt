@@ -6,8 +6,8 @@ package org.cqfn.save.core.config
 import kotlin.Array
 import kotlin.Boolean
 import kotlin.Int
-import kotlin.collections.List
 import kotlin.String
+import kotlin.collections.List
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.`vararg`
@@ -175,7 +175,8 @@ public data class SaveProperties(
 
         val testFiles by parser.argument(
                     ArgType.String,
-                    description = "Paths to individual test files, can be provided to execute only them"
+                    description = "Paths to individual test files, can be provided to execute " +
+                        "only them"
                 )
                     .optional()
                     .vararg()
@@ -196,6 +197,7 @@ public data class SaveProperties(
         this.configInheritance = configInheritance
         this.ignoreSaveComments = ignoreSaveComments
         this.reportDir = reportDir
+        this.testFiles = testFiles
     }
 
     /**

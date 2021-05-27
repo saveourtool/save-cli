@@ -91,7 +91,7 @@ fun FunSpec.Builder.addTestsVararg(): FunSpec.Builder = apply {
     addStatement("""
         val testFiles by parser.argument(
             ArgType.String,
-            description = "Paths to individual test files, can be provided to execute only them"
+            description = "Paths to individual test files, can be provided to execute " + "only them"
         )
             .optional()
             .vararg()

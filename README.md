@@ -114,9 +114,9 @@ To do so, you want to pass a test file name:
 ```bash
 $ save /path/to/tests/Test1
 ```
-or a list of comma-separated names
+or a list of file names (separated with spaces)
 ```bash
-$ save /path/to/tests/Test1,/path/to/tests/Test2
+$ save /path/to/tests/Test1 /path/to/tests/Test2
 ```
 SAVE will detect the closest `save.toml` file and use configuration from there.
 
