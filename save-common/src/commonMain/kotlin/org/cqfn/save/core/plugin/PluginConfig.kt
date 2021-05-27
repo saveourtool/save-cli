@@ -50,12 +50,18 @@ data class GeneralConfig(
         return childGeneralConfig?.mergePluginConfig(this) ?: this
     }
 
-    override fun mergePluginConfig(parentConfig: GeneralConfig) = GeneralConfig(
-        // TODO split and merge tags
-        this.tags ?: parentConfig.tags,
-        this.description ?: parentConfig.description,
-        this.suiteName ?: parentConfig.suiteName,
-        this.excludedTests ?: parentConfig.excludedTests,
-        this.includedTests ?: parentConfig.includedTests
-    )
+    override fun mergePluginConfig(parentConfig: GeneralConfig): GeneralConfig  {
+        val mergedTag = parentConfig.tags?.let{
+            val parentTags = parentConfig.tags.split(", ")
+            val childTags = this.tags.split(", ")
+            parentTags.union(childTags).joinToString(", ")
+        } ?: this.tags
+        return GeneralConfig(
+            mergedTag,
+            this.description ?: parentConfig.description,
+            this.suiteName ?: parentConfig.suiteName,
+            this.excludedTests ?: parentConfig.excludedTests,
+            this.includedTests ?: parentConfig.includedTests
+        )
+    }
 }
