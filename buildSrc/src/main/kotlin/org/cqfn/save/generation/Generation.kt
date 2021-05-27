@@ -69,16 +69,19 @@ fun Project.configFilePath() = "$rootDir/buildSrc/src/main/resources/config-opti
 @Suppress("TOO_MANY_LINES_IN_LAMBDA")
 fun FunSpec.Builder.generateOptions(jsonObject: Map<String, Option>): FunSpec.Builder {
     jsonObject.forEach {
-        var option = "val ${it.key} by parser.option(\n"
-        option += "${it.value.argType},\n"
-        option += "fullName = \"${it.value.fullName}\",\n"
-        if (it.value.shortName.isNotEmpty()) {
-            option += "shortName = \"${it.value.shortName}\",\n"
+        val option = StringBuilder().apply {
+            append("val ${it.key} by parser.option\n")
+            append("${it.value.argType},\n")
+            append("fullName = \"${it.value.fullName}\",\n")
+            if (it.value.shortName.isNotEmpty()) {
+                append("shortName = \"${it.value.shortName}\",\n")
+            }
+            // We replace whitespaces to `·`, in aim to avoid incorrect line breaking,
+            // which could be done by kotlinpoet (see https://github.com/square/kotlinpoet/issues/598)
+            append("description = \"${it.value.description.replace(" ", "·")}\"\n")
+            append(")\n")
         }
-        // We replace whitespaces to `·`, in aim to avoid incorrect line breaking,
-        // which could be done by kotlinpoet
-        option += "description = \"${it.value.description.replace(" ", "·")}\"\n"
-        option += ")\n"
+            .toString()
         this.addStatement(option)
     }
     return this
