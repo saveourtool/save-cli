@@ -10,3 +10,5 @@ actual fun getCurrentOs() = when (Platform.osFamily) {
     OsFamily.WINDOWS -> CurrentOs.WINDOWS
     else -> CurrentOs.UNDEFINED
 }
+
+actual typealias AtomicInt = kotlin.native.concurrent.AtomicInt

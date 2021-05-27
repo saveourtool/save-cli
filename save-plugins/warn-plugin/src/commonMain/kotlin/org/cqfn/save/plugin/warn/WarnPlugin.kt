@@ -10,6 +10,7 @@ import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.result.TestStatus
+import org.cqfn.save.core.utils.AtomicInt
 import org.cqfn.save.core.utils.ProcessBuilder
 import org.cqfn.save.plugin.warn.WarnPluginConfig.Companion.defaultResourceNamePattern
 import org.cqfn.save.plugin.warn.utils.Warning
@@ -17,7 +18,6 @@ import org.cqfn.save.plugin.warn.utils.extractWarning
 
 import okio.FileSystem
 import okio.Path
-import kotlin.jvm.JvmStatic
 
 private typealias LineColumn = Pair<Int, Int>
 
@@ -140,9 +140,9 @@ class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
         }
     }
 
-    private fun testFileName(): String = "test_file${numFile++}"
+    private fun testFileName(): String = "test_file${atomicInt.addAndGet(1)}"
 
     companion object {
-        @JvmStatic var numFile = 0
+        val atomicInt: AtomicInt = AtomicInt(0)
     }
 }

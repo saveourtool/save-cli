@@ -11,3 +11,5 @@ actual fun getCurrentOs() = when {
     System.getProperty("os.name").startsWith("Windows", ignoreCase = true) -> CurrentOs.WINDOWS
     else -> CurrentOs.UNDEFINED
 }
+
+actual typealias AtomicInt = java.util.concurrent.atomic.AtomicInteger
