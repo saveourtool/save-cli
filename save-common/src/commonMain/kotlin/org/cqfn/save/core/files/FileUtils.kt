@@ -2,26 +2,52 @@
  * Utility methods for common operations with file system using okio.
  */
 
+@file:Suppress("FILE_NAME_MATCH_CLASS", "MatchingDeclarationName")
+
 package org.cqfn.save.core.files
 
+import okio.Buffer
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
+import okio.Sink
+import okio.Timeout
+
+/**
+ * A simple okio [Sink] that writes it's input to stdout
+ */
+class StdoutSink : Sink {
+    override fun close() = Unit
+
+    override fun flush() = Unit
+
+    override fun timeout(): Timeout = Timeout.NONE
+
+    /**
+     * Writes a UTF-8 representation of [source] to stdout
+     */
+    override fun write(source: Buffer, byteCount: Long) {
+        print(source.readByteString(byteCount).utf8())
+    }
+}
 
 /**
  * Find all descendant files in the directory denoted by [this] [Path], that match [condition].
- * This method uses BFS, so files will appear in the returned list in order of directory levels.
+ * Files will appear in the returned list grouped by directories, while directories are visited in depth-first manner.
  *
  * @param condition a condition to match
- * @return a list of files
+ * @return a list of files, grouped by directory
  */
-// FixMe: need to filter empty lists here
 fun Path.findAllFilesMatching(condition: (Path) -> Boolean): List<List<Path>> = FileSystem.SYSTEM.list(this)
     .partition { FileSystem.SYSTEM.metadata(it).isDirectory }
     .let { (directories, files) ->
-        listOf(files.filter(condition)) + directories.flatMap {
+        val filesInCurrentDir = files.filter(condition).takeIf { it.isNotEmpty() }
+        val resultFromNestedDirs = directories.flatMap {
             it.findAllFilesMatching(condition)
         }
+        filesInCurrentDir?.let {
+            listOf(it) + resultFromNestedDirs
+        } ?: resultFromNestedDirs
     }
 
 /**
