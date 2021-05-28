@@ -46,10 +46,12 @@ fun Project.configureVersioning() {
         val grgit = project.findProperty("grgit") as Grgit  // grgit property is added by reckon plugin
         // A terrible hack to remove all pre-release tags. Because in semver `0.1.0-SNAPSHOT` < `0.1.0-alpha`, in snapshot mode
         // we remove tags like `0.1.0-alpha`, and then reckoned version will still be `0.1.0-SNAPSHOT` and it will be compliant.
-        val preReleaseTagNames = grgit.tag.list().reversed().takeWhile {
-            // take latest tags that are pre-release
-            !it.name.matches(Regex("""^\d+\.\d+\.\d+$"""))
-        }
+        val preReleaseTagNames = grgit.tag.list()
+            .sortedByDescending { it.commit.dateTime }
+            .takeWhile {
+                // take latest tags that are pre-release
+                !it.name.matches(Regex("""^v\d+\.\d+\.\d+$"""))
+            }
             .map { it.name }
         grgit.tag.remove { this.names = preReleaseTagNames }
     }
