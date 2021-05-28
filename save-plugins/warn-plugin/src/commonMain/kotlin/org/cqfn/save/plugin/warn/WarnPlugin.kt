@@ -1,13 +1,16 @@
 package org.cqfn.save.plugin.warn
 
 import org.cqfn.save.core.config.TestConfig
+import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
+import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.result.TestStatus
+import org.cqfn.save.core.utils.AtomicInt
 import org.cqfn.save.core.utils.ProcessBuilder
 import org.cqfn.save.plugin.warn.WarnPluginConfig.Companion.defaultResourceNamePattern
 import org.cqfn.save.plugin.warn.utils.Warning
@@ -28,8 +31,9 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
 
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
+        val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
         return discoverTestFiles(testConfig.directory).map { resources ->
-            handleTestFile(resources.single(), warnPluginConfig)
+            handleTestFile(resources.single(), warnPluginConfig, generalConfig)
         }
     }
 
@@ -40,10 +44,13 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
         }
         .filter { it.isNotEmpty() }
 
-    @Suppress("UnusedPrivateMember")
+    @Suppress(
+        "TOO_LONG_FUNCTION",
+        "SAY_NO_TO_VAR")
     private fun handleTestFile(
         path: Path,
-        warnPluginConfig: WarnPluginConfig): TestResult {
+        warnPluginConfig: WarnPluginConfig,
+        generalConfig: GeneralConfig?): TestResult {
         val expectedWarnings = fs.readLines(path)
             .mapNotNull {
                 with(warnPluginConfig) {
@@ -63,8 +70,15 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
                 }
             }
             .mapValues { it.value.sortedBy { it.message } }
-        // todo: create a temp file with technical comments removed and feed it to the tool
-        val executionResult = pb.exec(warnPluginConfig.execCmd, null)
+
+        val execCmd: String = if (generalConfig?.ignoreSaveComments == true) {
+            val fileName = createTestFile(path, warnPluginConfig.warningsInputPattern)
+            warnPluginConfig.execCmd + " $fileName"
+        } else {
+            warnPluginConfig.execCmd + " ${path.name}"
+        }
+
+        val executionResult = pb.exec(execCmd, null)
         val actualWarningsMap = executionResult.stdout.mapNotNull {
             with(warnPluginConfig) {
                 it.extractWarning(warningsOutputPattern, columnCaptureGroup, lineCaptureGroup, messageCaptureGroup)
@@ -79,16 +93,38 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
         )
     }
 
+    /**
+     * @param path
+     * @param warningsInputPattern
+     * @return name of the temporary file
+     */
+    internal fun createTestFile(path: Path, warningsInputPattern: Regex): String {
+        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPlugin::class.simpleName!!)
+
+        if (fs.exists(tmpDir) && atomicInt.get() == 0) {
+            fs.deleteRecursively(tmpDir)
+            fs.createDirectory(tmpDir)
+        } else if (!fs.exists(tmpDir)) {
+            fs.createDirectory(tmpDir)
+        }
+
+        val fileName = testFileName()
+        fs.write(fs.createFile(tmpDir / fileName)) {
+            fs.readLines(path).forEach {
+                if (!warningsInputPattern.matches(it)) {
+                    write(
+                        (it + "\n").encodeToByteArray()
+                    )
+                }
+            }
+        }
+        return fileName
+    }
+
     @Suppress("TYPE_ALIAS")
     private fun checkResults(expectedWarningsMap: Map<LineColumn?, List<Warning>>,
                              actualWarningsMap: Map<LineColumn?, List<Warning>>,
-                             warnPluginConfig: WarnPluginConfig): TestStatus =
-            checkCollectionsDiffer(expectedWarningsMap, actualWarningsMap, warnPluginConfig)
-
-    @Suppress("TYPE_ALIAS")
-    private fun checkCollectionsDiffer(expectedWarningsMap: Map<LineColumn?, List<Warning>>,
-                                       actualWarningsMap: Map<LineColumn?, List<Warning>>,
-                                       warnPluginConfig: WarnPluginConfig): TestStatus {
+                             warnPluginConfig: WarnPluginConfig): TestStatus {
         val missingWarnings = expectedWarningsMap.filterValues { it !in actualWarningsMap.values }.values
         val unexpectedWarnings = actualWarningsMap.filterValues { it !in expectedWarningsMap.values }.values
 
@@ -104,5 +140,11 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
             true to true -> Pass(null)
             else -> Fail("")
         }
+    }
+
+    private fun testFileName(): String = "test_file${atomicInt.addAndGet(1)}"
+
+    companion object {
+        val atomicInt: AtomicInt = AtomicInt(0)
     }
 }
