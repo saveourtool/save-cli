@@ -82,6 +82,11 @@ val generateCodeTaskProvider = tasks.register("generateConfigOptions") {
 }
 val generatedKotlinSrc = kotlin.sourceSets.create("generated") {
     kotlin.srcDir("$buildDir/generated/src")
+    dependencies {
+        implementation(project(":save-common"))
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
+        implementation("org.jetbrains.kotlinx:kotlinx-cli:${Versions.Kotlinx.cli}")
+    }
 }
 kotlin.sourceSets.getByName("commonMain").dependsOn(generatedKotlinSrc)
 tasks.withType<KotlinCompile<*>>().forEach {
