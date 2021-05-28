@@ -2,6 +2,8 @@ package org.cqfn.save.plugin.warn
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.files.readLines
+import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.ResourceFormatException
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
@@ -59,7 +61,8 @@ class WarnPluginTest {
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
                 true, true, 1, 2, 3
-            )
+            ),
+            GeneralConfig("", "", "")
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -92,7 +95,8 @@ class WarnPluginTest {
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
                 true, true, 1, 2, 3, false
-            )
+            ),
+            GeneralConfig("", "", "")
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -119,6 +123,7 @@ class WarnPluginTest {
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"), Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
                 true, true, 1, 2, 3
             ),
+            GeneralConfig("", "", "")
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -152,7 +157,8 @@ class WarnPluginTest {
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
                 true, true, 1, 2, 3
-            )
+            ),
+            GeneralConfig("", "", "")
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -189,6 +195,7 @@ class WarnPluginTest {
                 Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
                 true, true, 1, 2, 3
             ),
+            GeneralConfig("", "", "")
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -223,7 +230,7 @@ class WarnPluginTest {
                 Regex("// ;warn: (.*)"),
                 Regex("[\\w\\d.-]+: (.+)"),
                 false, false, null, null, 1
-            )
+            ), GeneralConfig("", "", "")
         ) { results ->
             assertEquals(1, results.size)
             results.single().status.let {
@@ -241,6 +248,7 @@ class WarnPluginTest {
     private fun performTest(
         text: String,
         warnPluginConfig: WarnPluginConfig,
+        generalConfig: GeneralConfig,
         assertion: (List<TestResult>) -> Unit) {
         val testFile = fs.createFile(tmpDir / "Test1Test.java")
         val config = fs.createFile(tmpDir / "save.toml")
@@ -248,7 +256,7 @@ class WarnPluginTest {
             write(text.encodeToByteArray())
         }
 
-        val results = WarnPlugin(TestConfig(config, null, mutableListOf(warnPluginConfig)))
+        val results = WarnPlugin(TestConfig(config, null, mutableListOf(warnPluginConfig, generalConfig)))
             .execute()
             .toList()
         println(results)
@@ -264,6 +272,38 @@ class WarnPluginTest {
                 2,
                 3
             )
+        }
+    }
+
+    @Test
+    fun `warn-plugin test create test file`() {
+        fs.write(fs.createFile(tmpDir / "resource")) {
+            write(
+                """
+                package org.cqfn.save.example
+                
+                // ;warn:3:6: Class name should be in PascalCase
+                class example {
+                    int foo = 42;
+                }
+            """.trimIndent().encodeToByteArray()
+            )
+        }
+
+        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
+        val warnPluginConfig = WarnPluginConfig(
+            "$catCmd ${tmpDir / "resource"}",
+            Regex("// ;warn: (.*)"),
+            Regex("[\\w\\d.-]+: (.+)"),
+            false, false, null, null, 1
+        )
+        val generalConfig = GeneralConfig("", "", "")
+        val config = fs.createFile(tmpDir / "save.toml")
+        val nameFile = WarnPlugin(TestConfig(config, null, mutableListOf(warnPluginConfig, generalConfig)))
+            .createTestFile(tmpDir / "resource", warnPluginConfig.warningsInputPattern)
+        val tmpDirTest = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPlugin::class.simpleName!!)
+        fs.readLines(tmpDirTest / nameFile).forEach {
+            assertTrue(!warnPluginConfig.warningsInputPattern.matches(it))
         }
     }
 }

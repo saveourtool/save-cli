@@ -14,6 +14,22 @@ enum class CurrentOs {
 }
 
 /**
+ * Atomic values
+ */
+expect class AtomicInt(value: Int) {
+    /**
+     * @return value
+     */
+    fun get(): Int
+
+    /**
+     * @param delta increments the value_ by delta
+     * @return the new value
+     */
+    fun addAndGet(delta: Int): Int
+}
+
+/**
  * Get type of current OS
  *
  * @return type of current OS

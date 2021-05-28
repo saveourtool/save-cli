@@ -18,6 +18,7 @@ interface PluginConfig
  * @property suiteName
  * @property excludedTests FixMe: after ktoml will support lists we should change it
  * @property includedTests FixMe: after ktoml will support lists we should change it
+ * @property ignoreSaveComments if true then ignore warning comments
  */
 @Serializable
 data class GeneralConfig(
@@ -26,4 +27,5 @@ data class GeneralConfig(
     val suiteName: String,
     val excludedTests: String = "",
     val includedTests: String = "",
+    val ignoreSaveComments: Boolean = false,
 ) : PluginConfig
