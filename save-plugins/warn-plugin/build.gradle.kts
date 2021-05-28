@@ -36,6 +36,8 @@ kotlin {
     }
 }
 
+configurePublishing()
+
 tasks.withType<org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest> {
     useJUnitPlatform()
 }
