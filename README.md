@@ -110,13 +110,13 @@ Such directories we will call `test suites`. We decided to have only one configu
 
 ## Executing specific tests
 It can be useful to execute only a number of tests instead of all tests under a particular `save.toml` config.
-To do so, you want to pass a test file name:
+To do so, you want to pass a test file name after all configuration options:
 ```bash
-$ save /path/to/tests/Test1
+$ save [options] /path/to/tests/Test1
 ```
 or a list of file names (separated with spaces)
 ```bash
-$ save /path/to/tests/Test1 /path/to/tests/Test2
+$ save [options] /path/to/tests/Test1 /path/to/tests/Test2
 ```
 SAVE will detect the closest `save.toml` file and use configuration from there.
 
