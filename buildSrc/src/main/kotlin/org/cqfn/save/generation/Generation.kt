@@ -33,9 +33,6 @@ private val autoGenerationComment =
             | ---------------------------------------------------------------------
         """.trimMargin()
 
-// Paths, where to store generated files
-val generatedOptionsTablePath = "."
-
 /**
  * This class represents the general form of each key in json file with config options
  * @property argType Type which will be used by ArgParser
@@ -54,6 +51,11 @@ class Option {
     lateinit var description: String
     lateinit var default: String
 }
+
+/**
+ * Paths, where to store generated files
+ */
+fun Project.generatedOptionsTablePath() = "$rootDir/OptionsTable.md"
 
 /**
  * Path to config file
@@ -131,7 +133,7 @@ fun Project.generateConfigOptions(destination: File) {
     val jsonString = bufferedReader.use { it.readText() }
     val jsonObject: Map<String, Option> = gson.fromJson(jsonString, object : TypeToken<Map<String, Option>>() {}.type)
     generateSaveProperties(jsonObject, destination)
-    generateReadme(jsonObject)
+    generateReadme(jsonObject, File(generatedOptionsTablePath()))
 }
 
 /**
@@ -267,9 +269,10 @@ fun generateMergeConfigFunc(jsonObject: Map<String, Option>): FunSpec.Builder {
  * Generate readme table from json object
  *
  * @param jsonObject map of cli option names to [Option] objects
+ * @param destination a destination file to write the table into
  */
 @Suppress("TOO_MANY_LINES_IN_LAMBDA")
-fun generateReadme(jsonObject: Map<String, Option>) {
+fun generateReadme(jsonObject: Map<String, Option>, destination: File) {
     var readmeContent =
             """
                 |Most (except for `-h` and `-prop`) of the options below can be passed to a SAVE via `save.properties` file
@@ -294,5 +297,5 @@ fun generateReadme(jsonObject: Map<String, Option>) {
         }
         readmeContent += "\n| $shortName | $longName | $description | $default |"
     }
-    File("$generatedOptionsTablePath/OptionsTable.md").writeText(readmeContent)
+    destination.writeText(readmeContent)
 }

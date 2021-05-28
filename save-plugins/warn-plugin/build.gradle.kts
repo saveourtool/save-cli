@@ -1,3 +1,5 @@
+import org.cqfn.save.buildutils.configurePublishing
+
 plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization")
@@ -35,6 +37,8 @@ kotlin {
         }
     }
 }
+
+configurePublishing()
 
 tasks.withType<org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest> {
     useJUnitPlatform()

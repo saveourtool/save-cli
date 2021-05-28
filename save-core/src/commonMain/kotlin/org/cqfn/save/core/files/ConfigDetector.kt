@@ -22,21 +22,18 @@ class ConfigDetector {
     fun configFromFile(testConfig: Path): TestConfig {
         // testConfig is validated in the beginning and cannot be null
         return discoverConfigWithParents(testConfig)
+            // After `discoverConfigWithParents` we successfully created TestConfig instances for all save.toml files
+            // starting from the given [testConfig] to the top-level save.toml in file tree.
+            // Now do the same for children configs
             ?.also { config ->
-                // fill children for parent configs
-                config.parentConfigs(wihSelf = true)
-                    .toList()
-                    .reversed()
-                    .zipWithNext()
-                    .forEach { (parent, child) -> parent.childConfigs.add(child) }
-
+                // Go down through the file tree and
                 // discover all descendant configs of [config]
-                val locationsFlattened = config
+                val descendantConfigLocations = config
                     .directory
                     .findAllFilesMatching { it.isSaveTomlConfig() }
                     .flatten()
 
-                createTestConfigs(locationsFlattened, mutableListOf(config))
+                createTestConfigs(descendantConfigLocations, mutableListOf(config))
             }
             ?: run {
                 logError("Config file was not found in $testConfig")
@@ -45,13 +42,13 @@ class ConfigDetector {
             }
     }
 
-    private fun createTestConfigs(locationsFlattened: List<Path>, configs: MutableList<TestConfig>) =
-            locationsFlattened
+    private fun createTestConfigs(descendantConfigLocations: List<Path>, configs: MutableList<TestConfig>) =
+            descendantConfigLocations
                 .drop(1)  // because [config] will be discovered too
                 .forEachIndexed { index, path ->
                     val parentConfig = configs.find { config ->
                         config.location ==
-                                locationsFlattened.take(index + 1)
+                                descendantConfigLocations.take(index + 1)
                                     .reversed()
                                     .find { it.parent in path.parents() }!!
                     }!!
@@ -60,15 +57,12 @@ class ConfigDetector {
                         TestConfig(
                             path,
                             parentConfig,
-                        ).also {
-                            logDebug("Found config file at $path, adding as a child for ${parentConfig.location}")
-                            it.neighbourConfigs?.add(it)
-                        }
+                        )
                     )
                 }
 
     /**
-     * Depends to type of entry point, start to create the hierarchy of TestConfig's, from bottom to top
+     * Depends to type of entry point, start to create the hierarchy of TestConfig's, starting from the [file] till the top in the file tree
      *
      * @param file entry point from which SAVE should create hierarchy of [TestConfig]'s.
      * @return [TestConfig] or null if no suitable config file has been found.
@@ -88,7 +82,7 @@ class ConfigDetector {
         .mapNotNull { it.findChildByOrNull { it.isSaveTomlConfig() } }
         .firstOrNull()
         ?.let { discoverConfigWithParents(it) }
-        .also { logDebug("Processing test config from a single test file: $file") }
+        .also { logDebug("Processing test config for a single test file: $file") }
 
     private fun getTestConfigFromDirectory(file: Path) = file
         .findChildByOrNull { it.isSaveTomlConfig() }
@@ -96,6 +90,7 @@ class ConfigDetector {
         .also { logDebug("Processing test config from directory: $file") }
 
     private fun getTestConfigFromTomlFile(file: Path): TestConfig {
+        // Create instances for all parent configs recursively
         val parentConfig = file.parents()
             .drop(1)  // because immediate parent already contains [this] config
             .mapNotNull { parentDir ->
@@ -105,7 +100,7 @@ class ConfigDetector {
             }
             .firstOrNull()
             ?.let { getTestConfigFromTomlFile(it) }
-
+        // Now process current config
         logDebug("Processing test config from the toml file: $file")
 
         return TestConfig(

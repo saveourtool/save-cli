@@ -17,6 +17,10 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
 /**
+ * Some fields by default are null, instead of some natural value, because of the fact, that in stage of merging
+ * of nested configs, we can't detect whether the value are passed by user, or taken from default.
+ * The logic of the default value processing will be provided in stage of validation
+ *
  * @property execCmd a command that will be executed to check resources and emit warnings
  * @property warningsInputPattern a regular expression by which expected warnings will be discovered in test resources
  * @property warningsOutputPattern a regular expression by which warnings will be discovered in the process output
@@ -35,23 +39,34 @@ data class WarnPluginConfig(
     val execCmd: String,
     val warningsInputPattern: Regex,
     val warningsOutputPattern: Regex,
-    val warningTextHasLine: Boolean = true,
-    val warningTextHasColumn: Boolean = true,
+    val warningTextHasLine: Boolean? = null,
+    val warningTextHasColumn: Boolean? = null,
     val lineCaptureGroup: Int?,
     val columnCaptureGroup: Int?,
     val messageCaptureGroup: Int,
-    val exactWarningsMatch: Boolean = true,
-) : PluginConfig {
-    init {
-        require(warningTextHasLine xor (lineCaptureGroup == null)) {
-            "warn-plugin configuration error: either warningTextHasLine should be false (actual: $warningTextHasLine) " +
-                    "or lineCaptureGroup should be provided (actual: $lineCaptureGroup}"
-        }
-        require(warningTextHasColumn xor (columnCaptureGroup == null)) {
-            "warn-plugin configuration error: either warningTextHasColumn should be false (actual: $warningTextHasColumn) " +
-                    "or columnCaptureGroup should be provided (actual: $columnCaptureGroup}"
-        }
+    val exactWarningsMatch: Boolean? = null,
+) : PluginConfig<WarnPluginConfig> {
+    @Suppress("TYPE_ALIAS")
+    override fun mergeConfigInto(childConfig: MutableList<PluginConfig<*>>) {
+        val childWarnConfig = childConfig.filterIsInstance<WarnPluginConfig>().firstOrNull()
+        val newChildWarnConfig = childWarnConfig?.mergePluginConfig(this) ?: this
+        // Now we update child config in place
+        childWarnConfig?.let {
+            childConfig.set(childConfig.indexOf(childWarnConfig), newChildWarnConfig)
+        } ?: childConfig.add(newChildWarnConfig)
     }
+
+    override fun mergePluginConfig(parentConfig: WarnPluginConfig) = WarnPluginConfig(
+        this.execCmd ?: parentConfig.execCmd,
+        this.warningsInputPattern ?: parentConfig.warningsInputPattern,
+        this.warningsOutputPattern ?: parentConfig.warningsOutputPattern,
+        this.warningTextHasLine ?: parentConfig.warningTextHasLine,
+        this.warningTextHasColumn ?: parentConfig.warningTextHasColumn,
+        this.lineCaptureGroup ?: parentConfig.lineCaptureGroup,
+        this.columnCaptureGroup ?: parentConfig.columnCaptureGroup,
+        this.messageCaptureGroup ?: parentConfig.messageCaptureGroup,
+        this.exactWarningsMatch ?: parentConfig.exactWarningsMatch
+    )
 
     companion object {
         /**
