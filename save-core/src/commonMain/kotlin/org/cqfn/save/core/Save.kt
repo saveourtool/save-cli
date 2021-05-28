@@ -124,7 +124,7 @@ class Save(
             }
 
             val sectionName = tomlPluginSection.name.uppercase()
-            val sectionPluginConfig: PluginConfig = when (val configName = TestConfigSections.valueOf(sectionName)) {
+            val sectionPluginConfig: PluginConfig<*> = when (val configName = TestConfigSections.valueOf(sectionName)) {
                 FIX -> createPluginConfig<FixPluginConfig>(testConfigPath, fakeFileNode, sectionName)
                 WARN -> createPluginConfig<WarnPluginConfig>(testConfigPath, fakeFileNode, sectionName)
                 GENERAL -> createPluginConfig<GeneralConfig>(testConfigPath, fakeFileNode, sectionName)
