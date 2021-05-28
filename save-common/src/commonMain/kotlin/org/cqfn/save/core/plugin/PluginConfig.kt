@@ -38,6 +38,7 @@ interface PluginConfig<T : PluginConfig<T>> {
  * @property suiteName
  * @property excludedTests FixMe: after ktoml will support lists we should change it
  * @property includedTests FixMe: after ktoml will support lists we should change it
+ * @property ignoreSaveComments if true then ignore warning comments
  */
 @Serializable
 data class GeneralConfig(
@@ -46,6 +47,7 @@ data class GeneralConfig(
     val suiteName: String,
     val excludedTests: String? = null,
     val includedTests: String? = null,
+    val ignoreSaveComments: Boolean? = null
 ) : PluginConfig<GeneralConfig> {
     @Suppress("TYPE_ALIAS")
     override fun mergeConfigInto(childConfig: MutableList<PluginConfig<*>>) {
@@ -68,7 +70,8 @@ data class GeneralConfig(
             this.description ?: parentConfig.description,
             this.suiteName ?: parentConfig.suiteName,
             this.excludedTests ?: parentConfig.excludedTests,
-            this.includedTests ?: parentConfig.includedTests
+            this.includedTests ?: parentConfig.includedTests,
+            this.ignoreSaveComments ?: parentConfig.ignoreSaveComments
         )
     }
 }
