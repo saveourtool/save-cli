@@ -1,3 +1,5 @@
+import org.cqfn.save.buildutils.configurePublishing
+
 plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization")
