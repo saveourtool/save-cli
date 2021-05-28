@@ -40,6 +40,7 @@ jobs:
         # if workflow is triggered after push to a branch, deploy snapshot
         if: ${{ startsWith(github.ref, 'refs/heads/') }}
         run: ./gradlew --build-cache -Prelease -Preckon.stage=snapshot linkReleaseExecutableMultiplatform publishToSonatype
+        shell: bash
       - name: Status git after
         if: ${{ always() }}
         run: git status
