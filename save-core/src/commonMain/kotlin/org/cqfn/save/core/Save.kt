@@ -79,7 +79,7 @@ class Save(
         reporter.beforeAll()
 
         val plugins: List<Plugin> = discoverPluginsAndUpdateTestConfig(testConfig)
-            // FixMe: Kirill should add merging of configs here
+            .also { it.merge() }
             // ignoring the section with general configuration as it is not needed to create plugin processors
             .pluginConfigs.filterNot { it is GeneralConfig }
             .map {
@@ -124,7 +124,7 @@ class Save(
             }
 
             val sectionName = tomlPluginSection.name.uppercase()
-            val sectionPluginConfig: PluginConfig = when (val configName = TestConfigSections.valueOf(sectionName)) {
+            val sectionPluginConfig: PluginConfig<*> = when (val configName = TestConfigSections.valueOf(sectionName)) {
                 FIX -> createPluginConfig<FixPluginConfig>(testConfigPath, fakeFileNode, sectionName)
                 WARN -> createPluginConfig<WarnPluginConfig>(testConfigPath, fakeFileNode, sectionName)
                 GENERAL -> createPluginConfig<GeneralConfig>(testConfigPath, fakeFileNode, sectionName)

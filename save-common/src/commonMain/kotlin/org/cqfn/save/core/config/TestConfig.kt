@@ -4,6 +4,7 @@
 
 package org.cqfn.save.core.config
 
+import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.plugin.PluginConfig
 
 import okio.FileSystem
@@ -15,10 +16,11 @@ import okio.Path
  * @property parentConfig parent config in the hierarchy of configs, `null` if this config is root.
  * @property pluginConfigs list of configurations for plugins that are active in this config
  */
+@Suppress("TYPE_ALIAS")
 data class TestConfig(
     val location: Path,
     val parentConfig: TestConfig?,
-    val pluginConfigs: MutableList<PluginConfig> = mutableListOf(),
+    val pluginConfigs: MutableList<PluginConfig<*>> = mutableListOf(),
     private val fs: FileSystem = FileSystem.SYSTEM,
 ) {
     /**
@@ -30,7 +32,7 @@ data class TestConfig(
     val neighbourConfigs: MutableList<TestConfig>? = this.parentConfig?.childConfigs
 
     /**
-     * List of child configs in the hierarchy oConfigDetectorf configs, can be empty if this config is at the very bottom.
+     * List of child configs in the hierarchy of ConfigDetector configs, can be empty if this config is at the very bottom.
      * NB: don't move to constructor in order not to break toString into infinite recursion.
      */
     val childConfigs: MutableList<TestConfig> = mutableListOf()
@@ -41,6 +43,10 @@ data class TestConfig(
     val directory: Path = location.parent!!
 
     init {
+        parentConfig?.let {
+            logDebug("Add child ${this.location} for ${parentConfig.location}")
+            parentConfig.childConfigs.add(this)
+        }
         require(fs.metadata(location).isRegularFile) {
             "Location <${location.name}> denotes a directory, but TestConfig should be created from a file"
         }
@@ -52,10 +58,10 @@ data class TestConfig(
     fun isRoot() = parentConfig == null
 
     /**
-     * @param wihSelf if true, include this config as the first element of the sequence or start with parent config otherwise
+     * @param withSelf if true, include this config as the first element of the sequence or start with parent config otherwise
      * @return a [Sequence] of parent config files
      */
-    fun parentConfigs(wihSelf: Boolean = false) = generateSequence(if (wihSelf) this else parentConfig) { it.parentConfig }
+    fun parentConfigs(withSelf: Boolean = false) = generateSequence(if (withSelf) this else parentConfig) { it.parentConfig }
 
     /**
      * recursively (till leafs) return all configs from the configuration Tree
@@ -64,6 +70,51 @@ data class TestConfig(
     @Suppress("WRONG_NEWLINES")
     fun getAllTestConfigs(): List<TestConfig> {
         return listOf(this) + this.childConfigs.flatMap { it.getAllTestConfigs() }
+    }
+    
+    /**
+     * Merge parent configurations with current and prolong it for all child configs
+     */
+    fun merge() {
+        logDebug("Start merging configs for ${this.location}")
+        val parentConfigs = parentConfigs(withSelf = true).toList().asReversed()
+        mergeConfigList(parentConfigs)
+        mergeChildConfigs()
+    }
+
+    // Merge list of configs pairwise
+    private fun mergeConfigList(configList: List<TestConfig>) {
+        if (configList.size == 1) {
+            return
+        }
+        val pairs = configList.zipWithNext()
+
+        pairs.forEach { (parent, child) ->
+            child.mergeChildConfigWithParent(parent)
+        }
+    }
+
+    // Merge child configs recursively
+    private fun mergeChildConfigs() {
+        for (child in childConfigs) {
+            child.mergeChildConfigWithParent(parent = this)
+            child.mergeChildConfigs()
+        }
+    }
+
+    private fun mergeChildConfigWithParent(parent: TestConfig) {
+        logDebug("Merging ${parent.location} with ${this.location}")
+        val parentPluginConfigs = parent.pluginConfigs
+        val childPluginConfigs = this.pluginConfigs
+
+        // Going through parent configs and:
+        // 1) If some config is absent in parent, but exists is child, leave it as it is. In this case, we will not enter the loop,
+        // therefore won't modify child config
+        // 2) If some config is absent in child, but exists in parent, just take it from parent
+        // 3) Otherwise we will merge configs
+        for (config in parentPluginConfigs) {
+            config.mergeConfigInto(childPluginConfigs)
+        }
     }
 }
 

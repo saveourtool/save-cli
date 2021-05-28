@@ -133,7 +133,7 @@ class WarnPlugin(testConfig: TestConfig) : Plugin(testConfig) {
             false to true -> Fail("Some warnings were expected but not received: $missingWarnings")
             false to false -> Fail("Some warnings were expected but not received: $missingWarnings, " +
                     "and others were unexpected: $unexpectedWarnings")
-            true to false -> if (!warnPluginConfig.exactWarningsMatch) {
+            true to false -> if (warnPluginConfig.exactWarningsMatch == false) {
                 Pass("Some warnings were unexpected: $unexpectedWarnings")
             } else {
                 Fail("Some warnings were unexpected: $unexpectedWarnings")
