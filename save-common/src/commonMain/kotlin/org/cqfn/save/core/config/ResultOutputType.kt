@@ -1,5 +1,6 @@
 package org.cqfn.save.core.config
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -7,5 +8,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 enum class ResultOutputType {
-    FILE, STDERR, STDOUT
+    @SerialName("file") FILE,
+    @SerialName("stderr") STDERR,
+    @SerialName("stdout") STDOUT,
+    ;
 }

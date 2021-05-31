@@ -1,5 +1,6 @@
 package org.cqfn.save.core.config
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -8,5 +9,10 @@ import kotlinx.serialization.Serializable
 @Suppress("IDENTIFIER_LENGTH")
 @Serializable
 enum class LanguageType {
-    C, CPP, JAVA, KOTLIN, UNDEFINED
+    @SerialName("c") C,
+    @SerialName("cpp") CPP,
+    @SerialName("java") JAVA,
+    @SerialName("kotlin") KOTLIN,
+    @SerialName("undefined") UNDEFINED,
+    ;
 }

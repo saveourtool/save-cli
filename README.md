@@ -75,7 +75,8 @@ OR you can pass these arguments directly in command line:
 save --mode=single --language=java
 ```
 
-For the complete list of supported options refer to the [options table.](/OptionsTable.md)
+For the complete list of supported options refer to the [options table.](/OptionsTable.md) or run `save --help`.
+Note, that options with choice are case-sensitive.
 
 SAVE framework will detect tests, run your analyzer on these tests, will calculate the pass-rate and test results.
 
