@@ -1,10 +1,22 @@
+@file:Suppress("HEADER_MISSING_IN_NON_SINGLE_CLASS_FILE")
+@file:UseSerializers(RegexSerializer::class)
+
 package org.cqfn.save.plugins.fix
 
 import org.cqfn.save.core.plugin.PluginConfig
 
 import okio.Path
 
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.UseSerializers
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
 /**
  * Some fields by default are null, instead of some natural value, because of the fact, that in stage of merging
@@ -13,11 +25,13 @@ import kotlinx.serialization.Serializable
  *
  * @property execCmd a command that will be executed to mutate test file contents
  * @property destinationFileSuffix [execCmd] should append this suffix to the file name after mutating it.
+ * @property resourceNamePattern
  */
 @Serializable
 data class FixPluginConfig(
     val execCmd: String,
     val destinationFileSuffix: String? = null,
+    val resourceNamePattern: Regex? = null
 ) : PluginConfig<FixPluginConfig> {
     /**
      * Constructs a name of destination file from original file name and [destinationFileSuffix]
@@ -50,4 +64,17 @@ data class FixPluginConfig(
     companion object {
         internal val defaultResourceNamePattern = Regex("""(.+)(Expected|Test)\.[\w\d]+""")
     }
+}
+
+@OptIn(ExperimentalSerializationApi::class)
+@Serializer(forClass = Regex::class)
+object RegexSerializer : KSerializer<Regex> {
+    override val descriptor: SerialDescriptor =
+            PrimitiveSerialDescriptor("regex", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: Regex) {
+        encoder.encodeString(value.pattern)
+    }
+
+    override fun deserialize(decoder: Decoder): Regex = Regex(decoder.decodeString())
 }

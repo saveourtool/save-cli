@@ -32,8 +32,13 @@ class FixPluginTest {
         fs.createFile(tmpDir / "Test1Test.java")
         fs.createFile(tmpDir / "Test1Expected.java")
 
+        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
+        val config = FixPluginConfig(
+            "$catCmd ${tmpDir / "resource"}"
+        )
+
         val pairs = FixPlugin(TestConfig(tmpDir / "Test1Test.java", null, mutableListOf()))
-            .discoverTestFiles(tmpDir)
+            .discoverTestFiles(tmpDir, config.resourceNamePattern)
             .map { it.first() to it.last() }
             .toList()
 
@@ -54,8 +59,13 @@ class FixPluginTest {
         fs.createFile(tmpDir / "NowCompletelyDifferentExpected.java")
         fs.createFile(tmpDir / "AndNowCompletelyDifferent.java")
 
+        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
+        val config = FixPluginConfig(
+            "$catCmd ${tmpDir / "resource"}"
+        )
+
         val pairs = FixPlugin(TestConfig(tmpDir / "Something.java", null, mutableListOf()))
-            .discoverTestFiles(tmpDir)
+            .discoverTestFiles(tmpDir, config.resourceNamePattern)
             .map { it.first() to it.last() }
             .toList()
 

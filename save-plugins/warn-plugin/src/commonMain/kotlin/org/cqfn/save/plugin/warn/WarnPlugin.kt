@@ -29,18 +29,27 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
     private val fs = FileSystem.SYSTEM
     private val pb = ProcessBuilder()
 
+    override fun execute(): Sequence<TestResult> {
+        val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
+        val regex = warnPluginConfig.resourceNamePattern ?: defaultResourceNamePattern
+        return handleFiles(
+            discoverTestFiles(testConfig.directory, regex)
+        )
+    }
+
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
-        return discoverTestFiles(testConfig.directory).map { resources ->
+        val regex = warnPluginConfig.resourceNamePattern ?: defaultResourceNamePattern
+        return discoverTestFiles(testConfig.directory, regex).map { resources ->
             handleTestFile(resources.single(), warnPluginConfig, generalConfig)
         }
     }
 
-    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> = resourceDirectories
+    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>, regex: Regex?): Sequence<List<Path>> = resourceDirectories
         .map { directory ->
             FileSystem.SYSTEM.list(directory)
-                .filter { defaultResourceNamePattern.matches(it.name) }
+                .filter { (regex ?: defaultResourceNamePattern).matches(it.name) }
         }
         .filter { it.isNotEmpty() }
 

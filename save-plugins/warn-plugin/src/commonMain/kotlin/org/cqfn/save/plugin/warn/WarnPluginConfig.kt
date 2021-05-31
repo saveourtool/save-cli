@@ -33,6 +33,7 @@ import kotlinx.serialization.encoding.Encoder
  * @property messageCaptureGroup an index of capture group in regular expressions, corresponding to warning text. Indices start at 0 with 0
  * corresponding to the whole string.
  * @property exactWarningsMatch exact match of errors
+ * @property resourceNamePattern
  */
 @Serializable
 data class WarnPluginConfig(
@@ -45,6 +46,7 @@ data class WarnPluginConfig(
     val columnCaptureGroup: Int?,
     val messageCaptureGroup: Int,
     val exactWarningsMatch: Boolean? = null,
+    val resourceNamePattern: Regex? = null,
 ) : PluginConfig<WarnPluginConfig> {
     @Suppress("TYPE_ALIAS")
     override fun mergeConfigInto(childConfig: MutableList<PluginConfig<*>>) {
@@ -65,7 +67,8 @@ data class WarnPluginConfig(
         this.lineCaptureGroup ?: parentConfig.lineCaptureGroup,
         this.columnCaptureGroup ?: parentConfig.columnCaptureGroup,
         this.messageCaptureGroup ?: parentConfig.messageCaptureGroup,
-        this.exactWarningsMatch ?: parentConfig.exactWarningsMatch
+        this.exactWarningsMatch ?: parentConfig.exactWarningsMatch,
+        this.resourceNamePattern ?: parentConfig.resourceNamePattern
     )
 
     companion object {

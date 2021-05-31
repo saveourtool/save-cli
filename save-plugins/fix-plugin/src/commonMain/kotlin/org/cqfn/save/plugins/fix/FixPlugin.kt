@@ -34,6 +34,14 @@ class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) :
         .newTag { start -> if (start) "<" else ">" }
         .build()
 
+    override fun execute(): Sequence<TestResult> {
+        val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
+        val regex = fixPluginConfig.resourceNamePattern ?: defaultResourceNamePattern
+        return handleFiles(
+            discoverTestFiles(testConfig.directory, regex)
+        )
+    }
+
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
         logInfo("Discovered the following file pairs for comparison: $files")
@@ -61,11 +69,11 @@ class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) :
             }
     }
 
-    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> = resourceDirectories
+    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>, regex: Regex?): Sequence<List<Path>> = resourceDirectories
         .map { FileSystem.SYSTEM.list(it) }
         .flatMap { files ->
             files.groupBy {
-                val matchResult = defaultResourceNamePattern.matchEntire(it.name)
+                val matchResult = (regex ?: defaultResourceNamePattern).matchEntire(it.name)
                 matchResult?.groupValues?.get(1)  // this is a capture group for the start of file name
             }
                 .filter { it.value.size > 1 && it.key != null }

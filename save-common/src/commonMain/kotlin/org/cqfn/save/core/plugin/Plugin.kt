@@ -18,9 +18,9 @@ abstract class Plugin(open val testConfig: TestConfig, private val testFiles: Li
      *
      * @return a sequence of [TestResult]s for each group of test resources
      */
-    fun execute(): Sequence<TestResult> = handleFiles(
+    open fun execute(): Sequence<TestResult> = handleFiles(
         // todo: pass individual groups of files to handleFiles? Or it will play bad with batch mode?
-        discoverTestFiles(testConfig.directory)
+        discoverTestFiles(testConfig.directory, null)
     )
 
     /**
@@ -36,10 +36,11 @@ abstract class Plugin(open val testConfig: TestConfig, private val testFiles: Li
      * for execution of individual tests.
      *
      * @param root root [Path], from where discovering should be started
+     * @param regex default regex for actual warnings in the tool output
      * @return a sequence of files, grouped by test
      */
-    fun discoverTestFiles(root: Path): Sequence<List<Path>> {
-        val rawTestFiles = rawDiscoverTestFiles(root.resourceDirectories())
+    fun discoverTestFiles(root: Path, regex: Regex?): Sequence<List<Path>> {
+        val rawTestFiles = rawDiscoverTestFiles(root.resourceDirectories(), regex)
         return if (testFiles.isNotEmpty()) {
             rawTestFiles.filter { paths ->
                 // test can be specified by the name of one of it's files
@@ -54,9 +55,10 @@ abstract class Plugin(open val testConfig: TestConfig, private val testFiles: Li
      * Discover groups of resource files which will be used to run tests.
      *
      * @param resourceDirectories a sequence of [Path]s, which contain this plugin's resources
+     * @param regex default regex for actual warnings in the tool output
      * @return a sequence of files, grouped by test
      */
-    abstract fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>>
+    abstract fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>, regex: Regex?): Sequence<List<Path>>
 
     /**
      * Returns a sequence of directories, where resources for this plugin may be located.
