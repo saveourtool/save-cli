@@ -8,9 +8,9 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 enum class ReportType {
-    @SerialName("JSON") JSON,
+    @SerialName("json") JSON,
     @SerialName("plain") PLAIN,
-    @SerialName("TOML") TOML,
-    @SerialName("XML") XML,
+    @SerialName("toml") TOML,
+    @SerialName("xml") XML,
     ;
 }

@@ -9,10 +9,10 @@ import kotlinx.serialization.Serializable
 @Suppress("IDENTIFIER_LENGTH")
 @Serializable
 enum class LanguageType {
-    @SerialName("C") C,
-    @SerialName("CPP") CPP,
-    @SerialName("Java") JAVA,
-    @SerialName("Kotlin") KOTLIN,
+    @SerialName("c") C,
+    @SerialName("cpp") CPP,
+    @SerialName("java") JAVA,
+    @SerialName("kotlin") KOTLIN,
     @SerialName("undefined") UNDEFINED,
     ;
 }
