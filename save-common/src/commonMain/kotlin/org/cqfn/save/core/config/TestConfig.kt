@@ -9,6 +9,7 @@ import org.cqfn.save.core.plugin.PluginConfig
 
 import okio.FileSystem
 import okio.Path
+import org.cqfn.save.core.plugin.GeneralConfig
 
 /**
  * Configuration for a test suite, that is read from test suite configuration file (toml config)
@@ -20,7 +21,7 @@ import okio.Path
 data class TestConfig(
     val location: Path,
     val parentConfig: TestConfig?,
-    val pluginConfigs: MutableList<PluginConfig<*>> = mutableListOf(),
+    val pluginConfigs: MutableList<PluginConfig> = mutableListOf(),
     private val fs: FileSystem = FileSystem.SYSTEM,
 ) {
     /**
@@ -61,7 +62,8 @@ data class TestConfig(
      * @param withSelf if true, include this config as the first element of the sequence or start with parent config otherwise
      * @return a [Sequence] of parent config files
      */
-    fun parentConfigs(withSelf: Boolean = false) = generateSequence(if (withSelf) this else parentConfig) { it.parentConfig }
+    fun parentConfigs(withSelf: Boolean = false) =
+        generateSequence(if (withSelf) this else parentConfig) { it.parentConfig }
 
     /**
      * recursively (till leafs) return all configs from the configuration Tree
@@ -71,50 +73,34 @@ data class TestConfig(
     fun getAllTestConfigs(): List<TestConfig> {
         return listOf(this) + this.childConfigs.flatMap { it.getAllTestConfigs() }
     }
-    
+
     /**
-     * Merge parent configurations with current and prolong it for all child configs
+     * filtering out general configs
      */
-    fun merge() {
+    fun pluginConfigsWithoutGeneralConfig() = pluginConfigs.filterNot { it is GeneralConfig }
+
+    /**
+     * Merge parent list of plugins with the current list
+     */
+    fun mergeConfigWithParent(): TestConfig {
         logDebug("Start merging configs for ${this.location}")
-        val parentConfigs = parentConfigs(withSelf = true).toList().asReversed()
-        mergeConfigList(parentConfigs)
-        mergeChildConfigs()
-    }
 
-    // Merge list of configs pairwise
-    private fun mergeConfigList(configList: List<TestConfig>) {
-        if (configList.size == 1) {
-            return
+        // return from the function if we stay at the root element of the plugin tree
+        val parentalPlugins = this.parentConfig?.pluginConfigs ?: return this
+        parentalPlugins.forEach { currentConfig ->
+            val childConfigs = this.pluginConfigs.filter { it.type == currentConfig.type }
+            if (childConfigs.isEmpty()) {
+                // if we haven't found a plugin from parent in a current list of plugins - we will simply copy it
+                this.pluginConfigs.add(currentConfig)
+            } else {
+                // else, we will merge plugin with a corresponding plugin from a parent config
+                // we expect that there is only one plugin of such type, otherwise we will throw an exception
+                val mergedConfig = childConfigs.single().mergeWith(currentConfig)
+                this.pluginConfigs.set(this.pluginConfigs.indexOf(childConfigs.single()), mergedConfig)
+            }
         }
-        val pairs = configList.zipWithNext()
 
-        pairs.forEach { (parent, child) ->
-            child.mergeChildConfigWithParent(parent)
-        }
-    }
-
-    // Merge child configs recursively
-    private fun mergeChildConfigs() {
-        for (child in childConfigs) {
-            child.mergeChildConfigWithParent(parent = this)
-            child.mergeChildConfigs()
-        }
-    }
-
-    private fun mergeChildConfigWithParent(parent: TestConfig) {
-        logDebug("Merging ${parent.location} with ${this.location}")
-        val parentPluginConfigs = parent.pluginConfigs
-        val childPluginConfigs = this.pluginConfigs
-
-        // Going through parent configs and:
-        // 1) If some config is absent in parent, but exists is child, leave it as it is. In this case, we will not enter the loop,
-        // therefore won't modify child config
-        // 2) If some config is absent in child, but exists in parent, just take it from parent
-        // 3) Otherwise we will merge configs
-        for (config in parentPluginConfigs) {
-            config.mergeConfigInto(childPluginConfigs)
-        }
+        return this
     }
 }
 

@@ -1,6 +1,6 @@
 [general]
 tags = test
-description = "My suite description"
+description = "My description 1"
 suiteName = "DocsCheck"
 
 [warn]

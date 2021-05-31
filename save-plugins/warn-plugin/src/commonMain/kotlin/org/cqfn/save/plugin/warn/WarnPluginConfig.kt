@@ -15,6 +15,7 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import org.cqfn.save.core.config.TestConfigSections
 
 /**
  * Some fields by default are null, instead of some natural value, because of the fact, that in stage of merging
@@ -45,28 +46,23 @@ data class WarnPluginConfig(
     val columnCaptureGroup: Int?,
     val messageCaptureGroup: Int,
     val exactWarningsMatch: Boolean? = null,
-) : PluginConfig<WarnPluginConfig> {
-    @Suppress("TYPE_ALIAS")
-    override fun mergeConfigInto(childConfig: MutableList<PluginConfig<*>>) {
-        val childWarnConfig = childConfig.filterIsInstance<WarnPluginConfig>().firstOrNull()
-        val newChildWarnConfig = childWarnConfig?.mergePluginConfig(this) ?: this
-        // Now we update child config in place
-        childWarnConfig?.let {
-            childConfig.set(childConfig.indexOf(childWarnConfig), newChildWarnConfig)
-        } ?: childConfig.add(newChildWarnConfig)
-    }
+) : PluginConfig {
+    override val type = TestConfigSections.WARN
 
-    override fun mergePluginConfig(parentConfig: WarnPluginConfig) = WarnPluginConfig(
-        this.execCmd ?: parentConfig.execCmd,
-        this.warningsInputPattern ?: parentConfig.warningsInputPattern,
-        this.warningsOutputPattern ?: parentConfig.warningsOutputPattern,
-        this.warningTextHasLine ?: parentConfig.warningTextHasLine,
-        this.warningTextHasColumn ?: parentConfig.warningTextHasColumn,
-        this.lineCaptureGroup ?: parentConfig.lineCaptureGroup,
-        this.columnCaptureGroup ?: parentConfig.columnCaptureGroup,
-        this.messageCaptureGroup ?: parentConfig.messageCaptureGroup,
-        this.exactWarningsMatch ?: parentConfig.exactWarningsMatch
-    )
+    override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
+        val other = otherConfig as WarnPluginConfig
+        return WarnPluginConfig(
+            this.execCmd,
+            this.warningsInputPattern,
+            this.warningsOutputPattern,
+            this.warningTextHasLine ?: other.warningTextHasLine,
+            this.warningTextHasColumn ?: other.warningTextHasColumn,
+            this.lineCaptureGroup ?: other.lineCaptureGroup,
+            this.columnCaptureGroup ?: other.columnCaptureGroup,
+            this.messageCaptureGroup,
+            this.exactWarningsMatch ?: other.exactWarningsMatch
+        )
+    }
 
     companion object {
         /**
@@ -88,7 +84,7 @@ data class WarnPluginConfig(
 @Serializer(forClass = Regex::class)
 object RegexSerializer : KSerializer<Regex> {
     override val descriptor: SerialDescriptor =
-            PrimitiveSerialDescriptor("regex", PrimitiveKind.STRING)
+        PrimitiveSerialDescriptor("regex", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: Regex) {
         encoder.encodeString(value.pattern)

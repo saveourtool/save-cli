@@ -12,6 +12,3 @@ columnCaptureGroup = 2  # index of regex capture group for column number, used w
 messageCaptureGroup = 3  # index of regex capture group for message text
 warningTextHasColumn = true
 warningTextHasLine = true
-
-[fix]
-execCmd="./ktlint -R diktat-0.4.2.jar -F"

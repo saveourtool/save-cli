@@ -2,10 +2,12 @@ package org.cqfn.save.core
 
 import org.cqfn.save.core.config.ReportType
 import org.cqfn.save.core.config.SaveProperties
+import kotlin.test.Ignore
 import kotlin.test.Test
 
-class PluginDiscoveryTest {
+class PerformAnalysisTest {
     @Test
+    @Ignore
     fun `detect plugins`() {
         val saveProperties = SaveProperties(
             testRootPath = "../examples",
