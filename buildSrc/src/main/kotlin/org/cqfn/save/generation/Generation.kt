@@ -71,19 +71,38 @@ fun Project.configFilePath() = "$rootDir/buildSrc/src/main/resources/config-opti
 @Suppress("TOO_MANY_LINES_IN_LAMBDA")
 fun FunSpec.Builder.generateOptions(jsonObject: Map<String, Option>): FunSpec.Builder {
     jsonObject.forEach {
-        var option = "val ${it.key} by parser.option(\n"
-        option += "${it.value.argType},\n"
-        option += "fullName = \"${it.value.fullName}\",\n"
-        if (it.value.shortName.isNotEmpty()) {
-            option += "shortName = \"${it.value.shortName}\",\n"
+        val option = StringBuilder().apply {
+            append("val ${it.key} by parser.option(\n")
+            append("${it.value.argType},\n")
+            append("fullName = \"${it.value.fullName}\",\n")
+            if (it.value.shortName.isNotEmpty()) {
+                append("shortName = \"${it.value.shortName}\",\n")
+            }
+            // We replace whitespaces to `·`, in aim to avoid incorrect line breaking,
+            // which could be done by kotlinpoet (see https://github.com/square/kotlinpoet/issues/598)
+            append("description = \"${it.value.description.replace(" ", "·")}\"\n")
+            append(")\n")
         }
-        // We replace whitespaces to `·`, in aim to avoid incorrect line breaking,
-        // which could be done by kotlinpoet
-        option += "description = \"${it.value.description.replace(" ", "·")}\"\n"
-        option += ")\n"
+            .toString()
         this.addStatement(option)
     }
     return this
+}
+
+/**
+ * Adds statement with vararg CLI argument for testFiles
+ *
+ * @return builder
+ */
+fun FunSpec.Builder.addTestsVararg(): FunSpec.Builder = apply {
+    addStatement("""
+        val testFiles by parser.argument(
+            ArgType.String,
+            description = "Paths to individual test files, can be provided to execute " + "only them"
+        )
+            .optional()
+            .vararg()
+    """.trimIndent())
 }
 
 /**
@@ -97,6 +116,7 @@ fun FunSpec.Builder.assignMembersToOptions(jsonObject: Map<String, Option>): Fun
         val assign = "this.${it.key} = ${it.key}"
         this.addStatement(assign)
     }
+    addStatement("this.testFiles = testFiles")
     return this
 }
 
@@ -127,6 +147,8 @@ fun generateSaveProperties(jsonObject: Map<String, Option>, destination: File) {
     builder.addComment(autoGenerationComment)
     builder.addImport("kotlinx.cli", "ArgParser")
     builder.addImport("kotlinx.cli", "ArgType")
+    builder.addImport("kotlinx.cli", "optional")
+    builder.addImport("kotlinx.cli", "vararg")
     val classBuilder = generateSavePropertiesClass(jsonObject)
     val mergeFunc = generateMergeConfigFunc(jsonObject)
     classBuilder.addFunction(mergeFunc.build())
@@ -151,6 +173,7 @@ fun generateSavePropertiesClass(jsonObject: Map<String, Option>): TypeSpec.Build
                """.trimMargin()
     classBuilder.addKdoc(kdoc)
     classBuilder.addAnnotation(AnnotationSpec.builder(ClassName("kotlinx.serialization", "Serializable")).build())
+
     // Generate primary ctor
     val primaryCtor = FunSpec.constructorBuilder()
     for ((name, value) in jsonObject) {
@@ -168,7 +191,19 @@ fun generateSavePropertiesClass(jsonObject: Map<String, Option>): TypeSpec.Build
             .mutable()
         classBuilder.addProperty(property.build())
     }
+    primaryCtor.addParameter(
+        ParameterSpec.builder(
+            "testFiles", ClassName("kotlin.collections", "List").parameterizedBy(ClassName("kotlin", "String"))
+        )
+            .defaultValue("emptyList()")
+            .build()
+    )
+    val property = PropertySpec.builder("testFiles", ClassName("kotlin.collections", "List").parameterizedBy(ClassName("kotlin", "String")))
+        .initializer("testFiles")
+        .mutable()
+    classBuilder.addProperty(property.build())
     classBuilder.primaryConstructor(primaryCtor.build())
+
     // Generate secondary ctor
     val secondaryCtor = FunSpec.constructorBuilder()
     secondaryCtor.addParameter("args", ClassName("kotlin", "Array")
@@ -176,9 +211,11 @@ fun generateSavePropertiesClass(jsonObject: Map<String, Option>): TypeSpec.Build
     secondaryCtor.callThisConstructor()
     secondaryCtor.addStatement("val parser = ArgParser(\"save\")")
         .generateOptions(jsonObject)
+        .addTestsVararg()
         .addStatement("parser.parse(args)")
         .assignMembersToOptions(jsonObject)
     classBuilder.addFunction(secondaryCtor.build())
+
     return classBuilder
 }
 
