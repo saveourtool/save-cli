@@ -24,7 +24,7 @@ import okio.Path.Companion.toPath
  * @property testConfig
  */
 @Suppress("INLINE_CLASS_CAN_BE_USED")
-class FixPlugin(testConfig: TestConfig) : Plugin(testConfig) {
+class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) : Plugin(testConfig, testFiles) {
     private val pb = ProcessBuilder()
     private val diffGenerator = DiffRowGenerator.create()
         .showInlineDiffs(true)
@@ -34,12 +34,9 @@ class FixPlugin(testConfig: TestConfig) : Plugin(testConfig) {
         .newTag { start -> if (start) "<" else ">" }
         .build()
 
-    override fun execute(): Sequence<TestResult> {
+    override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
-        val files = discoverTestFiles(testConfig.directory)
-            .also {
-                logInfo("Discovered the following file pairs for comparison: $it")
-            }
+        logInfo("Discovered the following file pairs for comparison: $files")
         return files
             .map { it.first() to it.last() }
             .map { (expected, test) ->
@@ -64,8 +61,7 @@ class FixPlugin(testConfig: TestConfig) : Plugin(testConfig) {
             }
     }
 
-    override fun discoverTestFiles(root: Path): Sequence<List<Path>> = root
-        .resourceDirectories()
+    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> = resourceDirectories
         .map { FileSystem.SYSTEM.list(it) }
         .flatMap { files ->
             files.groupBy {
