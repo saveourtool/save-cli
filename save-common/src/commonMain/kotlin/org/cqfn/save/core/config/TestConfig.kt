@@ -5,11 +5,11 @@
 package org.cqfn.save.core.config
 
 import org.cqfn.save.core.logging.logDebug
+import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.PluginConfig
 
 import okio.FileSystem
 import okio.Path
-import org.cqfn.save.core.plugin.GeneralConfig
 
 /**
  * Configuration for a test suite, that is read from test suite configuration file (toml config)
@@ -63,7 +63,7 @@ data class TestConfig(
      * @return a [Sequence] of parent config files
      */
     fun parentConfigs(withSelf: Boolean = false) =
-        generateSequence(if (withSelf) this else parentConfig) { it.parentConfig }
+            generateSequence(if (withSelf) this else parentConfig) { it.parentConfig }
 
     /**
      * recursively (till leafs) return all configs from the configuration Tree
@@ -81,6 +81,8 @@ data class TestConfig(
 
     /**
      * Merge parent list of plugins with the current list
+     *
+     * @return merged test config
      */
     fun mergeConfigWithParent(): TestConfig {
         logDebug("Start merging configs for ${this.location}")

@@ -1,12 +1,11 @@
 package org.cqfn.save.plugins.fix
 
+import org.cqfn.save.core.config.TestConfigSections
 import org.cqfn.save.core.plugin.PluginConfig
 
 import okio.Path
 
 import kotlinx.serialization.Serializable
-import org.cqfn.save.core.config.TestConfigSections
-import org.cqfn.save.core.plugin.PluginException
 
 /**
  * Some fields by default are null, instead of some natural value, because of the fact, that in stage of merging

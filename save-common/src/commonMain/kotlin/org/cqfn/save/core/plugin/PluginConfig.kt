@@ -4,18 +4,26 @@
 
 package org.cqfn.save.core.plugin
 
-import kotlinx.serialization.Serializable
 import org.cqfn.save.core.config.TestConfigSections
+
+import kotlinx.serialization.Serializable
 
 /**
  * Core interface for plugin configuration (like warnPlugin/fixPLuin/e.t.c)
  */
+@Suppress("INLINE_CLASS_CAN_BE_USED")
 interface PluginConfig {
+    /**
+     * type of the config (usually related to the class: WARN/FIX/e.t.c)
+     */
     val type: TestConfigSections
 
+    /**
+     * @param otherConfig - 'this' will be merged with 'other'
+     * @return merged config
+     */
     fun mergeWith(otherConfig: PluginConfig): PluginConfig
 }
-
 
 /**
  * General configuration for test suite.

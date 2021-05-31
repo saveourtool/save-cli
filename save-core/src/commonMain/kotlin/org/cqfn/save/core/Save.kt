@@ -104,11 +104,11 @@ class Save(
     }
 
     private fun createPlugin(pluginConfig: PluginConfig, testConfig: TestConfig) =
-        when (pluginConfig.type) {
-            FIX -> FixPlugin(testConfig)
-            WARN -> WarnPlugin(testConfig)
-            else -> throw PluginException("Unknown type <${pluginConfig::class}> of plugin config was provided")
-        }
+            when (pluginConfig.type) {
+                FIX -> FixPlugin(testConfig)
+                WARN -> WarnPlugin(testConfig)
+                else -> throw PluginException("Unknown type <${pluginConfig::class}> of plugin config was provided")
+            }
 
     private fun discoverPluginsAndUpdateTestConfig(testConfig: TestConfig): TestConfig {
         val testConfigPath = testConfig.location.toString()
@@ -145,19 +145,19 @@ class Save(
         fakeFileNode: TomlNode,
         pluginSectionName: String
     ) =
-        try {
-            TomlDecoder.decode<T>(
-                serializer(),
-                fakeFileNode,
-                DecoderConf()
-            )
-        } catch (e: KtomlException) {
-            logError(
-                "Plugin extraction failed for $testConfigPath and [$pluginSectionName] section." +
-                        " This file has incorrect toml format."
-            )
-            throw e
-        }
+            try {
+                TomlDecoder.decode<T>(
+                    serializer(),
+                    fakeFileNode,
+                    DecoderConf()
+                )
+            } catch (e: KtomlException) {
+                logError(
+                    "Plugin extraction failed for $testConfigPath and [$pluginSectionName] section." +
+                            " This file has incorrect toml format."
+                )
+                throw e
+            }
 
     private fun getReporter(saveProperties: SaveProperties): Reporter {
         val out = when (saveProperties.resultOutput) {

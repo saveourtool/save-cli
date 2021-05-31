@@ -3,6 +3,7 @@
 
 package org.cqfn.save.plugin.warn
 
+import org.cqfn.save.core.config.TestConfigSections
 import org.cqfn.save.core.plugin.PluginConfig
 
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -15,7 +16,6 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import org.cqfn.save.core.config.TestConfigSections
 
 /**
  * Some fields by default are null, instead of some natural value, because of the fact, that in stage of merging
@@ -84,7 +84,7 @@ data class WarnPluginConfig(
 @Serializer(forClass = Regex::class)
 object RegexSerializer : KSerializer<Regex> {
     override val descriptor: SerialDescriptor =
-        PrimitiveSerialDescriptor("regex", PrimitiveKind.STRING)
+            PrimitiveSerialDescriptor("regex", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: Regex) {
         encoder.encodeString(value.pattern)
