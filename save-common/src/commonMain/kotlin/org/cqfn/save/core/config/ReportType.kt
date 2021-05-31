@@ -1,5 +1,6 @@
 package org.cqfn.save.core.config
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -7,5 +8,9 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 enum class ReportType {
-    JSON, PLAIN, TOML, XML
+    @SerialName("json") JSON,
+    @SerialName("plain") PLAIN,
+    @SerialName("toml") TOML,
+    @SerialName("xml") XML,
+    ;
 }
