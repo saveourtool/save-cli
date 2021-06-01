@@ -4,7 +4,15 @@
 
 package org.cqfn.save.core.plugin
 
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
 /**
  * Core interface for plugin configuration
@@ -74,4 +82,17 @@ data class GeneralConfig(
             this.ignoreSaveComments ?: parentConfig.ignoreSaveComments
         )
     }
+}
+
+@OptIn(ExperimentalSerializationApi::class)
+@Serializer(forClass = Regex::class)
+object RegexSerializer : KSerializer<Regex> {
+    override val descriptor: SerialDescriptor =
+            PrimitiveSerialDescriptor("regex", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: Regex) {
+        encoder.encodeString(value.pattern)
+    }
+
+    override fun deserialize(decoder: Decoder): Regex = Regex(decoder.decodeString())
 }

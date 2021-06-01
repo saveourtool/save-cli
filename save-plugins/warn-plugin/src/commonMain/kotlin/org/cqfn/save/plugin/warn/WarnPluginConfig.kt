@@ -4,17 +4,10 @@
 package org.cqfn.save.plugin.warn
 
 import org.cqfn.save.core.plugin.PluginConfig
+import org.cqfn.save.core.plugin.RegexSerializer
 
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Serializer
 import kotlinx.serialization.UseSerializers
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
 
 /**
  * Some fields by default are null, instead of some natural value, because of the fact, that in stage of merging
@@ -33,7 +26,7 @@ import kotlinx.serialization.encoding.Encoder
  * @property messageCaptureGroup an index of capture group in regular expressions, corresponding to warning text. Indices start at 0 with 0
  * corresponding to the whole string.
  * @property exactWarningsMatch exact match of errors
- * @property resourceNamePattern
+ * @property resourceNamePattern regex for the name of the test files
  */
 @Serializable
 data class WarnPluginConfig(
@@ -85,17 +78,4 @@ data class WarnPluginConfig(
         internal val defaultOutputPattern = Regex(".*(\\d+):(\\d+): (.+)")
         internal val defaultResourceNamePattern = Regex("""(.+)Test\.[\w\d]+""")
     }
-}
-
-@OptIn(ExperimentalSerializationApi::class)
-@Serializer(forClass = Regex::class)
-object RegexSerializer : KSerializer<Regex> {
-    override val descriptor: SerialDescriptor =
-            PrimitiveSerialDescriptor("regex", PrimitiveKind.STRING)
-
-    override fun serialize(encoder: Encoder, value: Regex) {
-        encoder.encodeString(value.pattern)
-    }
-
-    override fun deserialize(decoder: Decoder): Regex = Regex(decoder.decodeString())
 }

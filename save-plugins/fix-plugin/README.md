@@ -46,7 +46,7 @@ exec_cmd="./ktlint -R diktat-0.4.2.jar -F"
 testFilePattern="*Test.kt"
 expectedFilePattern="*Expected.kt"
 batchMode = false
-resourceNamePattern = """(.+)(Expected|Test)\.[\w\d]+"""
+resourceNamePattern = (.+)(Expected|Test)\.[\w\d]+
 ```
 
 When executed from project root (where `save.propertes` is located), SAVE will cd to `rootDir` and discover all pairs of files

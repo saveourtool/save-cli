@@ -67,7 +67,7 @@ columnCaptureGroup = 2  # index of regex capture group for column number, used w
 messageCaptureGroup = 3  # index of regex capture group for message text
 warningTextHasColumn = true
 warningTextHasLine = true
-resourceNamePattern = """(.+)Test\.[\w\d]+"""
+resourceNamePattern = (.+)Test\.[\w\d]+
 ```
 
 When executed from project root (where `save.propertes` is located), SAVE will cd to `rootDir` and discover all files
