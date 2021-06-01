@@ -49,6 +49,6 @@ batchMode = false
 ```
 
 When executed from project root (where `save.propertes` is located), SAVE will cd to `rootDir` and discover all pairs of files
-matching `testFilePattern` and `expectedFilePattern` with same prefix. It will then execute `$exec_flags $testFile` (since we specified
+matching `testFilePattern` and `expectedFilePattern` with same prefix. It will then execute `$exec_cmd $testFile` (since we specified
 `batchMode = false`, it will provide inputs one by one) and compare its stdout (as per `output` option) with respecting `$expectedFile`.
 Results will be written in plain text as well as JSON.
