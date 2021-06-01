@@ -43,7 +43,7 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
         return resourceDirectories
             .map { directory ->
                 FileSystem.SYSTEM.list(directory)
-                    .filter { (regex ?: defaultResourceNamePattern).matches(it.name) }
+                    .filter { (regex).matches(it.name) }
             }
             .filter { it.isNotEmpty() }
     }
