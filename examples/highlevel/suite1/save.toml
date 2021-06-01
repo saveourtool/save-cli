@@ -15,7 +15,7 @@ warningTextHasColumn = true
 warningTextHasLine = true
 
 [diff]
-exec_flags="./ktlint -R diktat-0.4.2.jar -F"
+exec_flags="-p"
 testFilePattern="*Test.kt"
 expectedFilePattern="*Expected.kt"
 batchMode = false

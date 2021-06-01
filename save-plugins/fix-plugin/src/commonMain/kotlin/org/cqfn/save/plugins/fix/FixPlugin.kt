@@ -42,7 +42,7 @@ class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) :
         return files
             .map { it.first() to it.last() }
             .map { (expected, test) ->
-                val execCmd = generalConfig?.execCmd + " " + fixPluginConfig.execFlags
+                val execCmd = (generalConfig?.execCmd ?: "") + " " + fixPluginConfig.execFlags
                 val executionResult = pb.exec(execCmd, null, false)
                 val fixedLines = FileSystem.SYSTEM.readLines(
                     test.parent!! / fixPluginConfig.destinationFileFor(test).toPath()
