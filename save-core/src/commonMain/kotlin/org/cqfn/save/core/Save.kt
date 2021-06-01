@@ -89,7 +89,7 @@ class Save(
 
     private fun executePlugin(plugin: Plugin, reporter: Reporter) {
         reporter.onPluginInitialization(plugin)
-        logInfo("Execute plugin: ${plugin::class.simpleName}")
+        logInfo("=> Executing plugin: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
         reporter.onPluginExecutionStart(plugin)
         try {
             plugin.execute()
@@ -99,7 +99,7 @@ class Save(
             reporter.onPluginExecutionError(ex)
             logError("${plugin::class.simpleName} has crashed: ${ex.message}")
         }
-        logInfo("${plugin::class.simpleName} successfully executed!")
+        logInfo("<= Executed plugin: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
         reporter.onPluginExecutionEnd(plugin)
     }
 

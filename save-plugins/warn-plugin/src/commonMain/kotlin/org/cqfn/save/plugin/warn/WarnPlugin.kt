@@ -18,6 +18,8 @@ import org.cqfn.save.plugin.warn.utils.extractWarning
 
 import okio.FileSystem
 import okio.Path
+import org.cqfn.save.core.logging.logInfo
+import org.cqfn.save.core.logging.logWarn
 
 private typealias LineColumn = Pair<Int, Int>
 
@@ -30,8 +32,16 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
     private val pb = ProcessBuilder()
 
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
+        val flattenedResources = files.toList().flatten()
+        if(flattenedResources.isEmpty()) {
+            logWarn("No resources discovered for WarnPlugin in [${testConfig.location}]")
+        } else {
+            logInfo("Discovered the following test resources: $flattenedResources")
+        }
+
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
+
         return discoverTestFiles(testConfig.directory).map { resources ->
             handleTestFile(resources.single(), warnPluginConfig, generalConfig)
         }

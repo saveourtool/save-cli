@@ -15,3 +15,4 @@ warningTextHasLine = true
 
 [fix]
 execCmd="./ktlint -R diktat-0.4.2.jar -F"
+destinationFileSuffix = Expected
