@@ -24,10 +24,10 @@ class MergeConfigsTest {
     private val nestedDir2 = tmpDir / "nestedDir1" / "nestedDir2"
     private val toml3 = nestedDir2 / "save.toml"
     private val toml4 = nestedDir2 / "nestedDir3" / "nestedDir4" / "save.toml"
-    private val generalConfig1 = GeneralConfig("Tag11, Tag12", "Description1", "suiteName1", "excludedTests: test1", "includedTests: test2")
-    private val generalConfig2 = GeneralConfig("Tag21", "Description2", "suiteName2", "excludedTests: test3", "includedTests: test4")
-    private val generalConfig3 = GeneralConfig("Tag21, Tag31, Tag32", "Description2", "suiteName3", "excludedTests: test5", "includedTests: test6")
-    private val generalConfig4 = GeneralConfig("Tag11, Tag21", "Description2", "suiteName4", "excludedTests: test7", "includedTests: test8")
+    private val generalConfig1 = GeneralConfig("", "Tag11, Tag12", "Description1", "suiteName1", "excludedTests: test1", "includedTests: test2")
+    private val generalConfig2 = GeneralConfig("", "Tag21", "Description2", "suiteName2", "excludedTests: test3", "includedTests: test4")
+    private val generalConfig3 = GeneralConfig("", "Tag21, Tag31, Tag32", "Description2", "suiteName3", "excludedTests: test5", "includedTests: test6")
+    private val generalConfig4 = GeneralConfig("", "Tag11, Tag21", "Description2", "suiteName4", "excludedTests: test7", "includedTests: test8")
     private val warningsInputPattern1 = Regex(".*")
     private val warningsInputPattern2 = Regex("// ;warn:(\\d+):(\\d+): (.*)")
     private val warningsOutputPattern1 = Regex(".*")
@@ -66,7 +66,7 @@ class MergeConfigsTest {
 
         assertEquals(1, config2.pluginConfigs.size)
 
-        val expectedGeneralConfig = GeneralConfig("Tag11, Tag12, Tag21", "Description2", "suiteName2", "excludedTests: test3", "includedTests: test4")
+        val expectedGeneralConfig = GeneralConfig("", "Tag11, Tag12, Tag21", "Description2", "suiteName2", "excludedTests: test3", "includedTests: test4")
 
         val actualGeneralConfig = config2.pluginConfigs.filterIsInstance<GeneralConfig>().first()
 
@@ -83,7 +83,7 @@ class MergeConfigsTest {
 
         assertEquals(2, config2.pluginConfigs.size)
 
-        val expectedGeneralConfig = GeneralConfig("Tag11, Tag12, Tag21", "Description2", "suiteName2", "excludedTests: test3", "includedTests: test4")
+        val expectedGeneralConfig = GeneralConfig("", "Tag11, Tag12, Tag21", "Description2", "suiteName2", "excludedTests: test3", "includedTests: test4")
 
         val actualGeneralConfig = config2.pluginConfigs.filterIsInstance<GeneralConfig>().first()
         val actualWarnConfig = config2.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
@@ -119,7 +119,7 @@ class MergeConfigsTest {
 
         assertEquals(3, config2.pluginConfigs.size)
 
-        val expectedGeneralConfig = GeneralConfig("Tag11, Tag12, Tag21", "Description2", "suiteName2", "excludedTests: test3", "includedTests: test4")
+        val expectedGeneralConfig = GeneralConfig("", "Tag11, Tag12, Tag21", "Description2", "suiteName2", "excludedTests: test3", "includedTests: test4")
         val expectedWarnConfig = WarnPluginConfig("execCmd3", warningsInputPattern2, warningsOutputPattern2,
             true, false, 3, 3, 3, true)
         val expectedFixConfig = FixPluginConfig("fixCmd2", "some suffix")
@@ -144,7 +144,7 @@ class MergeConfigsTest {
         config4.merge()
 
         assertEquals(3, config4.pluginConfigs.size)
-        val expectedGeneralConfig = GeneralConfig("Tag11, Tag12, Tag21, Tag31, Tag32", "Description2", "suiteName4", "excludedTests: test7", "includedTests: test8")
+        val expectedGeneralConfig = GeneralConfig("", "Tag11, Tag12, Tag21, Tag31, Tag32", "Description2", "suiteName4", "excludedTests: test7", "includedTests: test8")
         val expectedWarnConfig = WarnPluginConfig("execCmd4", warningsInputPattern2, warningsOutputPattern2,
             true, false, 4, 4, 4, true)
         val expectedFixConfig = FixPluginConfig("fixCmd4", "some suffix")
@@ -170,7 +170,7 @@ class MergeConfigsTest {
 
         assertEquals(3, config4.pluginConfigs.size)
 
-        val expectedGeneralConfig = GeneralConfig("Tag11, Tag12, Tag21, Tag31, Tag32", "Description2", "suiteName4", "excludedTests: test7", "includedTests: test8")
+        val expectedGeneralConfig = GeneralConfig("", "Tag11, Tag12, Tag21, Tag31, Tag32", "Description2", "suiteName4", "excludedTests: test7", "includedTests: test8")
         val expectedWarnConfig = WarnPluginConfig("execCmd3", warningsInputPattern2, warningsOutputPattern2,
             false, false, 3, 3, 3, false)
         val expectedFixConfig = FixPluginConfig("fixCmd3", "some suffix")
@@ -195,7 +195,7 @@ class MergeConfigsTest {
 
         assertEquals(3, config2.pluginConfigs.size)
 
-        val expectedGeneralConfig = GeneralConfig("Tag11, Tag12, Tag21", "Description2", "suiteName2", "excludedTests: test3", "includedTests: test4")
+        val expectedGeneralConfig = GeneralConfig("", "Tag11, Tag12, Tag21", "Description2", "suiteName2", "excludedTests: test3", "includedTests: test4")
         val expectedWarnConfig = WarnPluginConfig("execCmd2", warningsInputPattern1, warningsOutputPattern1,
             true, true, 2, 2, 2, true)
         val expectedFixConfig = FixPluginConfig("fixCmd2", "some suffix")
@@ -208,7 +208,7 @@ class MergeConfigsTest {
         assertEquals(expectedWarnConfig, actualWarnConfig)
         assertEquals(expectedFixConfig, actualFixConfig)
 
-        val expectedGeneralConfig2 = GeneralConfig("Tag11, Tag12, Tag21, Tag31, Tag32", "Description2", "suiteName3", "excludedTests: test5", "includedTests: test6")
+        val expectedGeneralConfig2 = GeneralConfig("", "Tag11, Tag12, Tag21, Tag31, Tag32", "Description2", "suiteName3", "excludedTests: test5", "includedTests: test6")
 
         val actualGeneralConfig2 = config3.pluginConfigs.filterIsInstance<GeneralConfig>().first()
         val actualWarnConfig2 = config3.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()

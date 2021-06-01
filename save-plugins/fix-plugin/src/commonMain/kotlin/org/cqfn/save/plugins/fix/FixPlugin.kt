@@ -3,6 +3,7 @@ package org.cqfn.save.plugins.fix
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.logInfo
+import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Fail
@@ -36,11 +37,13 @@ class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) :
 
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
+        val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
         logInfo("Discovered the following file pairs for comparison: $files")
         return files
             .map { it.first() to it.last() }
             .map { (expected, test) ->
-                val executionResult = pb.exec(fixPluginConfig.execCmd, null, false)
+                val execCmd = generalConfig?.execCmd + " " + fixPluginConfig.execFlags
+                val executionResult = pb.exec(execCmd, null, false)
                 val fixedLines = FileSystem.SYSTEM.readLines(
                     test.parent!! / fixPluginConfig.destinationFileFor(test).toPath()
                 )

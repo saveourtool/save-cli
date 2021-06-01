@@ -59,7 +59,7 @@ description = "My suite description"
 suiteName = "DocsCheck"
 
 [warn]
-execCmd = "./detekt --build-upon-default-config -i"
+execFlags = "./detekt --build-upon-default-config -i"
 warningsInputPattern = "// ;warn:(\\d+):(\\d+): (.*)"  # warning is set inside the comment in code, `//` marks comment start in Java
 warningsOutputPattern = "\\w+ - (\\d+)/(\\d+) - (.*)$"  # e.g. `WARN - 10/14 - Class name is in incorrect case`
 lineCaptureGroup = 1  # index of regex capture group for line number, used when `warningTextHasLine == false`
@@ -70,7 +70,7 @@ warningTextHasLine = true
 ```
 
 When executed from project root (where `save.propertes` is located), SAVE will cd to `rootDir` and discover all files
-matching `inputFilePattern`. It will then execute `$exec_cmd $testFile` (since we specified
+matching `inputFilePattern`. It will then execute `$exec_flags $testFile` (since we specified
 `batchMode = false`, it will provide inputs one by one) and compare warnings its stdout (as per `output` option) parsed using `warningsOutputPattern` with warnings
 parsed from the same `$testFile` using `warningsInputPattern`.
 

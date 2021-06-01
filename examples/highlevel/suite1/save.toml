@@ -1,10 +1,11 @@
 [general]
+execCmd = ""
 tags = tag1
 description = "My suite description"
 suiteName = "DocsCheck"
 
 [warn]
-execCmd = "./detekt --build-upon-default-config -i"
+execFlags = "./detekt --build-upon-default-config -i"
 warningsInputPattern = "// ;warn:(\\d+):(\\d+): (.*)"  # warning is set inside the comment in code, `//` marks comment start in Java
 warningsOutputPattern = "\\w+ - (\\d+)/(\\d+) - (.*)$"  # e.g. `WARN - 10/14 - Class name is in incorrect case`
 lineCaptureGroup = 1  # index of regex capture group for line number, used when `warningTextHasLine: false`
@@ -14,7 +15,7 @@ warningTextHasColumn = true
 warningTextHasLine = true
 
 [diff]
-exec_cmd="./ktlint -R diktat-0.4.2.jar -F"
+exec_flags="./ktlint -R diktat-0.4.2.jar -F"
 testFilePattern="*Test.kt"
 expectedFilePattern="*Expected.kt"
 batchMode = false

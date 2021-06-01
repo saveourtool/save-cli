@@ -3,6 +3,7 @@ package org.cqfn.save.plugins.fix
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
+import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
@@ -80,7 +81,10 @@ class FixPluginTest {
 
         val results = FixPlugin(TestConfig(config,
             null,
-            mutableListOf(FixPluginConfig(executionCmd, destinationFileSuffix = "_copy"))
+            mutableListOf(
+                FixPluginConfig(executionCmd, destinationFileSuffix = "_copy"),
+                GeneralConfig("", "", "", "")
+            )
         )).execute()
 
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
