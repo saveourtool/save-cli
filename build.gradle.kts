@@ -5,7 +5,6 @@ import org.cqfn.save.buildutils.configureVersioning
 import org.cqfn.save.buildutils.createDetektTask
 import org.cqfn.save.buildutils.createDiktatTask
 import org.cqfn.save.buildutils.installGitHooks
-import org.cqfn.save.generation.generateConfigOptions
 
 plugins {
     kotlin("plugin.serialization") version Versions.kotlin apply false
