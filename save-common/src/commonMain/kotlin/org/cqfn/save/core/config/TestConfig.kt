@@ -63,7 +63,7 @@ data class TestConfig(
      * @return a [Sequence] of parent config files
      */
     fun parentConfigs(withSelf: Boolean = false) =
-            generateSequence(if (withSelf) this else parentConfig) { it.parentConfig }
+        generateSequence(if (withSelf) this else parentConfig) { it.parentConfig }
 
     /**
      * recursively (till leafs) return all configs from the configuration Tree
@@ -84,36 +84,38 @@ data class TestConfig(
      *
      * @return merged test config
      */
-    fun mergeConfigWithParent(): TestConfig {
+    fun mergeConfigWithParents(): TestConfig {
         logDebug("Start merging configs for ${this.location}")
 
-        // return from the function if we stay at the root element of the plugin tree
-        val parentalPlugins = this.parentConfig?.pluginConfigs ?: return this
-        parentalPlugins.forEach { currentConfig ->
-            val childConfigs = this.pluginConfigs.filter { it.type == currentConfig.type }
-            if (childConfigs.isEmpty()) {
-                // if we haven't found a plugin from parent in a current list of plugins - we will simply copy it
-                this.pluginConfigs.add(currentConfig)
-            } else {
-                // else, we will merge plugin with a corresponding plugin from a parent config
-                // we expect that there is only one plugin of such type, otherwise we will throw an exception
-                val mergedConfig = childConfigs.single().mergeWith(currentConfig)
-                this.pluginConfigs.set(this.pluginConfigs.indexOf(childConfigs.single()), mergedConfig)
+        this.parentConfigs().toList().reversed().forEach { parentConfig ->
+            // return from the function if we stay at the root element of the plugin tree
+            val parentalPlugins = parentConfig.pluginConfigs ?: return this
+            parentalPlugins.forEach { currentConfig ->
+                val childConfigs = this.pluginConfigs.filter { it.type == currentConfig.type }
+                if (childConfigs.isEmpty()) {
+                    // if we haven't found a plugin from parent in a current list of plugins - we will simply copy it
+                    this.pluginConfigs.add(currentConfig)
+                } else {
+                    // else, we will merge plugin with a corresponding plugin from a parent config
+                    // we expect that there is only one plugin of such type, otherwise we will throw an exception
+                    val mergedConfig = childConfigs.single().mergeWith(currentConfig)
+                    this.pluginConfigs.set(this.pluginConfigs.indexOf(childConfigs.single()), mergedConfig)
+                }
             }
         }
-
         return this
     }
 }
 
-/**
- * Sections of a toml configuration for tests (including standard plugins)
- */
-enum class TestConfigSections {
-    FIX, GENERAL, WARN;
-}
 
-/**
- * @return whether a file denoted by this [Path] is a default save configuration file (save.toml)
- */
-fun Path.isSaveTomlConfig() = name == "save.toml"
+    /**
+     * Sections of a toml configuration for tests (including standard plugins)
+     */
+    enum class TestConfigSections {
+        FIX, GENERAL, WARN;
+    }
+
+    /**
+     * @return whether a file denoted by this [Path] is a default save configuration file (save.toml)
+     */
+    fun Path.isSaveTomlConfig() = name == "save.toml"

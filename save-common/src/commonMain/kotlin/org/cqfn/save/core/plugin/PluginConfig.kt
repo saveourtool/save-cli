@@ -9,7 +9,7 @@ import org.cqfn.save.core.config.TestConfigSections
 import kotlinx.serialization.Serializable
 
 /**
- * Core interface for plugin configuration (like warnPlugin/fixPLuin/e.t.c)
+ * Core interface for plugin configuration (like warnPlugin/fixPluin/e.t.c)
  */
 @Suppress("INLINE_CLASS_CAN_BE_USED")
 interface PluginConfig {
@@ -51,11 +51,13 @@ data class GeneralConfig(
 
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as GeneralConfig
-        val mergedTag = other.tags.let {
-            val parentTags = other.tags.split(", ")
-            val childTags = this.tags.split(", ")
-            parentTags.union(childTags).joinToString(", ")
-        }
+        val mergedTag = other.tags?.let {
+            this.tags?.let {
+                val parentTags = other.tags.split(", ")
+                val childTags = this.tags.split(", ")
+                parentTags.union(childTags).joinToString(", ")
+            } ?: other.tags
+        } ?: this.tags
 
         return GeneralConfig(
             mergedTag,

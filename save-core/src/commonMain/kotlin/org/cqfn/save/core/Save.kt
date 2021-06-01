@@ -64,18 +64,18 @@ class Save(
         // FixMe: now we work only with the save.toml config and it's hierarchy, but we should work properly here with directories as well
         // constructing the file path to the configuration file
         val fullPathToConfig = saveProperties.testRootPath!!.toPath() / saveProperties.testConfigPath!!.toPath()
+        val reporter = getReporter(saveProperties)
         // get all toml configs in file system
         ConfigDetector()
             .configFromFile(fullPathToConfig)
             .getAllTestConfigs()
             .forEach { testConfig ->
-                val reporter = getReporter(saveProperties)
                 reporter.beforeAll()
 
                 // discover plugins from the test configuration
                 discoverPluginsAndUpdateTestConfig(testConfig)
                     // merge configurations with parents
-                    .mergeConfigWithParent()
+                    .mergeConfigWithParents()
                     // exclude general configuration from the list of plugins
                     .pluginConfigsWithoutGeneralConfig()
                     // create plugins from the configuration
