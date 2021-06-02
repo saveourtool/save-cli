@@ -5,7 +5,7 @@ package org.cqfn.save.plugins.fix
 
 import org.cqfn.save.core.config.TestConfigSections
 import org.cqfn.save.core.plugin.PluginConfig
-import org.cqfn.save.core.plugin.RegexSerializer
+import org.cqfn.save.core.utils.RegexSerializer
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
@@ -55,9 +55,9 @@ data class FixPluginConfig(
         val isNotNullResourceNameTestSuffix = resourceNameTestSuffix != null
         val isNotNullResourceNameExpectedSuffix = resourceNameExpectedSuffix != null
         return when (isNotNullResourceNameExpectedSuffix to isNotNullResourceNameTestSuffix) {
-            true to true -> Regex("""(.+)($resourceNameExpectedSuffix|$resourceNameExpectedSuffix)\.[\w\d]+""")
+            true to true -> Regex("""(.+)($resourceNameExpectedSuffix|$resourceNameTestSuffix)\.[\w\d]+""")
             true to false -> Regex("""(.+)($resourceNameExpectedSuffix|Test)\.[\w\d]+""")
-            false to true -> Regex("""(.+)(Expected|$resourceNameExpectedSuffix)\.[\w\d]+""")
+            false to true -> Regex("""(.+)(Expected|$resourceNameTestSuffix)\.[\w\d]+""")
             else -> Regex("""(.+)(Expected|Test)\.[\w\d]+""")
         }
     }

@@ -5,7 +5,7 @@ package org.cqfn.save.plugin.warn
 
 import org.cqfn.save.core.config.TestConfigSections
 import org.cqfn.save.core.plugin.PluginConfig
-import org.cqfn.save.core.plugin.RegexSerializer
+import org.cqfn.save.core.utils.RegexSerializer
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers

@@ -2,6 +2,7 @@ package org.cqfn.save.plugins.fix
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.files.readFile
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.logInfo
 import org.cqfn.save.core.logging.logWarn
@@ -69,17 +70,12 @@ class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) :
 
     private fun createTestFile(path: Path): Path {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
-
-        if (!fs.exists(tmpDir)) {
-            fs.createDirectory(tmpDir)
-        }
+        createTempDir(tmpDir)
         val pathCopy: Path = tmpDir / path.name
         fs.write(fs.createFile(pathCopy)) {
-            fs.readLines(path).forEach {
-                write(
-                    (it + "\n").encodeToByteArray()
-                )
-            }
+            write(
+                (fs.readFile(path)).encodeToByteArray()
+            )
         }
         return pathCopy
     }
@@ -109,7 +105,7 @@ class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) :
             .filter { it.isNotEmpty() }
     }
 
-    override fun cleanDir() {
+    override fun cleanupTempDir() {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
         if (fs.exists(tmpDir)) {
             fs.deleteRecursively(tmpDir)

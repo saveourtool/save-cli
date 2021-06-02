@@ -13,13 +13,15 @@ import okio.Path
  * @property testConfig
  */
 abstract class Plugin(open val testConfig: TestConfig, private val testFiles: List<String>) {
+    private val fs = FileSystem.SYSTEM
+
     /**
      * Perform plugin's work.
      *
      * @return a sequence of [TestResult]s for each group of test resources
      */
     fun execute(): Sequence<TestResult> {
-        cleanDir()
+        clean()
         return handleFiles(
             // todo: pass individual groups of files to handleFiles? Or it will play bad with batch mode?
             discoverTestFiles(testConfig.directory)
@@ -64,7 +66,36 @@ abstract class Plugin(open val testConfig: TestConfig, private val testFiles: Li
     /**
      * Method for cleaning up a directory.
      */
-    abstract fun cleanDir()
+    abstract fun cleanupTempDir()
+
+    /**
+     * Method for call cleanupTempDir().
+     *
+     * @throws TempDirException when deleting temp dir
+     */
+    private fun clean() {
+        try {
+            cleanupTempDir()
+        } catch (e: Exception) {
+            throw TempDirException("\"Could not delete temp dir, cause: ${e.message}\"")
+        }
+    }
+
+    /**
+     * Method for creating temp dir.
+     *
+     * @param tmpDir
+     * @throws TempDirException when creating temp dir
+     */
+    protected fun createTempDir(tmpDir: Path) {
+        try {
+            if (!fs.exists(tmpDir)) {
+                fs.createDirectory(tmpDir)
+            }
+        } catch (e: Exception) {
+            throw TempDirException("\"Could not create temp dir, cause: ${e.message}\"")
+        }
+    }
 
     /**
      * Returns a sequence of directories, where resources for this plugin may be located.

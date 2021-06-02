@@ -57,7 +57,7 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
             .filter { it.isNotEmpty() }
     }
 
-    override fun cleanDir() {
+    override fun cleanupTempDir() {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPlugin::class.simpleName!!)
         if (fs.exists(tmpDir)) {
             fs.deleteRecursively(tmpDir)
@@ -121,9 +121,7 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
     internal fun createTestFile(path: Path, warningsInputPattern: Regex): String {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPlugin::class.simpleName!!)
 
-        if (!fs.exists(tmpDir)) {
-            fs.createDirectory(tmpDir)
-        }
+        createTempDir(tmpDir)
 
         val fileName = testFileName()
         fs.write(fs.createFile(tmpDir / fileName)) {
