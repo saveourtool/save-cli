@@ -14,9 +14,9 @@ import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.result.TestStatus
 import org.cqfn.save.core.utils.AtomicInt
 import org.cqfn.save.core.utils.ProcessBuilder
-import org.cqfn.save.plugin.warn.WarnPluginConfig.Companion.defaultResourceNamePattern
 import org.cqfn.save.plugin.warn.WarnPluginConfig.Companion.defaultInputPattern
 import org.cqfn.save.plugin.warn.WarnPluginConfig.Companion.defaultOutputPattern
+import org.cqfn.save.plugin.warn.WarnPluginConfig.Companion.defaultResourceNamePattern
 import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
 

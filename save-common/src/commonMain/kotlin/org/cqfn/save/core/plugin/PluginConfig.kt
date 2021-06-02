@@ -24,6 +24,11 @@ interface PluginConfig {
      */
     fun mergeWith(otherConfig: PluginConfig): PluginConfig
 
+    /**
+     * Method, which validates config and provides the default values for fields, if possible
+     *
+     * @return new validated instance obtained from [this]
+     */
     fun validate(): PluginConfig
 }
 

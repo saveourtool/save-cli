@@ -1,3 +1,7 @@
+/**
+ * This file contain test suites for merge and validation operations
+ */
+
 package org.cqfn.save.core
 
 import org.cqfn.save.core.config.TestConfig
@@ -21,18 +25,6 @@ val toml2 = nestedDir1 / "save.toml"
 val nestedDir2 = tmpDir / "nestedDir1" / "nestedDir2"
 val toml3 = nestedDir2 / "save.toml"
 val toml4 = nestedDir2 / "nestedDir3" / "nestedDir4" / "save.toml"
-
-fun createTomlFiles() {
-    fs.createDirectory(tmpDir)
-    fs.createFile(toml1)
-    fs.createDirectory(nestedDir1)
-    fs.createFile(toml2)
-    fs.createDirectory(nestedDir2)
-    fs.createFile(toml3)
-    fs.createDirectory(nestedDir2 / "nestedDir3")
-    fs.createDirectory(nestedDir2 / "nestedDir3" / "nestedDir4")
-    fs.createFile(toml4)
-}
 
 @Suppress("TOO_LONG_FUNCTION", "LOCAL_VARIABLE_EARLY_DECLARATION")
 class MergeConfigsTest {
@@ -245,9 +237,20 @@ class ValidationTest {
         assertEquals("_copy", actualFixConfig.destinationFileSuffix)
     }
 
-
     @AfterTest
     fun tearDown() {
         fs.deleteRecursively(tmpDir)
     }
+}
+
+fun createTomlFiles() {
+    fs.createDirectory(tmpDir)
+    fs.createFile(toml1)
+    fs.createDirectory(nestedDir1)
+    fs.createFile(toml2)
+    fs.createDirectory(nestedDir2)
+    fs.createFile(toml3)
+    fs.createDirectory(nestedDir2 / "nestedDir3")
+    fs.createDirectory(nestedDir2 / "nestedDir3" / "nestedDir4")
+    fs.createFile(toml4)
 }
