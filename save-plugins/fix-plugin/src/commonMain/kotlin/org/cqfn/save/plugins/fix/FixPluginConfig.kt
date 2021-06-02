@@ -30,7 +30,7 @@ data class FixPluginConfig(
         )
     }
 
-    override fun validate(): FixPluginConfig {
+    override fun validateAndSetDefaults(): FixPluginConfig {
         val newDestinationFileSuffix = destinationFileSuffix ?: "_copy"
         return FixPluginConfig(
             execCmd,

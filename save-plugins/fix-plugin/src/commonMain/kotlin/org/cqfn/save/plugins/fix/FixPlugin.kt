@@ -36,13 +36,15 @@ class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) :
         .build()
 
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
-        val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
         val flattenedResources = files.toList()
         if (flattenedResources.isEmpty()) {
             logWarn("No resources discovered for FixPlugin in [${testConfig.location}]")
-        } else {
-            logInfo("Discovered the following file pairs for comparison: $flattenedResources")
+            return emptySequence()
         }
+        testConfig.validateAndSetDefaults()
+        logInfo("Discovered the following file pairs for comparison: $flattenedResources")
+
+        val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
         return files
             .map { it.first() to it.last() }
             .map { (expected, test) ->

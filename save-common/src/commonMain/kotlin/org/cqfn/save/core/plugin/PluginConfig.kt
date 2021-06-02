@@ -29,7 +29,7 @@ interface PluginConfig {
      *
      * @return new validated instance obtained from [this]
      */
-    fun validate(): PluginConfig
+    fun validateAndSetDefaults(): PluginConfig
 }
 
 /**
@@ -76,7 +76,7 @@ data class GeneralConfig(
         )
     }
 
-    override fun validate(): GeneralConfig {
+    override fun validateAndSetDefaults(): GeneralConfig {
         requireNotNull(tags) {
             "Error: Couldn't found `tags` in [general] section. Please provide it in this, " +
                     "or at least in one of the parent configs"

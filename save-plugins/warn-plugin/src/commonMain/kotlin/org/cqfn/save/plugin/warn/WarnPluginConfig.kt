@@ -64,7 +64,7 @@ data class WarnPluginConfig(
         )
     }
 
-    override fun validate(): WarnPluginConfig {
+    override fun validateAndSetDefaults(): WarnPluginConfig {
         require((warningTextHasLine == true) xor (lineCaptureGroup == null)) {
             "warn-plugin configuration error: either warningTextHasLine should be false (actual: $warningTextHasLine) " +
                     "or lineCaptureGroup should be provided (actual: $lineCaptureGroup)"

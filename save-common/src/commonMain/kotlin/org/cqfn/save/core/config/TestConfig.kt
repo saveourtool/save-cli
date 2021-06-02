@@ -107,11 +107,12 @@ data class TestConfig(
     }
 
     /**
-     * Method, which validates all plugin configs
+     * Method, which validates all plugin configs and set default values, if possible
      */
-    fun validate() {
-        for (config in this.pluginConfigs) {
-            this.pluginConfigs.set(this.pluginConfigs.indexOf(config), config.validate())
+    fun validateAndSetDefaults() {
+        logDebug("Start plugins validation for $location")
+        for (config in pluginConfigs) {
+            pluginConfigs.set(pluginConfigs.indexOf(config), config.validateAndSetDefaults())
         }
     }
 }

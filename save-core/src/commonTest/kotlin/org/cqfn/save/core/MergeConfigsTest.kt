@@ -165,7 +165,7 @@ class ValidationTest {
         val generalConfig = GeneralConfig(tags = "Tag11, Tag12", description = "Description1", suiteName = "suiteName1")
         val config = TestConfig(toml1, null, mutableListOf(generalConfig))
 
-        config.validate()
+        config.validateAndSetDefaults()
 
         assertEquals(1, config.pluginConfigs.size)
 
@@ -181,7 +181,7 @@ class ValidationTest {
         val generalConfig = GeneralConfig()
         val config = TestConfig(toml1, null, mutableListOf(generalConfig))
         try {
-            config.validate()
+            config.validateAndSetDefaults()
         } catch (ex: IllegalArgumentException) {
             assertEquals(
                 "Error: Couldn't found `tags` in [general] section. Please provide it in this, " +
@@ -196,7 +196,7 @@ class ValidationTest {
         val warnConfig = WarnPluginConfig(execCmd = "execCmd", messageCaptureGroup = 1)
         val config = TestConfig(toml1, null, mutableListOf(warnConfig))
 
-        config.validate()
+        config.validateAndSetDefaults()
 
         assertEquals(1, config.pluginConfigs.size)
 
@@ -214,7 +214,7 @@ class ValidationTest {
         val warnConfig = WarnPluginConfig(execCmd = "execCmd", lineCaptureGroup = 2, messageCaptureGroup = 1)
         val config = TestConfig(toml1, null, mutableListOf(warnConfig))
         try {
-            config.validate()
+            config.validateAndSetDefaults()
         } catch (ex: IllegalArgumentException) {
             assertEquals(
                 "warn-plugin configuration error: either warningTextHasLine should be false (actual: null) " +
@@ -229,7 +229,7 @@ class ValidationTest {
         val fixConfig = FixPluginConfig(execCmd = "execCmd")
         val config = TestConfig(toml1, null, mutableListOf(fixConfig))
 
-        config.validate()
+        config.validateAndSetDefaults()
 
         assertEquals(1, config.pluginConfigs.size)
 

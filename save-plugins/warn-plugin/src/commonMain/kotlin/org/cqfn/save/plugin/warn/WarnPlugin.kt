@@ -37,14 +37,16 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
         val flattenedResources = files.toList().flatten()
         if (flattenedResources.isEmpty()) {
             logWarn("No resources discovered for WarnPlugin in [${testConfig.location}]")
-        } else {
-            logInfo("Discovered the following test resources: $flattenedResources")
+            return emptySequence()
         }
+
+        testConfig.validateAndSetDefaults()
+        logInfo("Discovered the following test resources: $flattenedResources")
 
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
 
-        return discoverTestFiles(testConfig.directory).map { resources ->
+        return files.map { resources ->
             handleTestFile(resources.single(), warnPluginConfig, generalConfig)
         }
     }
