@@ -38,12 +38,12 @@ import kotlinx.serialization.encoding.Encoder
 @Serializable
 data class WarnPluginConfig(
     val execCmd: String,
-    val warningsInputPattern: Regex,
-    val warningsOutputPattern: Regex,
+    val warningsInputPattern: Regex? = null,
+    val warningsOutputPattern: Regex? = null,
     val warningTextHasLine: Boolean? = null,
     val warningTextHasColumn: Boolean? = null,
-    val lineCaptureGroup: Int?,
-    val columnCaptureGroup: Int?,
+    val lineCaptureGroup: Int? = null,
+    val columnCaptureGroup: Int? = null,
     val messageCaptureGroup: Int,
     val exactWarningsMatch: Boolean? = null,
 ) : PluginConfig {
@@ -61,6 +61,34 @@ data class WarnPluginConfig(
             this.columnCaptureGroup ?: other.columnCaptureGroup,
             this.messageCaptureGroup,
             this.exactWarningsMatch ?: other.exactWarningsMatch
+        )
+    }
+
+    override fun validate(): WarnPluginConfig {
+        require((warningTextHasLine == true) xor (lineCaptureGroup == null)) {
+            "warn-plugin configuration error: either warningTextHasLine should be false (actual: $warningTextHasLine) " +
+                    "or lineCaptureGroup should be provided (actual: $lineCaptureGroup)"
+        }
+        require((warningTextHasColumn == true) xor (columnCaptureGroup == null)) {
+            "warn-plugin configuration error: either warningTextHasColumn should be false (actual: $warningTextHasColumn) " +
+                    "or columnCaptureGroup should be provided (actual: $columnCaptureGroup)"
+        }
+
+        val newWarningsInputPattern = warningsInputPattern ?: defaultInputPattern
+        val newWarningsOutputPattern = warningsOutputPattern ?: defaultOutputPattern
+        val newWarningTextHasLine = warningTextHasLine ?: false
+        val newWarningTextHasColumn = warningTextHasColumn ?: false
+        val newExactWarningsMatch = exactWarningsMatch ?: true
+        return WarnPluginConfig(
+            execCmd,
+            newWarningsInputPattern,
+            newWarningsOutputPattern,
+            newWarningTextHasLine,
+            newWarningTextHasColumn,
+            lineCaptureGroup,
+            columnCaptureGroup,
+            messageCaptureGroup,
+            newExactWarningsMatch
         )
     }
 

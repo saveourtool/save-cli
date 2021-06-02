@@ -59,14 +59,25 @@ description = "My suite description"
 suiteName = "DocsCheck"
 
 [warn]
-execCmd = "./detekt --build-upon-default-config -i"
-warningsInputPattern = "// ;warn:(\\d+):(\\d+): (.*)"  # warning is set inside the comment in code, `//` marks comment start in Java
-warningsOutputPattern = "\\w+ - (\\d+)/(\\d+) - (.*)$"  # e.g. `WARN - 10/14 - Class name is in incorrect case`
-lineCaptureGroup = 1  # index of regex capture group for line number, used when `warningTextHasLine == false`
-columnCaptureGroup = 2  # index of regex capture group for column number, used when `warningTextHasColumn == false`
-messageCaptureGroup = 3  # index of regex capture group for message text
-warningTextHasColumn = true
-warningTextHasLine = true
+execCmd = "./detekt --build-upon-default-config -i" # (required)
+
+# warning is set inside the comment in code, `//` marks comment start in Java
+warningsInputPattern = "// ;warn:(\\d+):(\\d+): (.*)" # (optional)
+
+# e.g. `WARN - 10/14 - Class name is in incorrect case`
+warningsOutputPattern = "\\w+ - (\\d+)/(\\d+) - (.*)$" # (optional)
+
+# index of regex capture group for line number, used when `warningTextHasLine == false`
+lineCaptureGroup = 1 # (optional, depends on warningTextHasLine)
+
+# index of regex capture group for column number, used when `warningTextHasColumn == false`
+columnCaptureGroup = 2 # (optional, depends on warningTextHasColumn)
+
+# index of regex capture group for message text
+messageCaptureGroup = 3 # (required)
+
+warningTextHasColumn = true # (optional)
+warningTextHasLine = true # (optional)
 ```
 
 When executed from project root (where `save.propertes` is located), SAVE will cd to `rootDir` and discover all files

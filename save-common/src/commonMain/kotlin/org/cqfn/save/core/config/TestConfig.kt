@@ -105,6 +105,12 @@ data class TestConfig(
         }
         return this
     }
+
+    fun validate() {
+        for (config in this.pluginConfigs) {
+            this.pluginConfigs.set(this.pluginConfigs.indexOf(config), config.validate())
+        }
+    }
 }
 
 /**

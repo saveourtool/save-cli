@@ -30,6 +30,14 @@ data class FixPluginConfig(
         )
     }
 
+    override fun validate(): FixPluginConfig {
+        val newDestinationFileSuffix = destinationFileSuffix ?: "_copy"
+        return FixPluginConfig(
+            execCmd,
+            newDestinationFileSuffix
+        )
+    }
+
     /**
      * Constructs a name of destination file from original file name and [destinationFileSuffix]
      *

@@ -84,6 +84,11 @@ SAVE framework will detect tests, run your analyzer on these tests, will calcula
 To make SAVE detect your test suites you need to put `save.toml` file in each directory where you have tests that should be run.
 Note, that these configuration files inherit configurations from the previous level of directories.
 
+Despite the fact, that almost all fields may not be defined in bottom levels and can be inherited from the top level,
+you should be accurate: some fields are required for execution, so you need to provide them at least in one config from inheritance chain
+for test that should be run.
+[See this for details](#save_toml_configuration_file) about required fields.
+
 For example, in case of the following hierarchy of directories:
 ```text
 | A
@@ -121,7 +126,7 @@ $ save [options] /path/to/tests/Test1 /path/to/tests/Test2
 ```
 SAVE will detect the closest `save.toml` file and use configuration from there.
 
-## save.toml configuration file
+## <a name="save_toml_configuration_file"></a> save.toml configuration file
 Save configuration uses [toml](https://toml.io/en/) format. As it was told [above](#test_detection), save.toml can be imported from the directory hierarchy.
 The configuration file has `[general]` table and `[plugins]` table. To see more information about plugins, read [this](#plugins) section.
 In this section we will give information only about the `[general]` table that can be used in all plugins.
@@ -150,10 +155,10 @@ includedTests = NameWithTestPostfix, NameWithoutPostfix, e.t.c
 SAVE doesn't have any inspections active by default, instead the behavior of the analysis is fully configurable using plugins.
 Plugins are dynamic libraries (`.so` or `.dll`) and they should be provided using argument `--plugins-path`. Some plugins are bundled
 with SAVE out-of-the-box and don't require an additional setup. Here is a list of standard plugins:
-* [diff-plugin](save-plugins/fix-plugin/README.md) for testing tools for static analyzers that mutate text
+* [fix-plugin](save-plugins/fix-plugin/README.md) for testing tools for static analyzers that mutate text
 * [warn-plugin](save-plugins/warn-plugin/README.md) for testing tools that find problems in the source code and emit warnings
 
-Extending SAVE and writing your own plugin is simple. For instructions, see [corresponding README](save-plugins/README.md).
+Extending SAVE and writing your own plugin is simple. For instructions, see [corresponding README](save-plugins/README.md). // FixMe: add README
 
 In case you would like to have several plugins to work in your directory with same test files, just simply add them all to `save.toml` config:
 ```text

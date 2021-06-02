@@ -23,6 +23,8 @@ interface PluginConfig {
      * @return merged config
      */
     fun mergeWith(otherConfig: PluginConfig): PluginConfig
+
+    fun validate(): PluginConfig
 }
 
 /**
@@ -40,9 +42,9 @@ interface PluginConfig {
  */
 @Serializable
 data class GeneralConfig(
-    val tags: String,
-    val description: String,
-    val suiteName: String,
+    val tags: String? = null,
+    val description: String? = null,
+    val suiteName: String? = null,
     val excludedTests: String? = null,
     val includedTests: String? = null,
     val ignoreSaveComments: Boolean? = null
@@ -61,11 +63,37 @@ data class GeneralConfig(
 
         return GeneralConfig(
             mergedTag,
-            this.description,
-            this.suiteName,
+            this.description ?: other.description,
+            this.suiteName ?: other.suiteName,
             this.excludedTests ?: other.excludedTests,
             this.includedTests ?: other.includedTests,
             this.ignoreSaveComments ?: other.ignoreSaveComments
+        )
+    }
+
+    override fun validate(): GeneralConfig {
+        requireNotNull(tags) {
+            "Error: Couldn't found `tags` in [general] section. Please provide it in this, " +
+                    "or at least in one of the parent configs"
+        }
+        requireNotNull(description) {
+            "Error: Couldn't found `description` in [general] section. Please provide it in this, " +
+                    "or at least in one of the parent configs"
+        }
+        requireNotNull(suiteName) {
+            "Error: Couldn't found `suiteName` in [general] section. Please provide it in this, " +
+                    "or at least in one of the parent configs"
+        }
+        val newExcludedTests = excludedTests ?: ""
+        val newIncludedTests = includedTests ?: ""
+        val newIgnoreSaveComments = ignoreSaveComments ?: false
+        return GeneralConfig(
+            tags,
+            description,
+            suiteName,
+            newExcludedTests,
+            newIncludedTests,
+            newIgnoreSaveComments
         )
     }
 }

@@ -52,7 +52,7 @@ class UtilsTest {
         text: String,
         expectedWarning: Warning) {
         val warning = text.extractWarning(
-            warnPluginConfig.warningsInputPattern,
+            warnPluginConfig.warningsInputPattern!!,
             columnGroupIdx = warnPluginConfig.columnCaptureGroup,
             lineGroupIdx = warnPluginConfig.lineCaptureGroup,
             messageGroupIdx = warnPluginConfig.messageCaptureGroup
@@ -63,7 +63,7 @@ class UtilsTest {
 
     private fun assertExtractionFails(warnPluginConfig: WarnPluginConfig, text: String) {
         val warning = text.extractWarning(
-            warnPluginConfig.warningsInputPattern,
+            warnPluginConfig.warningsInputPattern!!,
             columnGroupIdx = warnPluginConfig.columnCaptureGroup,
             lineGroupIdx = warnPluginConfig.lineCaptureGroup,
             messageGroupIdx = warnPluginConfig.messageCaptureGroup
