@@ -18,10 +18,13 @@ abstract class Plugin(open val testConfig: TestConfig, private val testFiles: Li
      *
      * @return a sequence of [TestResult]s for each group of test resources
      */
-    fun execute(): Sequence<TestResult> = handleFiles(
-        // todo: pass individual groups of files to handleFiles? Or it will play bad with batch mode?
-        discoverTestFiles(testConfig.directory)
-    )
+    fun execute(): Sequence<TestResult> {
+        cleanDir()
+        return handleFiles(
+            // todo: pass individual groups of files to handleFiles? Or it will play bad with batch mode?
+            discoverTestFiles(testConfig.directory)
+        )
+    }
 
     /**
      * Perform plugin's work on a set of files.
@@ -57,6 +60,11 @@ abstract class Plugin(open val testConfig: TestConfig, private val testFiles: Li
      * @return a sequence of files, grouped by test
      */
     abstract fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>>
+
+    /**
+     * Method for cleaning up a directory.
+     */
+    abstract fun cleanDir()
 
     /**
      * Returns a sequence of directories, where resources for this plugin may be located.

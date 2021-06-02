@@ -6,8 +6,6 @@ package org.cqfn.save.plugins.fix
 import org.cqfn.save.core.plugin.PluginConfig
 import org.cqfn.save.core.plugin.RegexSerializer
 
-import okio.Path
-
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 
@@ -17,25 +15,38 @@ import kotlinx.serialization.UseSerializers
  * The logic of the default value processing will be provided in stage of validation
  *
  * @property execCmd a command that will be executed to mutate test file contents
- * @property destinationFileSuffix [execCmd] should append this suffix to the file name after mutating it.
- * @property resourceNamePattern regex for the name of the test files
+ * @property resourceNameTestSuffix suffix name of the test file.
+ * @property resourceNameExpectedSuffix suffix name of the expected file.
  */
 @Serializable
 data class FixPluginConfig(
     val execCmd: String,
-    val destinationFileSuffix: String? = null,
-    val resourceNamePattern: Regex? = null
+    val resourceNameTestSuffix: String? = null,
+    val resourceNameExpectedSuffix: String? = null,
 ) : PluginConfig<FixPluginConfig> {
     /**
-     * Constructs a name of destination file from original file name and [destinationFileSuffix]
-     *
-     * @param original an original file
-     * @return a name of destination file
+     *  @property resourceNamePattern regex for the name of the test files.
      */
-    fun destinationFileFor(original: Path): String {
-        requireNotNull(destinationFileSuffix) { "This method should never be called when destinationFileSuffix is null" }
-        return original.name.run {
-            substringBeforeLast(".") + destinationFileSuffix + "." + substringAfterLast(".")
+    val resourceNamePattern: Regex = resourceNamePattern()
+
+    /**
+     *  @property resourceNameTest
+     */
+    val resourceNameTest: String = resourceNameTestSuffix ?: "Test"
+
+    /**
+     *  @property resourceNameExpected
+     */
+    val resourceNameExpected: String = resourceNameExpectedSuffix ?: "Expected"
+
+    private fun resourceNamePattern(): Regex {
+        val isNotNullResourceNameTestSuffix = resourceNameTestSuffix != null
+        val isNotNullResourceNameExpectedSuffix = resourceNameExpectedSuffix != null
+        return when (isNotNullResourceNameExpectedSuffix to isNotNullResourceNameTestSuffix) {
+            true to true -> Regex("""(.+)($resourceNameExpectedSuffix|$resourceNameExpectedSuffix)\.[\w\d]+""")
+            true to false -> Regex("""(.+)($resourceNameExpectedSuffix|Test)\.[\w\d]+""")
+            false to true -> Regex("""(.+)(Expected|$resourceNameExpectedSuffix)\.[\w\d]+""")
+            else -> Regex("""(.+)(Expected|Test)\.[\w\d]+""")
         }
     }
 
@@ -50,11 +61,8 @@ data class FixPluginConfig(
     }
 
     override fun mergePluginConfig(parentConfig: FixPluginConfig) = FixPluginConfig(
-        this.execCmd ?: parentConfig.execCmd,
-        this.destinationFileSuffix ?: parentConfig.destinationFileSuffix
+        this.execCmd,
+        this.resourceNameTestSuffix ?: parentConfig.resourceNameTestSuffix,
+        this.resourceNameExpectedSuffix ?: parentConfig.resourceNameExpectedSuffix
     )
-
-    companion object {
-        internal val defaultResourceNamePattern = Regex("""(.+)(Expected|Test)\.[\w\d]+""")
-    }
 }
