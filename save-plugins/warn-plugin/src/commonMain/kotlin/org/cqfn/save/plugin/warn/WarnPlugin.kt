@@ -14,8 +14,6 @@ import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.result.TestStatus
 import org.cqfn.save.core.utils.AtomicInt
 import org.cqfn.save.core.utils.ProcessBuilder
-import org.cqfn.save.plugin.warn.WarnPluginConfig.Companion.defaultInputPattern
-import org.cqfn.save.plugin.warn.WarnPluginConfig.Companion.defaultOutputPattern
 import org.cqfn.save.plugin.warn.WarnPluginConfig.Companion.defaultResourceNamePattern
 import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
@@ -69,7 +67,7 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
             .mapNotNull {
                 with(warnPluginConfig) {
                     it.extractWarning(
-                        warningsInputPattern ?: defaultInputPattern,
+                        warningsInputPattern!!,
                         columnCaptureGroup,
                         lineCaptureGroup,
                         messageCaptureGroup
@@ -86,7 +84,7 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
             .mapValues { it.value.sortedBy { it.message } }
 
         val execCmd: String = if (generalConfig?.ignoreSaveComments == true) {
-            val fileName = createTestFile(path, warnPluginConfig.warningsInputPattern ?: defaultInputPattern)
+            val fileName = createTestFile(path, warnPluginConfig.warningsInputPattern!!)
             warnPluginConfig.execCmd + " $fileName"
         } else {
             warnPluginConfig.execCmd + " ${path.name}"
@@ -95,7 +93,7 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
         val executionResult = pb.exec(execCmd, null)
         val actualWarningsMap = executionResult.stdout.mapNotNull {
             with(warnPluginConfig) {
-                it.extractWarning(warningsOutputPattern ?: defaultOutputPattern, columnCaptureGroup, lineCaptureGroup, messageCaptureGroup)
+                it.extractWarning(warningsOutputPattern!!, columnCaptureGroup, lineCaptureGroup, messageCaptureGroup)
             }
         }
             .groupBy { if (it.line != null && it.column != null) it.line to it.column else null }
