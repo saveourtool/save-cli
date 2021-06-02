@@ -3,6 +3,7 @@
 
 package org.cqfn.save.plugin.warn
 
+import org.cqfn.save.core.config.TestConfigSections
 import org.cqfn.save.core.plugin.PluginConfig
 import org.cqfn.save.core.plugin.RegexSerializer
 
@@ -39,30 +40,23 @@ data class WarnPluginConfig(
     val columnCaptureGroup: Int?,
     val messageCaptureGroup: Int,
     val exactWarningsMatch: Boolean? = null,
-    val resourceNamePattern: Regex? = null,
-) : PluginConfig<WarnPluginConfig> {
-    @Suppress("TYPE_ALIAS")
-    override fun mergeConfigInto(childConfig: MutableList<PluginConfig<*>>) {
-        val childWarnConfig = childConfig.filterIsInstance<WarnPluginConfig>().firstOrNull()
-        val newChildWarnConfig = childWarnConfig?.mergePluginConfig(this) ?: this
-        // Now we update child config in place
-        childWarnConfig?.let {
-            childConfig.set(childConfig.indexOf(childWarnConfig), newChildWarnConfig)
-        } ?: childConfig.add(newChildWarnConfig)
-    }
+) : PluginConfig {
+    override val type = TestConfigSections.WARN
 
-    override fun mergePluginConfig(parentConfig: WarnPluginConfig) = WarnPluginConfig(
-        this.execCmd ?: parentConfig.execCmd,
-        this.warningsInputPattern ?: parentConfig.warningsInputPattern,
-        this.warningsOutputPattern ?: parentConfig.warningsOutputPattern,
-        this.warningTextHasLine ?: parentConfig.warningTextHasLine,
-        this.warningTextHasColumn ?: parentConfig.warningTextHasColumn,
-        this.lineCaptureGroup ?: parentConfig.lineCaptureGroup,
-        this.columnCaptureGroup ?: parentConfig.columnCaptureGroup,
-        this.messageCaptureGroup ?: parentConfig.messageCaptureGroup,
-        this.exactWarningsMatch ?: parentConfig.exactWarningsMatch,
-        this.resourceNamePattern ?: parentConfig.resourceNamePattern
-    )
+    override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
+        val other = otherConfig as WarnPluginConfig
+        return WarnPluginConfig(
+            this.execCmd,
+            this.warningsInputPattern,
+            this.warningsOutputPattern,
+            this.warningTextHasLine ?: other.warningTextHasLine,
+            this.warningTextHasColumn ?: other.warningTextHasColumn,
+            this.lineCaptureGroup ?: other.lineCaptureGroup,
+            this.columnCaptureGroup ?: other.columnCaptureGroup,
+            this.messageCaptureGroup,
+            this.exactWarningsMatch ?: other.exactWarningsMatch
+        )
+    }
 
     companion object {
         /**

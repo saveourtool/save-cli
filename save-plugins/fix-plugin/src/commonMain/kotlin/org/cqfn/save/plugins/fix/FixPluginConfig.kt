@@ -3,6 +3,7 @@
 
 package org.cqfn.save.plugins.fix
 
+import org.cqfn.save.core.config.TestConfigSections
 import org.cqfn.save.core.plugin.PluginConfig
 import org.cqfn.save.core.plugin.RegexSerializer
 
@@ -23,7 +24,17 @@ data class FixPluginConfig(
     val execCmd: String,
     val resourceNameTestSuffix: String? = null,
     val resourceNameExpectedSuffix: String? = null,
-) : PluginConfig<FixPluginConfig> {
+) : PluginConfig {
+    override val type = TestConfigSections.FIX
+
+    override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
+        val other = otherConfig as FixPluginConfig
+        return FixPluginConfig(
+            this.execCmd,
+            this.destinationFileSuffix ?: other.destinationFileSuffix
+        )
+    }
+
     /**
      *  @property resourceNamePattern regex for the name of the test files.
      */
@@ -50,19 +61,6 @@ data class FixPluginConfig(
         }
     }
 
-    @Suppress("TYPE_ALIAS")
-    override fun mergeConfigInto(childConfig: MutableList<PluginConfig<*>>) {
-        val childFixConfig = childConfig.filterIsInstance<FixPluginConfig>().firstOrNull()
-        val newChildFixConfig = childFixConfig?.mergePluginConfig(this) ?: this
-        // Now we update child config in place
-        childFixConfig?.let {
-            childConfig.set(childConfig.indexOf(childFixConfig), newChildFixConfig)
-        } ?: childConfig.add(newChildFixConfig)
     }
 
-    override fun mergePluginConfig(parentConfig: FixPluginConfig) = FixPluginConfig(
-        this.execCmd,
-        this.resourceNameTestSuffix ?: parentConfig.resourceNameTestSuffix,
-        this.resourceNameExpectedSuffix ?: parentConfig.resourceNameExpectedSuffix
-    )
 }
