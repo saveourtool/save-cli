@@ -12,7 +12,8 @@ class ConfigDetectorRegressionTest {
     fun `config detector regression test on directories`() {
         val expected = listOf(
             "../examples/save.toml", "../examples/highlevel/save.toml",
-            "../examples/highlevel/suite1/save.toml", "../examples/highlevel/suite2/inner/save.toml"
+            "../examples/highlevel/suite1/save.toml", "../examples/highlevel/suite1/subSuite/save.toml",
+            "../examples/highlevel/suite2/inner/save.toml"
         )
 
         val actual1 = ConfigDetector()
