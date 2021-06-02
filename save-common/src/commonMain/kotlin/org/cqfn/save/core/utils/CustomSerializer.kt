@@ -13,6 +13,7 @@ import kotlinx.serialization.encoding.Encoder
 
 @OptIn(ExperimentalSerializationApi::class)
 @Serializer(forClass = Regex::class)
+@Suppress("MatchingDeclarationName")
 object RegexSerializer : KSerializer<Regex> {
     override val descriptor: SerialDescriptor =
             PrimitiveSerialDescriptor("regex", PrimitiveKind.STRING)
