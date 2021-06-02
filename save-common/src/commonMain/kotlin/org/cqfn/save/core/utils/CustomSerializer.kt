@@ -1,4 +1,4 @@
-@file:Suppress("HEADER_MISSING_IN_NON_SINGLE_CLASS_FILE")
+@file:Suppress("HEADER_MISSING_IN_NON_SINGLE_CLASS_FILE", "MatchingDeclarationName")
 
 package org.cqfn.save.core.utils
 
@@ -13,7 +13,6 @@ import kotlinx.serialization.encoding.Encoder
 
 @OptIn(ExperimentalSerializationApi::class)
 @Serializer(forClass = Regex::class)
-@Suppress("MatchingDeclarationName")
 object RegexSerializer : KSerializer<Regex> {
     override val descriptor: SerialDescriptor =
             PrimitiveSerialDescriptor("regex", PrimitiveKind.STRING)
