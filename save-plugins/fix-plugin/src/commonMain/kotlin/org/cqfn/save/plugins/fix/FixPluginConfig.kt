@@ -31,7 +31,8 @@ data class FixPluginConfig(
         val other = otherConfig as FixPluginConfig
         return FixPluginConfig(
             this.execCmd,
-            this.destinationFileSuffix ?: other.destinationFileSuffix
+            this.resourceNameTestSuffix ?: other.resourceNameTestSuffix,
+            this.resourceNameExpectedSuffix ?: other.resourceNameExpectedSuffix,
         )
     }
 
@@ -59,8 +60,6 @@ data class FixPluginConfig(
             false to true -> Regex("""(.+)(Expected|$resourceNameExpectedSuffix)\.[\w\d]+""")
             else -> Regex("""(.+)(Expected|Test)\.[\w\d]+""")
         }
-    }
-
     }
 
 }

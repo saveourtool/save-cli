@@ -14,7 +14,6 @@ import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.result.TestStatus
 import org.cqfn.save.core.utils.AtomicInt
 import org.cqfn.save.core.utils.ProcessBuilder
-import org.cqfn.save.plugin.warn.WarnPluginConfig.Companion.defaultResourceNamePattern
 import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
 
@@ -49,7 +48,7 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
 
     override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
-        val regex = warnPluginConfig.resourceNamePattern ?: defaultResourceNamePattern
+        val regex = warnPluginConfig.resourceNamePattern
         return resourceDirectories
             .map { directory ->
                 FileSystem.SYSTEM.list(directory)

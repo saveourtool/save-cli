@@ -40,8 +40,14 @@ data class WarnPluginConfig(
     val columnCaptureGroup: Int?,
     val messageCaptureGroup: Int,
     val exactWarningsMatch: Boolean? = null,
+    val testNameSuffix: String? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.WARN
+
+    /**
+     *  @property resourceNamePattern regex for the name of the test files.
+     */
+    val resourceNamePattern: Regex = resourceNamePattern()
 
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as WarnPluginConfig
@@ -54,8 +60,15 @@ data class WarnPluginConfig(
             this.lineCaptureGroup ?: other.lineCaptureGroup,
             this.columnCaptureGroup ?: other.columnCaptureGroup,
             this.messageCaptureGroup,
-            this.exactWarningsMatch ?: other.exactWarningsMatch
+            this.exactWarningsMatch ?: other.exactWarningsMatch,
+            this.testNameSuffix ?: other.testNameSuffix
         )
+    }
+
+    private fun resourceNamePattern(): Regex = if (testNameSuffix != null) {
+        Regex("""(.+)$testNameSuffix\.[\w\d]+""")
+    } else {
+        Regex("""(.+)Test\.[\w\d]+""")
     }
 
     companion object {
@@ -70,6 +83,5 @@ data class WarnPluginConfig(
          * ```[WARN] /path/to/resources/ClassNameTest.java:2:4: Class name in incorrect case```
          */
         internal val defaultOutputPattern = Regex(".*(\\d+):(\\d+): (.+)")
-        internal val defaultResourceNamePattern = Regex("""(.+)Test\.[\w\d]+""")
     }
 }
