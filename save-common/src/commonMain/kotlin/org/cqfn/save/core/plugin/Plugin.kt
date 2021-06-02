@@ -73,6 +73,10 @@ abstract class Plugin(open val testConfig: TestConfig, private val testFiles: Li
      *
      * @throws TempDirException when deleting temp dir
      */
+    @Suppress(
+        "TooGenericExceptionCaught",
+        "SwallowedException"
+    )
     private fun clean() {
         try {
             cleanupTempDir()
@@ -87,6 +91,10 @@ abstract class Plugin(open val testConfig: TestConfig, private val testFiles: Li
      * @param tmpDir
      * @throws TempDirException when creating temp dir
      */
+    @Suppress(
+        "TooGenericExceptionCaught",
+        "SwallowedException"
+    )
     protected fun createTempDir(tmpDir: Path) {
         try {
             if (!fs.exists(tmpDir)) {
