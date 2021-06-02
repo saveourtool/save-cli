@@ -7,6 +7,7 @@ import kotlin.test.Test
 
 class PerformAnalysisTest {
     @Test
+    @Ignore
     fun `detect plugins`() {
         val saveProperties = SaveProperties(
             testRootPath = "../examples",

@@ -87,9 +87,9 @@ data class TestConfig(
     fun mergeConfigWithParents(): TestConfig {
         logDebug("Start merging configs for ${this.location}")
 
-        this.parentConfigs().toList().reversed().forEach { parentConfig ->
+        this.parentConfigs().toList().forEach { parentConfig ->
             // return from the function if we stay at the root element of the plugin tree
-            val parentalPlugins = parentConfig.pluginConfigs ?: return this
+            val parentalPlugins = parentConfig.pluginConfigs
             parentalPlugins.forEach { currentConfig ->
                 val childConfigs = this.pluginConfigs.filter { it.type == currentConfig.type }
                 if (childConfigs.isEmpty()) {

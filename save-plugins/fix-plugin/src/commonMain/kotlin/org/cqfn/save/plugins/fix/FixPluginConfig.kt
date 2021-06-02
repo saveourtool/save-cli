@@ -39,7 +39,7 @@ data class FixPluginConfig(
     fun destinationFileFor(original: Path): String {
         requireNotNull(destinationFileSuffix) { "This method should never be called when destinationFileSuffix is null" }
         return original.name.run {
-            substringBeforeLast("Test.") + destinationFileSuffix + "." + substringAfterLast(".")
+            substringBeforeLast(".") + destinationFileSuffix + "." + substringAfterLast(".")
         }
     }
 
