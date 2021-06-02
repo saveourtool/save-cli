@@ -3,6 +3,8 @@ package org.cqfn.save.plugin.warn
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
+import org.cqfn.save.core.logging.logInfo
+import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.DebugInfo
@@ -18,8 +20,6 @@ import org.cqfn.save.plugin.warn.utils.extractWarning
 
 import okio.FileSystem
 import okio.Path
-import org.cqfn.save.core.logging.logInfo
-import org.cqfn.save.core.logging.logWarn
 
 private typealias LineColumn = Pair<Int, Int>
 
@@ -33,7 +33,7 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
 
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
         val flattenedResources = files.toList().flatten()
-        if(flattenedResources.isEmpty()) {
+        if (flattenedResources.isEmpty()) {
             logWarn("No resources discovered for WarnPlugin in [${testConfig.location}]")
         } else {
             logInfo("Discovered the following test resources: $flattenedResources")

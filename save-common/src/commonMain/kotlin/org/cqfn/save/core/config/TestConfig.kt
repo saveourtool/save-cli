@@ -63,7 +63,7 @@ data class TestConfig(
      * @return a [Sequence] of parent config files
      */
     fun parentConfigs(withSelf: Boolean = false) =
-        generateSequence(if (withSelf) this else parentConfig) { it.parentConfig }
+            generateSequence(if (withSelf) this else parentConfig) { it.parentConfig }
 
     /**
      * recursively (till leafs) return all configs from the configuration Tree
@@ -107,15 +107,14 @@ data class TestConfig(
     }
 }
 
+/**
+ * Sections of a toml configuration for tests (including standard plugins)
+ */
+enum class TestConfigSections {
+    FIX, GENERAL, WARN;
+}
 
-    /**
-     * Sections of a toml configuration for tests (including standard plugins)
-     */
-    enum class TestConfigSections {
-        FIX, GENERAL, WARN;
-    }
-
-    /**
-     * @return whether a file denoted by this [Path] is a default save configuration file (save.toml)
-     */
-    fun Path.isSaveTomlConfig() = name == "save.toml"
+/**
+ * @return whether a file denoted by this [Path] is a default save configuration file (save.toml)
+ */
+fun Path.isSaveTomlConfig() = name == "save.toml"

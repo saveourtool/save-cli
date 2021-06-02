@@ -3,6 +3,7 @@ package org.cqfn.save.plugins.fix
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.logInfo
+import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Fail
@@ -18,7 +19,6 @@ import io.github.petertrr.diffutils.text.DiffRowGenerator
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
-import org.cqfn.save.core.logging.logWarn
 
 /**
  * A plugin that runs an executable on a file and compares output with expected output.
