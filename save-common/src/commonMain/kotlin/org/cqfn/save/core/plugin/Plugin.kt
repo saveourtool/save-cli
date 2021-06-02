@@ -81,7 +81,7 @@ abstract class Plugin(open val testConfig: TestConfig, private val testFiles: Li
         try {
             cleanupTempDir()
         } catch (e: Exception) {
-            throw TempDirException("\"Could not delete temp dir, cause: ${e.message}\"")
+            throw TempDirException("Could not delete temp dir, cause: ${e.message}")
         }
     }
 
@@ -101,7 +101,7 @@ abstract class Plugin(open val testConfig: TestConfig, private val testFiles: Li
                 fs.createDirectory(tmpDir)
             }
         } catch (e: Exception) {
-            throw TempDirException("\"Could not create temp dir, cause: ${e.message}\"")
+            throw TempDirException("Could not create temp dir, cause: ${e.message}")
         }
     }
 

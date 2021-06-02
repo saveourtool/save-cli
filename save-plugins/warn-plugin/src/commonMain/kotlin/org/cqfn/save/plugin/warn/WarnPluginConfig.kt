@@ -65,12 +65,7 @@ data class WarnPluginConfig(
         )
     }
 
-    private fun resourceNamePattern(): Regex = testNameSuffix?.let {
-        Regex("""(.+)$testNameSuffix\.[\w\d]+""")
-    }
-        ?: run {
-            Regex("""(.+)Test\.[\w\d]+""")
-        }
+    private fun resourceNamePattern(): Regex = Regex("""(.+)${(testNameSuffix ?: "Test")}\.[\w\d]+""")
 
     companion object {
         /**

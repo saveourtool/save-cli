@@ -11,11 +11,6 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
-/**
- * Class for custom serializer
- */
-class CustomSerializer
-
 @OptIn(ExperimentalSerializationApi::class)
 @Serializer(forClass = Regex::class)
 object RegexSerializer : KSerializer<Regex> {

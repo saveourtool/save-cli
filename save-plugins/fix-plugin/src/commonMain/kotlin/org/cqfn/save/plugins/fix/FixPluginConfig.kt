@@ -1,4 +1,3 @@
-@file:Suppress("HEADER_MISSING_IN_NON_SINGLE_CLASS_FILE")
 @file:UseSerializers(RegexSerializer::class)
 
 package org.cqfn.save.plugins.fix
@@ -28,11 +27,6 @@ data class FixPluginConfig(
     override val type = TestConfigSections.FIX
 
     /**
-     *  @property resourceNamePattern regex for the name of the test files.
-     */
-    val resourceNamePattern: Regex = resourceNamePattern()
-
-    /**
      *  @property resourceNameTest
      */
     val resourceNameTest: String = resourceNameTestSuffix ?: "Test"
@@ -42,6 +36,11 @@ data class FixPluginConfig(
      */
     val resourceNameExpected: String = resourceNameExpectedSuffix ?: "Expected"
 
+    /**
+     *  @property resourceNamePattern regex for the name of the test files.
+     */
+    val resourceNamePattern: Regex = Regex("""(.+)($resourceNameExpected|$resourceNameTest)\.[\w\d]+""")
+
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as FixPluginConfig
         return FixPluginConfig(
@@ -49,16 +48,5 @@ data class FixPluginConfig(
             this.resourceNameTestSuffix ?: other.resourceNameTestSuffix,
             this.resourceNameExpectedSuffix ?: other.resourceNameExpectedSuffix,
         )
-    }
-
-    private fun resourceNamePattern(): Regex {
-        val isNotNullResourceNameTestSuffix = resourceNameTestSuffix != null
-        val isNotNullResourceNameExpectedSuffix = resourceNameExpectedSuffix != null
-        return when (isNotNullResourceNameExpectedSuffix to isNotNullResourceNameTestSuffix) {
-            true to true -> Regex("""(.+)($resourceNameExpectedSuffix|$resourceNameTestSuffix)\.[\w\d]+""")
-            true to false -> Regex("""(.+)($resourceNameExpectedSuffix|Test)\.[\w\d]+""")
-            false to true -> Regex("""(.+)(Expected|$resourceNameTestSuffix)\.[\w\d]+""")
-            else -> Regex("""(.+)(Expected|Test)\.[\w\d]+""")
-        }
     }
 }
