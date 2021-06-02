@@ -27,7 +27,7 @@ import kotlinx.serialization.UseSerializers
  * @property messageCaptureGroup an index of capture group in regular expressions, corresponding to warning text. Indices start at 0 with 0
  * corresponding to the whole string.
  * @property exactWarningsMatch exact match of errors
- * @property resourceNamePattern regex for the name of the test files
+ * @property testNameSuffix suffix name of the test file.
  */
 @Serializable
 data class WarnPluginConfig(
@@ -65,11 +65,12 @@ data class WarnPluginConfig(
         )
     }
 
-    private fun resourceNamePattern(): Regex = if (testNameSuffix != null) {
+    private fun resourceNamePattern(): Regex = testNameSuffix?.let {
         Regex("""(.+)$testNameSuffix\.[\w\d]+""")
-    } else {
-        Regex("""(.+)Test\.[\w\d]+""")
     }
+        ?: run {
+            Regex("""(.+)Test\.[\w\d]+""")
+        }
 
     companion object {
         /**

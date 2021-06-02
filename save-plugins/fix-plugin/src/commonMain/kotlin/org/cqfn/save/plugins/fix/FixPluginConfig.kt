@@ -27,15 +27,6 @@ data class FixPluginConfig(
 ) : PluginConfig {
     override val type = TestConfigSections.FIX
 
-    override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
-        val other = otherConfig as FixPluginConfig
-        return FixPluginConfig(
-            this.execCmd,
-            this.resourceNameTestSuffix ?: other.resourceNameTestSuffix,
-            this.resourceNameExpectedSuffix ?: other.resourceNameExpectedSuffix,
-        )
-    }
-
     /**
      *  @property resourceNamePattern regex for the name of the test files.
      */
@@ -51,6 +42,15 @@ data class FixPluginConfig(
      */
     val resourceNameExpected: String = resourceNameExpectedSuffix ?: "Expected"
 
+    override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
+        val other = otherConfig as FixPluginConfig
+        return FixPluginConfig(
+            this.execCmd,
+            this.resourceNameTestSuffix ?: other.resourceNameTestSuffix,
+            this.resourceNameExpectedSuffix ?: other.resourceNameExpectedSuffix,
+        )
+    }
+
     private fun resourceNamePattern(): Regex {
         val isNotNullResourceNameTestSuffix = resourceNameTestSuffix != null
         val isNotNullResourceNameExpectedSuffix = resourceNameExpectedSuffix != null
@@ -61,5 +61,4 @@ data class FixPluginConfig(
             else -> Regex("""(.+)(Expected|Test)\.[\w\d]+""")
         }
     }
-
 }
