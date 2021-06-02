@@ -1,5 +1,6 @@
 package org.cqfn.save.plugins.fix
 
+import org.cqfn.save.core.config.TestConfigSections
 import org.cqfn.save.core.plugin.PluginConfig
 
 import okio.Path
@@ -18,7 +19,17 @@ import kotlinx.serialization.Serializable
 data class FixPluginConfig(
     val execCmd: String,
     val destinationFileSuffix: String? = null,
-) : PluginConfig<FixPluginConfig> {
+) : PluginConfig {
+    override val type = TestConfigSections.FIX
+
+    override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
+        val other = otherConfig as FixPluginConfig
+        return FixPluginConfig(
+            this.execCmd,
+            this.destinationFileSuffix ?: other.destinationFileSuffix
+        )
+    }
+
     /**
      * Constructs a name of destination file from original file name and [destinationFileSuffix]
      *
@@ -31,21 +42,6 @@ data class FixPluginConfig(
             substringBeforeLast(".") + destinationFileSuffix + "." + substringAfterLast(".")
         }
     }
-
-    @Suppress("TYPE_ALIAS")
-    override fun mergeConfigInto(childConfig: MutableList<PluginConfig<*>>) {
-        val childFixConfig = childConfig.filterIsInstance<FixPluginConfig>().firstOrNull()
-        val newChildFixConfig = childFixConfig?.mergePluginConfig(this) ?: this
-        // Now we update child config in place
-        childFixConfig?.let {
-            childConfig.set(childConfig.indexOf(childFixConfig), newChildFixConfig)
-        } ?: childConfig.add(newChildFixConfig)
-    }
-
-    override fun mergePluginConfig(parentConfig: FixPluginConfig) = FixPluginConfig(
-        this.execCmd ?: parentConfig.execCmd,
-        this.destinationFileSuffix ?: parentConfig.destinationFileSuffix
-    )
 
     companion object {
         internal val defaultResourceNamePattern = Regex("""(.+)(Expected|Test)\.[\w\d]+""")

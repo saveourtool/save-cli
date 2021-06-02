@@ -4,7 +4,6 @@ import org.cqfn.save.core.config.ReportType
 import org.cqfn.save.core.config.ResultOutputType
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.TestConfig
-import org.cqfn.save.core.config.TestConfigSections
 import org.cqfn.save.core.config.TestConfigSections.FIX
 import org.cqfn.save.core.config.TestConfigSections.GENERAL
 import org.cqfn.save.core.config.TestConfigSections.WARN
@@ -20,13 +19,6 @@ import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.plugin.PluginConfig
 import org.cqfn.save.core.plugin.PluginException
 import org.cqfn.save.core.reporter.Reporter
-import org.cqfn.save.core.reporter.afterAll
-import org.cqfn.save.core.reporter.beforeAll
-import org.cqfn.save.core.reporter.onEvent
-import org.cqfn.save.core.reporter.onPluginExecutionEnd
-import org.cqfn.save.core.reporter.onPluginExecutionError
-import org.cqfn.save.core.reporter.onPluginExecutionStart
-import org.cqfn.save.core.reporter.onPluginInitialization
 import org.cqfn.save.core.result.Crash
 import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.Ignored
@@ -72,63 +64,74 @@ class Save(
         // FixMe: now we work only with the save.toml config and it's hierarchy, but we should work properly here with directories as well
         // constructing the file path to the configuration file
         val fullPathToConfig = saveProperties.testRootPath!!.toPath() / saveProperties.testConfigPath!!.toPath()
-        // get all toml configs in file system
-        val testConfig = ConfigDetector().configFromFile(fullPathToConfig)
-
         val reporter = getReporter(saveProperties)
-        reporter.beforeAll()
+        // get all toml configs in file system
+        ConfigDetector()
+            .configFromFile(fullPathToConfig)
+            .getAllTestConfigs()
+            .forEach { testConfig ->
+                reporter.beforeAll()
 
-        val plugins: List<Plugin> = discoverPluginsAndUpdateTestConfig(testConfig)
-            .also { it.merge() }
-            // ignoring the section with general configuration as it is not needed to create plugin processors
-            .pluginConfigs.filterNot { it is GeneralConfig }
-            .map {
-                when (it) {
-                    is FixPluginConfig -> FixPlugin(testConfig)
-                    is WarnPluginConfig -> WarnPlugin(testConfig)
-                    else -> throw PluginException("Unknown type <${it::class}> of plugin config was provided")
-                }
+                // discover plugins from the test configuration
+                discoverPluginsAndUpdateTestConfig(testConfig)
+                    // merge configurations with parents
+                    .mergeConfigWithParents()
+                    // exclude general configuration from the list of plugins
+                    .pluginConfigsWithoutGeneralConfig()
+                    // create plugins from the configuration
+                    .map { createPlugin(it, testConfig) }
+                    // execute created plugins
+                    .forEach { executePlugin(it, reporter) }
+
+                reporter.afterAll()
             }
-
-        logInfo("Discovered plugins: $plugins")
-        plugins.forEach { plugin ->
-            reporter.onPluginInitialization(plugin)
-        }
-
-        plugins.forEach { plugin ->
-            logInfo("Execute plugin: ${plugin::class.simpleName}")
-            reporter.onPluginExecutionStart(plugin)
-            try {
-                plugin.execute()
-                    .onEach { event -> reporter.onEvent(event) }
-                    .forEach(this::handleResult)
-            } catch (ex: PluginException) {
-                reporter.onPluginExecutionError(ex)
-                logError("${plugin::class.simpleName} has crashed: ${ex.message}")
-            }
-            logInfo("${plugin::class.simpleName} successfully executed!")
-            reporter.onPluginExecutionEnd(plugin)
-        }
-
-        reporter.afterAll()
     }
+
+    private fun executePlugin(plugin: Plugin, reporter: Reporter) {
+        reporter.onPluginInitialization(plugin)
+        logInfo("=> Executing plugin: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
+        reporter.onPluginExecutionStart(plugin)
+        try {
+            plugin.execute()
+                .onEach { event -> reporter.onEvent(event) }
+                .forEach(this::handleResult)
+        } catch (ex: PluginException) {
+            reporter.onPluginExecutionError(ex)
+            logError("${plugin::class.simpleName} has crashed: ${ex.message}")
+        }
+        logInfo("<= Executed plugin: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
+        reporter.onPluginExecutionEnd(plugin)
+    }
+
+    private fun createPlugin(pluginConfig: PluginConfig, testConfig: TestConfig) =
+            when (pluginConfig.type) {
+                FIX -> FixPlugin(testConfig)
+                WARN -> WarnPlugin(testConfig)
+                else -> throw PluginException("Unknown type <${pluginConfig::class}> of plugin config was provided")
+            }
 
     private fun discoverPluginsAndUpdateTestConfig(testConfig: TestConfig): TestConfig {
         val testConfigPath = testConfig.location.toString()
         val parsedTomlConfig = TomlParser(testConfigPath).readAndParseFile()
         parsedTomlConfig.getRealTomlTables().forEach { tomlPluginSection ->
-            // adding a fake file node to restore the structure and parse only the part of te toml
+
+            // adding a fake file node to restore the structure and parse only the part of the toml
+            // this is a hack for easy partial read of Toml confiuration
             val fakeFileNode = TomlFile()
             tomlPluginSection.children.forEach {
                 fakeFileNode.appendChild(it)
             }
 
             val sectionName = tomlPluginSection.name.uppercase()
-            val sectionPluginConfig: PluginConfig<*> = when (val configName = TestConfigSections.valueOf(sectionName)) {
-                FIX -> createPluginConfig<FixPluginConfig>(testConfigPath, fakeFileNode, sectionName)
-                WARN -> createPluginConfig<WarnPluginConfig>(testConfigPath, fakeFileNode, sectionName)
-                GENERAL -> createPluginConfig<GeneralConfig>(testConfigPath, fakeFileNode, sectionName)
-                else -> throw PluginException("Received unknown plugin section name $configName")
+            // we don't convert sectionName to enum, because we don't want to get Kotlin exception
+            val sectionPluginConfig = when (sectionName) {
+                FIX.name -> createPluginConfig<FixPluginConfig>(testConfigPath, fakeFileNode, sectionName)
+                WARN.name -> createPluginConfig<WarnPluginConfig>(testConfigPath, fakeFileNode, sectionName)
+                GENERAL.name -> createPluginConfig<GeneralConfig>(testConfigPath, fakeFileNode, sectionName)
+                else -> throw PluginException(
+                    "Received unknown plugin section name in the input: [$sectionName]." +
+                            " Please check your <${testConfig.location}> config"
+                )
             }
 
             testConfig.pluginConfigs.add(sectionPluginConfig)
@@ -169,7 +172,7 @@ class Save(
         }
     }
 
-    @Suppress("WHEN_WITHOUT_ELSE")  // TestResult is a sealed class
+    @Suppress("WHEN_WITHOUT_ELSE")  // TestStatus is a sealed class
     private fun handleResult(testResult: TestResult) {
         when (val status = testResult.status) {
             is Pass -> {

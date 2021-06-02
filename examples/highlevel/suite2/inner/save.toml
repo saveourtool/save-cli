@@ -1,9 +1,8 @@
 [general]
+tags = "mytags"
 description = "My suite description"
 suiteName = "DocsCheck"
 
-[diff]
-exec_cmd="./ktlint -R diktat-0.4.2.jar -F"
-testFilePattern="*Test.kt"
-expectedFilePattern="*Expected.kt"
-batchMode = false
+[fix]
+execCmd="./ktlint -R diktat-0.4.2.jar -F"
+

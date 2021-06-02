@@ -62,7 +62,7 @@ class MergeConfigsTest {
         val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1))
         val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2))
 
-        config2.merge()
+        config2.mergeConfigWithParents()
 
         assertEquals(1, config2.pluginConfigs.size)
 
@@ -79,7 +79,7 @@ class MergeConfigsTest {
         val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig1))
         val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2))
 
-        config2.merge()
+        config2.mergeConfigWithParents()
 
         assertEquals(2, config2.pluginConfigs.size)
 
@@ -98,7 +98,7 @@ class MergeConfigsTest {
         val config1 = TestConfig(toml1, null, mutableListOf())
         val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, warnConfig1))
 
-        config2.merge()
+        config2.mergeConfigWithParents()
 
         assertEquals(2, config2.pluginConfigs.size)
 
@@ -115,7 +115,7 @@ class MergeConfigsTest {
         val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig2, fixConfig1))
         val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, warnConfig3, fixConfig2))
 
-        config2.merge()
+        config2.mergeConfigWithParents()
 
         assertEquals(3, config2.pluginConfigs.size)
 
@@ -134,14 +134,14 @@ class MergeConfigsTest {
     }
 
     @Test
-    fun `merge configs starting from bottom`() {
+    fun `merge configs with many parents`() {
         createTomlFiles()
         val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig1, fixConfig1))
         val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, warnConfig2, fixConfig2))
         val config3 = TestConfig(toml3, config2, mutableListOf(generalConfig3, warnConfig3, fixConfig3))
         val config4 = TestConfig(toml4, config3, mutableListOf(generalConfig4, warnConfig4, fixConfig4))
 
-        config4.merge()
+        config4.mergeConfigWithParents()
 
         assertEquals(3, config4.pluginConfigs.size)
         val expectedGeneralConfig = GeneralConfig("Tag11, Tag12, Tag21, Tag31, Tag32", "Description2", "suiteName4", "excludedTests: test7", "includedTests: test8")
@@ -156,67 +156,6 @@ class MergeConfigsTest {
         assertEquals(expectedGeneralConfig, actualGeneralConfig)
         assertEquals(expectedWarnConfig, actualWarnConfig)
         assertEquals(expectedFixConfig, actualFixConfig)
-    }
-
-    @Test
-    fun `merge configs starting from top`() {
-        createTomlFiles()
-        val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig1, fixConfig1))
-        val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, fixConfig2))
-        val config3 = TestConfig(toml3, config2, mutableListOf(generalConfig3, warnConfig3, fixConfig3))
-        val config4 = TestConfig(toml4, config3, mutableListOf(generalConfig4))
-
-        config1.merge()
-
-        assertEquals(3, config4.pluginConfigs.size)
-
-        val expectedGeneralConfig = GeneralConfig("Tag11, Tag12, Tag21, Tag31, Tag32", "Description2", "suiteName4", "excludedTests: test7", "includedTests: test8")
-        val expectedWarnConfig = WarnPluginConfig("execCmd3", warningsInputPattern2, warningsOutputPattern2,
-            false, false, 3, 3, 3, false)
-        val expectedFixConfig = FixPluginConfig("fixCmd3", "some suffix")
-
-        val actualGeneralConfig = config4.pluginConfigs.filterIsInstance<GeneralConfig>().first()
-        val actualWarnConfig = config4.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
-        val actualFixConfig = config4.pluginConfigs.filterIsInstance<FixPluginConfig>().first()
-
-        assertEquals(expectedGeneralConfig, actualGeneralConfig)
-        assertEquals(expectedWarnConfig, actualWarnConfig)
-        assertEquals(expectedFixConfig, actualFixConfig)
-    }
-
-    @Test
-    fun `merge configs starting from the middle`() {
-        createTomlFiles()
-        val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig1, fixConfig1))
-        val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, warnConfig2, fixConfig2))
-        val config3 = TestConfig(toml3, config2, mutableListOf(generalConfig3))
-
-        config2.merge()
-
-        assertEquals(3, config2.pluginConfigs.size)
-
-        val expectedGeneralConfig = GeneralConfig("Tag11, Tag12, Tag21", "Description2", "suiteName2", "excludedTests: test3", "includedTests: test4")
-        val expectedWarnConfig = WarnPluginConfig("execCmd2", warningsInputPattern1, warningsOutputPattern1,
-            true, true, 2, 2, 2, true)
-        val expectedFixConfig = FixPluginConfig("fixCmd2", "some suffix")
-
-        val actualGeneralConfig = config2.pluginConfigs.filterIsInstance<GeneralConfig>().first()
-        val actualWarnConfig = config2.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
-        val actualFixConfig = config2.pluginConfigs.filterIsInstance<FixPluginConfig>().first()
-
-        assertEquals(expectedGeneralConfig, actualGeneralConfig)
-        assertEquals(expectedWarnConfig, actualWarnConfig)
-        assertEquals(expectedFixConfig, actualFixConfig)
-
-        val expectedGeneralConfig2 = GeneralConfig("Tag11, Tag12, Tag21, Tag31, Tag32", "Description2", "suiteName3", "excludedTests: test5", "includedTests: test6")
-
-        val actualGeneralConfig2 = config3.pluginConfigs.filterIsInstance<GeneralConfig>().first()
-        val actualWarnConfig2 = config3.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
-        val actualFixConfig2 = config3.pluginConfigs.filterIsInstance<FixPluginConfig>().first()
-
-        assertEquals(expectedGeneralConfig2, actualGeneralConfig2)
-        assertEquals(expectedWarnConfig, actualWarnConfig2)
-        assertEquals(expectedFixConfig, actualFixConfig2)
     }
 
     @AfterTest
