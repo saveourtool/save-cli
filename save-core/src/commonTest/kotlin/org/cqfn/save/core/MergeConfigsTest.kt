@@ -134,7 +134,7 @@ class MergeConfigsTest {
     }
 
     @Test
-    fun `merge configs starting from bottom`() {
+    fun `merge configs with many parents`() {
         createTomlFiles()
         val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig1, fixConfig1))
         val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, warnConfig2, fixConfig2))
@@ -148,32 +148,6 @@ class MergeConfigsTest {
         val expectedWarnConfig = WarnPluginConfig("execCmd4", warningsInputPattern2, warningsOutputPattern2,
             true, false, 4, 4, 4, true)
         val expectedFixConfig = FixPluginConfig("fixCmd4", "some suffix")
-
-        val actualGeneralConfig = config4.pluginConfigs.filterIsInstance<GeneralConfig>().first()
-        val actualWarnConfig = config4.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
-        val actualFixConfig = config4.pluginConfigs.filterIsInstance<FixPluginConfig>().first()
-
-        assertEquals(expectedGeneralConfig, actualGeneralConfig)
-        assertEquals(expectedWarnConfig, actualWarnConfig)
-        assertEquals(expectedFixConfig, actualFixConfig)
-    }
-
-    @Test
-    fun `merge configs starting from top`() {
-        createTomlFiles()
-        val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig1, fixConfig1))
-        val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, fixConfig2))
-        val config3 = TestConfig(toml3, config2, mutableListOf(generalConfig3, warnConfig3, fixConfig3))
-        val config4 = TestConfig(toml4, config3, mutableListOf(generalConfig4))
-
-        config4.mergeConfigWithParents()
-
-        assertEquals(3, config4.pluginConfigs.size)
-
-        val expectedGeneralConfig = GeneralConfig("Tag11, Tag12, Tag21, Tag31, Tag32", "Description2", "suiteName4", "excludedTests: test7", "includedTests: test8")
-        val expectedWarnConfig = WarnPluginConfig("execCmd3", warningsInputPattern2, warningsOutputPattern2,
-            false, false, 3, 3, 3, false)
-        val expectedFixConfig = FixPluginConfig("fixCmd3", "some suffix")
 
         val actualGeneralConfig = config4.pluginConfigs.filterIsInstance<GeneralConfig>().first()
         val actualWarnConfig = config4.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
