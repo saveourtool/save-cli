@@ -1,6 +1,8 @@
 package org.cqfn.save.plugins.fix
 
 import org.cqfn.save.core.config.TestConfig
+import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.files.readFile
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.logInfo
 import org.cqfn.save.core.logging.logWarn
@@ -10,7 +12,6 @@ import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.ProcessBuilder
-import org.cqfn.save.plugins.fix.FixPluginConfig.Companion.defaultResourceNamePattern
 
 import io.github.petertrr.diffutils.diff
 import io.github.petertrr.diffutils.patch.ChangeDelta
@@ -18,7 +19,6 @@ import io.github.petertrr.diffutils.patch.Patch
 import io.github.petertrr.diffutils.text.DiffRowGenerator
 import okio.FileSystem
 import okio.Path
-import okio.Path.Companion.toPath
 
 /**
  * A plugin that runs an executable on a file and compares output with expected output.
@@ -26,6 +26,7 @@ import okio.Path.Companion.toPath
  */
 @Suppress("INLINE_CLASS_CAN_BE_USED")
 class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) : Plugin(testConfig, testFiles) {
+    private val fs = FileSystem.SYSTEM
     private val pb = ProcessBuilder()
     private val diffGenerator = DiffRowGenerator.create()
         .showInlineDiffs(true)
@@ -46,10 +47,10 @@ class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) :
         return files
             .map { it.first() to it.last() }
             .map { (expected, test) ->
-                val executionResult = pb.exec(fixPluginConfig.execCmd, null, false)
-                val fixedLines = FileSystem.SYSTEM.readLines(
-                    test.parent!! / fixPluginConfig.destinationFileFor(test).toPath()
-                )
+                val testCopy = createTestFile(test)
+                val execCmd = "${fixPluginConfig.execCmd} $testCopy"
+                val executionResult = pb.exec(execCmd, null, false)
+                val fixedLines = FileSystem.SYSTEM.readLines(testCopy)
                 val expectedLines = FileSystem.SYSTEM.readLines(expected)
                 val status = diff(expectedLines, fixedLines).let { patch ->
                     if (patch.deltas.isEmpty()) {
@@ -67,24 +68,49 @@ class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) :
             }
     }
 
-    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> = resourceDirectories
-        .map { FileSystem.SYSTEM.list(it) }
-        .flatMap { files ->
-            files.groupBy {
-                val matchResult = defaultResourceNamePattern.matchEntire(it.name)
-                matchResult?.groupValues?.get(1)  // this is a capture group for the start of file name
-            }
-                .filter { it.value.size > 1 && it.key != null }
-                .mapValues { (name, group) ->
-                    require(group.size == 2) { "Files should be grouped in pairs, but for name $name these files have been discovered: $group" }
-                    listOf(
-                        group.first { it.name.contains("Expected.") },
-                        group.first { it.name.contains("Test.") }
-                    )
-                }
-                .values
+    private fun createTestFile(path: Path): Path {
+        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
+        createTempDir(tmpDir)
+        val pathCopy: Path = tmpDir / path.name
+        fs.write(fs.createFile(pathCopy)) {
+            write(
+                (fs.readFile(path)).encodeToByteArray()
+            )
         }
-        .filter { it.isNotEmpty() }
+        return pathCopy
+    }
+
+    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {
+        val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
+        val regex = fixPluginConfig.resourceNamePattern
+        val resourceNameTest = fixPluginConfig.resourceNameTest
+        val resourceNameExpected = fixPluginConfig.resourceNameExpected
+        return resourceDirectories
+            .map { FileSystem.SYSTEM.list(it) }
+            .flatMap { files ->
+                files.groupBy {
+                    val matchResult = (regex).matchEntire(it.name)
+                    matchResult?.groupValues?.get(1)  // this is a capture group for the start of file name
+                }
+                    .filter { it.value.size > 1 && it.key != null }
+                    .mapValues { (name, group) ->
+                        require(group.size == 2) { "Files should be grouped in pairs, but for name $name these files have been discovered: $group" }
+                        listOf(
+                            group.first { it.name.contains("$resourceNameExpected.") },
+                            group.first { it.name.contains("$resourceNameTest.") }
+                        )
+                    }
+                    .values
+            }
+            .filter { it.isNotEmpty() }
+    }
+
+    override fun cleanupTempDir() {
+        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
+        if (fs.exists(tmpDir)) {
+            fs.deleteRecursively(tmpDir)
+        }
+    }
 
     private fun Patch<String>.formatToString() = deltas.joinToString("\n") { delta ->
         when (delta) {

@@ -99,6 +99,14 @@ fun FileSystem.readLines(path: Path): List<String> = this.read(path) {
 }
 
 /**
+ * @param path a path to a file
+ * @return string from the file
+ */
+fun FileSystem.readFile(path: Path): String = this.read(path) {
+    this.readUtf8()
+}
+
+/**
  * Returns a sequence of underlying directories, filtering on every level by [directoryPredicate].
  * Example:
  * ```

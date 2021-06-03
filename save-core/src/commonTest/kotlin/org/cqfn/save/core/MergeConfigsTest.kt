@@ -40,7 +40,7 @@ class MergeConfigsTest {
         warningTextHasColumn = false, lineCaptureGroup = 3, columnCaptureGroup = 3, messageCaptureGroup = 3)
     private val warnConfig4 = WarnPluginConfig("execCmd4", warningsInputPattern2, warningsOutputPattern2,
         lineCaptureGroup = 4, columnCaptureGroup = 4, messageCaptureGroup = 4)
-    private val fixConfig1 = FixPluginConfig("fixCmd1", "some suffix")
+    private val fixConfig1 = FixPluginConfig("fixCmd1", "Suffix")
     private val fixConfig2 = FixPluginConfig("fixCmd2")
     private val fixConfig3 = FixPluginConfig("fixCmd3", null)
     private val fixConfig4 = FixPluginConfig("fixCmd4")
@@ -122,7 +122,7 @@ class MergeConfigsTest {
         val expectedGeneralConfig = GeneralConfig("Tag11, Tag12, Tag21", "Description2", "suiteName2", "excludedTests: test3", "includedTests: test4")
         val expectedWarnConfig = WarnPluginConfig("execCmd3", warningsInputPattern2, warningsOutputPattern2,
             true, false, 3, 3, 3, true)
-        val expectedFixConfig = FixPluginConfig("fixCmd2", "some suffix")
+        val expectedFixConfig = FixPluginConfig("fixCmd2", "Suffix")
 
         val actualGeneralConfig = config2.pluginConfigs.filterIsInstance<GeneralConfig>().first()
         val actualWarnConfig = config2.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
@@ -147,7 +147,7 @@ class MergeConfigsTest {
         val expectedGeneralConfig = GeneralConfig("Tag11, Tag12, Tag21, Tag31, Tag32", "Description2", "suiteName4", "excludedTests: test7", "includedTests: test8")
         val expectedWarnConfig = WarnPluginConfig("execCmd4", warningsInputPattern2, warningsOutputPattern2,
             true, false, 4, 4, 4, true)
-        val expectedFixConfig = FixPluginConfig("fixCmd4", "some suffix")
+        val expectedFixConfig = FixPluginConfig("fixCmd4", "Suffix")
 
         val actualGeneralConfig = config4.pluginConfigs.filterIsInstance<GeneralConfig>().first()
         val actualWarnConfig = config4.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()

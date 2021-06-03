@@ -14,7 +14,6 @@ import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.result.TestStatus
 import org.cqfn.save.core.utils.AtomicInt
 import org.cqfn.save.core.utils.ProcessBuilder
-import org.cqfn.save.plugin.warn.WarnPluginConfig.Companion.defaultResourceNamePattern
 import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
 
@@ -47,12 +46,23 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
         }
     }
 
-    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> = resourceDirectories
-        .map { directory ->
-            FileSystem.SYSTEM.list(directory)
-                .filter { defaultResourceNamePattern.matches(it.name) }
+    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {
+        val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
+        val regex = warnPluginConfig.resourceNamePattern
+        return resourceDirectories
+            .map { directory ->
+                FileSystem.SYSTEM.list(directory)
+                    .filter { (regex).matches(it.name) }
+            }
+            .filter { it.isNotEmpty() }
+    }
+
+    override fun cleanupTempDir() {
+        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPlugin::class.simpleName!!)
+        if (fs.exists(tmpDir)) {
+            fs.deleteRecursively(tmpDir)
         }
-        .filter { it.isNotEmpty() }
+    }
 
     @Suppress(
         "TOO_LONG_FUNCTION",
@@ -111,12 +121,7 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
     internal fun createTestFile(path: Path, warningsInputPattern: Regex): String {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPlugin::class.simpleName!!)
 
-        if (fs.exists(tmpDir) && atomicInt.get() == 0) {
-            fs.deleteRecursively(tmpDir)
-            fs.createDirectory(tmpDir)
-        } else if (!fs.exists(tmpDir)) {
-            fs.createDirectory(tmpDir)
-        }
+        createTempDir(tmpDir)
 
         val fileName = testFileName()
         fs.write(fs.createFile(tmpDir / fileName)) {
