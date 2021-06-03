@@ -110,7 +110,7 @@ data class TestConfig(
      * Method, which validates all plugin configs and set default values, if possible
      */
     fun validateAndSetDefaults() {
-        logDebug("Start plugins validation for $location")
+        logDebug("Start plugin validation for $location")
         for (config in pluginConfigs) {
             pluginConfigs.set(pluginConfigs.indexOf(config), config.validateAndSetDefaults())
         }

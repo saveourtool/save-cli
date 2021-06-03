@@ -38,7 +38,6 @@ class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) :
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
         val flattenedResources = files.toList()
         if (flattenedResources.isEmpty()) {
-            logWarn("No resources discovered for FixPlugin in [${testConfig.location}]")
             return emptySequence()
         }
         testConfig.validateAndSetDefaults()

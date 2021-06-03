@@ -34,7 +34,6 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
         val flattenedResources = files.toList().flatten()
         if (flattenedResources.isEmpty()) {
-            logWarn("No resources discovered for WarnPlugin in [${testConfig.location}]")
             return emptySequence()
         }
 

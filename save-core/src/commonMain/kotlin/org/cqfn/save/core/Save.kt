@@ -92,14 +92,19 @@ class Save(
         logInfo("=> Executing plugin: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
         reporter.onPluginExecutionStart(plugin)
         try {
-            plugin.execute()
+            val events = plugin.execute()
+            if (events.toList().isEmpty()) {
+                logWarn("No resources discovered for ${plugin::class.simpleName} in [${plugin.testConfig.location}], skipping")
+                reporter.onPluginExecutionSkip(plugin)
+            }
+            events
                 .onEach { event -> reporter.onEvent(event) }
                 .forEach(this::handleResult)
         } catch (ex: PluginException) {
             reporter.onPluginExecutionError(ex)
             logError("${plugin::class.simpleName} has crashed: ${ex.message}")
         }
-        logInfo("<= Executed plugin: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
+        logInfo("<= Finish execution of: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
         reporter.onPluginExecutionEnd(plugin)
     }
 
