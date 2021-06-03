@@ -21,7 +21,7 @@ kotlin {
             dependencies {
                 implementation(project(":save-common"))
                 implementation("io.github.petertrr:kotlin-multiplatform-diff:0.2.0")
-                implementation( "org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
             }
         }
         val commonTest by getting {

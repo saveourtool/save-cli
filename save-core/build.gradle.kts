@@ -1,4 +1,4 @@
-import io.gitlab.arturbosch.detekt.Detekt
+
 import org.cqfn.save.buildutils.configurePublishing
 import org.cqfn.save.generation.configFilePath
 import org.cqfn.save.generation.generateConfigOptions

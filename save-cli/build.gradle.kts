@@ -1,6 +1,7 @@
 import org.cqfn.save.buildutils.configurePublishing
-import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
+
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem
+import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 
 plugins {
     kotlin("multiplatform")
@@ -37,14 +38,13 @@ kotlin {
             dependsOn(commonMain)
             dependencies {
                 implementation(project(":save-core"))
-                implementation( "org.jetbrains.kotlinx:kotlinx-serialization-properties:${Versions.Kotlinx.serialization}")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-properties:${Versions.Kotlinx.serialization}")
             }
         }
         saveTarget.forEach {
             getByName("${it.name}Main").dependsOn(nativeMain)
         }
         val commonTest by getting
-
 
         val jvmTest by getting {
             dependencies {
