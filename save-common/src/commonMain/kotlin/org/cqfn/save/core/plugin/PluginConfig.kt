@@ -31,6 +31,7 @@ interface PluginConfig {
  * of nested configs, we can't detect whether the value are passed by user, or taken from default.
  * The logic of the default value processing will be provided in stage of validation
  *
+ * @property execCmd a command that will be executed to check resources and emit warnings
  * @property tags FixMe: after ktoml will support lists we should change it
  * @property description
  * @property suiteName
@@ -40,6 +41,7 @@ interface PluginConfig {
  */
 @Serializable
 data class GeneralConfig(
+    val execCmd: String,
     val tags: String,
     val description: String,
     val suiteName: String,
@@ -60,6 +62,7 @@ data class GeneralConfig(
         } ?: this.tags
 
         return GeneralConfig(
+            this.execCmd,
             mergedTag,
             this.description,
             this.suiteName,

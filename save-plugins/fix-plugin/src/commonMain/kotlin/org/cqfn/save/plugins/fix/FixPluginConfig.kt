@@ -14,13 +14,13 @@ import kotlinx.serialization.UseSerializers
  * of nested configs, we can't detect whether the value are passed by user, or taken from default.
  * The logic of the default value processing will be provided in stage of validation
  *
- * @property execCmd a command that will be executed to mutate test file contents
+ * @property execFlags a command that will be executed to mutate test file contents
  * @property resourceNameTestSuffix suffix name of the test file.
  * @property resourceNameExpectedSuffix suffix name of the expected file.
  */
 @Serializable
 data class FixPluginConfig(
-    val execCmd: String,
+    val execFlags: String,
     val resourceNameTestSuffix: String? = null,
     val resourceNameExpectedSuffix: String? = null,
 ) : PluginConfig {
@@ -44,7 +44,7 @@ data class FixPluginConfig(
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as FixPluginConfig
         return FixPluginConfig(
-            this.execCmd,
+            this.execFlags,
             this.resourceNameTestSuffix ?: other.resourceNameTestSuffix,
             this.resourceNameExpectedSuffix ?: other.resourceNameExpectedSuffix,
         )

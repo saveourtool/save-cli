@@ -15,7 +15,7 @@ import kotlinx.serialization.UseSerializers
  * of nested configs, we can't detect whether the value are passed by user, or taken from default.
  * The logic of the default value processing will be provided in stage of validation
  *
- * @property execCmd a command that will be executed to check resources and emit warnings
+ * @property execFlags a command that will be executed to check resources and emit warnings
  * @property warningsInputPattern a regular expression by which expected warnings will be discovered in test resources
  * @property warningsOutputPattern a regular expression by which warnings will be discovered in the process output
  * @property warningTextHasLine whether line number is included in [warningsOutputPattern]
@@ -31,7 +31,7 @@ import kotlinx.serialization.UseSerializers
  */
 @Serializable
 data class WarnPluginConfig(
-    val execCmd: String,
+    val execFlags: String,
     val warningsInputPattern: Regex,
     val warningsOutputPattern: Regex,
     val warningTextHasLine: Boolean? = null,
@@ -52,7 +52,7 @@ data class WarnPluginConfig(
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as WarnPluginConfig
         return WarnPluginConfig(
-            this.execCmd,
+            this.execFlags ?: other.execFlags,
             this.warningsInputPattern,
             this.warningsOutputPattern,
             this.warningTextHasLine ?: other.warningTextHasLine,

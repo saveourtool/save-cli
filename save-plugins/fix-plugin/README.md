@@ -38,11 +38,12 @@ language=kotlin
 `save.toml`:
 ```toml
 [general]
+exec_cmd="./ktlint -R diktat-0.4.2.jar"
 description = "My suite description"
 suiteName = "DocsCheck"
 
 [diff]
-exec_cmd="./ktlint -R diktat-0.4.2.jar -F"
+exec_flags="-F"
 testFilePattern="*Test.kt"
 expectedFilePattern="*Expected.kt"
 batchMode = false

@@ -1,10 +1,11 @@
 [general]
+execCmd = "./detekt"
 tags = test
 description = "My description 1"
 suiteName = "DocsCheck"
 
 [warn]
-execCmd = "./detekt --build-upon-default-config -i"
+execFlags = "--build-upon-default-config -i"
 warningsInputPattern = "// ;warn:(\\d+):(\\d+): (.*)"  # warning is set inside the comment in code, `//` marks comment start in Java
 warningsOutputPattern = "\\w+ - (\\d+)/(\\d+) - (.*)$"  # e.g. `WARN - 10/14 - Class name is in incorrect case`
 lineCaptureGroup = 1  # index of regex capture group for line number, used when `warningTextHasLine: false`

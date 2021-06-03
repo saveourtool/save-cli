@@ -62,7 +62,7 @@ class WarnPluginTest {
                 Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
                 true, true, 1, 2, 3
             ),
-            GeneralConfig("", "", "")
+            GeneralConfig("", "", "", "")
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -96,7 +96,7 @@ class WarnPluginTest {
                 Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
                 true, true, 1, 2, 3, false
             ),
-            GeneralConfig("", "", "")
+            GeneralConfig("", "", "", "")
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -123,7 +123,7 @@ class WarnPluginTest {
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"), Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
                 true, true, 1, 2, 3
             ),
-            GeneralConfig("", "", "")
+            GeneralConfig("", "", "", "")
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -158,7 +158,7 @@ class WarnPluginTest {
                 Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
                 true, true, 1, 2, 3
             ),
-            GeneralConfig("", "", "")
+            GeneralConfig("", "", "", "")
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -195,7 +195,7 @@ class WarnPluginTest {
                 Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
                 true, true, 1, 2, 3
             ),
-            GeneralConfig("", "", "")
+            GeneralConfig("", "", "", "")
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -230,7 +230,7 @@ class WarnPluginTest {
                 Regex("// ;warn: (.*)"),
                 Regex("[\\w\\d.-]+: (.+)"),
                 false, false, null, null, 1
-            ), GeneralConfig("", "", "")
+            ), GeneralConfig("", "", "", "")
         ) { results ->
             assertEquals(1, results.size)
             results.single().status.let {
@@ -297,7 +297,7 @@ class WarnPluginTest {
             Regex("[\\w\\d.-]+: (.+)"),
             false, false, null, null, 1
         )
-        val generalConfig = GeneralConfig("", "", "")
+        val generalConfig = GeneralConfig("", "", "", "")
         val config = fs.createFile(tmpDir / "save.toml")
         val nameFile = WarnPlugin(TestConfig(config, null, mutableListOf(warnPluginConfig, generalConfig)))
             .createTestFile(tmpDir / "resource", warnPluginConfig.warningsInputPattern)

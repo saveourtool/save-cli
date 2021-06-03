@@ -6,6 +6,7 @@ import org.cqfn.save.core.files.readFile
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.logInfo
 import org.cqfn.save.core.logging.logWarn
+import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Fail
@@ -38,6 +39,7 @@ class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) :
 
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
+        val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
         val flattenedResources = files.toList()
         if (flattenedResources.isEmpty()) {
             logWarn("No resources discovered for FixPlugin in [${testConfig.location}]")
@@ -48,7 +50,7 @@ class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) :
             .map { it.first() to it.last() }
             .map { (expected, test) ->
                 val testCopy = createTestFile(test)
-                val execCmd = "${fixPluginConfig.execCmd} $testCopy"
+                val execCmd = "${(generalConfig?.execCmd ?: "")} ${fixPluginConfig.execFlags} $testCopy"
                 val executionResult = pb.exec(execCmd, null, false)
                 val fixedLines = FileSystem.SYSTEM.readLines(testCopy)
                 val expectedLines = FileSystem.SYSTEM.readLines(expected)
