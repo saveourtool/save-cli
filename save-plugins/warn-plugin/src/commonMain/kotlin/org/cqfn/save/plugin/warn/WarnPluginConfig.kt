@@ -52,7 +52,7 @@ data class WarnPluginConfig(
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as WarnPluginConfig
         return WarnPluginConfig(
-        	this.execFlags ?: other.execFlags,
+            this.execFlags ?: other.execFlags,
             this.warningsInputPattern,
             this.warningsOutputPattern,
             this.warningTextHasLine ?: other.warningTextHasLine,

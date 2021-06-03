@@ -36,10 +36,6 @@ data class FixPluginConfig(
      */
     val resourceNameExpected: String = resourceNameExpectedSuffix ?: "Expected"
 
-    override fun mergePluginConfig(parentConfig: FixPluginConfig) = FixPluginConfig(
-        this.execFlags ?: parentConfig.execFlags,
-        this.destinationFileSuffix ?: parentConfig.destinationFileSuffix
-    )
     /**
      *  @property resourceNamePattern regex for the name of the test files.
      */
@@ -48,7 +44,7 @@ data class FixPluginConfig(
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as FixPluginConfig
         return FixPluginConfig(
-            this.execCmd,
+            this.execFlags,
             this.resourceNameTestSuffix ?: other.resourceNameTestSuffix,
             this.resourceNameExpectedSuffix ?: other.resourceNameExpectedSuffix,
         )

@@ -62,7 +62,7 @@ data class GeneralConfig(
         } ?: this.tags
 
         return GeneralConfig(
-            this.execCmd ?: parentConfig.execCmd,
+            this.execCmd,
             mergedTag,
             this.description,
             this.suiteName,
