@@ -24,7 +24,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api("com.squareup.okio:okio-multiplatform:${Versions.okio}")
-                implementation( "org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:${Versions.Kotlinx.datetime}")
             }
         }
