@@ -4,27 +4,25 @@
 
 package org.cqfn.save.core.plugin
 
+import org.cqfn.save.core.config.TestConfigSections
+
 import kotlinx.serialization.Serializable
 
 /**
- * Core interface for plugin configuration
+ * Core interface for plugin configuration (like warnPlugin/fixPluin/e.t.c)
  */
-interface PluginConfig<T : PluginConfig<T>> {
+@Suppress("INLINE_CLASS_CAN_BE_USED")
+interface PluginConfig {
     /**
-     * Merge current config into [childConfig]
-     *
-     * @param childConfig list of child configs, which will be filtered for merging
+     * type of the config (usually related to the class: WARN/FIX/e.t.c)
      */
-    @Suppress("TYPE_ALIAS")
-    fun mergeConfigInto(childConfig: MutableList<PluginConfig<*>>)
+    val type: TestConfigSections
 
     /**
-     * Function which is capable for merging inherited configurations
-     *
-     * @param parentConfig config which will be merged with [this]
-     * @return corresponding merged config
+     * @param otherConfig - 'this' will be merged with 'other'
+     * @return merged config
      */
-    fun mergePluginConfig(parentConfig: T): T
+    fun mergeWith(otherConfig: PluginConfig): PluginConfig
 }
 
 /**
@@ -50,31 +48,27 @@ data class GeneralConfig(
     val excludedTests: String? = null,
     val includedTests: String? = null,
     val ignoreSaveComments: Boolean? = null
-) : PluginConfig<GeneralConfig> {
-    @Suppress("TYPE_ALIAS")
-    override fun mergeConfigInto(childConfig: MutableList<PluginConfig<*>>) {
-        val childGeneralConfig = childConfig.filterIsInstance<GeneralConfig>().firstOrNull()
-        val newChildGeneralConfig = childGeneralConfig?.mergePluginConfig(this) ?: this
-        // Now we update child config in place
-        childGeneralConfig?.let {
-            childConfig.set(childConfig.indexOf(childGeneralConfig), newChildGeneralConfig)
-        } ?: childConfig.add(newChildGeneralConfig)
-    }
+) : PluginConfig {
+    override val type = TestConfigSections.GENERAL
 
-    override fun mergePluginConfig(parentConfig: GeneralConfig): GeneralConfig {
-        val mergedTag = parentConfig.tags.let {
-            val parentTags = parentConfig.tags.split(", ")
-            val childTags = this.tags.split(", ")
-            parentTags.union(childTags).joinToString(", ")
+    override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
+        val other = otherConfig as GeneralConfig
+        val mergedTag = other.tags?.let {
+            this.tags?.let {
+                val parentTags = other.tags.split(", ")
+                val childTags = this.tags.split(", ")
+                parentTags.union(childTags).joinToString(", ")
+            } ?: other.tags
         } ?: this.tags
+
         return GeneralConfig(
             this.execCmd ?: parentConfig.execCmd,
             mergedTag,
-            this.description ?: parentConfig.description,
-            this.suiteName ?: parentConfig.suiteName,
-            this.excludedTests ?: parentConfig.excludedTests,
-            this.includedTests ?: parentConfig.includedTests,
-            this.ignoreSaveComments ?: parentConfig.ignoreSaveComments
+            this.description,
+            this.suiteName,
+            this.excludedTests ?: other.excludedTests,
+            this.includedTests ?: other.includedTests,
+            this.ignoreSaveComments ?: other.ignoreSaveComments
         )
     }
 }

@@ -33,7 +33,7 @@ class FixPluginTest {
         fs.createFile(tmpDir / "Test1Test.java")
         fs.createFile(tmpDir / "Test1Expected.java")
 
-        val pairs = FixPlugin(TestConfig(tmpDir / "Test1Test.java", null, mutableListOf()))
+        val pairs = FixPlugin(TestConfig(tmpDir / "Test1Test.java", null, mutableListOf(FixPluginConfig(""))))
             .discoverTestFiles(tmpDir)
             .map { it.first() to it.last() }
             .toList()
@@ -55,7 +55,7 @@ class FixPluginTest {
         fs.createFile(tmpDir / "NowCompletelyDifferentExpected.java")
         fs.createFile(tmpDir / "AndNowCompletelyDifferent.java")
 
-        val pairs = FixPlugin(TestConfig(tmpDir / "Something.java", null, mutableListOf()))
+        val pairs = FixPlugin(TestConfig(tmpDir / "Something.java", null, mutableListOf(FixPluginConfig(""))))
             .discoverTestFiles(tmpDir)
             .map { it.first() to it.last() }
             .toList()
@@ -66,7 +66,7 @@ class FixPluginTest {
     }
 
     @Test
-    fun `should calculate diff of discovered files with destinationFileSuffix`() {
+    fun `should calculate diff of discovered files`() {
         val config = fs.createFile(tmpDir / "save.toml")
         val testFile = fs.createFile(tmpDir / "Test3Test.java")
         fs.write(testFile) {
@@ -77,21 +77,21 @@ class FixPluginTest {
             write("Expected file".encodeToByteArray())
         }
         val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").lowercase()} && " else ""
-        val executionCmd = "${diskWithTmpDir}cd $tmpDir && echo Expected file > Test3Test_copy.java"
+        val executionCmd = "${diskWithTmpDir}cd $tmpDir && echo Expected file >"
 
         val results = FixPlugin(TestConfig(config,
             null,
             mutableListOf(
-                FixPluginConfig(executionCmd, destinationFileSuffix = "_copy"),
+                FixPluginConfig(executionCmd),
                 GeneralConfig("", "", "", "")
             )
         )).execute()
 
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
         assertEquals(TestResult(listOf(expectedFile, testFile), Pass(null), DebugInfo(results.single().debugInfo?.stdout, null, null)), results.single())
-
+        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
         assertTrue("Files should be identical") {
-            diff(fs.readLines(tmpDir / "Test3Test_copy.java"), fs.readLines(expectedFile))
+            diff(fs.readLines(tmpDir / "Test3Test.java"), fs.readLines(expectedFile))
                 .deltas.isEmpty()
         }
     }

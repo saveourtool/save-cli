@@ -68,6 +68,7 @@ columnCaptureGroup = 2  # index of regex capture group for column number, used w
 messageCaptureGroup = 3  # index of regex capture group for message text
 warningTextHasColumn = true
 warningTextHasLine = true
+testNameSuffix = Test
 ```
 
 When executed from project root (where `save.propertes` is located), SAVE will cd to `rootDir` and discover all files
@@ -79,3 +80,4 @@ parsed from the same `$testFile` using `warningsInputPattern`.
 for column number (if `warningTextHasColumn` is true) and for warning text. Their indices can be customized
 with `lineCaptureGroup`, `columnCaptureGroup` and `messageCaptureGroup` parameters. These parameters are shared between input and output pattern;
 usually you'll want them to be consistent to make testing easier, i.e. if input has line number, then so should output.
+`testNameSuffix` must include suffix name of the test file.

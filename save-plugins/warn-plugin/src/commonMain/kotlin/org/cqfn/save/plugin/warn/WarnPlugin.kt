@@ -3,6 +3,8 @@ package org.cqfn.save.plugin.warn
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
+import org.cqfn.save.core.logging.logInfo
+import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.DebugInfo
@@ -12,7 +14,6 @@ import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.result.TestStatus
 import org.cqfn.save.core.utils.AtomicInt
 import org.cqfn.save.core.utils.ProcessBuilder
-import org.cqfn.save.plugin.warn.WarnPluginConfig.Companion.defaultResourceNamePattern
 import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
 
@@ -30,19 +31,38 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
     private val pb = ProcessBuilder()
 
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
+        val flattenedResources = files.toList().flatten()
+        if (flattenedResources.isEmpty()) {
+            logWarn("No resources discovered for WarnPlugin in [${testConfig.location}]")
+        } else {
+            logInfo("Discovered the following test resources: $flattenedResources")
+        }
+
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
+
         return discoverTestFiles(testConfig.directory).map { resources ->
             handleTestFile(resources.single(), warnPluginConfig, generalConfig)
         }
     }
 
-    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> = resourceDirectories
-        .map { directory ->
-            FileSystem.SYSTEM.list(directory)
-                .filter { defaultResourceNamePattern.matches(it.name) }
+    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {
+        val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
+        val regex = warnPluginConfig.resourceNamePattern
+        return resourceDirectories
+            .map { directory ->
+                FileSystem.SYSTEM.list(directory)
+                    .filter { (regex).matches(it.name) }
+            }
+            .filter { it.isNotEmpty() }
+    }
+
+    override fun cleanupTempDir() {
+        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPlugin::class.simpleName!!)
+        if (fs.exists(tmpDir)) {
+            fs.deleteRecursively(tmpDir)
         }
-        .filter { it.isNotEmpty() }
+    }
 
     @Suppress(
         "TOO_LONG_FUNCTION",
@@ -101,12 +121,7 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
     internal fun createTestFile(path: Path, warningsInputPattern: Regex): String {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPlugin::class.simpleName!!)
 
-        if (fs.exists(tmpDir) && atomicInt.get() == 0) {
-            fs.deleteRecursively(tmpDir)
-            fs.createDirectory(tmpDir)
-        } else if (!fs.exists(tmpDir)) {
-            fs.createDirectory(tmpDir)
-        }
+        createTempDir(tmpDir)
 
         val fileName = testFileName()
         fs.write(fs.createFile(tmpDir / fileName)) {
