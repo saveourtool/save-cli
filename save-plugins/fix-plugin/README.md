@@ -38,17 +38,21 @@ language=kotlin
 `save.toml`:
 ```toml
 [general]
+exec_cmd="./ktlint -R diktat-0.4.2.jar"
 description = "My suite description"
 suiteName = "DocsCheck"
 
 [fix] # FixMe: Change to actual fields, add whether the field required or optional
-exec_cmd="./ktlint -R diktat-0.4.2.jar -F"
+exec_flags="-F"
 testFilePattern="*Test.kt"
 expectedFilePattern="*Expected.kt"
 batchMode = false
+resourceNameTestSuffix = Test
+resourceNameExpectedSuffix = Expected
 ```
 
 When executed from project root (where `save.propertes` is located), SAVE will cd to `rootDir` and discover all pairs of files
 matching `testFilePattern` and `expectedFilePattern` with same prefix. It will then execute `$exec_cmd $testFile` (since we specified
 `batchMode = false`, it will provide inputs one by one) and compare its stdout (as per `output` option) with respecting `$expectedFile`.
 Results will be written in plain text as well as JSON.
+`resourceNameTestSuffix` must include suffix name of the test file. `resourceNameExpectedSuffix` must include suffix name of the expected file.

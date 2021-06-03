@@ -5,24 +5,20 @@ package org.cqfn.save.plugin.warn
 
 import org.cqfn.save.core.config.TestConfigSections
 import org.cqfn.save.core.plugin.PluginConfig
+import org.cqfn.save.core.utils.RegexSerializer
 
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.KSerializer
+
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Serializer
+
 import kotlinx.serialization.UseSerializers
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
+
 
 /**
  * Some fields by default are null, instead of some natural value, because of the fact, that in stage of merging
  * of nested configs, we can't detect whether the value are passed by user, or taken from default.
  * The logic of the default value processing will be provided in stage of validation
  *
- * @property execCmd a command that will be executed to check resources and emit warnings
+ * @property execFlags a command that will be executed to check resources and emit warnings
  * @property warningsInputPattern a regular expression by which expected warnings will be discovered in test resources
  * @property warningsOutputPattern a regular expression by which warnings will be discovered in the process output
  * @property warningTextHasLine whether line number is included in [warningsOutputPattern]
@@ -34,33 +30,46 @@ import kotlinx.serialization.encoding.Encoder
  * @property messageCaptureGroup an index of capture group in regular expressions, corresponding to warning text. Indices start at 0 with 0
  * corresponding to the whole string.
  * @property exactWarningsMatch exact match of errors
+ * @property testNameSuffix suffix name of the test file.
  */
 @Serializable
 data class WarnPluginConfig(
-    val execCmd: String,
+    val execFlags: String? = null,
     val warningsInputPattern: Regex? = null,
     val warningsOutputPattern: Regex? = null,
     val warningTextHasLine: Boolean? = null,
     val warningTextHasColumn: Boolean? = null,
     val lineCaptureGroup: Int? = null,
     val columnCaptureGroup: Int? = null,
-    val messageCaptureGroup: Int,
+    val messageCaptureGroup: Int? = null,
     val exactWarningsMatch: Boolean? = null,
+    val testNameSuffix: String? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.WARN
+
+    /**
+     *  @property testName
+     */
+    val testName: String = testNameSuffix ?: "Test"
+
+    /**
+     *  @property resourceNamePattern regex for the name of the test files.
+     */
+    val resourceNamePattern: Regex = Regex("""(.+)${(testName)}\.[\w\d]+""")
 
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as WarnPluginConfig
         return WarnPluginConfig(
-            this.execCmd,
-            this.warningsInputPattern,
-            this.warningsOutputPattern,
+            this.execFlags ?: other.execFlags,
+            this.warningsInputPattern ?: other.warningsInputPattern,
+            this.warningsOutputPattern ?: other.warningsOutputPattern,
             this.warningTextHasLine ?: other.warningTextHasLine,
             this.warningTextHasColumn ?: other.warningTextHasColumn,
             this.lineCaptureGroup ?: other.lineCaptureGroup,
             this.columnCaptureGroup ?: other.columnCaptureGroup,
-            this.messageCaptureGroup,
-            this.exactWarningsMatch ?: other.exactWarningsMatch
+            this.messageCaptureGroup ?: other.columnCaptureGroup,
+            this.exactWarningsMatch ?: other.exactWarningsMatch,
+            this.testNameSuffix ?: other.testNameSuffix
         )
     }
 
@@ -73,22 +82,17 @@ data class WarnPluginConfig(
             "warn-plugin configuration error: either warningTextHasColumn should be false (actual: $warningTextHasColumn) " +
                     "or columnCaptureGroup should be provided (actual: $columnCaptureGroup)"
         }
-
-        val newWarningsInputPattern = warningsInputPattern ?: defaultInputPattern
-        val newWarningsOutputPattern = warningsOutputPattern ?: defaultOutputPattern
-        val newWarningTextHasLine = warningTextHasLine ?: false
-        val newWarningTextHasColumn = warningTextHasColumn ?: false
-        val newExactWarningsMatch = exactWarningsMatch ?: true
         return WarnPluginConfig(
-            execCmd,
-            newWarningsInputPattern,
-            newWarningsOutputPattern,
-            newWarningTextHasLine,
-            newWarningTextHasColumn,
-            lineCaptureGroup,
-            columnCaptureGroup,
-            messageCaptureGroup,
-            newExactWarningsMatch
+            execFlags,
+            warningsInputPattern ?: defaultInputPattern,
+            warningsOutputPattern ?: defaultOutputPattern,
+            warningTextHasLine ?: true,
+            warningTextHasColumn ?: true,
+            lineCaptureGroup ?: 2,
+            columnCaptureGroup ?: 3,
+            messageCaptureGroup ?: 4,
+            exactWarningsMatch ?: true,
+            testName
         )
     }
 
@@ -104,19 +108,5 @@ data class WarnPluginConfig(
          * ```[WARN] /path/to/resources/ClassNameTest.java:2:4: Class name in incorrect case```
          */
         internal val defaultOutputPattern = Regex(".*(\\d+):(\\d+): (.+)")
-        internal val defaultResourceNamePattern = Regex("""(.+)Test\.[\w\d]+""")
     }
-}
-
-@OptIn(ExperimentalSerializationApi::class)
-@Serializer(forClass = Regex::class)
-object RegexSerializer : KSerializer<Regex> {
-    override val descriptor: SerialDescriptor =
-            PrimitiveSerialDescriptor("regex", PrimitiveKind.STRING)
-
-    override fun serialize(encoder: Encoder, value: Regex) {
-        encoder.encodeString(value.pattern)
-    }
-
-    override fun deserialize(decoder: Decoder): Regex = Regex(decoder.decodeString())
 }

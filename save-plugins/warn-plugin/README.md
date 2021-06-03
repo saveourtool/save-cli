@@ -55,11 +55,12 @@ you will need the following SAVE configuration:
 `save.toml`:
 ```toml
 [general]
+execCmd = "./detekt"
 description = "My suite description"
 suiteName = "DocsCheck"
 
 [warn]
-execCmd = "./detekt --build-upon-default-config -i" # (required)
+execFlags = "--build-upon-default-config -i" # (required)
 
 # warning is set inside the comment in code, `//` marks comment start in Java
 warningsInputPattern = "// ;warn:(\\d+):(\\d+): (.*)" # (optional)
@@ -78,6 +79,7 @@ messageCaptureGroup = 3 # (required)
 
 warningTextHasColumn = true # (optional)
 warningTextHasLine = true # (optional)
+testNameSuffix = "Test" # (optional)
 ```
 
 When executed from project root (where `save.propertes` is located), SAVE will cd to `rootDir` and discover all files
@@ -89,3 +91,4 @@ parsed from the same `$testFile` using `warningsInputPattern`.
 for column number (if `warningTextHasColumn` is true) and for warning text. Their indices can be customized
 with `lineCaptureGroup`, `columnCaptureGroup` and `messageCaptureGroup` parameters. These parameters are shared between input and output pattern;
 usually you'll want them to be consistent to make testing easier, i.e. if input has line number, then so should output.
+`testNameSuffix` must include suffix name of the test file.
