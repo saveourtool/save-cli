@@ -28,10 +28,10 @@ val toml4 = nestedDir2 / "nestedDir3" / "nestedDir4" / "save.toml"
 
 @Suppress("TOO_LONG_FUNCTION", "LOCAL_VARIABLE_EARLY_DECLARATION")
 class MergeConfigsTest {
-    private val generalConfig1 = GeneralConfig("","Tag11, Tag12", "Description1", "suiteName1", "excludedTests: test1", "includedTests: test2")
-    private val generalConfig2 = GeneralConfig("","Tag21", "Description2", "suiteName2", "excludedTests: test3", "includedTests: test4")
-    private val generalConfig3 = GeneralConfig("","Tag21, Tag31, Tag32", "Description2", "suiteName3", "excludedTests: test5", "includedTests: test6")
-    private val generalConfig4 = GeneralConfig("","Tag11, Tag21", "Description2", "suiteName4", "excludedTests: test7", "includedTests: test8")
+    private val generalConfig1 = GeneralConfig("", "Tag11, Tag12", "Description1", "suiteName1", "excludedTests: test1", "includedTests: test2")
+    private val generalConfig2 = GeneralConfig("", "Tag21", "Description2", "suiteName2", "excludedTests: test3", "includedTests: test4")
+    private val generalConfig3 = GeneralConfig("", "Tag21, Tag31, Tag32", "Description2", "suiteName3", "excludedTests: test5", "includedTests: test6")
+    private val generalConfig4 = GeneralConfig("", "Tag11, Tag21", "Description2", "suiteName4", "excludedTests: test7", "includedTests: test8")
     private val warningsInputPattern1 = Regex(".*")
     private val warningsInputPattern2 = Regex("// ;warn:(\\d+):(\\d+): (.*)")
     private val warningsOutputPattern1 = Regex(".*")
@@ -157,10 +157,10 @@ class MergeConfigsTest {
     }
 }
 
-// TODO are these tests even necessary?
+@Suppress("MAGIC_NUMBER")
 class ValidationTest {
     @Test
-    fun `general section validation`() {
+    fun `set defaults to general section`() {
         createTomlFiles()
         val generalConfig = GeneralConfig("exeCmd", tags = "Tag11, Tag12", description = "Description1", suiteName = "suiteName1")
         val config = TestConfig(toml1, null, mutableListOf(generalConfig))
@@ -176,7 +176,7 @@ class ValidationTest {
     }
 
     @Test
-    fun `general section validation 2`() {
+    fun `invalid general section`() {
         createTomlFiles()
         val generalConfig = GeneralConfig()
         val config = TestConfig(toml1, null, mutableListOf(generalConfig))
@@ -191,7 +191,7 @@ class ValidationTest {
     }
 
     @Test
-    fun `warn section validation`() {
+    fun `set defaults to warn section`() {
         createTomlFiles()
         val warnConfig = WarnPluginConfig(execFlags = "execFlags", messageCaptureGroup = 1)
         val config = TestConfig(toml1, null, mutableListOf(warnConfig))
@@ -203,28 +203,87 @@ class ValidationTest {
         val actualWarnConfig = config.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
         assertEquals(Regex(";warn:(\\d+):(\\d+): (.+)").toString(), actualWarnConfig.warningsInputPattern.toString())
         assertEquals(Regex(".*(\\d+):(\\d+): (.+)").toString(), actualWarnConfig.warningsOutputPattern.toString())
-        assertEquals(false, actualWarnConfig.warningTextHasLine)
-        assertEquals(false, actualWarnConfig.warningTextHasColumn)
+        assertEquals(true, actualWarnConfig.warningTextHasLine)
+        assertEquals(true, actualWarnConfig.warningTextHasColumn)
+        assertEquals(2, actualWarnConfig.lineCaptureGroup)
+        assertEquals(3, actualWarnConfig.columnCaptureGroup)
         assertEquals(true, actualWarnConfig.exactWarningsMatch)
+        assertEquals("Test", actualWarnConfig.testNameSuffix)
     }
 
+    // Add proper values for `lineCaptureGroup` and `columnCaptureGroup` according
+    // `warningTextHasLine` `warningTextHasColumn`
     @Test
-    fun `warn section validation 2`() {
+    fun `validate warn section`() {
         createTomlFiles()
-        val warnConfig = WarnPluginConfig(execFlags = "execFlags", lineCaptureGroup = 2, messageCaptureGroup = 1)
+        val warnConfig = WarnPluginConfig(execFlags = "execFlags",  warningTextHasLine = true, warningTextHasColumn = false)
         val config = TestConfig(toml1, null, mutableListOf(warnConfig))
+
+        config.validateAndSetDefaults()
+
+        assertEquals(1, config.pluginConfigs.size)
+
+        val actualWarnConfig = config.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
+        assertEquals(true, actualWarnConfig.warningTextHasLine)
+        assertEquals(false, actualWarnConfig.warningTextHasColumn)
+        assertEquals(2, actualWarnConfig.lineCaptureGroup)
+        assertEquals(null, actualWarnConfig.columnCaptureGroup)
+    }
+
+    // Provided incorrect values `warningTextHasLine = false` but `lineCaptureGroup = 2`; validate it
+    @Test
+    fun `validate warn section 2`() {
+        createTomlFiles()
+        val warnConfig = WarnPluginConfig(execFlags = "execFlags",  warningTextHasLine = false, lineCaptureGroup = 2)
+        val config = TestConfig(toml1, null, mutableListOf(warnConfig))
+
+        config.validateAndSetDefaults()
+
+        assertEquals(1, config.pluginConfigs.size)
+
+        val actualWarnConfig = config.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
+        assertEquals(null, actualWarnConfig.warningTextHasLine)
+        assertEquals(true, actualWarnConfig.warningTextHasColumn)
+        assertEquals(null, actualWarnConfig.lineCaptureGroup)
+        assertEquals(3, actualWarnConfig.columnCaptureGroup)
+    }
+
+    // `lineCaptureGroup` provided, but `warningTextHasLine` is absent; validate it
+    @Test
+    fun `validate warn section 3`() {
+        createTomlFiles()
+        val warnConfig = WarnPluginConfig(execFlags = "execFlags", lineCaptureGroup = 5)
+        val config = TestConfig(toml1, null, mutableListOf(warnConfig))
+
+        config.validateAndSetDefaults()
+
+        assertEquals(1, config.pluginConfigs.size)
+
+        val actualWarnConfig = config.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
+        assertEquals(true, actualWarnConfig.warningTextHasLine)
+        assertEquals(true, actualWarnConfig.warningTextHasColumn)
+        assertEquals(5, actualWarnConfig.lineCaptureGroup)
+        assertEquals(3, actualWarnConfig.columnCaptureGroup)
+    }
+
+    // `lineCaptureGroup` provided, but incorrect -- error
+    @Test
+    fun `validate warn section 4`() {
+        createTomlFiles()
+        val warnConfig = WarnPluginConfig(execFlags = "execFlags", lineCaptureGroup = -127)
+        val config = TestConfig(toml1, null, mutableListOf(warnConfig))
+
         try {
             config.validateAndSetDefaults()
         } catch (ex: IllegalArgumentException) {
             assertEquals(
-                "warn-plugin configuration error: either warningTextHasLine should be false (actual: null) " +
-                        "or lineCaptureGroup should be provided (actual: 2)", ex.message
+                "Error: Integer value in [warn] section must be positive!", ex.message
             )
         }
     }
 
     @Test
-    fun `fix section validation`() {
+    fun `set defaults to fix section`() {
         createTomlFiles()
         val fixConfig = FixPluginConfig(execFlags = "execFlags")
         val config = TestConfig(toml1, null, mutableListOf(fixConfig))
@@ -234,8 +293,8 @@ class ValidationTest {
         assertEquals(1, config.pluginConfigs.size)
 
         val actualFixConfig = config.pluginConfigs.filterIsInstance<FixPluginConfig>().first()
-        // FIXME:
-        //assertEquals("_copy", actualFixConfig.destinationFileSuffix)
+        assertEquals("Test", actualFixConfig.resourceNameTest)
+        assertEquals("Expected", actualFixConfig.resourceNameExpected)
     }
 
     @AfterTest

@@ -60,7 +60,7 @@ description = "My suite description"
 suiteName = "DocsCheck"
 
 [warn]
-execFlags = "--build-upon-default-config -i" # (required)
+execFlags = "--build-upon-default-config -i" # (required in the file being run)
 
 # warning is set inside the comment in code, `//` marks comment start in Java
 warningsInputPattern = "// ;warn:(\\d+):(\\d+): (.*)" # (optional)
@@ -69,13 +69,13 @@ warningsInputPattern = "// ;warn:(\\d+):(\\d+): (.*)" # (optional)
 warningsOutputPattern = "\\w+ - (\\d+)/(\\d+) - (.*)$" # (optional)
 
 # index of regex capture group for line number, used when `warningTextHasLine == false`
-lineCaptureGroup = 1 # (optional, depends on warningTextHasLine)
+lineCaptureGroup = 2 # (optional, depends on warningTextHasLine)
 
 # index of regex capture group for column number, used when `warningTextHasColumn == false`
-columnCaptureGroup = 2 # (optional, depends on warningTextHasColumn)
+columnCaptureGroup = 3 # (optional, depends on warningTextHasColumn)
 
 # index of regex capture group for message text
-messageCaptureGroup = 3 # (required)
+messageCaptureGroup = 4 # (optional)
 
 warningTextHasColumn = true # (optional)
 warningTextHasLine = true # (optional)

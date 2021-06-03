@@ -7,11 +7,8 @@ import org.cqfn.save.core.config.TestConfigSections
 import org.cqfn.save.core.plugin.PluginConfig
 import org.cqfn.save.core.utils.RegexSerializer
 
-
 import kotlinx.serialization.Serializable
-
 import kotlinx.serialization.UseSerializers
-
 
 /**
  * Some fields by default are null, instead of some natural value, because of the fact, that in stage of merging
@@ -46,11 +43,7 @@ data class WarnPluginConfig(
     val testNameSuffix: String? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.WARN
-
-    /**
-     *  @property testName
-     */
-    val testName: String = testNameSuffix ?: "Test"
+    private val testName: String = testNameSuffix ?: "Test"
 
     /**
      *  @property resourceNamePattern regex for the name of the test files.
@@ -73,27 +66,36 @@ data class WarnPluginConfig(
         )
     }
 
+    @Suppress("MAGIC_NUMBER")
     override fun validateAndSetDefaults(): WarnPluginConfig {
-        require((warningTextHasLine == true) xor (lineCaptureGroup == null)) {
-            "warn-plugin configuration error: either warningTextHasLine should be false (actual: $warningTextHasLine) " +
-                    "or lineCaptureGroup should be provided (actual: $lineCaptureGroup)"
-        }
-        require((warningTextHasColumn == true) xor (columnCaptureGroup == null)) {
-            "warn-plugin configuration error: either warningTextHasColumn should be false (actual: $warningTextHasColumn) " +
-                    "or columnCaptureGroup should be provided (actual: $columnCaptureGroup)"
-        }
+        val newWarningTextHasLine = warningTextHasLine ?: true
+        val newWarningTextHasColumn = warningTextHasColumn ?: true
+        val newLineCaptureGroup = if (newWarningTextHasLine) (lineCaptureGroup ?: 2) else null
+        val newColumnCaptureGroup = if (newWarningTextHasColumn) (columnCaptureGroup ?: 3) else null
+        val newMessageCaptureGroup = messageCaptureGroup ?: 4
+        requiredPositiveIfNotNull(lineCaptureGroup)
+        requiredPositiveIfNotNull(columnCaptureGroup)
+        requiredPositiveIfNotNull(messageCaptureGroup)
         return WarnPluginConfig(
             execFlags,
             warningsInputPattern ?: defaultInputPattern,
             warningsOutputPattern ?: defaultOutputPattern,
-            warningTextHasLine ?: true,
-            warningTextHasColumn ?: true,
-            lineCaptureGroup ?: 2,
-            columnCaptureGroup ?: 3,
-            messageCaptureGroup ?: 4,
+            newWarningTextHasLine,
+            newWarningTextHasColumn,
+            newLineCaptureGroup,
+            newColumnCaptureGroup,
+            newMessageCaptureGroup,
             exactWarningsMatch ?: true,
             testName
         )
+    }
+
+    private fun requiredPositiveIfNotNull(value: Int?) {
+        value?.let {
+            require(value >= 0) {
+                "Error: Integer value in [warn] section must be positive!"
+            }
+        }
     }
 
     companion object {

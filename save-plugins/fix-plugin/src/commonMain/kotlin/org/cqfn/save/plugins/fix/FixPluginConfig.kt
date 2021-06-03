@@ -50,11 +50,9 @@ data class FixPluginConfig(
         )
     }
 
-    override fun validateAndSetDefaults(): FixPluginConfig {
-        return FixPluginConfig(
-            execFlags,
-            resourceNameTest,
-            resourceNameExpected
-        )
-    }
+    override fun validateAndSetDefaults() = FixPluginConfig(
+        execFlags,
+        resourceNameTest,
+        resourceNameExpected
+    )
 }

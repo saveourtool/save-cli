@@ -23,6 +23,7 @@ interface PluginConfig {
      * @return merged config
      */
     fun mergeWith(otherConfig: PluginConfig): PluginConfig
+
     /**
      * Method, which validates config and provides the default values for fields, if possible
      *
@@ -102,8 +103,6 @@ data class GeneralConfig(
         )
     }
 
-    private fun requiredErrorMsg(field: String): String {
-        return "Error: Couldn't found `$field` in [general] section. Please provide it in this, " +
-                "or at least in one of the parent configs"
-    }
+    private fun requiredErrorMsg(field: String) = "Error: Couldn't found `$field` in [general] section. Please provide it in this, " +
+            "or at least in one of the parent configs"
 }

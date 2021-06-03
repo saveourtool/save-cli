@@ -34,9 +34,9 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
         if (flattenedResources.isEmpty()) {
             return emptySequence()
         }
+        logInfo("Discovered the following test resources: $flattenedResources")
 
         testConfig.validateAndSetDefaults()
-        logInfo("Discovered the following test resources: $flattenedResources")
 
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()

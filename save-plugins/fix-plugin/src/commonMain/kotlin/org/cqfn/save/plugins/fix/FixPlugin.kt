@@ -41,8 +41,9 @@ class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) :
         if (flattenedResources.isEmpty()) {
             return emptySequence()
         }
-        testConfig.validateAndSetDefaults()
         logInfo("Discovered the following file pairs for comparison: $flattenedResources")
+
+        testConfig.validateAndSetDefaults()
 
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
