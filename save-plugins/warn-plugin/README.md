@@ -60,26 +60,26 @@ description = "My suite description"
 suiteName = "DocsCheck"
 
 [warn]
-execFlags = "--build-upon-default-config -i" # (required in the file being run)
+execFlags = "--build-upon-default-config -i" # (required in the config of test being run, can be inherited from parent configs)
 
 # warning is set inside the comment in code, `//` marks comment start in Java
-warningsInputPattern = "// ;warn:(\\d+):(\\d+): (.*)" # (optional)
+warningsInputPattern = "// ;warn:(\\d+):(\\d+): (.*)" # (default value)
 
 # e.g. `WARN - 10/14 - Class name is in incorrect case`
-warningsOutputPattern = "\\w+ - (\\d+)/(\\d+) - (.*)$" # (optional)
+warningsOutputPattern = "\\w+ - (\\d+)/(\\d+) - (.*)$" # (default value)
 
-# index of regex capture group for line number, used when `warningTextHasLine == false`
-lineCaptureGroup = 2 # (optional, depends on warningTextHasLine)
+# index of regex capture group for line number, used when `warningTextHasLine == true`
+lineCaptureGroup = 2 # (default value)
 
-# index of regex capture group for column number, used when `warningTextHasColumn == false`
-columnCaptureGroup = 3 # (optional, depends on warningTextHasColumn)
+# index of regex capture group for column number, used when `warningTextHasColumn == true`
+columnCaptureGroup = 3 # (default value)
 
 # index of regex capture group for message text
-messageCaptureGroup = 4 # (optional)
+messageCaptureGroup = 4 # (default value)
 
-warningTextHasColumn = true # (optional)
-warningTextHasLine = true # (optional)
-testNameSuffix = "Test" # (optional)
+warningTextHasColumn = true # (default value)
+warningTextHasLine = true # (default value)
+testNameSuffix = "Test" # (default value)
 ```
 
 When executed from project root (where `save.propertes` is located), SAVE will cd to `rootDir` and discover all files

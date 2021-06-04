@@ -47,8 +47,8 @@ exec_flags="-F"
 testFilePattern="*Test.kt"
 expectedFilePattern="*Expected.kt"
 batchMode = false
-resourceNameTestSuffix = "Test"
-resourceNameExpectedSuffix = "Expected"
+resourceNameTestSuffix = "Test" # (default value)
+resourceNameExpectedSuffix = "Expected" #(default value)
 ```
 
 When executed from project root (where `save.propertes` is located), SAVE will cd to `rootDir` and discover all pairs of files

@@ -57,6 +57,7 @@ class ValidationTest {
         assertEquals(true, actualWarnConfig.warningTextHasColumn)
         assertEquals(2, actualWarnConfig.lineCaptureGroup)
         assertEquals(3, actualWarnConfig.columnCaptureGroup)
+        assertEquals(1, actualWarnConfig.messageCaptureGroup)
         assertEquals(true, actualWarnConfig.exactWarningsMatch)
         assertEquals("Test", actualWarnConfig.testNameSuffix)
     }
@@ -127,7 +128,7 @@ class ValidationTest {
             config.validateAndSetDefaults()
         } catch (ex: IllegalArgumentException) {
             assertEquals(
-                "Error: Integer value in [warn] section must be positive!", ex.message
+                "Error: Integer value in [warn] section should be positive!", ex.message
             )
         }
     }

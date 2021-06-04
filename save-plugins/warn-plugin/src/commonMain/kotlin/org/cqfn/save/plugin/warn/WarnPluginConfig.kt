@@ -73,9 +73,9 @@ data class WarnPluginConfig(
         val newLineCaptureGroup = if (newWarningTextHasLine) (lineCaptureGroup ?: 2) else null
         val newColumnCaptureGroup = if (newWarningTextHasColumn) (columnCaptureGroup ?: 3) else null
         val newMessageCaptureGroup = messageCaptureGroup ?: 4
-        requiredPositiveIfNotNull(lineCaptureGroup)
-        requiredPositiveIfNotNull(columnCaptureGroup)
-        requiredPositiveIfNotNull(messageCaptureGroup)
+        requirePositiveIfNotNull(lineCaptureGroup)
+        requirePositiveIfNotNull(columnCaptureGroup)
+        requirePositiveIfNotNull(messageCaptureGroup)
         return WarnPluginConfig(
             execFlags,
             warningsInputPattern ?: defaultInputPattern,
@@ -90,10 +90,10 @@ data class WarnPluginConfig(
         )
     }
 
-    private fun requiredPositiveIfNotNull(value: Int?) {
+    private fun requirePositiveIfNotNull(value: Int?) {
         value?.let {
             require(value >= 0) {
-                "Error: Integer value in [warn] section must be positive!"
+                "Error: Integer value in [warn] section should be positive!"
             }
         }
     }

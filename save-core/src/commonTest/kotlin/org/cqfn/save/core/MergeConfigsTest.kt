@@ -1,7 +1,3 @@
-/**
- * This file contain test suites for merge and validation operations
- */
-
 package org.cqfn.save.core
 
 import org.cqfn.save.core.config.TestConfig
