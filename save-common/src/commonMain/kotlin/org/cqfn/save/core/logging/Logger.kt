@@ -17,6 +17,11 @@ import kotlinx.datetime.toLocalDateTime
 var isDebugEnabled: Boolean = false
 
 /**
+ * Whether to add time stamps to log messages
+ */
+var isTimeStampsEnabled: Boolean = false
+
+/**
  * Log a message to the [stream] with timestamp and specific [level]
  *
  * @param level log level
@@ -28,9 +33,13 @@ fun logMessage(
     msg: String,
     stream: ResultOutputType = ResultOutputType.STDOUT
 ) {
-    val currentTimeInstance = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-    val currentTime = "${currentTimeInstance.date} ${currentTimeInstance.hour}:${currentTimeInstance.minute}:${currentTimeInstance.second}"
-    logToStream("[$level] $currentTime: $msg", stream)
+    val currentTime = if (isTimeStampsEnabled) {
+        val currentTimeInstance = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        " ${currentTimeInstance.date} ${currentTimeInstance.hour}:${currentTimeInstance.minute}:${currentTimeInstance.second}"
+    } else {
+        ""
+    }
+    logToStream("[$level]$currentTime: $msg", stream)
 }
 
 /**
