@@ -19,8 +19,6 @@ import org.cqfn.save.plugin.warn.utils.extractWarning
 import okio.FileSystem
 import okio.Path
 
-import kotlin.math.min
-
 private typealias LineColumn = Pair<Int, Int>
 
 /**
@@ -43,32 +41,9 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
 
-        return if (warnPluginConfig.batchSize == 1) {
-            files.map { resources ->
-                handleTestFile(resources.single(), warnPluginConfig, generalConfig)
-            }
-        } else {
-            chunk(files.toList(), warnPluginConfig.batchSize ?: 1).map { resources ->
-                handleTestFile(resources, warnPluginConfig, generalConfig)
-            }
+        return files.chunked(warnPluginConfig.batchSize ?: 1).map { resources ->
+            handleTestFile(resources.single(), warnPluginConfig, generalConfig)
         }
-    }
-
-    /**
-     * @param list list of path files
-     * @param batchSize batchSize
-     * @return Sequence of list of path
-     */
-    fun chunk(list: List<List<Path>>, batchSize: Int): Sequence<List<Path>> {
-        val chunks: MutableList<List<Path>> = mutableListOf()
-        var i = 0
-        val newList = list.single()
-        while (i < newList.size) {
-            val chunk: List<Path> = newList.subList(i, min(newList.size, i + batchSize))
-            chunks.add(chunk)
-            i += batchSize
-        }
-        return chunks.asSequence()
     }
 
     override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {
@@ -93,60 +68,10 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
         "TOO_LONG_FUNCTION",
         "SAY_NO_TO_VAR")
     private fun handleTestFile(
-        path: Path,
-        warnPluginConfig: WarnPluginConfig,
-        generalConfig: GeneralConfig?): TestResult {
-        val expectedWarnings = fs.readLines(path)
-            .mapNotNull {
-                with(warnPluginConfig) {
-                    it.extractWarning(
-                        warningsInputPattern!!,
-                        fileNameCaptureGroup!!,
-                        lineCaptureGroup,
-                        columnCaptureGroup,
-                        messageCaptureGroup!!,
-                    )
-                }
-            }
-            .groupBy {
-                if (it.line != null && it.column != null) {
-                    it.line to it.column
-                } else {
-                    null
-                }
-            }
-            .mapValues { it.value.sortedBy { it.message } }
-
-        val execCmd: String = if (generalConfig?.ignoreSaveComments == true) {
-            val fileName = createTestFile(path, warnPluginConfig.warningsInputPattern!!)
-            "${generalConfig.execCmd} ${warnPluginConfig.execFlags} $fileName"
-        } else {
-            "${(generalConfig?.execCmd ?: "")} ${warnPluginConfig.execFlags} ${path.name}"
-        }
-
-        val executionResult = pb.exec(execCmd, null)
-        val actualWarningsMap = executionResult.stdout.mapNotNull {
-            with(warnPluginConfig) {
-                it.extractWarning(warningsOutputPattern!!, fileNameCaptureGroup!!, lineCaptureGroup, columnCaptureGroup, messageCaptureGroup!!)
-            }
-        }
-            .groupBy { if (it.line != null && it.column != null) it.line to it.column else null }
-            .mapValues { (_, warning) -> warning.sortedBy { it.message } }
-        return TestResult(
-            listOf(path),
-            checkResults(expectedWarnings, actualWarningsMap, warnPluginConfig),
-            DebugInfo(executionResult.stdout.joinToString("\n"), executionResult.stderr.joinToString("\n"), null)
-        )
-    }
-
-    @Suppress(
-        "TOO_LONG_FUNCTION",
-        "SAY_NO_TO_VAR")
-    private fun handleTestFile(
         paths: List<Path>,
         warnPluginConfig: WarnPluginConfig,
         generalConfig: GeneralConfig?): TestResult {
-        val expectedWarnings: MutMap = mutableMapOf()
+        val expectedWarnings: WarningMap = mutableMapOf()
         paths.forEach { path ->
             expectedWarnings.putAll(
                 fs.readLines(path)
@@ -252,4 +177,4 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
     }
 }
 
-typealias MutMap = MutableMap<Pair<Int, Int>?, List<Warning>>
+typealias WarningMap = MutableMap<Pair<Int, Int>?, List<Warning>>
