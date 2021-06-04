@@ -111,8 +111,8 @@ data class TestConfig(
      */
     fun validateAndSetDefaults() {
         logDebug("Start plugin validation for $location")
-        for (config in pluginConfigs) {
-            pluginConfigs.set(pluginConfigs.indexOf(config), config.validateAndSetDefaults())
+        pluginConfigs.forEachIndexed { index, config ->
+            pluginConfigs[index] = config.validateAndSetDefaults()
         }
     }
 }

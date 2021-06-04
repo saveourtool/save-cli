@@ -94,7 +94,7 @@ class Save(
         try {
             val events = plugin.execute()
             if (events.toList().isEmpty()) {
-                logWarn("No resources discovered for ${plugin::class.simpleName} in [${plugin.testConfig.location}], skipping")
+                logInfo("No resources discovered for ${plugin::class.simpleName} in [${plugin.testConfig.location}], skipping")
                 reporter.onPluginExecutionSkip(plugin)
             }
             events
@@ -104,7 +104,7 @@ class Save(
             reporter.onPluginExecutionError(ex)
             logError("${plugin::class.simpleName} has crashed: ${ex.message}")
         }
-        logInfo("<= Finish execution of: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
+        logInfo("<= Finished execution of: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
         reporter.onPluginExecutionEnd(plugin)
     }
 

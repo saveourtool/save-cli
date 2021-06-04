@@ -34,8 +34,12 @@ class ValidationTest {
             config.validateAndSetDefaults()
         } catch (ex: IllegalArgumentException) {
             assertEquals(
-                "Error: Couldn't found `execCmd` in [general] section. Please provide it in this, " +
-                        "or at least in one of the parent configs", ex.message
+                """
+                    |Error: Couldn't find `execCmd` in [general] section.
+                    |Current configuration: execCmd=null, tags=null, description=null, suiteName=null, excludedTests=null, includedTests=null, ignoreSaveComments=null
+                    |Please provide it in this, or at least in one of the parent configs.
+                """.trimIndent(),
+                ex.message
             )
         }
     }

@@ -103,6 +103,10 @@ data class GeneralConfig(
         )
     }
 
-    private fun errorMsgForRequireCheck(field: String) = "Error: Couldn't found `$field` in [general] section. Please provide it in this, " +
-            "or at least in one of the parent configs"
+    private fun errorMsgForRequireCheck(field: String) =
+            """
+                |Error: Couldn't find `$field` in [general] section.
+                |Current configuration: ${this.toString().substringAfter("(").substringBefore(")")}
+                |Please provide it in this, or at least in one of the parent configs.
+            """.trimIndent()
 }
