@@ -81,16 +81,16 @@ data class GeneralConfig(
 
     override fun validateAndSetDefaults(): GeneralConfig {
         requireNotNull(execCmd) {
-            requiredErrorMsg("execCmd")
+            errorMsgForRequireCheck("execCmd")
         }
         requireNotNull(tags) {
-            requiredErrorMsg("tags")
+            errorMsgForRequireCheck("tags")
         }
         requireNotNull(description) {
-            requiredErrorMsg("description")
+            errorMsgForRequireCheck("description")
         }
         requireNotNull(suiteName) {
-            requiredErrorMsg("suiteName")
+            errorMsgForRequireCheck("suiteName")
         }
         return GeneralConfig(
             execCmd,
@@ -103,6 +103,6 @@ data class GeneralConfig(
         )
     }
 
-    private fun requiredErrorMsg(field: String) = "Error: Couldn't found `$field` in [general] section. Please provide it in this, " +
+    private fun errorMsgForRequireCheck(field: String) = "Error: Couldn't found `$field` in [general] section. Please provide it in this, " +
             "or at least in one of the parent configs"
 }

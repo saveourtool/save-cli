@@ -16,15 +16,15 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-val fs = FileSystem.SYSTEM
-val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / MergeConfigsTest::class.simpleName!!)
+internal val fs = FileSystem.SYSTEM
+internal val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / MergeConfigsTest::class.simpleName!!)
 
-val toml1 = tmpDir / "save.toml"
-val nestedDir1 = tmpDir / "nestedDir1"
-val toml2 = nestedDir1 / "save.toml"
-val nestedDir2 = tmpDir / "nestedDir1" / "nestedDir2"
-val toml3 = nestedDir2 / "save.toml"
-val toml4 = nestedDir2 / "nestedDir3" / "nestedDir4" / "save.toml"
+internal val toml1 = tmpDir / "save.toml"
+internal val nestedDir1 = tmpDir / "nestedDir1"
+internal val toml2 = nestedDir1 / "save.toml"
+internal val nestedDir2 = tmpDir / "nestedDir1" / "nestedDir2"
+internal val toml3 = nestedDir2 / "save.toml"
+internal val toml4 = nestedDir2 / "nestedDir3" / "nestedDir4" / "save.toml"
 
 @Suppress("TOO_LONG_FUNCTION", "LOCAL_VARIABLE_EARLY_DECLARATION")
 class MergeConfigsTest {
@@ -157,153 +157,7 @@ class MergeConfigsTest {
     }
 }
 
-@Suppress("MAGIC_NUMBER")
-class ValidationTest {
-    @Test
-    fun `set defaults to general section`() {
-        createTomlFiles()
-        val generalConfig = GeneralConfig("exeCmd", tags = "Tag11, Tag12", description = "Description1", suiteName = "suiteName1")
-        val config = TestConfig(toml1, null, mutableListOf(generalConfig))
-
-        config.validateAndSetDefaults()
-
-        assertEquals(1, config.pluginConfigs.size)
-
-        val actualGeneralConfig1 = config.pluginConfigs.filterIsInstance<GeneralConfig>().first()
-        assertEquals("", actualGeneralConfig1.excludedTests)
-        assertEquals("", actualGeneralConfig1.includedTests)
-        assertEquals(false, actualGeneralConfig1.ignoreSaveComments)
-    }
-
-    @Test
-    fun `invalid general section`() {
-        createTomlFiles()
-        val generalConfig = GeneralConfig()
-        val config = TestConfig(toml1, null, mutableListOf(generalConfig))
-        try {
-            config.validateAndSetDefaults()
-        } catch (ex: IllegalArgumentException) {
-            assertEquals(
-                "Error: Couldn't found `execCmd` in [general] section. Please provide it in this, " +
-                        "or at least in one of the parent configs", ex.message
-            )
-        }
-    }
-
-    @Test
-    fun `set defaults to warn section`() {
-        createTomlFiles()
-        val warnConfig = WarnPluginConfig(execFlags = "execFlags", messageCaptureGroup = 1)
-        val config = TestConfig(toml1, null, mutableListOf(warnConfig))
-
-        config.validateAndSetDefaults()
-
-        assertEquals(1, config.pluginConfigs.size)
-
-        val actualWarnConfig = config.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
-        assertEquals(Regex(";warn:(\\d+):(\\d+): (.+)").toString(), actualWarnConfig.warningsInputPattern.toString())
-        assertEquals(Regex(".*(\\d+):(\\d+): (.+)").toString(), actualWarnConfig.warningsOutputPattern.toString())
-        assertEquals(true, actualWarnConfig.warningTextHasLine)
-        assertEquals(true, actualWarnConfig.warningTextHasColumn)
-        assertEquals(2, actualWarnConfig.lineCaptureGroup)
-        assertEquals(3, actualWarnConfig.columnCaptureGroup)
-        assertEquals(true, actualWarnConfig.exactWarningsMatch)
-        assertEquals("Test", actualWarnConfig.testNameSuffix)
-    }
-
-    // Add proper values for `lineCaptureGroup` and `columnCaptureGroup` according
-    // `warningTextHasLine` `warningTextHasColumn`
-    @Test
-    fun `validate warn section`() {
-        createTomlFiles()
-        val warnConfig = WarnPluginConfig(execFlags = "execFlags",  warningTextHasLine = true, warningTextHasColumn = false)
-        val config = TestConfig(toml1, null, mutableListOf(warnConfig))
-
-        config.validateAndSetDefaults()
-
-        assertEquals(1, config.pluginConfigs.size)
-
-        val actualWarnConfig = config.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
-        assertEquals(true, actualWarnConfig.warningTextHasLine)
-        assertEquals(false, actualWarnConfig.warningTextHasColumn)
-        assertEquals(2, actualWarnConfig.lineCaptureGroup)
-        assertEquals(null, actualWarnConfig.columnCaptureGroup)
-    }
-
-    // Provided incorrect values `warningTextHasLine = false` but `lineCaptureGroup = 2`; validate it
-    @Test
-    fun `validate warn section 2`() {
-        createTomlFiles()
-        val warnConfig = WarnPluginConfig(execFlags = "execFlags",  warningTextHasLine = false, lineCaptureGroup = 2)
-        val config = TestConfig(toml1, null, mutableListOf(warnConfig))
-
-        config.validateAndSetDefaults()
-
-        assertEquals(1, config.pluginConfigs.size)
-
-        val actualWarnConfig = config.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
-        assertEquals(null, actualWarnConfig.warningTextHasLine)
-        assertEquals(true, actualWarnConfig.warningTextHasColumn)
-        assertEquals(null, actualWarnConfig.lineCaptureGroup)
-        assertEquals(3, actualWarnConfig.columnCaptureGroup)
-    }
-
-    // `lineCaptureGroup` provided, but `warningTextHasLine` is absent; validate it
-    @Test
-    fun `validate warn section 3`() {
-        createTomlFiles()
-        val warnConfig = WarnPluginConfig(execFlags = "execFlags", lineCaptureGroup = 5)
-        val config = TestConfig(toml1, null, mutableListOf(warnConfig))
-
-        config.validateAndSetDefaults()
-
-        assertEquals(1, config.pluginConfigs.size)
-
-        val actualWarnConfig = config.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
-        assertEquals(true, actualWarnConfig.warningTextHasLine)
-        assertEquals(true, actualWarnConfig.warningTextHasColumn)
-        assertEquals(5, actualWarnConfig.lineCaptureGroup)
-        assertEquals(3, actualWarnConfig.columnCaptureGroup)
-    }
-
-    // `lineCaptureGroup` provided, but incorrect -- error
-    @Test
-    fun `validate warn section 4`() {
-        createTomlFiles()
-        val warnConfig = WarnPluginConfig(execFlags = "execFlags", lineCaptureGroup = -127)
-        val config = TestConfig(toml1, null, mutableListOf(warnConfig))
-
-        try {
-            config.validateAndSetDefaults()
-        } catch (ex: IllegalArgumentException) {
-            assertEquals(
-                "Error: Integer value in [warn] section must be positive!", ex.message
-            )
-        }
-    }
-
-    @Test
-    fun `set defaults to fix section`() {
-        createTomlFiles()
-        val fixConfig = FixPluginConfig(execFlags = "execFlags")
-        val config = TestConfig(toml1, null, mutableListOf(fixConfig))
-
-        config.validateAndSetDefaults()
-
-        assertEquals(1, config.pluginConfigs.size)
-
-        val actualFixConfig = config.pluginConfigs.filterIsInstance<FixPluginConfig>().first()
-        assertEquals("Test", actualFixConfig.resourceNameTest)
-        assertEquals("Expected", actualFixConfig.resourceNameExpected)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        fs.deleteRecursively(tmpDir)
-    }
-}
-
-fun createTomlFiles() {
+internal fun createTomlFiles() {
     fs.createDirectory(tmpDir)
     fs.createFile(toml1)
     fs.createDirectory(nestedDir1)

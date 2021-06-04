@@ -55,7 +55,7 @@ class UtilsTest {
             warnPluginConfig.warningsInputPattern!!,
             columnGroupIdx = warnPluginConfig.columnCaptureGroup,
             lineGroupIdx = warnPluginConfig.lineCaptureGroup,
-            messageGroupIdx = warnPluginConfig.messageCaptureGroup
+            messageGroupIdx = warnPluginConfig.messageCaptureGroup!!
         )
         requireNotNull(warning)
         assertEquals(expectedWarning, warning)
@@ -66,7 +66,7 @@ class UtilsTest {
             warnPluginConfig.warningsInputPattern!!,
             columnGroupIdx = warnPluginConfig.columnCaptureGroup,
             lineGroupIdx = warnPluginConfig.lineCaptureGroup,
-            messageGroupIdx = warnPluginConfig.messageCaptureGroup
+            messageGroupIdx = warnPluginConfig.messageCaptureGroup!!
         )
         assertNull(warning)
     }

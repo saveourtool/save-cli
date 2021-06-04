@@ -66,7 +66,7 @@ data class WarnPluginConfig(
         )
     }
 
-    @Suppress("MAGIC_NUMBER")
+    @Suppress("MAGIC_NUMBER", "MagicNumber")
     override fun validateAndSetDefaults(): WarnPluginConfig {
         val newWarningTextHasLine = warningTextHasLine ?: true
         val newWarningTextHasColumn = warningTextHasColumn ?: true
