@@ -160,7 +160,7 @@ class ProcessBuilder {
             val listOfCommands = if (separator != "") command.split(separator) as MutableList<String> else mutableListOf(command)
             listOfCommands.forEachIndexed { index, cmd ->
                 if (cmd.contains("echo")) {
-                    var newEchoCommand = cmd.trim(' ').replace("echo ", " echo | set /p=\"")
+                    var newEchoCommand = cmd.trim(' ').replace("echo ", " echo | set /p dummyName=\"")
                     // Now we need to add closing `"` in proper place
                     // Despite the fact, that we don't expect user redirections, for out internal tests we use them,
                     // so we need to process such cases
