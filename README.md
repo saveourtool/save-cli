@@ -85,9 +85,9 @@ To make SAVE detect your test suites you need to put `save.toml` file in each di
 Note, that these configuration files inherit configurations from the previous level of directories.
 
 Despite the fact, that almost all fields may not be defined in bottom levels and can be inherited from the top level,
-you should be accurate: some fields are required for execution, so you need to provide them at least in one config from inheritance chain
+you should be accurate: some fields in `[general]` section are required for execution, so you need to provide them at least in one config from inheritance chain
 for test that should be run.
-[See this for details](#save_toml_configuration_file) about required fields.
+[Look which fields are required](#save_toml_configuration_file).
 
 For example, in case of the following hierarchy of directories:
 ```text

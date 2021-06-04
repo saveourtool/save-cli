@@ -42,7 +42,7 @@ exec_cmd="./ktlint -R diktat-0.4.2.jar"
 description = "My suite description"
 suiteName = "DocsCheck"
 
-[fix] # FixMe: Change to actual fields, add whether the field required or optional
+[fix]
 exec_flags="-F"
 testFilePattern="*Test.kt"
 expectedFilePattern="*Expected.kt"

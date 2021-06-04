@@ -60,7 +60,7 @@ description = "My suite description"
 suiteName = "DocsCheck"
 
 [warn]
-execFlags = "--build-upon-default-config -i" # (required in the config of test being run, can be inherited from parent configs)
+execFlags = "--build-upon-default-config -i"
 
 # warning is set inside the comment in code, `//` marks comment start in Java
 warningsInputPattern = "// ;warn:(\\d+):(\\d+): (.*)" # (default value)
