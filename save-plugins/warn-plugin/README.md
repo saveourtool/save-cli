@@ -61,14 +61,25 @@ suiteName = "DocsCheck"
 
 [warn]
 execFlags = "--build-upon-default-config -i"
-warningsInputPattern = "// ;warn:(\\d+):(\\d+): (.*)"  # warning is set inside the comment in code, `//` marks comment start in Java
-warningsOutputPattern = "\\w+ - (\\d+)/(\\d+) - (.*)$"  # e.g. `WARN - 10/14 - Class name is in incorrect case`
-lineCaptureGroup = 1  # index of regex capture group for line number, used when `warningTextHasLine == false`
-columnCaptureGroup = 2  # index of regex capture group for column number, used when `warningTextHasColumn == false`
-messageCaptureGroup = 3  # index of regex capture group for message text
-warningTextHasColumn = true
-warningTextHasLine = true
-testNameSuffix = Test
+
+# warning is set inside the comment in code, `//` marks comment start in Java
+warningsInputPattern = "// ;warn:(\\d+):(\\d+): (.*)" # (default value)
+
+# e.g. `WARN - 10/14 - Class name is in incorrect case`
+warningsOutputPattern = "\\w+ - (\\d+)/(\\d+) - (.*)$" # (default value)
+
+# index of regex capture group for line number, used when `warningTextHasLine == true`
+lineCaptureGroup = 2 # (default value)
+
+# index of regex capture group for column number, used when `warningTextHasColumn == true`
+columnCaptureGroup = 3 # (default value)
+
+# index of regex capture group for message text
+messageCaptureGroup = 4 # (default value)
+
+warningTextHasColumn = true # (default value)
+warningTextHasLine = true # (default value)
+testNameSuffix = "Test" # (default value)
 ```
 
 When executed from project root (where `save.propertes` is located), SAVE will cd to `rootDir` and discover all files

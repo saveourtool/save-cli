@@ -4,7 +4,6 @@ import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.logInfo
-import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.DebugInfo
@@ -33,15 +32,16 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
         val flattenedResources = files.toList().flatten()
         if (flattenedResources.isEmpty()) {
-            logWarn("No resources discovered for WarnPlugin in [${testConfig.location}]")
-        } else {
-            logInfo("Discovered the following test resources: $flattenedResources")
+            return emptySequence()
         }
+        logInfo("Discovered the following test resources: $flattenedResources")
+
+        testConfig.validateAndSetDefaults()
 
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
 
-        return discoverTestFiles(testConfig.directory).map { resources ->
+        return files.map { resources ->
             handleTestFile(resources.single(), warnPluginConfig, generalConfig)
         }
     }
@@ -75,10 +75,10 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
             .mapNotNull {
                 with(warnPluginConfig) {
                     it.extractWarning(
-                        warningsInputPattern,
+                        warningsInputPattern!!,
                         columnCaptureGroup,
                         lineCaptureGroup,
-                        messageCaptureGroup
+                        messageCaptureGroup!!
                     )
                 }
             }
@@ -92,7 +92,7 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
             .mapValues { it.value.sortedBy { it.message } }
 
         val execCmd: String = if (generalConfig?.ignoreSaveComments == true) {
-            val fileName = createTestFile(path, warnPluginConfig.warningsInputPattern)
+            val fileName = createTestFile(path, warnPluginConfig.warningsInputPattern!!)
             "${generalConfig.execCmd} ${warnPluginConfig.execFlags} $fileName"
         } else {
             "${(generalConfig?.execCmd ?: "")} ${warnPluginConfig.execFlags} ${path.name}"
@@ -101,7 +101,7 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
         val executionResult = pb.exec(execCmd, null)
         val actualWarningsMap = executionResult.stdout.mapNotNull {
             with(warnPluginConfig) {
-                it.extractWarning(warningsOutputPattern, columnCaptureGroup, lineCaptureGroup, messageCaptureGroup)
+                it.extractWarning(warningsOutputPattern!!, columnCaptureGroup, lineCaptureGroup, messageCaptureGroup!!)
             }
         }
             .groupBy { if (it.line != null && it.column != null) it.line to it.column else null }

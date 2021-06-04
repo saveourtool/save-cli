@@ -31,41 +31,72 @@ import kotlinx.serialization.UseSerializers
  */
 @Serializable
 data class WarnPluginConfig(
-    val execFlags: String,
-    val warningsInputPattern: Regex,
-    val warningsOutputPattern: Regex,
+    val execFlags: String? = null,
+    val warningsInputPattern: Regex? = null,
+    val warningsOutputPattern: Regex? = null,
     val warningTextHasLine: Boolean? = null,
     val warningTextHasColumn: Boolean? = null,
-    val lineCaptureGroup: Int?,
-    val columnCaptureGroup: Int?,
-    val messageCaptureGroup: Int,
+    val lineCaptureGroup: Int? = null,
+    val columnCaptureGroup: Int? = null,
+    val messageCaptureGroup: Int? = null,
     val exactWarningsMatch: Boolean? = null,
     val testNameSuffix: String? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.WARN
+    private val testName: String = testNameSuffix ?: "Test"
 
     /**
      *  @property resourceNamePattern regex for the name of the test files.
      */
-    val resourceNamePattern: Regex = resourceNamePattern()
+    val resourceNamePattern: Regex = Regex("""(.+)${(testName)}\.[\w\d]+""")
 
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as WarnPluginConfig
         return WarnPluginConfig(
             this.execFlags ?: other.execFlags,
-            this.warningsInputPattern,
-            this.warningsOutputPattern,
+            this.warningsInputPattern ?: other.warningsInputPattern,
+            this.warningsOutputPattern ?: other.warningsOutputPattern,
             this.warningTextHasLine ?: other.warningTextHasLine,
             this.warningTextHasColumn ?: other.warningTextHasColumn,
             this.lineCaptureGroup ?: other.lineCaptureGroup,
             this.columnCaptureGroup ?: other.columnCaptureGroup,
-            this.messageCaptureGroup,
+            this.messageCaptureGroup ?: other.columnCaptureGroup,
             this.exactWarningsMatch ?: other.exactWarningsMatch,
             this.testNameSuffix ?: other.testNameSuffix
         )
     }
 
-    private fun resourceNamePattern(): Regex = Regex("""(.+)${(testNameSuffix ?: "Test")}\.[\w\d]+""")
+    @Suppress("MAGIC_NUMBER", "MagicNumber")
+    override fun validateAndSetDefaults(): WarnPluginConfig {
+        val newWarningTextHasLine = warningTextHasLine ?: true
+        val newWarningTextHasColumn = warningTextHasColumn ?: true
+        val newLineCaptureGroup = if (newWarningTextHasLine) (lineCaptureGroup ?: 2) else null
+        val newColumnCaptureGroup = if (newWarningTextHasColumn) (columnCaptureGroup ?: 3) else null
+        val newMessageCaptureGroup = messageCaptureGroup ?: 4
+        requirePositiveIfNotNull(lineCaptureGroup)
+        requirePositiveIfNotNull(columnCaptureGroup)
+        requirePositiveIfNotNull(messageCaptureGroup)
+        return WarnPluginConfig(
+            execFlags,
+            warningsInputPattern ?: defaultInputPattern,
+            warningsOutputPattern ?: defaultOutputPattern,
+            newWarningTextHasLine,
+            newWarningTextHasColumn,
+            newLineCaptureGroup,
+            newColumnCaptureGroup,
+            newMessageCaptureGroup,
+            exactWarningsMatch ?: true,
+            testName
+        )
+    }
+
+    private fun requirePositiveIfNotNull(value: Int?) {
+        value?.let {
+            require(value >= 0) {
+                "Error: Integer value in [warn] section should be positive!"
+            }
+        }
+    }
 
     companion object {
         /**

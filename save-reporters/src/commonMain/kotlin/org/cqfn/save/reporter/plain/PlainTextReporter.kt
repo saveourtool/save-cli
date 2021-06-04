@@ -47,6 +47,11 @@ class PlainTextReporter(override val out: BufferedSink) : Reporter {
         out.write("| Test name | result | comment |".encodeToByteArray())
     }
 
+    override fun onPluginExecutionSkip(plugin: Plugin) {
+        out.write("--------------------------------".encodeToByteArray())
+        out.write("Plugin ${plugin::class.simpleName} has been skipped".encodeToByteArray())
+    }
+
     override fun onPluginExecutionEnd(plugin: Plugin) {
         out.write("--------------------------------".encodeToByteArray())
         out.write("Plugin ${plugin::class.simpleName} has completed execution".encodeToByteArray())

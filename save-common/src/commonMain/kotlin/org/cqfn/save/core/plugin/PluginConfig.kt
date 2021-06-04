@@ -23,6 +23,13 @@ interface PluginConfig {
      * @return merged config
      */
     fun mergeWith(otherConfig: PluginConfig): PluginConfig
+
+    /**
+     * Method, which validates config and provides the default values for fields, if possible
+     *
+     * @return new validated instance obtained from [this]
+     */
+    fun validateAndSetDefaults(): PluginConfig
 }
 
 /**
@@ -41,10 +48,10 @@ interface PluginConfig {
  */
 @Serializable
 data class GeneralConfig(
-    val execCmd: String,
-    val tags: String,
-    val description: String,
-    val suiteName: String,
+    val execCmd: String? = null,
+    val tags: String? = null,
+    val description: String? = null,
+    val suiteName: String? = null,
     val excludedTests: String? = null,
     val includedTests: String? = null,
     val ignoreSaveComments: Boolean? = null
@@ -62,13 +69,44 @@ data class GeneralConfig(
         } ?: this.tags
 
         return GeneralConfig(
-            this.execCmd,
+            this.execCmd ?: other.execCmd,
             mergedTag,
-            this.description,
-            this.suiteName,
+            this.description ?: other.description,
+            this.suiteName ?: other.suiteName,
             this.excludedTests ?: other.excludedTests,
             this.includedTests ?: other.includedTests,
             this.ignoreSaveComments ?: other.ignoreSaveComments
         )
     }
+
+    override fun validateAndSetDefaults(): GeneralConfig {
+        requireNotNull(execCmd) {
+            errorMsgForRequireCheck("execCmd")
+        }
+        requireNotNull(tags) {
+            errorMsgForRequireCheck("tags")
+        }
+        requireNotNull(description) {
+            errorMsgForRequireCheck("description")
+        }
+        requireNotNull(suiteName) {
+            errorMsgForRequireCheck("suiteName")
+        }
+        return GeneralConfig(
+            execCmd,
+            tags,
+            description,
+            suiteName,
+            excludedTests ?: "",
+            includedTests ?: "",
+            ignoreSaveComments ?: false
+        )
+    }
+
+    private fun errorMsgForRequireCheck(field: String) =
+            """
+                |Error: Couldn't find `$field` in [general] section.
+                |Current configuration: ${this.toString().substringAfter("(").substringBefore(")")}
+                |Please provide it in this, or at least in one of the parent configs.
+            """.trimIndent()
 }

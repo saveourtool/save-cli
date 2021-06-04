@@ -5,7 +5,6 @@ import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readFile
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.logInfo
-import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.DebugInfo
@@ -38,14 +37,16 @@ class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) :
         .build()
 
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
-        val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
-        val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
         val flattenedResources = files.toList()
         if (flattenedResources.isEmpty()) {
-            logWarn("No resources discovered for FixPlugin in [${testConfig.location}]")
-        } else {
-            logInfo("Discovered the following file pairs for comparison: $flattenedResources")
+            return emptySequence()
         }
+        logInfo("Discovered the following file pairs for comparison: $flattenedResources")
+
+        testConfig.validateAndSetDefaults()
+
+        val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
+        val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
         return files
             .map { it.first() to it.last() }
             .map { (expected, test) ->

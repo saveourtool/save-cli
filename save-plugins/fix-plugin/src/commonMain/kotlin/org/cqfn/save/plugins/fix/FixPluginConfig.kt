@@ -20,7 +20,7 @@ import kotlinx.serialization.UseSerializers
  */
 @Serializable
 data class FixPluginConfig(
-    val execFlags: String,
+    val execFlags: String? = null,
     val resourceNameTestSuffix: String? = null,
     val resourceNameExpectedSuffix: String? = null,
 ) : PluginConfig {
@@ -44,9 +44,15 @@ data class FixPluginConfig(
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as FixPluginConfig
         return FixPluginConfig(
-            this.execFlags,
+            this.execFlags ?: other.execFlags,
             this.resourceNameTestSuffix ?: other.resourceNameTestSuffix,
             this.resourceNameExpectedSuffix ?: other.resourceNameExpectedSuffix,
         )
     }
+
+    override fun validateAndSetDefaults() = FixPluginConfig(
+        execFlags,
+        resourceNameTest,
+        resourceNameExpected
+    )
 }
