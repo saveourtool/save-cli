@@ -51,7 +51,7 @@ class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) :
             .map { it.first() to it.last() }
             .map { (expected, test) ->
                 val testCopy = createTestFile(test)
-                val execCmd = "${(generalConfig?.execCmd ?: "")} ${fixPluginConfig.execFlags} $testCopy"
+                val execCmd = "${(generalConfig!!.execCmd)} ${fixPluginConfig.execFlags} $testCopy"
                 val executionResult = pb.exec(execCmd, null, false)
                 val fixedLines = FileSystem.SYSTEM.readLines(testCopy)
                 val expectedLines = FileSystem.SYSTEM.readLines(expected)
