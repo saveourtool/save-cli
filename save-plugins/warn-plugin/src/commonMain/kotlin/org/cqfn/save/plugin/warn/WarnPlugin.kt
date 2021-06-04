@@ -99,6 +99,9 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
         }
 
         val executionResult = pb.exec(execCmd, null)
+        val stdout = executionResult.stdout.joinToString("\n")
+        val stderr = executionResult.stderr.joinToString("\n")
+        val status = if (executionResult.code != 0) Fail(stderr) else null
         val actualWarningsMap = executionResult.stdout.mapNotNull {
             with(warnPluginConfig) {
                 it.extractWarning(warningsOutputPattern!!, columnCaptureGroup, lineCaptureGroup, messageCaptureGroup!!)
@@ -108,8 +111,8 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
             .mapValues { (_, warning) -> warning.sortedBy { it.message } }
         return TestResult(
             listOf(path),
-            checkResults(expectedWarnings, actualWarningsMap, warnPluginConfig),
-            DebugInfo(executionResult.stdout.joinToString("\n"), executionResult.stderr.joinToString("\n"), null)
+            status ?: checkResults(expectedWarnings, actualWarningsMap, warnPluginConfig),
+            DebugInfo(stdout, stderr, null)
         )
     }
 

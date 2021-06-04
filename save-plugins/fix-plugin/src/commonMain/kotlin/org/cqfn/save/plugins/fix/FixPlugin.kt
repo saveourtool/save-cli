@@ -36,6 +36,7 @@ class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) :
         .newTag { start -> if (start) "<" else ">" }
         .build()
 
+    @Suppress("TOO_LONG_FUNCTION")
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
         val flattenedResources = files.toList()
         if (flattenedResources.isEmpty()) {
@@ -53,20 +54,26 @@ class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) :
                 val testCopy = createTestFile(test)
                 val execCmd = "${(generalConfig!!.execCmd)} ${fixPluginConfig.execFlags} $testCopy"
                 val executionResult = pb.exec(execCmd, null, false)
+                val stdout = executionResult.stdout.joinToString("\n")
+                val stderr = executionResult.stderr.joinToString("\n")
+
                 val fixedLines = FileSystem.SYSTEM.readLines(testCopy)
                 val expectedLines = FileSystem.SYSTEM.readLines(expected)
-                val status = diff(expectedLines, fixedLines).let { patch ->
-                    if (patch.deltas.isEmpty()) {
-                        Pass(null)
-                    } else {
-                        Fail(patch.formatToString())
+                val status = if (executionResult.code != 0) {
+                    Fail(stderr)
+                } else {
+                    diff(expectedLines, fixedLines).let { patch ->
+                        if (patch.deltas.isEmpty()) {
+                            Pass(null)
+                        } else {
+                            Fail(patch.formatToString())
+                        }
                     }
                 }
                 TestResult(
                     listOf(expected, test),
                     status,
-                    // todo: fill debug info
-                    DebugInfo(executionResult.stdout.joinToString("\n"), null, null)
+                    DebugInfo(stdout, stderr, null)
                 )
             }
     }
