@@ -26,8 +26,11 @@ import kotlinx.serialization.UseSerializers
  * corresponding to the whole string.
  * @property messageCaptureGroup an index of capture group in regular expressions, corresponding to warning text. Indices start at 0 with 0
  * corresponding to the whole string.
+ * @property fileNameCaptureGroup an index of capture group in regular expressions, corresponding to file name. Indices start at 0 with 0
+ * corresponding to the whole string.
  * @property exactWarningsMatch exact match of errors
  * @property testNameSuffix suffix name of the test file.
+ * @property batchSize
  */
 @Serializable
 data class WarnPluginConfig(
@@ -36,6 +39,8 @@ data class WarnPluginConfig(
     val warningsOutputPattern: Regex? = null,
     val warningTextHasLine: Boolean? = null,
     val warningTextHasColumn: Boolean? = null,
+    val batchSize: Int? = null,
+    val fileNameCaptureGroup: Int? = null,
     val lineCaptureGroup: Int? = null,
     val columnCaptureGroup: Int? = null,
     val messageCaptureGroup: Int? = null,
@@ -58,6 +63,8 @@ data class WarnPluginConfig(
             this.warningsOutputPattern ?: other.warningsOutputPattern,
             this.warningTextHasLine ?: other.warningTextHasLine,
             this.warningTextHasColumn ?: other.warningTextHasColumn,
+            this.batchSize ?: other.batchSize,
+            this.fileNameCaptureGroup ?: other.fileNameCaptureGroup,
             this.lineCaptureGroup ?: other.lineCaptureGroup,
             this.columnCaptureGroup ?: other.columnCaptureGroup,
             this.messageCaptureGroup ?: other.columnCaptureGroup,
@@ -70,6 +77,8 @@ data class WarnPluginConfig(
     override fun validateAndSetDefaults(): WarnPluginConfig {
         val newWarningTextHasLine = warningTextHasLine ?: true
         val newWarningTextHasColumn = warningTextHasColumn ?: true
+        val newBatchSize = batchSize ?: 1
+        val newFileNameCaptureGroup = fileNameCaptureGroup ?: 1
         val newLineCaptureGroup = if (newWarningTextHasLine) (lineCaptureGroup ?: 2) else null
         val newColumnCaptureGroup = if (newWarningTextHasColumn) (columnCaptureGroup ?: 3) else null
         val newMessageCaptureGroup = messageCaptureGroup ?: 4
@@ -82,6 +91,8 @@ data class WarnPluginConfig(
             warningsOutputPattern ?: defaultOutputPattern,
             newWarningTextHasLine,
             newWarningTextHasColumn,
+            newBatchSize,
+            newFileNameCaptureGroup,
             newLineCaptureGroup,
             newColumnCaptureGroup,
             newMessageCaptureGroup,
@@ -101,9 +112,9 @@ data class WarnPluginConfig(
     companion object {
         /**
          * Default regex for expected warnings in test resources, e.g.
-         * `// ;warn:2:4: Class name in incorrect case`
+         * `// ;warn:ClassNameTest.java:2:4: Class name in incorrect case`
          */
-        internal val defaultInputPattern = Regex(";warn:(\\d+):(\\d+): (.+)")
+        internal val defaultInputPattern = Regex(";warn:(.+):(\\d+):(\\d+): (.+)")
 
         /**
          * Default regex for actual warnings in the tool output, e.g.
