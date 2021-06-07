@@ -64,6 +64,7 @@ data class WarnPluginConfig(
      */
     val resourceNamePattern: Regex = Regex("""(.+)${(testName)}\.[\w\d]+""")
 
+    @Suppress("ComplexMethod")
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as WarnPluginConfig
         return WarnPluginConfig(
@@ -85,7 +86,7 @@ data class WarnPluginConfig(
         )
     }
 
-    @Suppress("MAGIC_NUMBER", "MagicNumber")
+    @Suppress("MAGIC_NUMBER", "MagicNumber", "ComplexMethod")
     override fun validateAndSetDefaults(): WarnPluginConfig {
         val newWarningTextHasLine = warningTextHasLine ?: true
         val newWarningTextHasColumn = warningTextHasColumn ?: true
