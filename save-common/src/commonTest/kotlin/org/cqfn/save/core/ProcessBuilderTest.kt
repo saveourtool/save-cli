@@ -6,6 +6,7 @@ package org.cqfn.save.core
 
 import org.cqfn.save.core.utils.ProcessBuilder
 import org.cqfn.save.core.utils.ProcessBuilder.Companion.processCommandWithEcho
+import org.cqfn.save.core.utils.isCurrentOsWindows
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -27,6 +28,28 @@ class ProcessBuilderTest {
         val expectedCode = 0
         val expectedStdout = listOf("something")
         val expectedStderr: List<String> = emptyList()
+        assertEquals(expectedCode, actualResult.code)
+        assertEquals(expectedStdout, actualResult.stdout)
+        assertEquals(expectedStderr, actualResult.stderr)
+    }
+
+    @Test
+    @Suppress("SAY_NO_TO_VAR")
+    fun `check stdout with redirection`() {
+        val actualResult = processBuilder.exec("echo something >/dev/null", null)
+        var expectedCode: Int
+        val expectedStdout: List<String> = emptyList()
+        lateinit var expectedStderr: List<String>
+        when {
+            isCurrentOsWindows() -> {
+                expectedCode = 1
+                expectedStderr = listOf("The system cannot find the path specified.")
+            }
+            else -> {
+                expectedCode = 0
+                expectedStderr = emptyList()
+            }
+        }
         assertEquals(expectedCode, actualResult.code)
         assertEquals(expectedStdout, actualResult.stdout)
         assertEquals(expectedStderr, actualResult.stderr)

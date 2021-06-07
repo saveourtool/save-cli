@@ -25,7 +25,13 @@ private typealias LineColumn = Pair<Int, Int>
  * A plugin that runs an executable and verifies that it produces required warning messages.
  * @property testConfig
  */
-class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) : Plugin(testConfig, testFiles) {
+class WarnPlugin(
+    testConfig: TestConfig,
+    testFiles: List<String> = emptyList(),
+    collectStdOut: Boolean = true) : Plugin(
+    testConfig,
+    testFiles,
+    collectStdOut) {
     private val fs = FileSystem.SYSTEM
     private val pb = ProcessBuilder()
 
@@ -98,7 +104,7 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
             "${(generalConfig.execCmd)} ${warnPluginConfig.execFlags} $path"
         }
 
-        val executionResult = pb.exec(execCmd, null)
+        val executionResult = pb.exec(execCmd, null, collectStdOut)
         val stdout = executionResult.stdout.joinToString("\n")
         val stderr = executionResult.stderr.joinToString("\n")
         val status = if (executionResult.code != 0) Fail(stderr) else null

@@ -15,9 +15,9 @@ actual class ProcessBuilderInternal actual constructor(
     private val collectStdout: Boolean
 ) {
     actual fun prepareCmd(command: String) = if (collectStdout) {
-        "$command >$stdoutFile 2>$stderrFile"
+        "($command) >$stdoutFile 2>$stderrFile"
     } else {
-        "$command 2>$stderrFile"
+        "($command) 2>$stderrFile"
     }
 
     actual fun exec(cmd: String): Int {

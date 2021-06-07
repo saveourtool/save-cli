@@ -25,7 +25,13 @@ import okio.Path
  * @property testConfig
  */
 @Suppress("INLINE_CLASS_CAN_BE_USED")
-class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) : Plugin(testConfig, testFiles) {
+class FixPlugin(
+    testConfig: TestConfig,
+    testFiles: List<String> = emptyList(),
+    collectStdOut: Boolean = true) : Plugin(
+    testConfig,
+    testFiles,
+    collectStdOut) {
     private val fs = FileSystem.SYSTEM
     private val pb = ProcessBuilder()
     private val diffGenerator = DiffRowGenerator.create()
@@ -53,7 +59,7 @@ class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) :
             .map { (expected, test) ->
                 val testCopy = createTestFile(test)
                 val execCmd = "${(generalConfig!!.execCmd)} ${fixPluginConfig.execFlags} $testCopy"
-                val executionResult = pb.exec(execCmd, null, false)
+                val executionResult = pb.exec(execCmd, null, collectStdOut)
                 val stdout = executionResult.stdout.joinToString("\n")
                 val stderr = executionResult.stderr.joinToString("\n")
 
