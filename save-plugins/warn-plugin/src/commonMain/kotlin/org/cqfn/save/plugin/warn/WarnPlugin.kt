@@ -98,16 +98,11 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
         }
 
         val execCmd: String = if (generalConfig?.ignoreSaveComments == true) {
-            var fileNames = ""
-            paths.forEach { path ->
-                fileNames += " ${createTestFile(path, warnPluginConfig.warningsInputPattern!!)})"
-            }
+            val fileNames = paths.joinToString { createTestFile(it, warnPluginConfig.warningsInputPattern!!) }
             "${generalConfig.execCmd} ${warnPluginConfig.execFlags} $fileNames"
         } else {
-            var fileNames = ""
-            paths.forEach { path ->
-                fileNames += " ${path.name}"
-            }
+            val fileNames = paths.joinToString { it.name }
+            paths.joinToString { it.name }
             "${(generalConfig?.execCmd ?: "")} ${warnPluginConfig.execFlags} $fileNames"
         }
 
