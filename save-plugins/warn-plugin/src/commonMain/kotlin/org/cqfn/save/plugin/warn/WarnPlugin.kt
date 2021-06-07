@@ -28,10 +28,10 @@ private typealias LineColumn = Pair<Int, Int>
 class WarnPlugin(
     testConfig: TestConfig,
     testFiles: List<String> = emptyList(),
-    collectStdOut: Boolean = true) : Plugin(
+    useInternalRedirections: Boolean = true) : Plugin(
     testConfig,
     testFiles,
-    collectStdOut) {
+    useInternalRedirections) {
     private val fs = FileSystem.SYSTEM
     private val pb = ProcessBuilder()
 
@@ -104,7 +104,7 @@ class WarnPlugin(
             "${(generalConfig.execCmd)} ${warnPluginConfig.execFlags} $path"
         }
 
-        val executionResult = pb.exec(execCmd, null, collectStdOut)
+        val executionResult = pb.exec(execCmd, null, useInternalRedirections)
         val stdout = executionResult.stdout.joinToString("\n")
         val stderr = executionResult.stderr.joinToString("\n")
         val status = if (executionResult.code != 0) Fail(stderr) else null

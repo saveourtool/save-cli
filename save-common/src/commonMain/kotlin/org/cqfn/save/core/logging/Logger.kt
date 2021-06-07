@@ -14,7 +14,7 @@ import kotlinx.datetime.toLocalDateTime
 /**
  * Is debug logging enabled
  */
-var isDebugEnabled: Boolean = true
+var isDebugEnabled: Boolean = false
 
 /**
  * Whether to add time stamps to log messages

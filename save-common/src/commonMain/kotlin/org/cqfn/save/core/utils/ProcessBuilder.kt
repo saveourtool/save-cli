@@ -22,7 +22,7 @@ import kotlinx.datetime.Clock
 expect class ProcessBuilderInternal(
     stdoutFile: Path,
     stderrFile: Path,
-    collectStdout: Boolean) {
+    useInternalRedirections: Boolean) {
     /**
      * Modify execution command according behavior of different OS,
      * also stdout and stderr will be redirected to tmp files
@@ -56,7 +56,7 @@ class ProcessBuilder {
      *
      * @param command executable command with arguments
      * @param redirectTo a file where process output should be redirected. If null, output will be returned as [ExecutionResult.stdout].
-     * @param collectStdout whether to collect stdout for future usage, if false, [redirectTo] will be ignored
+     * @param useInternalRedirections whether to collect output for future usage, if false, [redirectTo] will be ignored
      * @return [ExecutionResult] built from process output
      */
     @Suppress(
@@ -66,10 +66,15 @@ class ProcessBuilder {
     fun exec(
         command: String,
         redirectTo: Path?,
-        collectStdout: Boolean = true): ExecutionResult {
+        useInternalRedirections: Boolean = true): ExecutionResult {
         if (command.isBlank()) {
             return returnWithError("Command couldn't be empty!")
         }
+        if (command.contains(">") && useInternalRedirections) {
+            logError("Found user provided redirections in `$command`. " +
+                    "SAVE will create own redirections for internal purpose, please refuse redirects or use corresponding argument [redirectTo]")
+        }
+
         // Temporary directory for stderr and stdout (posix `system()` can't separate streams, so we do it ourselves)
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY /
                 ("ProcessBuilder_" + Clock.System.now().toEpochMilliseconds()).toPath())
@@ -78,15 +83,11 @@ class ProcessBuilder {
         // Path to stderr file
         val stderrFile = tmpDir / "stderr.txt"
         // Instance, containing platform-dependent realization of command execution
-        val processBuilderInternal = ProcessBuilderInternal(stdoutFile, stderrFile, collectStdout)
+        val processBuilderInternal = ProcessBuilderInternal(stdoutFile, stderrFile, useInternalRedirections)
         fs.createDirectories(tmpDir)
         fs.createFile(stdoutFile)
         fs.createFile(stderrFile)
         logDebug("Created temp directory $tmpDir for stderr and stdout of ProcessBuilder")
-        if (command.contains(">")) {
-            logWarn("Found user provided redirections in `$command`. " +
-                    "SAVE uses own redirections for internal purpose and will redirect all streams to $tmpDir")
-        }
         val commandWithEcho = if (isCurrentOsWindows()) {
             processCommandWithEcho(command)
         } else {

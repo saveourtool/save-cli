@@ -11,12 +11,12 @@ import okio.Path
 /**
  * Plugin that can be injected into SAVE during execution. Plugins accept contents of configuration file and then perform some work.
  * @property testConfig
- * @property collectStdOut
+ * @property useInternalRedirections whether to redirect stdout/stderr for internal purposes
  */
 abstract class Plugin(
     open val testConfig: TestConfig,
     private val testFiles: List<String>,
-    protected val collectStdOut: Boolean) {
+    protected val useInternalRedirections: Boolean) {
     private val fs = FileSystem.SYSTEM
 
     /**

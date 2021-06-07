@@ -28,10 +28,10 @@ import okio.Path
 class FixPlugin(
     testConfig: TestConfig,
     testFiles: List<String> = emptyList(),
-    collectStdOut: Boolean = true) : Plugin(
+    useInternalRedirections: Boolean = true) : Plugin(
     testConfig,
     testFiles,
-    collectStdOut) {
+    useInternalRedirections) {
     private val fs = FileSystem.SYSTEM
     private val pb = ProcessBuilder()
     private val diffGenerator = DiffRowGenerator.create()
@@ -59,7 +59,7 @@ class FixPlugin(
             .map { (expected, test) ->
                 val testCopy = createTestFile(test)
                 val execCmd = "${(generalConfig!!.execCmd)} ${fixPluginConfig.execFlags} $testCopy"
-                val executionResult = pb.exec(execCmd, null, collectStdOut)
+                val executionResult = pb.exec(execCmd, null, useInternalRedirections)
                 val stdout = executionResult.stdout.joinToString("\n")
                 val stderr = executionResult.stderr.joinToString("\n")
 
