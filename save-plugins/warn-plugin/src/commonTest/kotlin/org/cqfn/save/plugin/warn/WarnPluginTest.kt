@@ -57,7 +57,7 @@ class WarnPluginTest {
                 }
             """.trimIndent(),
             WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"}",
+                "$catCmd ${tmpDir / "resource"} && set stub=",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
                 true, true, 1, 2, 3
@@ -91,7 +91,7 @@ class WarnPluginTest {
                 }
             """.trimIndent(),
             WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"}",
+                "$catCmd ${tmpDir / "resource"} && set stub=",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
                 true, true, 1, 2, 3, false
@@ -153,7 +153,7 @@ class WarnPluginTest {
                 // ;warn:7:1: File should end with trailing newline
             """.trimIndent(),
             WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"}",
+                "$catCmd ${tmpDir / "resource"} && set stub=",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
                 true, true, 1, 2, 3
@@ -190,7 +190,7 @@ class WarnPluginTest {
                 // ;warn:3:1: File should end with trailing newline
             """.trimIndent(),
             WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"}",
+                "$catCmd ${tmpDir / "resource"} && set stub=",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
                 true, true, 1, 2, 3
@@ -226,7 +226,7 @@ class WarnPluginTest {
                 // ;warn: File should end with trailing newline
             """.trimIndent(),
             WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"}",
+                "$catCmd ${tmpDir / "resource"} && set stub=",
                 Regex("// ;warn: (.*)"),
                 Regex("[\\w\\d.-]+: (.+)"),
                 false, false, null, null, 1
@@ -292,7 +292,7 @@ class WarnPluginTest {
 
         val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         val warnPluginConfig = WarnPluginConfig(
-            "$catCmd ${tmpDir / "resource"}",
+            "$catCmd ${tmpDir / "resource"} && set stub=",
             Regex("// ;warn: (.*)"),
             Regex("[\\w\\d.-]+: (.+)"),
             false, false, null, null, 1

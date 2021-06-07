@@ -95,7 +95,7 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
             val fileName = createTestFile(path, warnPluginConfig.warningsInputPattern!!)
             "${generalConfig.execCmd} ${warnPluginConfig.execFlags} $fileName"
         } else {
-            "${(generalConfig.execCmd)} ${warnPluginConfig.execFlags} ${path.name}"
+            "${(generalConfig.execCmd)} ${warnPluginConfig.execFlags} $path"
         }
 
         val executionResult = pb.exec(execCmd, null)
@@ -126,8 +126,8 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
 
         createTempDir(tmpDir)
 
-        val fileName = testFileName()
-        fs.write(fs.createFile(tmpDir / fileName)) {
+        val fileName = tmpDir / testFileName()
+        fs.write(fs.createFile(fileName)) {
             fs.readLines(path).forEach {
                 if (!warningsInputPattern.matches(it)) {
                     write(
@@ -136,7 +136,7 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
                 }
             }
         }
-        return fileName
+        return fileName.toString()
     }
 
     @Suppress("TYPE_ALIAS")
