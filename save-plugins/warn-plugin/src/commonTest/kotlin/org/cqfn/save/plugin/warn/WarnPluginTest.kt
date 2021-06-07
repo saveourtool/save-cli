@@ -51,16 +51,16 @@ class WarnPluginTest {
             """
                 package org.cqfn.save.example
                 
-                // ;warn:Test1Test.java:4:6: Class name should be in PascalCase
+                // ;warn:4:6: Class name should be in PascalCase
                 class example {
                     int foo = 42;
                 }
             """.trimIndent(),
             WarnPluginConfig(
                 "$catCmd ${tmpDir / "resource"}",
-                Regex("// ;warn:(.*):(\\d+):(\\d+): (.*)"),
-                Regex("(.*):(\\d+):(\\d+): (.+)"),
-                true, true, 1, 1, 2, 3, 4
+                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
+                Regex("(.+):(\\d+):(\\d+): (.+)"),
+                true, true, 1, 1, 2, 3, 1, 2, 3, 4
             ),
             GeneralConfig("", "", "", "")
         ) { results ->
@@ -85,16 +85,16 @@ class WarnPluginTest {
             """
                 package org.cqfn.save.example
                 
-                // ;warn:Test1Test.java:4:6: Class name should be in PascalCase
+                // ;warn:4:6: Class name should be in PascalCase
                 class example {
                     int Foo = 42;
                 }
             """.trimIndent(),
             WarnPluginConfig(
                 "$catCmd ${tmpDir / "resource"}",
-                Regex("// ;warn:(.*):(\\d+):(\\d+): (.*)"),
-                Regex("(.*):(\\d+):(\\d+): (.+)"),
-                true, true, 1, 1, 2, 3, 4, false
+                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
+                Regex("(.+):(\\d+):(\\d+): (.+)"),
+                true, true, 1, 1, 2, 3, 1, 2, 3, 4, false
             ),
             GeneralConfig("", "", "", "")
         ) { results ->
@@ -120,9 +120,9 @@ class WarnPluginTest {
             """.trimIndent(),
             WarnPluginConfig(
                 "echo Test1Test.java:4:6: Class name should be in PascalCase",
-                Regex("// ;warn:(.*):(\\d+):(\\d+): (.*)"),
-                Regex("[\\w\\d.-]+:(\\d+):(\\d+): (.+)"),
-                true, true, 1, 1, 2, 3, 4
+                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
+                Regex("(.+):(\\d+):(\\d+): (.+)"),
+                true, true, 1, 1, 2, 3, 1, 2, 3, 4
             ),
             GeneralConfig("", "", "", "")
         ) { results ->
@@ -145,19 +145,19 @@ class WarnPluginTest {
         val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
             """
-                // ;warn:Test1Test.java:1:1: Avoid using default package
-                // ;warn:Test1Test.java:3:6: Class name should be in PascalCase
+                // ;warn:1:1: Avoid using default package
+                // ;warn:3:6: Class name should be in PascalCase
                 class example {
-                    // ;warn:Test1Test.java:5:5: Variable name should be in lowerCamelCase
+                    // ;warn:5:5: Variable name should be in lowerCamelCase
                     int Foo = 42;
                 }
-                // ;warn:Test1Test.java:7:1: File should end with trailing newline
+                // ;warn:7:1: File should end with trailing newline
             """.trimIndent(),
             WarnPluginConfig(
                 "$catCmd ${tmpDir / "resource"}",
-                Regex("// ;warn:(.*):(\\d+):(\\d+): (.*)"),
-                Regex("(.*):(\\d+):(\\d+): (.+)"),
-                true, true, 1, 1, 2, 3, 4
+                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
+                Regex("(.+):(\\d+):(\\d+): (.+)"),
+                true, true, 1, 1, 2, 3, 1, 2, 3, 4
             ),
             GeneralConfig("", "", "", "")
         ) { results ->
@@ -192,9 +192,9 @@ class WarnPluginTest {
             """.trimIndent(),
             WarnPluginConfig(
                 "$catCmd ${tmpDir / "resource"}",
-                Regex("// ;warn:(.*):(\\d+):(\\d+): (.*)"),
-                Regex("(.*)+:(\\d+):(\\d+): (.+)"),
-                true, true, 1, 1, 2, 3, 4
+                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
+                Regex("(.+):(\\d+):(\\d+): (.+)"),
+                true, true, 1, 1, 2, 3, 1, 2, 3, 4
             ),
             GeneralConfig("", "", "", "")
         ) { results ->
@@ -218,19 +218,19 @@ class WarnPluginTest {
         val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
             """
-                // ;warn:Test1Test.java: Avoid using default package
-                // ;warn:Test1Test.java: Class name should be in PascalCase
+                // ;warn: Avoid using default package
+                // ;warn: Class name should be in PascalCase
                 class example {
-                    // ;warn:Test1Test.java: Variable name should be in lowerCamelCase
+                    // ;warn: Variable name should be in lowerCamelCase
                     int Foo = 42;
                 }
-                // ;warn:Test1Test.java: File should end with trailing newline
+                // ;warn: File should end with trailing newline
             """.trimIndent(),
             WarnPluginConfig(
                 "$catCmd ${tmpDir / "resource"}",
-                Regex("// ;warn:(.*): (.*)"),
-                Regex("(.*): (.+)"),
-                false, false, 1, 1, null, null, 2
+                Regex("// ;warn: (.*)"),
+                Regex("(.+): (.+)"),
+                false, false, 1, null, null, 1, 1, null, null, 2
             ), GeneralConfig("", "", "", "")
         ) { results ->
             assertEquals(1, results.size)
@@ -257,7 +257,7 @@ class WarnPluginTest {
             """
                 package org.cqfn.save.example
                 
-                // ;warn:Test1Test.java:4:6: Class name should be in PascalCase
+                // ;warn:4:6: Class name should be in PascalCase
                 class example {
                     int foo = 42;
                 }
@@ -265,16 +265,16 @@ class WarnPluginTest {
             """
                 package org.cqfn.save.example
                 
-                // ;warn:Test2Test.java:2:3: Class name should be in PascalCase
+                // ;warn:2:3: Class name should be in PascalCase
                 class example2 {
                     int foo = 42;
                 }
             """.trimIndent(),
             WarnPluginConfig(
                 "$catCmd ${tmpDir / "resource"}",
-                Regex("// ;warn:(.*):(\\d+):(\\d+): (.*)"),
-                Regex("(.*):(\\d+):(\\d+): (.+)"),
-                true, true, 2, 1, 2, 3, 4
+                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
+                Regex("(.+):(\\d+):(\\d+): (.+)"),
+                true, true, 2, 1, 2, 3, 1, 2, 3, 4
             ),
             GeneralConfig("", "", "", "")
         ) { results ->
@@ -333,12 +333,12 @@ class WarnPluginTest {
     @Test
     fun `warn-plugin test exception`() {
         assertFailsWith<ResourceFormatException> {
-            "// ;warn:Test.kt:4:6: Class name should be in PascalCase".extractWarning(
-                Regex("// ;warn:(.*):(\\d+):(\\d+): (.*)"),
+            "// ;warn:4:6: Class name should be in PascalCase".extractWarning(
+                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
+                "fileName",
                 1,
                 5,
-                3,
-                4
+                2,
             )
         }
     }
@@ -350,7 +350,7 @@ class WarnPluginTest {
                 """
                 package org.cqfn.save.example
                 
-                // ;warn:Test1Test.java:3:6: Class name should be in PascalCase
+                // ;warn:3:6: Class name should be in PascalCase
                 class example {
                     int foo = 42;
                 }
@@ -361,9 +361,9 @@ class WarnPluginTest {
         val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         val warnPluginConfig = WarnPluginConfig(
             "$catCmd ${tmpDir / "resource"}",
-            Regex("// ;warn:(.*): (.*)"),
-            Regex("(.*): (.+)"),
-            false, false, 1, 1, null, null, 2
+            Regex("// ;warn: (.*)"),
+            Regex("(.+): (.+)"),
+            false, false, 1, null, null, 1, 1, null, null, 2
         )
         val generalConfig = GeneralConfig("", "", "", "")
         val config = fs.createFile(tmpDir / "save.toml")

@@ -79,7 +79,7 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
                         with(warnPluginConfig) {
                             it.extractWarning(
                                 warningsInputPattern!!,
-                                fileNameCaptureGroup!!,
+                                path.name,
                                 lineCaptureGroup,
                                 columnCaptureGroup,
                                 messageCaptureGroup!!,
@@ -114,7 +114,7 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
         val executionResult = pb.exec(execCmd, null)
         val actualWarningsMap = executionResult.stdout.mapNotNull {
             with(warnPluginConfig) {
-                it.extractWarning(warningsOutputPattern!!, fileNameCaptureGroup!!, lineCaptureGroup, columnCaptureGroup, messageCaptureGroup!!)
+                it.extractWarning(warningsOutputPattern!!, fileNameCaptureGroupOut!!, lineCaptureGroupOut, columnCaptureGroupOut, messageCaptureGroupOut!!)
             }
         }
             .groupBy { if (it.line != null && it.column != null) it.line to it.column else null }
