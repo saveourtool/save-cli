@@ -47,7 +47,7 @@ class ValidationTest {
     @Test
     fun `set defaults to warn section`() {
         createTomlFiles()
-        val warnConfig = WarnPluginConfig(execFlags = "execFlags", messageCaptureGroup = 1)
+        val warnConfig = WarnPluginConfig(execFlags = "execFlags", messageCaptureGroup = 4)
         val config = TestConfig(toml1, null, mutableListOf(warnConfig))
 
         config.validateAndSetDefaults()
@@ -55,13 +55,17 @@ class ValidationTest {
         assertEquals(1, config.pluginConfigs.size)
 
         val actualWarnConfig = config.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
-        assertEquals(Regex(";warn:(.+):(\\d+):(\\d+): (.+)").toString(), actualWarnConfig.warningsInputPattern.toString())
-        assertEquals(Regex(".*(\\d+):(\\d+): (.+)").toString(), actualWarnConfig.warningsOutputPattern.toString())
+        assertEquals(Regex(";warn:(\\d+):(\\d+): (.+)").toString(), actualWarnConfig.warningsInputPattern.toString())
+        assertEquals(Regex("(.+):(\\d+):(\\d+): (.+)").toString(), actualWarnConfig.warningsOutputPattern.toString())
         assertEquals(true, actualWarnConfig.warningTextHasLine)
         assertEquals(true, actualWarnConfig.warningTextHasColumn)
-        assertEquals(2, actualWarnConfig.lineCaptureGroup)
-        assertEquals(3, actualWarnConfig.columnCaptureGroup)
-        assertEquals(1, actualWarnConfig.messageCaptureGroup)
+        assertEquals(1, actualWarnConfig.lineCaptureGroup)
+        assertEquals(2, actualWarnConfig.columnCaptureGroup)
+        assertEquals(4, actualWarnConfig.messageCaptureGroup)
+        assertEquals(1, actualWarnConfig.fileNameCaptureGroupOut)
+        assertEquals(2, actualWarnConfig.lineCaptureGroupOut)
+        assertEquals(3, actualWarnConfig.columnCaptureGroupOut)
+        assertEquals(4, actualWarnConfig.messageCaptureGroupOut)
         assertEquals(true, actualWarnConfig.exactWarningsMatch)
         assertEquals("Test", actualWarnConfig.testNameSuffix)
     }
@@ -81,7 +85,7 @@ class ValidationTest {
         val actualWarnConfig = config.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
         assertEquals(true, actualWarnConfig.warningTextHasLine)
         assertEquals(false, actualWarnConfig.warningTextHasColumn)
-        assertEquals(2, actualWarnConfig.lineCaptureGroup)
+        assertEquals(1, actualWarnConfig.lineCaptureGroup)
         assertEquals(null, actualWarnConfig.columnCaptureGroup)
     }
 
@@ -89,7 +93,7 @@ class ValidationTest {
     @Test
     fun `validate warn section 2`() {
         createTomlFiles()
-        val warnConfig = WarnPluginConfig(execFlags = "execFlags", warningTextHasLine = false, lineCaptureGroup = 2)
+        val warnConfig = WarnPluginConfig(execFlags = "execFlags", warningTextHasLine = false, lineCaptureGroup = 1)
         val config = TestConfig(toml1, null, mutableListOf(warnConfig))
 
         config.validateAndSetDefaults()
@@ -100,7 +104,7 @@ class ValidationTest {
         assertEquals(false, actualWarnConfig.warningTextHasLine)
         assertEquals(true, actualWarnConfig.warningTextHasColumn)
         assertEquals(null, actualWarnConfig.lineCaptureGroup)
-        assertEquals(3, actualWarnConfig.columnCaptureGroup)
+        assertEquals(2, actualWarnConfig.columnCaptureGroup)
     }
 
     // `lineCaptureGroup` provided, but `warningTextHasLine` is absent; validate it
@@ -118,7 +122,7 @@ class ValidationTest {
         assertEquals(true, actualWarnConfig.warningTextHasLine)
         assertEquals(true, actualWarnConfig.warningTextHasColumn)
         assertEquals(5, actualWarnConfig.lineCaptureGroup)
-        assertEquals(3, actualWarnConfig.columnCaptureGroup)
+        assertEquals(2, actualWarnConfig.columnCaptureGroup)
     }
 
     // `lineCaptureGroup` provided, but incorrect -- error

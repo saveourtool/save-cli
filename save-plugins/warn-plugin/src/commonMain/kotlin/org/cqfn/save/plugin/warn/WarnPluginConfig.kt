@@ -76,7 +76,7 @@ data class WarnPluginConfig(
             this.batchSize ?: other.batchSize,
             this.lineCaptureGroup ?: other.lineCaptureGroup,
             this.columnCaptureGroup ?: other.columnCaptureGroup,
-            this.messageCaptureGroup ?: other.columnCaptureGroup,
+            this.messageCaptureGroup ?: other.messageCaptureGroup,
             this.fileNameCaptureGroupOut ?: other.fileNameCaptureGroupOut,
             this.lineCaptureGroupOut ?: other.lineCaptureGroupOut,
             this.columnCaptureGroupOut ?: other.columnCaptureGroupOut,
