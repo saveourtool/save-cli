@@ -102,7 +102,6 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
             "${generalConfig.execCmd} ${warnPluginConfig.execFlags} $fileNames"
         } else {
             val fileNames = paths.joinToString { it.name }
-            paths.joinToString { it.name }
             "${(generalConfig?.execCmd ?: "")} ${warnPluginConfig.execFlags} $fileNames"
         }
 
