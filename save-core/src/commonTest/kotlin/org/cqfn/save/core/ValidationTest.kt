@@ -139,8 +139,9 @@ class ValidationTest {
             assertEquals(
                 "Error: All integer values in [warn] section of `${warnConfig.configLocation}` config should be positive!" +
                         "\nCurrent configuration: execFlags=execFlags, warningsInputPattern=null, warningsOutputPattern=null, " +
-                        "warningTextHasLine=null, warningTextHasColumn=null, lineCaptureGroup=-127, columnCaptureGroup=null, " +
-                        "messageCaptureGroup=null, exactWarningsMatch=null, testNameSuffix=null",
+                        "warningTextHasLine=null, warningTextHasColumn=null, batchSize=null, lineCaptureGroup=-127, columnCaptureGroup=null, " +
+                        "messageCaptureGroup=null, fileNameCaptureGroupOut=null, lineCaptureGroupOut=null, columnCaptureGroupOut=null, messageCaptureGroupOut=null, " +
+                        "exactWarningsMatch=null, testNameSuffix=null",
                 ex.message
             )
         }
