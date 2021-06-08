@@ -7,7 +7,11 @@ import org.cqfn.save.core.config.TestConfigSections
 import org.cqfn.save.core.plugin.PluginConfig
 import org.cqfn.save.core.utils.RegexSerializer
 
+import okio.Path
+import okio.Path.Companion.toPath
+
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.UseSerializers
 
 /**
@@ -43,6 +47,9 @@ data class WarnPluginConfig(
     val testNameSuffix: String? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.WARN
+
+    @Transient
+    override var configLocation: Path = "undefined_toml_location".toPath()
     private val testName: String = testNameSuffix ?: "Test"
 
     /**
@@ -93,7 +100,10 @@ data class WarnPluginConfig(
     private fun requirePositiveIfNotNull(value: Int?) {
         value?.let {
             require(value >= 0) {
-                "Error: Integer value in [warn] section should be positive!"
+                """
+                    Error: All integer values in [warn] section of `$configLocation` config should be positive!
+                    Current configuration: ${this.toString().substringAfter("(").substringBefore(")")}
+                """.trimIndent()
             }
         }
     }

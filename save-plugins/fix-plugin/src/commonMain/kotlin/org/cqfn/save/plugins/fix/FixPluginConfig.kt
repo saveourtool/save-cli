@@ -6,7 +6,11 @@ import org.cqfn.save.core.config.TestConfigSections
 import org.cqfn.save.core.plugin.PluginConfig
 import org.cqfn.save.core.utils.RegexSerializer
 
+import okio.Path
+import okio.Path.Companion.toPath
+
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.UseSerializers
 
 /**
@@ -25,6 +29,9 @@ data class FixPluginConfig(
     val resourceNameExpectedSuffix: String? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.FIX
+
+    @Transient
+    override var configLocation: Path = "undefined_toml_location".toPath()
 
     /**
      *  @property resourceNameTest
