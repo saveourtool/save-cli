@@ -47,7 +47,7 @@ class WarnPlugin(
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
 
-        return files.map { resources ->
+        return files.chunked(warnPluginConfig.batchSize ?: 1).map { resources ->
             handleTestFile(resources.single(), warnPluginConfig, generalConfig)
         }
     }
@@ -74,35 +74,39 @@ class WarnPlugin(
         "TOO_LONG_FUNCTION",
         "SAY_NO_TO_VAR")
     private fun handleTestFile(
-        path: Path,
+        paths: List<Path>,
         warnPluginConfig: WarnPluginConfig,
         generalConfig: GeneralConfig?): TestResult {
-        val expectedWarnings = fs.readLines(path)
-            .mapNotNull {
-                with(warnPluginConfig) {
-                    it.extractWarning(
-                        warningsInputPattern!!,
-                        columnCaptureGroup,
-                        lineCaptureGroup,
-                        messageCaptureGroup!!
-                    )
-                }
-            }
-            .groupBy {
-                if (it.line != null && it.column != null) {
-                    it.line to it.column
-                } else {
-                    null
-                }
-            }
-            .mapValues { it.value.sortedBy { it.message } }
-
-        val execCmd: String = if (generalConfig!!.ignoreSaveComments == true) {
-            val fileName = createTestFile(path, warnPluginConfig.warningsInputPattern!!)
-            "${generalConfig.execCmd} ${warnPluginConfig.execFlags} $fileName"
-        } else {
-            "${(generalConfig.execCmd)} ${warnPluginConfig.execFlags} $path"
+        val expectedWarnings: WarningMap = mutableMapOf()
+        paths.forEach { path ->
+            expectedWarnings.putAll(
+                fs.readLines(path)
+                    .mapNotNull {
+                        with(warnPluginConfig) {
+                            it.extractWarning(
+                                warningsInputPattern!!,
+                                path.name,
+                                lineCaptureGroup,
+                                columnCaptureGroup,
+                                messageCaptureGroup!!,
+                            )
+                        }
+                    }
+                    .groupBy {
+                        if (it.line != null && it.column != null) {
+                            it.line to it.column
+                        } else {
+                            null
+                        }
+                    }
+                    .mapValues { it.value.sortedBy { it.message } }
+            )
         }
+
+        val fileNames = paths.joinToString {
+            if (generalConfig!!.ignoreSaveComments == true) createTestFile(it, warnPluginConfig.warningsInputPattern!!) else it.name
+        }
+        val execCmd = "${generalConfig!!.execCmd} ${warnPluginConfig.execFlags} $fileNames"
 
         val executionResult = pb.exec(execCmd, null, useInternalRedirections)
         val stdout = executionResult.stdout.joinToString("\n")
@@ -110,13 +114,13 @@ class WarnPlugin(
         val status = if (executionResult.code != 0) Fail(stderr) else null
         val actualWarningsMap = executionResult.stdout.mapNotNull {
             with(warnPluginConfig) {
-                it.extractWarning(warningsOutputPattern!!, columnCaptureGroup, lineCaptureGroup, messageCaptureGroup!!)
+                it.extractWarning(warningsOutputPattern!!, fileNameCaptureGroupOut!!, lineCaptureGroupOut, columnCaptureGroupOut, messageCaptureGroupOut!!)
             }
         }
             .groupBy { if (it.line != null && it.column != null) it.line to it.column else null }
             .mapValues { (_, warning) -> warning.sortedBy { it.message } }
         return TestResult(
-            listOf(path),
+            paths,
             status ?: checkResults(expectedWarnings, actualWarningsMap, warnPluginConfig),
             DebugInfo(stdout, stderr, null)
         )
@@ -172,3 +176,4 @@ class WarnPlugin(
         val atomicInt: AtomicInt = AtomicInt(0)
     }
 }
+typealias WarningMap = MutableMap<Pair<Int, Int>?, List<Warning>>
