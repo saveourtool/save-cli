@@ -97,13 +97,10 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
             )
         }
 
-        val execCmd: String = if (generalConfig?.ignoreSaveComments == true) {
-            val fileNames = paths.joinToString { createTestFile(it, warnPluginConfig.warningsInputPattern!!) }
-            "${generalConfig.execCmd} ${warnPluginConfig.execFlags} $fileNames"
-        } else {
-            val fileNames = paths.joinToString { it.name }
-            "${(generalConfig?.execCmd ?: "")} ${warnPluginConfig.execFlags} $fileNames"
+        val fileNames = paths.joinToString {
+            if (generalConfig?.ignoreSaveComments == true) createTestFile(it, warnPluginConfig.warningsInputPattern!!) else it.name
         }
+        val execCmd = "${(generalConfig?.execCmd ?: "")} ${warnPluginConfig.execFlags} $fileNames"
 
         val executionResult = pb.exec(execCmd, null)
         val actualWarningsMap = executionResult.stdout.mapNotNull {

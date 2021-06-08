@@ -48,14 +48,16 @@ class WarnPluginTest {
         }
         val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
-            """
+            listOf(
+                """
                 package org.cqfn.save.example
                 
                 // ;warn:4:6: Class name should be in PascalCase
                 class example {
                     int foo = 42;
                 }
-            """.trimIndent(),
+            """.trimIndent()
+            ),
             WarnPluginConfig(
                 "$catCmd ${tmpDir / "resource"}",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
@@ -82,14 +84,16 @@ class WarnPluginTest {
         }
         val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
-            """
+            listOf(
+                """
                 package org.cqfn.save.example
                 
                 // ;warn:4:6: Class name should be in PascalCase
                 class example {
                     int Foo = 42;
                 }
-            """.trimIndent(),
+            """.trimIndent()
+            ),
             WarnPluginConfig(
                 "$catCmd ${tmpDir / "resource"}",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
@@ -110,14 +114,17 @@ class WarnPluginTest {
     @Ignore  // this logic is todo
     fun `basic warn-plugin test with ignoreTechnicalComments=true`() {
         performTest(
-            """
-                package org.cqfn.save.example
-                
+            listOf(
+                """
+                // ;warn:1:1: Avoid using default package
                 // ;warn:3:6: Class name should be in PascalCase
                 class example {
-                    int foo = 42;
+                    // ;warn:5:5: Variable name should be in lowerCamelCase
+                    int Foo = 42;
                 }
-            """.trimIndent(),
+                // ;warn:7:1: File should end with trailing newline
+            """.trimIndent()
+            ),
             WarnPluginConfig(
                 "echo Test1Test.java:4:6: Class name should be in PascalCase",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
@@ -132,6 +139,7 @@ class WarnPluginTest {
     }
 
     @Test
+    @Suppress("TOO_LONG_FUNCTION")
     fun `warn-plugin test - multiple warnings`() {
         fs.write(fs.createFile(tmpDir / "resource")) {
             write(
@@ -144,7 +152,8 @@ class WarnPluginTest {
         }
         val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
-            """
+            listOf(
+                """
                 // ;warn:1:1: Avoid using default package
                 // ;warn:3:6: Class name should be in PascalCase
                 class example {
@@ -152,7 +161,8 @@ class WarnPluginTest {
                     int Foo = 42;
                 }
                 // ;warn:7:1: File should end with trailing newline
-            """.trimIndent(),
+            """.trimIndent()
+            ),
             WarnPluginConfig(
                 "$catCmd ${tmpDir / "resource"}",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
@@ -169,6 +179,7 @@ class WarnPluginTest {
 
     @Test
     @Ignore  // this logic is todo
+    @Suppress("TOO_LONG_FUNCTION")
     fun `warn-plugin test - multiple warnings & ignore technical comments`() {
         fs.write(fs.createFile(tmpDir / "resource")) {
             write(
@@ -181,7 +192,8 @@ class WarnPluginTest {
         }
         val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
-            """
+            listOf(
+                """
                 // ;warn:1:1: Avoid using default package
                 // ;warn:1:6: Class name should be in PascalCase
                 class example {
@@ -189,7 +201,8 @@ class WarnPluginTest {
                     int Foo = 42;
                 }
                 // ;warn:3:1: File should end with trailing newline
-            """.trimIndent(),
+            """.trimIndent()
+            ),
             WarnPluginConfig(
                 "$catCmd ${tmpDir / "resource"}",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
@@ -205,6 +218,7 @@ class WarnPluginTest {
     }
 
     @Test
+    @Suppress("TOO_LONG_FUNCTION")
     fun `warn-plugin test - multiple warnings, no line-col`() {
         fs.write(fs.createFile(tmpDir / "resource")) {
             write(
@@ -217,7 +231,8 @@ class WarnPluginTest {
         }
         val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
-            """
+            listOf(
+                """
                 // ;warn: Avoid using default package
                 // ;warn: Class name should be in PascalCase
                 class example {
@@ -225,7 +240,8 @@ class WarnPluginTest {
                     int Foo = 42;
                 }
                 // ;warn: File should end with trailing newline
-            """.trimIndent(),
+            """.trimIndent()
+            ),
             WarnPluginConfig(
                 "$catCmd ${tmpDir / "resource"}",
                 Regex("// ;warn: (.*)"),
@@ -254,7 +270,8 @@ class WarnPluginTest {
         }
         val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
-            """
+            listOf(
+                """
                 package org.cqfn.save.example
                 
                 // ;warn:4:6: Class name should be in PascalCase
@@ -262,14 +279,15 @@ class WarnPluginTest {
                     int foo = 42;
                 }
             """.trimIndent(),
-            """
+                """
                 package org.cqfn.save.example
                 
                 // ;warn:2:3: Class name should be in PascalCase
                 class example2 {
                     int foo = 42;
                 }
-            """.trimIndent(),
+            """.trimIndent()
+            ),
             WarnPluginConfig(
                 "$catCmd ${tmpDir / "resource"}",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
@@ -290,37 +308,17 @@ class WarnPluginTest {
     }
 
     private fun performTest(
-        text1: String,
-        text2: String,
+        texts: List<String>,
         warnPluginConfig: WarnPluginConfig,
         generalConfig: GeneralConfig,
         assertion: (List<TestResult>) -> Unit) {
-        val testFile1 = fs.createFile(tmpDir / "Test1Test.java")
-        val testFile2 = fs.createFile(tmpDir / "Test2Test.java")
         val config = fs.createFile(tmpDir / "save.toml")
-        fs.write(testFile1) {
-            write(text1.encodeToByteArray())
-        }
-        fs.write(testFile2) {
-            write(text2.encodeToByteArray())
-        }
-
-        val results = WarnPlugin(TestConfig(config, null, mutableListOf(warnPluginConfig, generalConfig)))
-            .execute()
-            .toList()
-        println(results)
-        assertion(results)
-    }
-
-    private fun performTest(
-        text: String,
-        warnPluginConfig: WarnPluginConfig,
-        generalConfig: GeneralConfig,
-        assertion: (List<TestResult>) -> Unit) {
-        val testFile = fs.createFile(tmpDir / "Test1Test.java")
-        val config = fs.createFile(tmpDir / "save.toml")
-        fs.write(testFile) {
-            write(text.encodeToByteArray())
+        var i = 1
+        texts.forEach {
+            val testFileName = "Test${i++}Test.java"
+            fs.write(fs.createFile(tmpDir / testFileName)) {
+                write(it.encodeToByteArray())
+            }
         }
 
         val results = WarnPlugin(TestConfig(config, null, mutableListOf(warnPluginConfig, generalConfig)))

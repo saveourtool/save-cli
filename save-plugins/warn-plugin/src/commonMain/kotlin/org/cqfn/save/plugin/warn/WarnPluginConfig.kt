@@ -134,7 +134,7 @@ data class WarnPluginConfig(
     companion object {
         /**
          * Default regex for expected warnings in test resources, e.g.
-         * `// ;warn:ClassNameTest.java:2:4: Class name in incorrect case`
+         * `// ;warn:2:4: Class name in incorrect case`
          */
         internal val defaultInputPattern = Regex(";warn:(\\d+):(\\d+): (.+)")
 

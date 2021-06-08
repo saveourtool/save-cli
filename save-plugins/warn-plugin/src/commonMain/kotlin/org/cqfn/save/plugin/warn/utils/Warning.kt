@@ -18,7 +18,7 @@ data class Warning(
     val message: String,
     val line: Int?,
     val column: Int?,
-    val fileName: String?,
+    val fileName: String,
 )
 
 /**
@@ -28,7 +28,7 @@ data class Warning(
  * @param columnGroupIdx index of capture group for column number
  * @param lineGroupIdx index of capture group for line number
  * @param messageGroupIdx index of capture group for waring text
- * @param fileName
+ * @param fileName file name
  * @return a [Warning] or null if [this] string doesn't match [warningRegex]
  * @throws ResourceFormatException when parsing a file
  */
@@ -37,7 +37,7 @@ data class Warning(
     "SwallowedException",
     "ThrowsCount")
 internal fun String.extractWarning(warningRegex: Regex,
-                                   fileName: String?,
+                                   fileName: String,
                                    lineGroupIdx: Int?,
                                    columnGroupIdx: Int?,
                                    messageGroupIdx: Int,
@@ -87,8 +87,7 @@ internal fun String.extractWarning(warningRegex: Regex,
  */
 @Suppress(
     "TooGenericExceptionCaught",
-    "SwallowedException",
-    "ThrowsCount")
+    "SwallowedException")
 internal fun String.extractWarning(warningRegex: Regex,
                                    fileNameGroupIdx: Int,
                                    lineGroupIdx: Int?,
@@ -103,32 +102,5 @@ internal fun String.extractWarning(warningRegex: Regex,
         throw ResourceFormatException("Could not extract file name from line [$this], cause: ${e.message}")
     }
 
-    val line = lineGroupIdx?.let {
-        try {
-            groups[lineGroupIdx]!!.value.toInt()
-        } catch (e: Exception) {
-            throw ResourceFormatException("Could not extract line number from line [$this], cause: ${e.message}")
-        }
-    }
-
-    val column = columnGroupIdx?.let {
-        try {
-            groups[columnGroupIdx]!!.value.toInt()
-        } catch (e: Exception) {
-            throw ResourceFormatException("Could not extract column number from line [$this], cause: ${e.message}")
-        }
-    }
-
-    val message = try {
-        groups[messageGroupIdx]!!.value
-    } catch (e: Exception) {
-        throw ResourceFormatException("Could not extract warning message from line [$this], cause: ${e.message}")
-    }
-
-    return Warning(
-        message,
-        line,
-        column,
-        fileName,
-    )
+    return extractWarning(warningRegex, fileName, lineGroupIdx, columnGroupIdx, messageGroupIdx)
 }
