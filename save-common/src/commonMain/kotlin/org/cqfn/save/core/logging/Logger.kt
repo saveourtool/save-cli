@@ -6,6 +6,7 @@
 package org.cqfn.save.core.logging
 
 import org.cqfn.save.core.config.ResultOutputType
+import org.cqfn.save.core.utils.writeToStream
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -39,18 +40,8 @@ fun logMessage(
     } else {
         ""
     }
-    logToStream("[$level]$currentTime: $msg", stream)
+    writeToStream("[$level]$currentTime: $msg", stream)
 }
-
-/**
- * Platform specific logger
- *
- * @param msg a message string
- * @param stream output stream (file, stdout, stderr)
- */
-expect fun logToStream(
-    msg: String,
-    stream: ResultOutputType)
 
 /**
  * Log a message with debug level
