@@ -1,11 +1,10 @@
 [general]
-execCmd = "./detekt"
-tags = tag1
-description = "My suite description"
-suiteName = "DocsCheck"
+tags = warn
+description = "Test warnings discovered by diKTat"
+suiteName = "warnings"
 
 [warn]
-execFlags = "--build-upon-default-config -i"
+execFlags = --debug  # todo: replace with empty string once ktoml supports quotes
 warningsInputPattern = "// ;warn:(\\d+):(\\d+): (.*)"
 warningsOutputPattern = "\\w+ - (\\d+)/(\\d+) - (.*)$"
 lineCaptureGroup = 1
@@ -13,8 +12,3 @@ columnCaptureGroup = 2
 messageCaptureGroup = 3
 warningTextHasColumn = true
 warningTextHasLine = true
-
-[fix]
-exec_flags="-p"
-testFilePattern="*Test.kt"
-expectedFilePattern="*Expected.kt"

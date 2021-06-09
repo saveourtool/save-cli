@@ -1,0 +1,3 @@
+[general]
+execCmd = java -jar ktlint -R diktat-0.6.1.jar
+description = "Test for diktat - linter and formatter for Kotlin"
