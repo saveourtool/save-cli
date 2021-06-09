@@ -45,8 +45,8 @@ class WarnPlugin(
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
 
-        return files.chunked(warnPluginConfig.batchSize ?: 1).map { resources ->
-            handleTestFile(resources.single(), warnPluginConfig, generalConfig)
+        return files.chunked(warnPluginConfig.batchSize ?: 1).map { chunk ->
+            handleTestFile(chunk.map { it.single() }, warnPluginConfig, generalConfig)
         }
     }
 
