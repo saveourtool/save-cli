@@ -12,7 +12,6 @@ import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.result.TestStatus
 import org.cqfn.save.core.utils.AtomicInt
-import org.cqfn.save.core.utils.ProcessBuilder
 import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
 
@@ -25,9 +24,14 @@ private typealias LineColumn = Pair<Int, Int>
  * A plugin that runs an executable and verifies that it produces required warning messages.
  * @property testConfig
  */
-class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) : Plugin(testConfig, testFiles) {
+class WarnPlugin(
+    testConfig: TestConfig,
+    testFiles: List<String> = emptyList(),
+    useInternalRedirections: Boolean = true) : Plugin(
+    testConfig,
+    testFiles,
+    useInternalRedirections) {
     private val fs = FileSystem.SYSTEM
-    private val pb = ProcessBuilder()
 
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
         val flattenedResources = files.toList().flatten()
@@ -98,22 +102,30 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
         }
 
         val fileNames = paths.joinToString {
-            if (generalConfig?.ignoreSaveComments == true) createTestFile(it, warnPluginConfig.warningsInputPattern!!) else it.name
+            if (generalConfig!!.ignoreSaveComments == true) createTestFile(it, warnPluginConfig.warningsInputPattern!!) else it.toString()
         }
-        val execCmd = "${(generalConfig?.execCmd ?: "")} ${warnPluginConfig.execFlags} $fileNames"
+        val execCmd = "${generalConfig!!.execCmd} ${warnPluginConfig.execFlags} $fileNames"
 
         val executionResult = pb.exec(execCmd, null)
-        val actualWarningsMap = executionResult.stdout.mapNotNull {
-            with(warnPluginConfig) {
-                it.extractWarning(warningsOutputPattern!!, fileNameCaptureGroupOut!!, lineCaptureGroupOut, columnCaptureGroupOut, messageCaptureGroupOut!!)
+        val stdout = executionResult.stdout.joinToString("\n")
+        val stderr = executionResult.stderr.joinToString("\n")
+        val status = if (executionResult.code == 0) {
+            val actualWarningsMap = executionResult.stdout.mapNotNull {
+                with(warnPluginConfig) {
+                    it.extractWarning(warningsOutputPattern!!, fileNameCaptureGroupOut!!, lineCaptureGroupOut, columnCaptureGroupOut, messageCaptureGroupOut!!)
+                }
             }
+                .groupBy { if (it.line != null && it.column != null) it.line to it.column else null }
+                .mapValues { (_, warning) -> warning.sortedBy { it.message } }
+            checkResults(expectedWarnings, actualWarningsMap, warnPluginConfig)
+        } else {
+            Fail(stderr)
         }
-            .groupBy { if (it.line != null && it.column != null) it.line to it.column else null }
-            .mapValues { (_, warning) -> warning.sortedBy { it.message } }
+
         return TestResult(
             paths,
-            checkResults(expectedWarnings, actualWarningsMap, warnPluginConfig),
-            DebugInfo(executionResult.stdout.joinToString("\n"), executionResult.stderr.joinToString("\n"), null)
+            status,
+            DebugInfo(stdout, stderr, null)
         )
     }
 
@@ -127,8 +139,8 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
 
         createTempDir(tmpDir)
 
-        val fileName = testFileName()
-        fs.write(fs.createFile(tmpDir / fileName)) {
+        val fileName = tmpDir / testFileName()
+        fs.write(fs.createFile(fileName)) {
             fs.readLines(path).forEach {
                 if (!warningsInputPattern.matches(it)) {
                     write(
@@ -137,7 +149,7 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
                 }
             }
         }
-        return fileName
+        return fileName.toString()
     }
 
     @Suppress("TYPE_ALIAS")
@@ -167,5 +179,4 @@ class WarnPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) 
         val atomicInt: AtomicInt = AtomicInt(0)
     }
 }
-
 typealias WarningMap = MutableMap<Pair<Int, Int>?, List<Warning>>

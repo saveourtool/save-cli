@@ -4,6 +4,7 @@ import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.config.isSaveTomlConfig
 import org.cqfn.save.core.files.findDescendantDirectoriesBy
 import org.cqfn.save.core.result.TestResult
+import org.cqfn.save.core.utils.ProcessBuilder
 
 import okio.FileSystem
 import okio.Path
@@ -11,9 +12,18 @@ import okio.Path
 /**
  * Plugin that can be injected into SAVE during execution. Plugins accept contents of configuration file and then perform some work.
  * @property testConfig
+ * @property useInternalRedirections whether to redirect stdout/stderr for internal purposes
  */
-abstract class Plugin(open val testConfig: TestConfig, private val testFiles: List<String>) {
+abstract class Plugin(
+    open val testConfig: TestConfig,
+    private val testFiles: List<String>,
+    private val useInternalRedirections: Boolean) {
     private val fs = FileSystem.SYSTEM
+
+    /**
+     * Instance that is capable of executing processes
+     */
+    val pb = ProcessBuilder(useInternalRedirections)
 
     /**
      * Perform plugin's work.
