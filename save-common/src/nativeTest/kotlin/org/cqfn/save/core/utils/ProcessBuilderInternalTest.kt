@@ -5,7 +5,7 @@ import kotlin.test.assertEquals
 
 @Suppress("LOCAL_VARIABLE_EARLY_DECLARATION", "SAY_NO_TO_VAR")
 class ProcessBuilderInternalTest {
-    private val processBuilder = ProcessBuilder()
+    private val processBuilder = ProcessBuilder(useInternalRedirections = true)
 
     @Test
     fun `check stderr`() {

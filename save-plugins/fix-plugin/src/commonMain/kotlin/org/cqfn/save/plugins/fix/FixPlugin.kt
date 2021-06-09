@@ -11,7 +11,6 @@ import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
-import org.cqfn.save.core.utils.ProcessBuilder
 
 import io.github.petertrr.diffutils.diff
 import io.github.petertrr.diffutils.patch.ChangeDelta
@@ -33,7 +32,6 @@ class FixPlugin(
     testFiles,
     useInternalRedirections) {
     private val fs = FileSystem.SYSTEM
-    private val pb = ProcessBuilder()
     private val diffGenerator = DiffRowGenerator.create()
         .showInlineDiffs(true)
         .mergeOriginalRevised(false)
@@ -59,7 +57,7 @@ class FixPlugin(
             .map { (expected, test) ->
                 val testCopy = createTestFile(test)
                 val execCmd = "${(generalConfig!!.execCmd)} ${fixPluginConfig.execFlags} $testCopy"
-                val executionResult = pb.exec(execCmd, null, useInternalRedirections)
+                val executionResult = pb.exec(execCmd, null)
                 val stdout = executionResult.stdout.joinToString("\n")
                 val stderr = executionResult.stderr.joinToString("\n")
 

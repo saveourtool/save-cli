@@ -4,6 +4,7 @@ import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.config.isSaveTomlConfig
 import org.cqfn.save.core.files.findDescendantDirectoriesBy
 import org.cqfn.save.core.result.TestResult
+import org.cqfn.save.core.utils.ProcessBuilder
 
 import okio.FileSystem
 import okio.Path
@@ -16,8 +17,13 @@ import okio.Path
 abstract class Plugin(
     open val testConfig: TestConfig,
     private val testFiles: List<String>,
-    protected val useInternalRedirections: Boolean) {
+    private val useInternalRedirections: Boolean) {
     private val fs = FileSystem.SYSTEM
+
+    /**
+     * Instance that is capable of executing processes
+     */
+    val pb = ProcessBuilder(useInternalRedirections)
 
     /**
      * Perform plugin's work.

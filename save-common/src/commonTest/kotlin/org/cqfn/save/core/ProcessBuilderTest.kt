@@ -12,7 +12,7 @@ import kotlin.test.assertEquals
 
 @Suppress("INLINE_CLASS_CAN_BE_USED", "LOCAL_VARIABLE_EARLY_DECLARATION")
 class ProcessBuilderTest {
-    private val processBuilder = ProcessBuilder()
+    private val processBuilder = ProcessBuilder(useInternalRedirections = true)
 
     @Test
     fun `empty command`() {

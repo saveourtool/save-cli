@@ -43,9 +43,11 @@ expect class ProcessBuilderInternal(
 
 /**
  * Class contains common logic for all platforms
+ *
+ * @property useInternalRedirections whether to collect output for future usage, if false, [redirectTo] will be ignored
  */
 @Suppress("INLINE_CLASS_CAN_BE_USED")
-class ProcessBuilder {
+class ProcessBuilder(private val useInternalRedirections: Boolean) {
     /**
      * Singleton that describes the current file system
      */
@@ -56,7 +58,6 @@ class ProcessBuilder {
      *
      * @param command executable command with arguments
      * @param redirectTo a file where process output should be redirected. If null, output will be returned as [ExecutionResult.stdout].
-     * @param useInternalRedirections whether to collect output for future usage, if false, [redirectTo] will be ignored
      * @return [ExecutionResult] built from process output
      */
     @Suppress(
@@ -65,8 +66,7 @@ class ProcessBuilder {
         "ReturnCount")
     fun exec(
         command: String,
-        redirectTo: Path?,
-        useInternalRedirections: Boolean = true): ExecutionResult {
+        redirectTo: Path?): ExecutionResult {
         if (command.isBlank()) {
             return returnWithError("Command couldn't be empty!")
         }

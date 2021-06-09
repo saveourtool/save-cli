@@ -12,7 +12,6 @@ import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.result.TestStatus
 import org.cqfn.save.core.utils.AtomicInt
-import org.cqfn.save.core.utils.ProcessBuilder
 import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
 
@@ -33,7 +32,6 @@ class WarnPlugin(
     testFiles,
     useInternalRedirections) {
     private val fs = FileSystem.SYSTEM
-    private val pb = ProcessBuilder()
 
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
         val flattenedResources = files.toList().flatten()
@@ -108,7 +106,7 @@ class WarnPlugin(
         }
         val execCmd = "${generalConfig!!.execCmd} ${warnPluginConfig.execFlags} $fileNames"
 
-        val executionResult = pb.exec(execCmd, null, useInternalRedirections)
+        val executionResult = pb.exec(execCmd, null)
         val stdout = executionResult.stdout.joinToString("\n")
         val stderr = executionResult.stderr.joinToString("\n")
         val status = if (executionResult.code != 0) Fail(stderr) else null

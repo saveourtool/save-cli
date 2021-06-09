@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
     "MISSING_KDOC_ON_FUNCTION"
 )
 class ProcessBuilderInternalTest {
-    private val processBuilder = ProcessBuilder()
+    private val processBuilder = ProcessBuilder(useInternalRedirections = true)
 
     @Test
     fun `check stderr`() {
