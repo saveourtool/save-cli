@@ -121,7 +121,7 @@ class Save(
         parsedTomlConfig.getRealTomlTables().forEach { tomlPluginSection ->
 
             // adding a fake file node to restore the structure and parse only the part of the toml
-            // this is a hack for easy partial read of Toml confiuration
+            // this is a hack for easy partial read of Toml configuration
             val fakeFileNode = TomlFile()
             tomlPluginSection.children.forEach {
                 fakeFileNode.appendChild(it)
@@ -145,17 +145,20 @@ class Save(
         return testConfig
     }
 
-    private inline fun <reified T> createPluginConfig(
+    private inline fun <reified T : PluginConfig> createPluginConfig(
         testConfigPath: String,
         fakeFileNode: TomlNode,
         pluginSectionName: String
     ) =
             try {
-                TomlDecoder.decode<T>(
+                val pluginConfig = TomlDecoder.decode<T>(
                     serializer(),
                     fakeFileNode,
                     DecoderConf()
-                )
+                ).apply {
+                    configLocation = testConfigPath.toPath()
+                }
+                pluginConfig
             } catch (e: KtomlException) {
                 logError(
                     "Plugin extraction failed for $testConfigPath and [$pluginSectionName] section." +

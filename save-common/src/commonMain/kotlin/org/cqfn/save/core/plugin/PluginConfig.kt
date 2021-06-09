@@ -6,7 +6,11 @@ package org.cqfn.save.core.plugin
 
 import org.cqfn.save.core.config.TestConfigSections
 
+import okio.Path
+import okio.Path.Companion.toPath
+
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 /**
  * Core interface for plugin configuration (like warnPlugin/fixPluin/e.t.c)
@@ -17,6 +21,11 @@ interface PluginConfig {
      * type of the config (usually related to the class: WARN/FIX/e.t.c)
      */
     val type: TestConfigSections
+
+    /**
+     * Location of the toml config
+     */
+    var configLocation: Path
 
     /**
      * @param otherConfig - 'this' will be merged with 'other'
@@ -57,6 +66,9 @@ data class GeneralConfig(
     val ignoreSaveComments: Boolean? = null
 ) : PluginConfig {
     override val type = TestConfigSections.GENERAL
+
+    @Transient
+    override var configLocation: Path = "undefined_toml_location".toPath()
 
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as GeneralConfig
@@ -105,8 +117,8 @@ data class GeneralConfig(
 
     private fun errorMsgForRequireCheck(field: String) =
             """
-                |Error: Couldn't find `$field` in [general] section.
-                |Current configuration: ${this.toString().substringAfter("(").substringBefore(")")}
-                |Please provide it in this, or at least in one of the parent configs.
+                Error: Couldn't find `$field` in [general] section of `$configLocation` config.
+                Current configuration: ${this.toString().substringAfter("(").substringBefore(")")}
+                Please provide it in this, or at least in one of the parent configs.
             """.trimIndent()
 }

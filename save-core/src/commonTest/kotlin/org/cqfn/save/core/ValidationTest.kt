@@ -30,14 +30,15 @@ class ValidationTest {
         createTomlFiles()
         val generalConfig = GeneralConfig()
         val config = TestConfig(toml1, null, mutableListOf(generalConfig))
+        generalConfig.configLocation = config.location
         try {
             config.validateAndSetDefaults()
         } catch (ex: IllegalArgumentException) {
             assertEquals(
                 """
-                    |Error: Couldn't find `execCmd` in [general] section.
-                    |Current configuration: execCmd=null, tags=null, description=null, suiteName=null, excludedTests=null, includedTests=null, ignoreSaveComments=null
-                    |Please provide it in this, or at least in one of the parent configs.
+                    Error: Couldn't find `execCmd` in [general] section of `${generalConfig.configLocation}` config.
+                    Current configuration: execCmd=null, tags=null, description=null, suiteName=null, excludedTests=null, includedTests=null, ignoreSaveComments=null
+                    Please provide it in this, or at least in one of the parent configs.
                 """.trimIndent(),
                 ex.message
             )
@@ -131,12 +132,17 @@ class ValidationTest {
         createTomlFiles()
         val warnConfig = WarnPluginConfig(execFlags = "execFlags", lineCaptureGroup = -127)
         val config = TestConfig(toml1, null, mutableListOf(warnConfig))
-
+        warnConfig.configLocation = config.location
         try {
             config.validateAndSetDefaults()
         } catch (ex: IllegalArgumentException) {
             assertEquals(
-                "Error: Integer value in [warn] section should be positive!", ex.message
+                "Error: All integer values in [warn] section of `${warnConfig.configLocation}` config should be positive!" +
+                        "\nCurrent configuration: execFlags=execFlags, warningsInputPattern=null, warningsOutputPattern=null, " +
+                        "warningTextHasLine=null, warningTextHasColumn=null, batchSize=null, lineCaptureGroup=-127, columnCaptureGroup=null, " +
+                        "messageCaptureGroup=null, fileNameCaptureGroupOut=null, lineCaptureGroupOut=null, columnCaptureGroupOut=null, messageCaptureGroupOut=null, " +
+                        "exactWarningsMatch=null, testNameSuffix=null",
+                ex.message
             )
         }
     }
