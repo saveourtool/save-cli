@@ -109,17 +109,22 @@ class WarnPlugin(
         val executionResult = pb.exec(execCmd, null)
         val stdout = executionResult.stdout.joinToString("\n")
         val stderr = executionResult.stderr.joinToString("\n")
-        val status = if (executionResult.code != 0) Fail(stderr) else null
-        val actualWarningsMap = executionResult.stdout.mapNotNull {
-            with(warnPluginConfig) {
-                it.extractWarning(warningsOutputPattern!!, fileNameCaptureGroupOut!!, lineCaptureGroupOut, columnCaptureGroupOut, messageCaptureGroupOut!!)
+        val status = if (executionResult.code == 0) {
+            val actualWarningsMap = executionResult.stdout.mapNotNull {
+                with(warnPluginConfig) {
+                    it.extractWarning(warningsOutputPattern!!, fileNameCaptureGroupOut!!, lineCaptureGroupOut, columnCaptureGroupOut, messageCaptureGroupOut!!)
+                }
             }
+                .groupBy { if (it.line != null && it.column != null) it.line to it.column else null }
+                .mapValues { (_, warning) -> warning.sortedBy { it.message } }
+            checkResults(expectedWarnings, actualWarningsMap, warnPluginConfig)
+        } else {
+            Fail(stderr)
         }
-            .groupBy { if (it.line != null && it.column != null) it.line to it.column else null }
-            .mapValues { (_, warning) -> warning.sortedBy { it.message } }
+
         return TestResult(
             paths,
-            status ?: checkResults(expectedWarnings, actualWarningsMap, warnPluginConfig),
+            status,
             DebugInfo(stdout, stderr, null)
         )
     }

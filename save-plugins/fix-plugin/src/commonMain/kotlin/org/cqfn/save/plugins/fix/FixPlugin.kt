@@ -63,9 +63,7 @@ class FixPlugin(
 
                 val fixedLines = FileSystem.SYSTEM.readLines(testCopy)
                 val expectedLines = FileSystem.SYSTEM.readLines(expected)
-                val status = if (executionResult.code != 0) {
-                    Fail(stderr)
-                } else {
+                val status = if (executionResult.code == 0) {
                     diff(expectedLines, fixedLines).let { patch ->
                         if (patch.deltas.isEmpty()) {
                             Pass(null)
@@ -73,6 +71,8 @@ class FixPlugin(
                             Fail(patch.formatToString())
                         }
                     }
+                } else {
+                    Fail(stderr)
                 }
                 TestResult(
                     listOf(expected, test),
