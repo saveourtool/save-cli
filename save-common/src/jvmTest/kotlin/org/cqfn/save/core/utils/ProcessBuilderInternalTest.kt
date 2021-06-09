@@ -10,28 +10,7 @@ import kotlin.test.assertEquals
     "MISSING_KDOC_ON_FUNCTION"
 )
 class ProcessBuilderInternalTest {
-    private val processBuilder = ProcessBuilder()
-
-    @Test
-    fun `check stdout with redirection`() {
-        val actualResult = processBuilder.exec("echo something >/dev/null", null)
-        var expectedCode: Int
-        val expectedStdout: List<String> = emptyList()
-        lateinit var expectedStderr: List<String>
-        when {
-            isCurrentOsWindows() -> {
-                expectedCode = 1
-                expectedStderr = listOf("The system cannot find the path specified.")
-            }
-            else -> {
-                expectedCode = 0
-                expectedStderr = emptyList()
-            }
-        }
-        assertEquals(expectedCode, actualResult.code)
-        assertEquals(expectedStdout, actualResult.stdout)
-        assertEquals(expectedStderr, actualResult.stderr)
-    }
+    private val processBuilder = ProcessBuilder(useInternalRedirections = true)
 
     @Test
     fun `check stderr`() {

@@ -59,7 +59,7 @@ class WarnPluginTest {
             """.trimIndent()
             ),
             WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"}",
+                "$catCmd ${tmpDir / "resource"} && set stub=",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 Regex("(.+):(\\d+):(\\d+): (.+)"),
                 true, true, 1, 1, 2, 3, 1, 2, 3, 4
@@ -95,7 +95,7 @@ class WarnPluginTest {
             """.trimIndent()
             ),
             WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"}",
+                "$catCmd ${tmpDir / "resource"} && set stub=",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 Regex("(.+):(\\d+):(\\d+): (.+)"),
                 true, true, 1, 1, 2, 3, 1, 2, 3, 4, false
@@ -164,7 +164,7 @@ class WarnPluginTest {
             """.trimIndent()
             ),
             WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"}",
+                "$catCmd ${tmpDir / "resource"} && set stub=",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 Regex("(.+):(\\d+):(\\d+): (.+)"),
                 true, true, 1, 1, 2, 3, 1, 2, 3, 4
@@ -204,7 +204,7 @@ class WarnPluginTest {
             """.trimIndent()
             ),
             WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"}",
+                "$catCmd ${tmpDir / "resource"} && set stub=",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 Regex("(.+):(\\d+):(\\d+): (.+)"),
                 true, true, 1, 1, 2, 3, 1, 2, 3, 4
@@ -243,7 +243,7 @@ class WarnPluginTest {
             """.trimIndent()
             ),
             WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"}",
+                "$catCmd ${tmpDir / "resource"} && set stub=",
                 Regex("// ;warn: (.*)"),
                 Regex("(.+): (.+)"),
                 false, false, 1, null, null, 1, 1, null, null, 2
@@ -289,7 +289,7 @@ class WarnPluginTest {
             """.trimIndent()
             ),
             WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"}",
+                "$catCmd ${tmpDir / "resource"} && set stub=",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 Regex("(.+):(\\d+):(\\d+): (.+)"),
                 true, true, 2, 1, 2, 3, 1, 2, 3, 4
@@ -358,7 +358,7 @@ class WarnPluginTest {
 
         val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         val warnPluginConfig = WarnPluginConfig(
-            "$catCmd ${tmpDir / "resource"}",
+            "$catCmd ${tmpDir / "resource"} && set stub=",
             Regex("// ;warn: (.*)"),
             Regex("(.+): (.+)"),
             false, false, 1, null, null, 1, 1, null, null, 2
