@@ -12,12 +12,12 @@ import platform.posix.system
 actual class ProcessBuilderInternal actual constructor(
     private val stdoutFile: Path,
     private val stderrFile: Path,
-    private val collectStdout: Boolean
+    private val useInternalRedirections: Boolean
 ) {
-    actual fun prepareCmd(command: String) = if (collectStdout) {
-        "$command >$stdoutFile 2>$stderrFile"
+    actual fun prepareCmd(command: String) = if (useInternalRedirections) {
+        "($command) >$stdoutFile 2>$stderrFile"
     } else {
-        "$command 2>$stderrFile"
+        command
     }
 
     actual fun exec(cmd: String): Int {

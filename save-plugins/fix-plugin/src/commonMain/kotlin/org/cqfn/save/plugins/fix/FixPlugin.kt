@@ -11,7 +11,6 @@ import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
-import org.cqfn.save.core.utils.ProcessBuilder
 
 import io.github.petertrr.diffutils.diff
 import io.github.petertrr.diffutils.patch.ChangeDelta
@@ -25,9 +24,14 @@ import okio.Path
  * @property testConfig
  */
 @Suppress("INLINE_CLASS_CAN_BE_USED")
-class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) : Plugin(testConfig, testFiles) {
+class FixPlugin(
+    testConfig: TestConfig,
+    testFiles: List<String> = emptyList(),
+    useInternalRedirections: Boolean = true) : Plugin(
+    testConfig,
+    testFiles,
+    useInternalRedirections) {
     private val fs = FileSystem.SYSTEM
-    private val pb = ProcessBuilder()
     private val diffGenerator = DiffRowGenerator.create()
         .showInlineDiffs(true)
         .mergeOriginalRevised(false)
@@ -36,6 +40,7 @@ class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) :
         .newTag { start -> if (start) "<" else ">" }
         .build()
 
+    @Suppress("TOO_LONG_FUNCTION")
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
         val flattenedResources = files.toList()
         if (flattenedResources.isEmpty()) {
@@ -51,22 +56,28 @@ class FixPlugin(testConfig: TestConfig, testFiles: List<String> = emptyList()) :
             .map { it.first() to it.last() }
             .map { (expected, test) ->
                 val testCopy = createTestFile(test)
-                val execCmd = "${(generalConfig?.execCmd ?: "")} ${fixPluginConfig.execFlags} $testCopy"
-                val executionResult = pb.exec(execCmd, null, false)
+                val execCmd = "${(generalConfig!!.execCmd)} ${fixPluginConfig.execFlags} $testCopy"
+                val executionResult = pb.exec(execCmd, null)
+                val stdout = executionResult.stdout.joinToString("\n")
+                val stderr = executionResult.stderr.joinToString("\n")
+
                 val fixedLines = FileSystem.SYSTEM.readLines(testCopy)
                 val expectedLines = FileSystem.SYSTEM.readLines(expected)
-                val status = diff(expectedLines, fixedLines).let { patch ->
-                    if (patch.deltas.isEmpty()) {
-                        Pass(null)
-                    } else {
-                        Fail(patch.formatToString())
+                val status = if (executionResult.code == 0) {
+                    diff(expectedLines, fixedLines).let { patch ->
+                        if (patch.deltas.isEmpty()) {
+                            Pass(null)
+                        } else {
+                            Fail(patch.formatToString())
+                        }
                     }
+                } else {
+                    Fail(stderr)
                 }
                 TestResult(
                     listOf(expected, test),
                     status,
-                    // todo: fill debug info
-                    DebugInfo(executionResult.stdout.joinToString("\n"), null, null)
+                    DebugInfo(stdout, stderr, null)
                 )
             }
     }

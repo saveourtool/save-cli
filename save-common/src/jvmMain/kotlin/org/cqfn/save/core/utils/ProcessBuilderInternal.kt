@@ -13,7 +13,7 @@ import java.io.InputStreamReader
 actual class ProcessBuilderInternal actual constructor(
     private val stdoutFile: Path,
     private val stderrFile: Path,
-    private val collectStdout: Boolean
+    private val useInternalRedirections: Boolean
 ) {
     @OptIn(ExperimentalStdlibApi::class)
     actual fun prepareCmd(command: String): String {
@@ -42,7 +42,7 @@ actual class ProcessBuilderInternal actual constructor(
         process: Process,
         stream: String,
         file: Path) {
-        if (!collectStdout && stream == "stdout") {
+        if (!useInternalRedirections) {
             return
         }
         val br = BufferedReader(
