@@ -102,7 +102,7 @@ class WarnPlugin(
         }
 
         val fileNames = paths.joinToString {
-            if (generalConfig!!.ignoreSaveComments == true) createTestFile(it, warnPluginConfig.warningsInputPattern!!) else it.name
+            if (generalConfig!!.ignoreSaveComments == true) createTestFile(it, warnPluginConfig.warningsInputPattern!!) else it.toString()
         }
         val execCmd = "${generalConfig!!.execCmd} ${warnPluginConfig.execFlags} $fileNames"
 
