@@ -92,8 +92,8 @@ class Save(
         logInfo("=> Executing plugin: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
         reporter.onPluginExecutionStart(plugin)
         try {
-            val events = plugin.execute()
-            if (events.toList().isEmpty()) {
+            val events = plugin.execute().toList()
+            if (events.isEmpty()) {
                 logInfo("No resources discovered for ${plugin::class.simpleName} in [${plugin.testConfig.location}], skipping")
                 reporter.onPluginExecutionSkip(plugin)
             }
