@@ -1,0 +1,8 @@
+[general]
+execCmd = "echo hello world"
+tags = "Tag"
+description = "My description"
+suiteName = "DocsCheck"
+
+[warn]
+execFlags = "--build-upon-default-config -i"

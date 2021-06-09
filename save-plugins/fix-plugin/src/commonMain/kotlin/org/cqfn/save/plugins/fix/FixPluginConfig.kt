@@ -50,8 +50,9 @@ data class FixPluginConfig(
 
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as FixPluginConfig
+        val mergedFlags = (other.execFlags ?: "") + " " + (this.execFlags ?: "")
         return FixPluginConfig(
-            this.execFlags ?: other.execFlags,
+            if (mergedFlags.isNotBlank()) mergedFlags.trim() else mergedFlags,
             this.resourceNameTestSuffix ?: other.resourceNameTestSuffix,
             this.resourceNameExpectedSuffix ?: other.resourceNameExpectedSuffix,
         )

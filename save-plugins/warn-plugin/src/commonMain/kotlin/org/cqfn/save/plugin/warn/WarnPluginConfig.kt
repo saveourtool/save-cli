@@ -74,8 +74,9 @@ data class WarnPluginConfig(
     @Suppress("ComplexMethod")
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as WarnPluginConfig
+        val mergedFlags = (other.execFlags ?: "") + " " + (this.execFlags ?: "")
         return WarnPluginConfig(
-            this.execFlags ?: other.execFlags,
+            if (mergedFlags.isNotBlank()) mergedFlags.trim() else mergedFlags,
             this.warningsInputPattern ?: other.warningsInputPattern,
             this.warningsOutputPattern ?: other.warningsOutputPattern,
             this.warningTextHasLine ?: other.warningTextHasLine,
