@@ -77,6 +77,7 @@ class Save(
 
                 reporter.afterAll()
             }
+        reporter.out.close()
     }
 
     private fun executePlugin(plugin: Plugin, reporter: Reporter) {
