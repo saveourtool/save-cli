@@ -53,12 +53,12 @@ class WarnPlugin(
     override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val regex = warnPluginConfig.resourceNamePattern
-        return resourceDirectories
-            .map { directory ->
-                FileSystem.SYSTEM.list(directory)
-                    .filter { (regex).matches(it.name) }
-            }
-            .filter { it.isNotEmpty() }
+        // returned sequence is a sequence of groups of size 1
+        return resourceDirectories.flatMap { directory ->
+            fs.list(directory)
+                .filter { regex.matches(it.name) }
+                .map { listOf(it) }
+        }
     }
 
     override fun cleanupTempDir() {
