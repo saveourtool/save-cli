@@ -18,20 +18,46 @@ import com.akuleshov7.ktoml.exceptions.KtomlException
 import com.akuleshov7.ktoml.parsers.TomlParser
 import com.akuleshov7.ktoml.parsers.node.TomlFile
 import com.akuleshov7.ktoml.parsers.node.TomlNode
-import okio.Path.Companion.toPath
+import okio.Path
 
 import kotlinx.serialization.serializer
 
 /**
+ * Create the plugin config according section name
+ *
+ * @param fakeFileNode fake file node to restore the structure and parse only the part of the toml
+ * @param pluginSectionName name of plugin section from toml file
+ */
+private inline fun <reified T : PluginConfig> Path.createPluginConfig(
+    fakeFileNode: TomlNode,
+    pluginSectionName: String
+) =
+        try {
+            TomlDecoder.decode<T>(
+                serializer(),
+                fakeFileNode,
+                DecoderConf()
+            ).apply {
+                configLocation = this@createPluginConfig
+            }
+        } catch (e: KtomlException) {
+            logError(
+                "Plugin extraction failed for $this and [$pluginSectionName] section." +
+                        " This file has incorrect toml format."
+            )
+            throw e
+        }
+
+/**
  * Create the list of plugins from toml file with plugin sections
  *
+ * @param testConfigPath path to the toml file
  * @return list of plugin configs from toml file
  * @throws PluginException in case of unknown plugin
  */
-fun String.createPluginConfigListFromToml(): MutableList<PluginConfig> {
+fun createPluginConfigListFromToml(testConfigPath: Path): MutableList<PluginConfig> {
     val configList: MutableList<PluginConfig> = mutableListOf()
-    val testConfigPath = this
-    val parsedTomlConfig = TomlParser(testConfigPath).readAndParseFile()
+    val parsedTomlConfig = TomlParser(testConfigPath.toString()).readAndParseFile()
     parsedTomlConfig.getRealTomlTables().forEach { tomlPluginSection ->
 
         // adding a fake file node to restore the structure and parse only the part of the toml
@@ -58,7 +84,7 @@ fun String.createPluginConfigListFromToml(): MutableList<PluginConfig> {
             )
             else -> throw PluginException(
                 "Received unknown plugin section name in the input: [$sectionName]." +
-                        " Please check your <${this}> config"
+                        " Please check your <$testConfigPath> config"
             )
         }
 
@@ -67,30 +93,3 @@ fun String.createPluginConfigListFromToml(): MutableList<PluginConfig> {
 
     return configList
 }
-
-/**
- * Create the plugin config according section name
- *
- * @param fakeFileNode fake file node to restore the structure and parse only the part of the toml
- * @param pluginSectionName name of plugin section from toml file
- */
-private inline fun <reified T : PluginConfig> String.createPluginConfig(
-    fakeFileNode: TomlNode,
-    pluginSectionName: String
-) =
-        try {
-            val pluginConfig = TomlDecoder.decode<T>(
-                serializer(),
-                fakeFileNode,
-                DecoderConf()
-            ).apply {
-                configLocation = this@createPluginConfig.toPath()
-            }
-            pluginConfig
-        } catch (e: KtomlException) {
-            logError(
-                "Plugin extraction failed for $this and [$pluginSectionName] section." +
-                        " This file has incorrect toml format."
-            )
-            throw e
-        }

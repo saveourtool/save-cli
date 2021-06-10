@@ -62,8 +62,7 @@ class Save(
                 reporter.beforeAll()
 
                 // discover plugins from the test configuration
-                testConfig.pluginConfigs.clear()
-                testConfig.location.toString().createPluginConfigListFromToml().forEach {
+                createPluginConfigListFromToml(testConfig.location).forEach {
                     testConfig.pluginConfigs.add(it)
                 }
                 testConfig
