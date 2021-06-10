@@ -314,13 +314,13 @@ class WarnPluginTest {
                 """.trimMargin().encodeToByteArray()
             )
         }
-        val batchSize = 2
-        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         fs.createFile(tmpDir / "Test1Test.java")
         fs.createFile(tmpDir / "Test2Test.java")
         fs.createDirectory(tmpDir / "inner")
         fs.createFile(tmpDir / "inner" / "Test3Test.java")
         fs.createFile(tmpDir / "inner" / "Test4Test.java")
+        val batchSize = 2
+        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
             emptyList(),  // files will be discovered in tmpDir, because they are already created
             WarnPluginConfig(
