@@ -59,6 +59,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean) {
      * @param command executable command with arguments
      * @param redirectTo a file where process output should be redirected. If null, output will be returned as [ExecutionResult.stdout].
      * @return [ExecutionResult] built from process output
+     * @throws ProcessExecutionException in case of impossibility of command execution
      */
     @Suppress(
         "TOO_LONG_FUNCTION",
@@ -68,7 +69,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean) {
         command: String,
         redirectTo: Path?): ExecutionResult {
         if (command.isBlank()) {
-            return returnWithError("Command couldn't be empty!")
+            logErrorAndThrowProcessBuilderException("Command couldn't be empty!")
         }
         if (command.contains(">") && useInternalRedirections) {
             logError("Found user provided redirections in `$command`. " +
@@ -99,7 +100,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean) {
             processBuilderInternal.exec(cmd)
         } catch (ex: Exception) {
             fs.deleteRecursively(tmpDir)
-            return returnWithError(ex.message ?: "Couldn't execute $cmd")
+            logErrorAndThrowProcessBuilderException(ex.message ?: "Couldn't execute $cmd")
         }
         val stdout = fs.readLines(stdoutFile)
         val stderr = fs.readLines(stderrFile)
@@ -117,14 +118,14 @@ class ProcessBuilder(private val useInternalRedirections: Boolean) {
     }
 
     /**
-     * Log error message and return with status = -1
+     * Log error message and throw exception
      *
      * @param errMsg error message
-     * @return [ExecutionResult] corresponding result with error message and exit code
+     * @throws ProcessExecutionException
      */
-    private fun returnWithError(errMsg: String): ExecutionResult {
+    private fun logErrorAndThrowProcessBuilderException(errMsg: String): Nothing {
         logError(errMsg)
-        return ExecutionResult(-1, emptyList(), listOf(errMsg))
+        throw ProcessExecutionException(errMsg)
     }
 
     companion object {
