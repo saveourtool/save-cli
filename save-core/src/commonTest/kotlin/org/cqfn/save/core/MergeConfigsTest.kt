@@ -157,20 +157,21 @@ class MergeConfigsTest {
         // stub, since tearDown should delete it anyway
         createTomlFiles()
 
-        val toml1 = "src/commonTest/resources/MergeResources/save.toml"
+        val toml1 = "src/commonTest/resources/merge_configs/save.toml"
         val configList1 = toml1.createPluginConfigListFromToml()
 
         val parentGeneralConfig = configList1.filterIsInstance<GeneralConfig>().first()
         val parentWarnConfig = configList1.filterIsInstance<WarnPluginConfig>().first()
         assertEquals("\"echo hello world\"", parentGeneralConfig.execCmd)
         assertEquals("\"Tag\"", parentGeneralConfig.tags)
-        assertEquals("\"--build-upon-default-config -i\"", parentWarnConfig.execFlags)
+        assertEquals(null, parentWarnConfig.execFlags)
 
-        val toml2 = "src/commonTest/resources/MergeResources/inner/save.toml"
+        val toml2 = "src/commonTest/resources/merge_configs/inner/save.toml"
         val configList2 = toml2.createPluginConfigListFromToml()
 
         val childGeneralConfig = configList2.filterIsInstance<GeneralConfig>().first()
         val childWarnConfig = configList2.filterIsInstance<WarnPluginConfig>().first()
+        // FixME: Should be empty string after ktoml release, not '""'
         assertEquals("\"\"", childGeneralConfig.tags)
         assertEquals(null, childWarnConfig.execFlags)
 
@@ -184,7 +185,8 @@ class MergeConfigsTest {
         val mergedWarnConfig = mergedTestConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
         // FixME: Fix after ktoml release
         assertEquals("\"Tag\", \"\"", mergedGeneralConfig.tags)
-        assertEquals("\"--build-upon-default-config -i\"", mergedWarnConfig.execFlags)
+        // execFlags should be empty, not `"null"`
+        assertEquals("", mergedWarnConfig.execFlags)
     }
 
     @AfterTest
