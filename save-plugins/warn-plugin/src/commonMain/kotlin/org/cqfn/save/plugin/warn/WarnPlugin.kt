@@ -12,6 +12,7 @@ import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.result.TestStatus
 import org.cqfn.save.core.utils.AtomicInt
+import org.cqfn.save.core.utils.ProcessExecutionException
 import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
 
@@ -105,26 +106,29 @@ class WarnPlugin(
             if (generalConfig!!.ignoreSaveComments == true) createTestFile(it, warnPluginConfig.warningsInputPattern!!) else it.toString()
         }
         val execCmd = "${generalConfig!!.execCmd} ${warnPluginConfig.execFlags} $fileNames"
-
-        val executionResult = pb.exec(execCmd, null)
+        val executionResult = try {
+            pb.exec(execCmd, null)
+        } catch (ex: ProcessExecutionException) {
+            return TestResult(
+                paths,
+                Fail(ex.message!!),
+                DebugInfo(null, ex.message, null)
+            )
+        }
         val stdout = executionResult.stdout.joinToString("\n")
         val stderr = executionResult.stderr.joinToString("\n")
-        val status = if (executionResult.code == 0) {
-            val actualWarningsMap = executionResult.stdout.mapNotNull {
-                with(warnPluginConfig) {
-                    it.extractWarning(warningsOutputPattern!!, fileNameCaptureGroupOut!!, lineCaptureGroupOut, columnCaptureGroupOut, messageCaptureGroupOut!!)
-                }
+
+        val actualWarningsMap = executionResult.stdout.mapNotNull {
+            with(warnPluginConfig) {
+                it.extractWarning(warningsOutputPattern!!, fileNameCaptureGroupOut!!, lineCaptureGroupOut, columnCaptureGroupOut, messageCaptureGroupOut!!)
             }
-                .groupBy { if (it.line != null && it.column != null) it.line to it.column else null }
-                .mapValues { (_, warning) -> warning.sortedBy { it.message } }
-            checkResults(expectedWarnings, actualWarningsMap, warnPluginConfig)
-        } else {
-            Fail(stderr)
         }
+            .groupBy { if (it.line != null && it.column != null) it.line to it.column else null }
+            .mapValues { (_, warning) -> warning.sortedBy { it.message } }
 
         return TestResult(
             paths,
-            status,
+            checkResults(expectedWarnings, actualWarningsMap, warnPluginConfig),
             DebugInfo(stdout, stderr, null)
         )
     }
