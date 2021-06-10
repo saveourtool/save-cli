@@ -6,6 +6,7 @@ package org.cqfn.save.core
 
 import org.cqfn.save.core.utils.ProcessBuilder
 import org.cqfn.save.core.utils.ProcessBuilder.Companion.processCommandWithEcho
+import org.cqfn.save.core.utils.ProcessExecutionException
 import org.cqfn.save.core.utils.isCurrentOsWindows
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -16,10 +17,11 @@ class ProcessBuilderTest {
 
     @Test
     fun `empty command`() {
-        val actualResult = processBuilder.exec(" ", null)
-        assertEquals(-1, actualResult.code)
-        assertEquals(emptyList(), actualResult.stdout)
-        assertEquals(listOf("Command couldn't be empty!"), actualResult.stderr)
+        try {
+            processBuilder.exec(" ", null)
+        } catch (ex: ProcessExecutionException) {
+            assertEquals("Command couldn't be empty!", ex.message)
+        }
     }
 
     @Test
