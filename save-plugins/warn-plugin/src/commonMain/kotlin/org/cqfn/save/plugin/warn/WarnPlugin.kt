@@ -11,7 +11,6 @@ import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.result.TestStatus
-import org.cqfn.save.core.utils.AtomicInt
 import org.cqfn.save.core.utils.ProcessExecutionException
 import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
@@ -19,7 +18,7 @@ import org.cqfn.save.plugin.warn.utils.extractWarning
 import okio.FileSystem
 import okio.Path
 
-private typealias LineColumn = Pair<Int, Int>
+internal typealias LineColumn = Pair<Int, Int>
 
 /**
  * A plugin that runs an executable and verifies that it produces required warning messages.
@@ -143,7 +142,7 @@ class WarnPlugin(
 
         createTempDir(tmpDir)
 
-        val fileName = tmpDir / testFileName()
+        val fileName = tmpDir / path.name
         fs.write(fs.createFile(fileName)) {
             fs.readLines(path).forEach {
                 if (!warningsInputPattern.matches(it)) {
@@ -156,12 +155,22 @@ class WarnPlugin(
         return fileName.toString()
     }
 
+    /**
+     * Compares actual and expected warnings and returns TestResult
+     *
+     * @param expectedWarningsMap expected warnings, grouped by LineCol
+     * @param actualWarningsMap actual warnings, grouped by LineCol
+     * @param warnPluginConfig configuration of warn plugin
+     * @return [TestResult]
+     */
     @Suppress("TYPE_ALIAS")
-    private fun checkResults(expectedWarningsMap: Map<LineColumn?, List<Warning>>,
-                             actualWarningsMap: Map<LineColumn?, List<Warning>>,
-                             warnPluginConfig: WarnPluginConfig): TestStatus {
-        val missingWarnings = expectedWarningsMap.filterValues { it !in actualWarningsMap.values }.values
-        val unexpectedWarnings = actualWarningsMap.filterValues { it !in expectedWarningsMap.values }.values
+    internal fun checkResults(expectedWarningsMap: Map<LineColumn?, List<Warning>>,
+                              actualWarningsMap: Map<LineColumn?, List<Warning>>,
+                              warnPluginConfig: WarnPluginConfig): TestStatus {
+        val missingWarnings: List<Warning> = expectedWarningsMap.values.flatten()
+            .filter { it !in actualWarningsMap.values.flatten() }
+        val unexpectedWarnings: List<Warning> = actualWarningsMap.values.flatten()
+            .filter { it !in expectedWarningsMap.values.flatten() }
 
         return when (missingWarnings.isEmpty() to unexpectedWarnings.isEmpty()) {
             false to true -> Fail("Some warnings were expected but not received: $missingWarnings")
@@ -176,11 +185,6 @@ class WarnPlugin(
             else -> Fail("")
         }
     }
-
-    private fun testFileName(): String = "test_file${atomicInt.addAndGet(1)}"
-
-    companion object {
-        val atomicInt: AtomicInt = AtomicInt(0)
-    }
 }
+
 typealias WarningMap = MutableMap<Pair<Int, Int>?, List<Warning>>
