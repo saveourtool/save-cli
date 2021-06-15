@@ -168,10 +168,8 @@ class WarnPlugin(
     internal fun checkResults(expectedWarningsMap: Map<LineColumn?, List<Warning>>,
                               actualWarningsMap: Map<LineColumn?, List<Warning>>,
                               warnPluginConfig: WarnPluginConfig): TestStatus {
-        val missingWarnings: List<Warning> = expectedWarningsMap.values.flatten()
-            .filter { it !in actualWarningsMap.values.flatten() }
-        val unexpectedWarnings: List<Warning> = actualWarningsMap.values.flatten()
-            .filter { it !in expectedWarningsMap.values.flatten() }
+        val missingWarnings = expectedWarningsMap.valuesNotIn(actualWarningsMap)
+        val unexpectedWarnings = actualWarningsMap.valuesNotIn(expectedWarningsMap)
 
         return when (missingWarnings.isEmpty() to unexpectedWarnings.isEmpty()) {
             false to true -> Fail("Some warnings were expected but not received: $missingWarnings")
@@ -186,4 +184,14 @@ class WarnPlugin(
             else -> Fail("")
         }
     }
+}
+
+/**
+ * Collect all values that are present in [this] map, but absent in [other]
+ */
+private fun <K, V> Map<K, List<V>>.valuesNotIn(other: Map<K, List<V>>): List<V> = flatMap { (key, value) ->
+    other[key]?.let { otherValue ->
+        value.filter { it !in otherValue }
+    }
+        ?: value
 }
