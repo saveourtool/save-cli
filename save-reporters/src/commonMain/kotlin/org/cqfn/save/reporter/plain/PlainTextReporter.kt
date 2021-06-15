@@ -21,7 +21,7 @@ class PlainTextReporter(override val out: BufferedSink) : Reporter {
     override val type: ReportType = ReportType.PLAIN
 
     override fun afterAll() {
-        out.write("Finished".encodeToByteArray())
+        out.write("Finished\n".encodeToByteArray())
     }
 
     override fun onEvent(event: TestResult) {
@@ -32,32 +32,32 @@ class PlainTextReporter(override val out: BufferedSink) : Reporter {
             is Crash -> status.throwable.message
         }
         out.write(
-            "| ${event.resources.first()} | ${event.status} | $comment |"
+            "| ${event.resources.first()} | ${event.status} | $comment |\n"
                 .encodeToByteArray()
         )
     }
 
     override fun onPluginInitialization(plugin: Plugin) {
-        out.write("Initializing plugin ${plugin::class.simpleName}".encodeToByteArray())
+        out.write("Initializing plugin ${plugin::class.simpleName}\n".encodeToByteArray())
     }
 
     override fun onPluginExecutionStart(plugin: Plugin) {
-        out.write("Starting plugin ${plugin::class.simpleName}".encodeToByteArray())
-        out.write("--------------------------------".encodeToByteArray())
-        out.write("| Test name | result | comment |".encodeToByteArray())
+        out.write("Starting plugin ${plugin::class.simpleName}\n".encodeToByteArray())
+        out.write("--------------------------------\n".encodeToByteArray())
+        out.write("| Test name | result | comment |\n".encodeToByteArray())
     }
 
     override fun onPluginExecutionSkip(plugin: Plugin) {
-        out.write("--------------------------------".encodeToByteArray())
-        out.write("Plugin ${plugin::class.simpleName} has been skipped".encodeToByteArray())
+        out.write("--------------------------------\n".encodeToByteArray())
+        out.write("Plugin ${plugin::class.simpleName} has been skipped\n".encodeToByteArray())
     }
 
     override fun onPluginExecutionEnd(plugin: Plugin) {
-        out.write("--------------------------------".encodeToByteArray())
-        out.write("Plugin ${plugin::class.simpleName} has completed execution".encodeToByteArray())
+        out.write("--------------------------------\n".encodeToByteArray())
+        out.write("Plugin ${plugin::class.simpleName} has completed execution\n".encodeToByteArray())
     }
 
     override fun onPluginExecutionError(ex: PluginException) {
-        out.write("Error during plugin execution: ${ex.message}".encodeToByteArray())
+        out.write("Error during plugin execution: ${ex.message}\n".encodeToByteArray())
     }
 }

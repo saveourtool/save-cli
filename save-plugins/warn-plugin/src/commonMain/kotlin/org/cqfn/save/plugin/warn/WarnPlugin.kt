@@ -12,6 +12,7 @@ import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.result.TestStatus
 import org.cqfn.save.core.utils.AtomicInt
+import org.cqfn.save.core.utils.ProcessExecutionException
 import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
 
@@ -45,20 +46,20 @@ class WarnPlugin(
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
 
-        return files.chunked(warnPluginConfig.batchSize ?: 1).map { resources ->
-            handleTestFile(resources.single(), warnPluginConfig, generalConfig)
+        return files.chunked(warnPluginConfig.batchSize ?: 1).map { chunk ->
+            handleTestFile(chunk.map { it.single() }, warnPluginConfig, generalConfig)
         }
     }
 
     override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val regex = warnPluginConfig.resourceNamePattern
-        return resourceDirectories
-            .map { directory ->
-                FileSystem.SYSTEM.list(directory)
-                    .filter { (regex).matches(it.name) }
-            }
-            .filter { it.isNotEmpty() }
+        // returned sequence is a sequence of groups of size 1
+        return resourceDirectories.flatMap { directory ->
+            fs.list(directory)
+                .filter { regex.matches(it.name) }
+                .map { listOf(it) }
+        }
     }
 
     override fun cleanupTempDir() {
@@ -105,26 +106,29 @@ class WarnPlugin(
             if (generalConfig!!.ignoreSaveComments == true) createTestFile(it, warnPluginConfig.warningsInputPattern!!) else it.toString()
         }
         val execCmd = "${generalConfig!!.execCmd} ${warnPluginConfig.execFlags} $fileNames"
-
-        val executionResult = pb.exec(execCmd, null)
+        val executionResult = try {
+            pb.exec(execCmd, null)
+        } catch (ex: ProcessExecutionException) {
+            return TestResult(
+                paths,
+                Fail(ex.message!!),
+                DebugInfo(null, ex.message, null)
+            )
+        }
         val stdout = executionResult.stdout.joinToString("\n")
         val stderr = executionResult.stderr.joinToString("\n")
-        val status = if (executionResult.code == 0) {
-            val actualWarningsMap = executionResult.stdout.mapNotNull {
-                with(warnPluginConfig) {
-                    it.extractWarning(warningsOutputPattern!!, fileNameCaptureGroupOut!!, lineCaptureGroupOut, columnCaptureGroupOut, messageCaptureGroupOut!!)
-                }
+
+        val actualWarningsMap = executionResult.stdout.mapNotNull {
+            with(warnPluginConfig) {
+                it.extractWarning(warningsOutputPattern!!, fileNameCaptureGroupOut!!, lineCaptureGroupOut, columnCaptureGroupOut, messageCaptureGroupOut!!)
             }
-                .groupBy { if (it.line != null && it.column != null) it.line to it.column else null }
-                .mapValues { (_, warning) -> warning.sortedBy { it.message } }
-            checkResults(expectedWarnings, actualWarningsMap, warnPluginConfig)
-        } else {
-            Fail(stderr)
         }
+            .groupBy { if (it.line != null && it.column != null) it.line to it.column else null }
+            .mapValues { (_, warning) -> warning.sortedBy { it.message } }
 
         return TestResult(
             paths,
-            status,
+            checkResults(expectedWarnings, actualWarningsMap, warnPluginConfig),
             DebugInfo(stdout, stderr, null)
         )
     }
