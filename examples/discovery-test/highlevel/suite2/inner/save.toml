@@ -1,0 +1,12 @@
+[general]
+execCmd="./ktlint -R diktat-0.4.2.jar"
+tags = "mytags"
+description = "My suite description"
+suiteName = "DocsCheck"
+
+[fix]
+execFlags="-F"
+resourceNameTestSuffix="Test"
+resourceNameExpectedSuffix="Expected"
+# testFilePattern="*Test.kt"
+# expectedFilePattern="*Expected.kt"

@@ -8,7 +8,7 @@ class PerformAnalysisTest {
     @Test
     fun `detect plugins`() {
         val saveProperties = SaveProperties(
-            testRootPath = "../examples/kotlin-diktat",
+            testRootPath = "../examples/discovery-test",
             reportType = ReportType.PLAIN,
         )
 
