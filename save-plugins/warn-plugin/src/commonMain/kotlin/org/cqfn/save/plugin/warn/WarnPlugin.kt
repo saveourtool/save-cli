@@ -18,6 +18,7 @@ import org.cqfn.save.plugin.warn.utils.extractWarning
 import okio.FileSystem
 import okio.Path
 
+private typealias WarningMap = MutableMap<LineColumn?, List<Warning>>
 internal typealias LineColumn = Pair<Int, Int>
 
 /**
@@ -186,5 +187,3 @@ class WarnPlugin(
         }
     }
 }
-
-typealias WarningMap = MutableMap<Pair<Int, Int>?, List<Warning>>

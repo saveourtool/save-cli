@@ -33,6 +33,7 @@ class ComparisonTest {
     }
 
     @Test
+    @Suppress("TYPE_ALIAS")
     fun `should compare warnings`() {
         val resourceFileName = "resource"
         val expectedWarningsMap: Map<LineColumn?, List<Warning>> = mapOf(
