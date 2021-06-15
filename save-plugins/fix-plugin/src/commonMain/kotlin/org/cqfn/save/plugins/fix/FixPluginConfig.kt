@@ -58,7 +58,7 @@ data class FixPluginConfig(
     }
 
     override fun validateAndSetDefaults() = FixPluginConfig(
-        execFlags,
+        execFlags ?: "",
         resourceNameTest,
         resourceNameExpected
     )

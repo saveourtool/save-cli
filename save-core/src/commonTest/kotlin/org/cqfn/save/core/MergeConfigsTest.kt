@@ -3,10 +3,12 @@ package org.cqfn.save.core
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.plugin.GeneralConfig
+import org.cqfn.save.core.utils.createPluginConfigListFromToml
 import org.cqfn.save.plugin.warn.WarnPluginConfig
 import org.cqfn.save.plugins.fix.FixPluginConfig
 
 import okio.FileSystem
+import okio.Path.Companion.toPath
 
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -147,6 +149,44 @@ class MergeConfigsTest {
         assertEquals(expectedGeneralConfig, actualGeneralConfig)
         assertEquals(expectedWarnConfig, actualWarnConfig)
         assertEquals(expectedFixConfig, actualFixConfig)
+    }
+
+    // FixMe: there should be removed additional quotes in string after new release of ktoml
+    @Test
+    fun `merge real toml configs with empty execFlag in child`() {
+        // stub, since tearDown should delete it anyway
+        createTomlFiles()
+
+        val toml1 = "src/commonTest/resources/merge_configs/save.toml"
+        val configList1 = createPluginConfigListFromToml(toml1.toPath())
+
+        val parentGeneralConfig = configList1.filterIsInstance<GeneralConfig>().first()
+        val parentWarnConfig = configList1.filterIsInstance<WarnPluginConfig>().first()
+        assertEquals("\"echo hello world\"", parentGeneralConfig.execCmd)
+        assertEquals("\"Tag\"", parentGeneralConfig.tags)
+        assertEquals(null, parentWarnConfig.execFlags)
+
+        val toml2 = "src/commonTest/resources/merge_configs/inner/save.toml"
+        val configList2 = createPluginConfigListFromToml(toml2.toPath())
+
+        val childGeneralConfig = configList2.filterIsInstance<GeneralConfig>().first()
+        val childWarnConfig = configList2.filterIsInstance<WarnPluginConfig>().first()
+        // FixME: Should be empty string after ktoml release, not '""'
+        assertEquals("\"\"", childGeneralConfig.tags)
+        assertEquals(null, childWarnConfig.execFlags)
+
+        val testConfig1 = TestConfig(toml1.toPath(), null, configList1)
+        val testConfig2 = TestConfig(toml2.toPath(), testConfig1, configList2)
+
+        val mergedTestConfig = testConfig2.mergeConfigWithParents()
+        testConfig2.validateAndSetDefaults()
+
+        val mergedGeneralConfig = mergedTestConfig.pluginConfigs.filterIsInstance<GeneralConfig>().first()
+        val mergedWarnConfig = mergedTestConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
+        // FixME: Fix after ktoml release
+        assertEquals("\"Tag\", \"\"", mergedGeneralConfig.tags)
+        // execFlags should be empty, not `"null"`
+        assertEquals("", mergedWarnConfig.execFlags)
     }
 
     @AfterTest

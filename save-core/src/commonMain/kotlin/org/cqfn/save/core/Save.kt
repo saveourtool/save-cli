@@ -5,7 +5,6 @@ import org.cqfn.save.core.config.ResultOutputType
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.config.TestConfigSections.FIX
-import org.cqfn.save.core.config.TestConfigSections.GENERAL
 import org.cqfn.save.core.config.TestConfigSections.WARN
 import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.files.StdoutSink
@@ -14,7 +13,6 @@ import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
 import org.cqfn.save.core.logging.logInfo
 import org.cqfn.save.core.logging.logWarn
-import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.plugin.PluginConfig
 import org.cqfn.save.core.plugin.PluginException
@@ -24,23 +22,14 @@ import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.Ignored
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
+import org.cqfn.save.core.utils.createPluginConfigListFromToml
 import org.cqfn.save.plugin.warn.WarnPlugin
-import org.cqfn.save.plugin.warn.WarnPluginConfig
 import org.cqfn.save.plugins.fix.FixPlugin
-import org.cqfn.save.plugins.fix.FixPluginConfig
 import org.cqfn.save.reporter.plain.PlainTextReporter
 
-import com.akuleshov7.ktoml.decoders.DecoderConf
-import com.akuleshov7.ktoml.decoders.TomlDecoder
-import com.akuleshov7.ktoml.exceptions.KtomlException
-import com.akuleshov7.ktoml.parsers.TomlParser
-import com.akuleshov7.ktoml.parsers.node.TomlFile
-import com.akuleshov7.ktoml.parsers.node.TomlNode
 import okio.FileSystem
 import okio.Path.Companion.toPath
 import okio.buffer
-
-import kotlinx.serialization.serializer
 
 /**
  * @property saveProperties an instance of [SaveProperties]
@@ -73,7 +62,10 @@ class Save(
                 reporter.beforeAll()
 
                 // discover plugins from the test configuration
-                discoverPluginsAndUpdateTestConfig(testConfig)
+                createPluginConfigListFromToml(testConfig.location).forEach {
+                    testConfig.pluginConfigs.add(it)
+                }
+                testConfig
                     // merge configurations with parents
                     .mergeConfigWithParents()
                     // exclude general configuration from the list of plugins
@@ -114,58 +106,6 @@ class Save(
                 FIX -> FixPlugin(testConfig)
                 WARN -> WarnPlugin(testConfig)
                 else -> throw PluginException("Unknown type <${pluginConfig::class}> of plugin config was provided")
-            }
-
-    private fun discoverPluginsAndUpdateTestConfig(testConfig: TestConfig): TestConfig {
-        val testConfigPath = testConfig.location.toString()
-        val parsedTomlConfig = TomlParser(testConfigPath).readAndParseFile()
-        parsedTomlConfig.getRealTomlTables().forEach { tomlPluginSection ->
-
-            // adding a fake file node to restore the structure and parse only the part of the toml
-            // this is a hack for easy partial read of Toml configuration
-            val fakeFileNode = TomlFile()
-            tomlPluginSection.children.forEach {
-                fakeFileNode.appendChild(it)
-            }
-
-            val sectionName = tomlPluginSection.name.uppercase()
-            // we don't convert sectionName to enum, because we don't want to get Kotlin exception
-            val sectionPluginConfig = when (sectionName) {
-                FIX.name -> createPluginConfig<FixPluginConfig>(testConfigPath, fakeFileNode, sectionName)
-                WARN.name -> createPluginConfig<WarnPluginConfig>(testConfigPath, fakeFileNode, sectionName)
-                GENERAL.name -> createPluginConfig<GeneralConfig>(testConfigPath, fakeFileNode, sectionName)
-                else -> throw PluginException(
-                    "Received unknown plugin section name in the input: [$sectionName]." +
-                            " Please check your <${testConfig.location}> config"
-                )
-            }
-
-            testConfig.pluginConfigs.add(sectionPluginConfig)
-        }
-
-        return testConfig
-    }
-
-    private inline fun <reified T : PluginConfig> createPluginConfig(
-        testConfigPath: String,
-        fakeFileNode: TomlNode,
-        pluginSectionName: String
-    ) =
-            try {
-                val pluginConfig = TomlDecoder.decode<T>(
-                    serializer(),
-                    fakeFileNode,
-                    DecoderConf()
-                ).apply {
-                    configLocation = testConfigPath.toPath()
-                }
-                pluginConfig
-            } catch (e: KtomlException) {
-                logError(
-                    "Plugin extraction failed for $testConfigPath and [$pluginSectionName] section." +
-                            " This file has incorrect toml format."
-                )
-                throw e
             }
 
     private fun getReporter(saveProperties: SaveProperties): Reporter {
