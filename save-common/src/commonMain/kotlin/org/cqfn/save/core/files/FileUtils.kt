@@ -6,6 +6,9 @@
 
 package org.cqfn.save.core.files
 
+import org.cqfn.save.core.config.OutputStreamType
+import org.cqfn.save.core.utils.writeToStream
+
 import okio.Buffer
 import okio.FileSystem
 import okio.Path
@@ -14,9 +17,10 @@ import okio.Sink
 import okio.Timeout
 
 /**
- * A simple okio [Sink] that writes it's input to stdout
+ * A simple okio [Sink] that writes it's input to stdout/stderr
  */
-class StdoutSink : Sink {
+@Suppress("INLINE_CLASS_CAN_BE_USED")
+class StdStreamsSink(private val outputType: OutputStreamType) : Sink {
     override fun close() = Unit
 
     override fun flush() = Unit
@@ -27,7 +31,8 @@ class StdoutSink : Sink {
      * Writes a UTF-8 representation of [source] to stdout
      */
     override fun write(source: Buffer, byteCount: Long) {
-        print(source.readByteString(byteCount).utf8())
+        val msg = source.readByteString(byteCount).utf8()
+        writeToStream(msg, outputType)
     }
 }
 

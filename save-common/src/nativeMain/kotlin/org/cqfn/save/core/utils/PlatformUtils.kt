@@ -5,6 +5,12 @@
 
 package org.cqfn.save.core.utils
 
+import org.cqfn.save.core.config.OutputStreamType
+
+import platform.posix.fdopen
+import platform.posix.fflush
+import platform.posix.fprintf
+
 /**
  * Atomic values
  */
@@ -28,4 +34,27 @@ actual fun getCurrentOs() = when (Platform.osFamily) {
     OsFamily.MACOSX -> CurrentOs.MACOS
     OsFamily.WINDOWS -> CurrentOs.WINDOWS
     else -> CurrentOs.UNDEFINED
+}
+
+actual fun writeToConsole(msg: String, outputType: OutputStreamType) {
+    when (outputType) {
+        OutputStreamType.STDOUT -> processStandardStreams(msg, OutputStreamType.STDOUT)
+        OutputStreamType.STDERR -> processStandardStreams(msg, OutputStreamType.STDERR)
+        else -> return
+    }
+}
+
+/**
+ * Create the proper stream and log a [msg]
+ *
+ * @param msg a message string
+ * @param output output stream (stdout or stderr)
+ */
+fun processStandardStreams(msg: String, output: OutputStreamType) {
+    val stream = when (output) {
+        OutputStreamType.STDERR -> fdopen(2, "w")
+        else -> fdopen(1, "w")
+    }
+    fprintf(stream, msg + "\n")
+    fflush(stream)
 }
