@@ -10,6 +10,9 @@ import org.cqfn.save.core.plugin.PluginConfig
 
 import okio.FileSystem
 import okio.Path
+import org.cqfn.save.core.plugin.Plugin
+import org.cqfn.save.core.reporter.Reporter
+import org.cqfn.save.core.utils.createPluginConfigListFromToml
 
 /**
  * Configuration for a test suite, that is read from test suite configuration file (toml config)
@@ -72,6 +75,32 @@ data class TestConfig(
     @Suppress("WRONG_NEWLINES")
     fun getAllTestConfigs(): List<TestConfig> {
         return listOf(this) + this.childConfigs.flatMap { it.getAllTestConfigs() }
+    }
+
+    /**
+     * Walk all descendant configs and merge them with their parents
+     */
+    fun buildDescendantConfigs(createPluginConfigList: (TestConfig) -> List<PluginConfig>): TestConfig {
+        getAllTestConfigs().forEach { testConfig ->
+            // discover plugins from the test configuration
+            createPluginConfigList(testConfig).forEach {
+                testConfig.pluginConfigs.add(it)
+            }
+            // merge configurations with parents
+            testConfig.mergeConfigWithParents()
+        }
+        return this
+    }
+
+    fun forEachPlugin(pluginFromConfig: (PluginConfig, TestConfig) -> Plugin, handler: (Plugin) -> Unit) {
+        // exclude general configuration from the list of plugins
+        pluginConfigsWithoutGeneralConfig().map {
+            // create plugins from the configuration
+            pluginFromConfig(it, this)
+        }
+            // filter out plugins that don't have any resources
+            .filter { it.discoverTestFiles(directory).any() }
+            .forEach(handler)
     }
 
     /**

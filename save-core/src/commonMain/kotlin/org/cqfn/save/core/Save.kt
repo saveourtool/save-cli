@@ -55,25 +55,21 @@ class Save(
         val fullPathToConfig = saveProperties.testRootPath!!.toPath() / saveProperties.testConfigPath!!.toPath()
         val reporter = getReporter(saveProperties)
         // get all toml configs in file system
-        ConfigDetector()
+        val rootConfig = ConfigDetector()
             .configFromFile(fullPathToConfig)
-            .getAllTestConfigs()
+            .buildDescendantConfigs {
+                createPluginConfigListFromToml(it.location)
+            }
+
+        rootConfig.getAllTestConfigs()
             .forEach { testConfig ->
+                // iterating top-down
                 reporter.beforeAll()
 
-                // discover plugins from the test configuration
-                createPluginConfigListFromToml(testConfig.location).forEach {
-                    testConfig.pluginConfigs.add(it)
-                }
-                testConfig
-                    // merge configurations with parents
-                    .mergeConfigWithParents()
-                    // exclude general configuration from the list of plugins
-                    .pluginConfigsWithoutGeneralConfig()
-                    // create plugins from the configuration
-                    .map { createPlugin(it, testConfig) }
+                testConfig.forEachPlugin(::createPlugin) {
                     // execute created plugins
-                    .forEach { executePlugin(it, reporter) }
+                    executePlugin(it, reporter)
+                }
 
                 reporter.afterAll()
             }
