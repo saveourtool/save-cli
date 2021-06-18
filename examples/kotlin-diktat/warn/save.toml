@@ -1,11 +1,10 @@
 [general]
 tags = warn
-description = "Test warnings discovered by diKTat"
-suiteName = "warnings"
+description = Test warnings discovered by diKTat
+suiteName = warnings
 ignoreSaveComments = true
 
 [warn]
-execFlags = --debug  # todo: replace with empty string once ktoml supports quotes
 warningsInputPattern=.*// ;warn:(\d+):(\d+) (.*)
 warningsOutputPattern=(\w+\..+):(\d+):(\d+): (.*)$
 lineCaptureGroup = 1
