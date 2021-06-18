@@ -6,7 +6,7 @@
 
 package org.cqfn.save.core.utils
 
-import org.cqfn.save.core.config.ResultOutputType
+import org.cqfn.save.core.config.OutputStreamType
 
 /**
  * Supported platforms
@@ -52,10 +52,10 @@ fun isCurrentOsWindows(): Boolean = (getCurrentOs() == CurrentOs.WINDOWS)
  * @param outputType output stream (file, stdout, stderr)
  */
 @Suppress("WHEN_WITHOUT_ELSE")
-fun writeToStream(msg: String, outputType: ResultOutputType) {
+fun writeToStream(msg: String, outputType: OutputStreamType) {
     when (outputType) {
-        ResultOutputType.STDOUT, ResultOutputType.STDERR -> writeToConsole(msg, outputType)
-        ResultOutputType.FILE -> TODO("Not yet implemented")
+        OutputStreamType.STDOUT, OutputStreamType.STDERR -> writeToConsole(msg, outputType)
+        OutputStreamType.FILE -> TODO("Not yet implemented")
     }
 }
 
@@ -65,4 +65,4 @@ fun writeToStream(msg: String, outputType: ResultOutputType) {
  * @param msg a message string
  * @param outputType output stream: stdout or stderr
  */
-expect fun writeToConsole(msg: String, outputType: ResultOutputType)
+expect fun writeToConsole(msg: String, outputType: OutputStreamType)

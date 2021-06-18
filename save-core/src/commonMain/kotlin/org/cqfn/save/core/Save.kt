@@ -1,7 +1,7 @@
 package org.cqfn.save.core
 
+import org.cqfn.save.core.config.OutputStreamType
 import org.cqfn.save.core.config.ReportType
-import org.cqfn.save.core.config.ResultOutputType
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.config.TestConfigSections.FIX
@@ -110,8 +110,8 @@ class Save(
 
     private fun getReporter(saveProperties: SaveProperties): Reporter {
         val out = when (val currentOutputType = saveProperties.resultOutput!!) {
-            ResultOutputType.FILE -> fs.sink("save.out".toPath()).buffer()
-            ResultOutputType.STDOUT, ResultOutputType.STDERR -> StdStreamsSink(currentOutputType).buffer()
+            OutputStreamType.FILE -> fs.sink("save.out".toPath()).buffer()
+            OutputStreamType.STDOUT, OutputStreamType.STDERR -> StdStreamsSink(currentOutputType).buffer()
         }
         // todo: make `saveProperties.reportType` a collection
         return when (saveProperties.reportType) {

@@ -5,7 +5,7 @@
 
 package org.cqfn.save.core.utils
 
-import org.cqfn.save.core.config.ResultOutputType
+import org.cqfn.save.core.config.OutputStreamType
 
 actual fun getCurrentOs() = when {
     System.getProperty("os.name").startsWith("Linux", ignoreCase = true) -> CurrentOs.LINUX
@@ -14,10 +14,10 @@ actual fun getCurrentOs() = when {
     else -> CurrentOs.UNDEFINED
 }
 
-actual fun writeToConsole(msg: String, outputType: ResultOutputType) {
+actual fun writeToConsole(msg: String, outputType: OutputStreamType) {
     when (outputType) {
-        ResultOutputType.STDOUT -> System.out.println(msg)
-        ResultOutputType.STDERR -> System.err.println(msg)
+        OutputStreamType.STDOUT -> System.out.println(msg)
+        OutputStreamType.STDERR -> System.err.println(msg)
         else -> return
     }
 }

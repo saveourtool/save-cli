@@ -5,7 +5,7 @@
 
 package org.cqfn.save.core.logging
 
-import org.cqfn.save.core.config.ResultOutputType
+import org.cqfn.save.core.config.OutputStreamType
 import org.cqfn.save.core.utils.writeToStream
 
 import kotlinx.datetime.Clock
@@ -32,7 +32,7 @@ var isTimeStampsEnabled: Boolean = false
 fun logMessage(
     level: String,
     msg: String,
-    stream: ResultOutputType = ResultOutputType.STDOUT
+    stream: OutputStreamType = OutputStreamType.STDOUT
 ) {
     val currentTime = if (isTimeStampsEnabled) {
         val currentTimeInstance = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
@@ -66,11 +66,11 @@ fun logInfo(msg: String): Unit = logMessage("INFO", msg)
  *
  * @param msg a message string
  */
-fun logWarn(msg: String): Unit = logMessage("WARN", msg, ResultOutputType.STDERR)
+fun logWarn(msg: String): Unit = logMessage("WARN", msg, OutputStreamType.STDERR)
 
 /**
  * Log a message with error level
  *
  * @param msg a message string
  */
-fun logError(msg: String): Unit = logMessage("ERROR", msg, ResultOutputType.STDERR)
+fun logError(msg: String): Unit = logMessage("ERROR", msg, OutputStreamType.STDERR)

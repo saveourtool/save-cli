@@ -6,7 +6,7 @@
 
 package org.cqfn.save.core.files
 
-import org.cqfn.save.core.config.ResultOutputType
+import org.cqfn.save.core.config.OutputStreamType
 import org.cqfn.save.core.utils.writeToStream
 
 import okio.Buffer
@@ -20,7 +20,7 @@ import okio.Timeout
  * A simple okio [Sink] that writes it's input to stdout/stderr
  */
 @Suppress("INLINE_CLASS_CAN_BE_USED")
-class StdStreamsSink(private val outputType: ResultOutputType) : Sink {
+class StdStreamsSink(private val outputType: OutputStreamType) : Sink {
     override fun close() = Unit
 
     override fun flush() = Unit
