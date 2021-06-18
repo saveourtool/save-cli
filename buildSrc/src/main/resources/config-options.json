@@ -96,12 +96,12 @@
       "default" : "null"
     },
     "resultOutput" : {
-      "argType" : "ArgType.Choice<ResultOutputType>()",
-      "kotlinType": "org.cqfn.save.core.config.ResultOutputType",
+      "argType" : "ArgType.Choice<OutputStreamType>()",
+      "kotlinType": "org.cqfn.save.core.config.OutputStreamType",
       "fullName" : "result-output",
       "shortName" : "out",
       "description" : "Data output stream",
-      "default" : "ResultOutputType.STDOUT"
+      "default" : "OutputStreamType.STDOUT"
     },
     "configInheritance" : {
       "argType" : "ArgType.Boolean",
