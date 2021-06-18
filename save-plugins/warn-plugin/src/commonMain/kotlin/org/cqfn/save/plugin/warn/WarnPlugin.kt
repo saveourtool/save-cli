@@ -34,6 +34,7 @@ class WarnPlugin(
     useInternalRedirections) {
     private val fs = FileSystem.SYSTEM
 
+    @Suppress("LOCAL_VARIABLE_EARLY_DECLARATION")
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
         val flattenedResources = files.toList().flatten()
         if (flattenedResources.isEmpty()) {
@@ -46,9 +47,12 @@ class WarnPlugin(
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
 
-        return files.chunked(warnPluginConfig.batchSize ?: 1).map { chunk ->
+        val listTestResult: MutableList<TestResult> = mutableListOf()
+        files.chunked(warnPluginConfig.batchSize ?: 1).map { chunk ->
             handleTestFile(chunk.map { it.single() }, warnPluginConfig, generalConfig)
-        }
+        }.forEach { listTestResult.addAll(it) }
+
+        return listTestResult.asSequence()
     }
 
     override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {
@@ -71,11 +75,13 @@ class WarnPlugin(
 
     @Suppress(
         "TOO_LONG_FUNCTION",
-        "SAY_NO_TO_VAR")
+        "SAY_NO_TO_VAR",
+        "LOCAL_VARIABLE_EARLY_DECLARATION",
+        "LongMethod")
     private fun handleTestFile(
         paths: List<Path>,
         warnPluginConfig: WarnPluginConfig,
-        generalConfig: GeneralConfig?): TestResult {
+        generalConfig: GeneralConfig?): List<TestResult> {
         val expectedWarnings: WarningMap = mutableMapOf()
         paths.forEach { path ->
             expectedWarnings.putAll(
@@ -109,11 +115,11 @@ class WarnPlugin(
         val executionResult = try {
             pb.exec(execCmd, null)
         } catch (ex: ProcessExecutionException) {
-            return TestResult(
+            return listOf(TestResult(
                 paths,
                 Fail(ex.message!!),
                 DebugInfo(null, ex.message, null)
-            )
+            ))
         }
         val stdout = executionResult.stdout.joinToString("\n")
         val stderr = executionResult.stderr.joinToString("\n")
@@ -126,11 +132,22 @@ class WarnPlugin(
             .groupBy { if (it.line != null && it.column != null) it.line to it.column else null }
             .mapValues { (_, warning) -> warning.sortedBy { it.message } }
 
-        return TestResult(
-            paths,
-            checkResults(expectedWarnings, actualWarningsMap, warnPluginConfig),
-            DebugInfo(stdout, stderr, null)
-        )
+        val testResultList: MutableList<TestResult> = mutableListOf()
+        paths.forEach { path ->
+            testResultList.add(
+                TestResult(
+                    listOf(path),
+                    checkResults(
+                        expectedWarnings.filter { it.value.any { warning -> warning.fileName == path.name } },
+                        actualWarningsMap.filter { it.value.any { warning -> warning.fileName == path.name } },
+                        warnPluginConfig
+                    ),
+                    DebugInfo(stdout, stderr, null)
+                )
+            )
+        }
+
+        return testResultList
     }
 
     /**
