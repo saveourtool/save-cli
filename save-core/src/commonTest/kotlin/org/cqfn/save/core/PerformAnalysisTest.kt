@@ -12,6 +12,6 @@ class PerformAnalysisTest {
             reportType = ReportType.PLAIN,
         )
 
-        Save(saveProperties).performAnalysis()
+        Save(saveProperties.mergeConfigWithPriorityToThis(SaveProperties())).performAnalysis()
     }
 }

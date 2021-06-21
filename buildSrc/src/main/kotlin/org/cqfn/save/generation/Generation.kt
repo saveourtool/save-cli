@@ -262,7 +262,6 @@ fun generateDefaultConfig(jsonObject: Map<String, Option>): FunSpec.Builder {
                     defaultFields +
                     ")"
         )
-        .addModifiers(KModifier.PRIVATE)
 }
 
 /**

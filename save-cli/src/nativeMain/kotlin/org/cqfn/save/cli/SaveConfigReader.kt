@@ -6,6 +6,7 @@ package org.cqfn.save.cli
 
 import org.cqfn.save.cli.logging.logErrorAndExit
 import org.cqfn.save.core.config.SaveProperties
+import org.cqfn.save.core.config.defaultConfig
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logInfo
 
@@ -56,7 +57,7 @@ fun createConfigFromArgs(args: Array<String>): SaveProperties {
     val configFromCli = SaveProperties(args)
     logDebug("Properties after parsed command line args:\n${configFromCli.getFields()}")
     // reading configuration from the properties file
-    val configFromPropertiesFile = readPropertiesFile(configFromCli.propertiesFile)
+    val configFromPropertiesFile = readPropertiesFile(configFromCli.propertiesFile ?: defaultConfig().propertiesFile)
     // merging two configurations into single [SaveProperties] class with a priority to command line arguments
     val mergedProperties = configFromCli.mergeConfigWithPriorityToThis(configFromPropertiesFile)
     logInfo("Using the following properties for SAVE execution:\n${mergedProperties.getFields()}")
@@ -69,8 +70,9 @@ fun createConfigFromArgs(args: Array<String>): SaveProperties {
  */
 @OptIn(ExperimentalSerializationApi::class)
 fun readPropertiesFile(propertiesFileName: String?): SaveProperties {
-    propertiesFileName ?: return SaveProperties()
-
+    if (propertiesFileName == null || !FileSystem.SYSTEM.exists(propertiesFileName.toPath())) {
+        return SaveProperties()
+    }
     logDebug("Reading properties from the file: $propertiesFileName")
 
     val properties: Map<String, String> = try {
