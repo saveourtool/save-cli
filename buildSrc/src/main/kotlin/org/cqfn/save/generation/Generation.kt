@@ -152,7 +152,9 @@ fun generateSaveProperties(jsonObject: Map<String, Option>, destination: File) {
     val classBuilder = generateSavePropertiesClass(jsonObject)
     val mergeFunc = generateMergeConfigFunc(jsonObject)
     classBuilder.addFunction(mergeFunc.build())
-    builder.addType(classBuilder.build()).indent("    ")
+    builder.addType(classBuilder.build())
+    builder.addFunction(generateDefaultConfig(jsonObject).build())
+    builder.indent("    ")
     destination.writeText(builder.build().toString())
 }
 
@@ -178,13 +180,7 @@ fun generateSavePropertiesClass(jsonObject: Map<String, Option>): TypeSpec.Build
     val primaryCtor = FunSpec.constructorBuilder()
     for ((name, value) in jsonObject) {
         primaryCtor.addParameter(ParameterSpec.builder(name, createClassName(value.kotlinType).copy(nullable = true))
-            .defaultValue(run {
-                var default = value.default
-                if (default != "null" && value.kotlinType == "kotlin.String") {
-                    default = "\"$default\""
-                }
-                default
-            })
+            .defaultValue("null")
             .build())
         val property = PropertySpec.builder(name, createClassName(value.kotlinType).copy(nullable = true))
             .initializer(name)
@@ -193,12 +189,15 @@ fun generateSavePropertiesClass(jsonObject: Map<String, Option>): TypeSpec.Build
     }
     primaryCtor.addParameter(
         ParameterSpec.builder(
-            "testFiles", ClassName("kotlin.collections", "List").parameterizedBy(ClassName("kotlin", "String"))
+            "testFiles", ClassName("kotlin.collections", "List")
+                .parameterizedBy(ClassName("kotlin", "String")).copy(nullable = true)
         )
-            .defaultValue("emptyList()")
+            .defaultValue("null")
             .build()
     )
-    val property = PropertySpec.builder("testFiles", ClassName("kotlin.collections", "List").parameterizedBy(ClassName("kotlin", "String")))
+    val property = PropertySpec.builder("testFiles", ClassName("kotlin.collections", "List")
+        .parameterizedBy(ClassName("kotlin", "String")).copy(nullable = true)
+    )
         .initializer("testFiles")
         .mutable()
     classBuilder.addProperty(property.build())
@@ -244,6 +243,29 @@ fun createClassName(type: String): TypeName {
 fun extractClassNameFromString(type: String) = ClassName(type.substringBeforeLast("."), type.substringAfterLast("."))
 
 /**
+ * @param jsonObject map of cli option names to [Option] objects
+ * @return function which returns instance of SaveProperties with default values
+ */
+fun generateDefaultConfig(jsonObject: Map<String, Option>): FunSpec.Builder {
+    val defaultFields = jsonObject.map { (name, value) ->
+        if (value.kotlinType == "kotlin.String" && value.default != "null") {
+            "$name = \"${value.default}\","
+        } else {
+            "$name = ${value.default},"
+        }
+    }.joinToString("\n") + "\ntestFiles = emptyList()\n"
+
+    // bad indent https://github.com/square/kotlinpoet/issues/415
+    return FunSpec.builder("defaultConfig")
+        .addStatement(
+            "return SaveProperties(" +
+                    defaultFields +
+                    ")"
+        )
+        .addModifiers(KModifier.PRIVATE)
+}
+
+/**
  * Generate function, which will merge cli config options and options from property file
  *
  * @param jsonObject map of cli option names to [Option] objects
@@ -259,8 +281,11 @@ fun generateMergeConfigFunc(jsonObject: Map<String, Option>): FunSpec.Builder {
         .addKdoc(kdoc)
         .addParameter("configFromPropertiesFile", ClassName("org.cqfn.save.core.config", "SaveProperties"))
         .returns(ClassName("org.cqfn.save.core.config", "SaveProperties"))
-    val statements = jsonObject.entries.joinToString("\n") { "${it.key} = ${it.key} ?: configFromPropertiesFile.${it.key}" }
+    val statements = jsonObject.entries.joinToString("\n") {
+        "${it.key} = ${it.key} ?: configFromPropertiesFile.${it.key} ?: defaultConfig().${it.key}".replace(" ", "·")
+    }
     mergeFunc.addStatement(statements)
+    mergeFunc.addStatement("testFiles = testFiles ?: configFromPropertiesFile.testFiles ?: defaultConfig().testFiles")
     mergeFunc.addStatement("return this")
     return mergeFunc
 }
