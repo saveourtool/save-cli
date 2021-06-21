@@ -6,13 +6,11 @@ package org.cqfn.save.core.config
 
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.plugin.GeneralConfig
+import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.plugin.PluginConfig
 
 import okio.FileSystem
 import okio.Path
-import org.cqfn.save.core.plugin.Plugin
-import org.cqfn.save.core.reporter.Reporter
-import org.cqfn.save.core.utils.createPluginConfigListFromToml
 
 /**
  * Configuration for a test suite, that is read from test suite configuration file (toml config)
@@ -79,6 +77,9 @@ data class TestConfig(
 
     /**
      * Walk all descendant configs and merge them with their parents
+     *
+     * @param createPluginConfigList a function which can create a list of [PluginConfig]s for this [TestConfig]
+     * @return an update this [TestConfig]
      */
     fun buildDescendantConfigs(createPluginConfigList: (TestConfig) -> List<PluginConfig>): TestConfig {
         getAllTestConfigs().forEach { testConfig ->
@@ -92,6 +93,10 @@ data class TestConfig(
         return this
     }
 
+    /**
+     * @param pluginFromConfig a function which can create a list of [Plugin]s for this [TestConfig]
+     * @param handler a function that is invoked for each created plugin
+     */
     fun forEachPlugin(pluginFromConfig: (PluginConfig, TestConfig) -> Plugin, handler: (Plugin) -> Unit) {
         // exclude general configuration from the list of plugins
         pluginConfigsWithoutGeneralConfig().map {
