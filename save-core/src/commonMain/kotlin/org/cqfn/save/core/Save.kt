@@ -3,9 +3,6 @@ package org.cqfn.save.core
 import org.cqfn.save.core.config.OutputStreamType
 import org.cqfn.save.core.config.ReportType
 import org.cqfn.save.core.config.SaveProperties
-import org.cqfn.save.core.config.TestConfig
-import org.cqfn.save.core.config.TestConfigSections.FIX
-import org.cqfn.save.core.config.TestConfigSections.WARN
 import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.files.StdStreamsSink
 import org.cqfn.save.core.logging.isDebugEnabled
@@ -14,7 +11,6 @@ import org.cqfn.save.core.logging.logError
 import org.cqfn.save.core.logging.logInfo
 import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.plugin.Plugin
-import org.cqfn.save.core.plugin.PluginConfig
 import org.cqfn.save.core.plugin.PluginException
 import org.cqfn.save.core.reporter.Reporter
 import org.cqfn.save.core.result.Crash
@@ -22,9 +18,8 @@ import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.Ignored
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
-import org.cqfn.save.core.utils.createPluginConfigListFromToml
-import org.cqfn.save.plugin.warn.WarnPlugin
-import org.cqfn.save.plugins.fix.FixPlugin
+import org.cqfn.save.core.utils.buildActivePlugins
+import org.cqfn.save.core.utils.withEvaluatedDescendantConfigsFromToml
 import org.cqfn.save.reporter.plain.PlainTextReporter
 
 import okio.FileSystem
@@ -57,16 +52,14 @@ class Save(
         // get all toml configs in file system
         val rootConfig = ConfigDetector()
             .configFromFile(fullPathToConfig)
-            .buildDescendantConfigs {
-                createPluginConfigListFromToml(it.location)
-            }
+            .withEvaluatedDescendantConfigsFromToml()
 
         rootConfig.getAllTestConfigs()
             .forEach { testConfig ->
                 // iterating top-down
                 reporter.beforeAll()
 
-                testConfig.forEachPlugin(::createPlugin) {
+                testConfig.buildActivePlugins().forEach {
                     // execute created plugins
                     executePlugin(it, reporter)
                 }
@@ -96,13 +89,6 @@ class Save(
         logInfo("<= Finished execution of: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
         reporter.onPluginExecutionEnd(plugin)
     }
-
-    private fun createPlugin(pluginConfig: PluginConfig, testConfig: TestConfig) =
-            when (pluginConfig.type) {
-                FIX -> FixPlugin(testConfig)
-                WARN -> WarnPlugin(testConfig)
-                else -> throw PluginException("Unknown type <${pluginConfig::class}> of plugin config was provided")
-            }
 
     private fun getReporter(saveProperties: SaveProperties): Reporter {
         val out = when (val currentOutputType = saveProperties.resultOutput!!) {

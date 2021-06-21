@@ -81,7 +81,7 @@ data class TestConfig(
      * @param createPluginConfigList a function which can create a list of [PluginConfig]s for this [TestConfig]
      * @return an update this [TestConfig]
      */
-    fun buildDescendantConfigs(createPluginConfigList: (TestConfig) -> List<PluginConfig>): TestConfig {
+    fun withEvaluatedDescendantConfigs(createPluginConfigList: (TestConfig) -> List<PluginConfig>): TestConfig {
         getAllTestConfigs().forEach { testConfig ->
             // discover plugins from the test configuration
             createPluginConfigList(testConfig).forEach {
@@ -94,19 +94,18 @@ data class TestConfig(
     }
 
     /**
+     * Construct plugins from this config and filter out those, that don't have any test resources
+     *
      * @param pluginFromConfig a function which can create a list of [Plugin]s for this [TestConfig]
-     * @param handler a function that is invoked for each created plugin
+     * @return a list of [Plugin]s from this config with non-empty test resources
      */
-    fun forEachPlugin(pluginFromConfig: (PluginConfig, TestConfig) -> Plugin, handler: (Plugin) -> Unit) {
-        // exclude general configuration from the list of plugins
-        pluginConfigsWithoutGeneralConfig().map {
-            // create plugins from the configuration
-            pluginFromConfig(it, this)
-        }
-            // filter out plugins that don't have any resources
-            .filter { it.discoverTestFiles(directory).any() }
-            .forEach(handler)
-    }
+    fun buildActivePlugins(pluginFromConfig: (PluginConfig, TestConfig) -> Plugin): List<Plugin> =
+            pluginConfigsWithoutGeneralConfig().map {
+                // create plugins from the configuration
+                pluginFromConfig(it, this)
+            }
+                // filter out plugins that don't have any resources
+                .filter { it.discoverTestFiles(directory).any() }
 
     /**
      * filtering out general configs
