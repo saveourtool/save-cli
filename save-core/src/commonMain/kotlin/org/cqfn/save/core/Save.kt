@@ -50,11 +50,10 @@ class Save(
         val fullPathToConfig = saveProperties.testRootPath!!.toPath() / saveProperties.testConfigPath!!.toPath()
         val reporter = getReporter(saveProperties)
         // get all toml configs in file system
-        val rootConfig = ConfigDetector()
+        ConfigDetector()
             .configFromFile(fullPathToConfig)
             .withEvaluatedDescendantConfigsFromToml()
-
-        rootConfig.getAllTestConfigs()
+            .getAllTestConfigs()
             .forEach { testConfig ->
                 // iterating top-down
                 reporter.beforeAll()
