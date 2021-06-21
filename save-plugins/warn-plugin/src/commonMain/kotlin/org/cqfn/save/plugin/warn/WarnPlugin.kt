@@ -34,7 +34,6 @@ class WarnPlugin(
     useInternalRedirections) {
     private val fs = FileSystem.SYSTEM
 
-    @Suppress("LOCAL_VARIABLE_EARLY_DECLARATION")
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
         val flattenedResources = files.toList().flatten()
         if (flattenedResources.isEmpty()) {
@@ -47,12 +46,9 @@ class WarnPlugin(
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
 
-        val listTestResult: MutableList<TestResult> = mutableListOf()
-        files.chunked(warnPluginConfig.batchSize ?: 1).map { chunk ->
+        return files.chunked(warnPluginConfig.batchSize ?: 1).map { chunk ->
             handleTestFile(chunk.map { it.single() }, warnPluginConfig, generalConfig)
-        }.forEach { listTestResult.addAll(it) }
-
-        return listTestResult.asSequence()
+        }.flatMap { it }
     }
 
     override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {
@@ -76,7 +72,6 @@ class WarnPlugin(
     @Suppress(
         "TOO_LONG_FUNCTION",
         "SAY_NO_TO_VAR",
-        "LOCAL_VARIABLE_EARLY_DECLARATION",
         "LongMethod")
     private fun handleTestFile(
         paths: List<Path>,
@@ -132,22 +127,17 @@ class WarnPlugin(
             .groupBy { if (it.line != null && it.column != null) it.line to it.column else null }
             .mapValues { (_, warning) -> warning.sortedBy { it.message } }
 
-        val testResultList: MutableList<TestResult> = mutableListOf()
-        paths.forEach { path ->
-            testResultList.add(
-                TestResult(
-                    listOf(path),
-                    checkResults(
-                        expectedWarnings.filter { it.value.any { warning -> warning.fileName == path.name } },
-                        actualWarningsMap.filter { it.value.any { warning -> warning.fileName == path.name } },
-                        warnPluginConfig
-                    ),
-                    DebugInfo(stdout, stderr, null)
-                )
+        return paths.map { path ->
+            TestResult(
+                listOf(path),
+                checkResults(
+                    expectedWarnings.filter { it.value.any { warning -> warning.fileName == path.name } },
+                    actualWarningsMap.filter { it.value.any { warning -> warning.fileName == path.name } },
+                    warnPluginConfig
+                ),
+                DebugInfo(stdout, stderr, null)
             )
         }
-
-        return testResultList
     }
 
     /**
