@@ -48,7 +48,7 @@ class WarnPlugin(
 
         return files.chunked(warnPluginConfig.batchSize ?: 1).map { chunk ->
             handleTestFile(chunk.map { it.single() }, warnPluginConfig, generalConfig)
-        }.flatMap { it }
+        }.flatten()
     }
 
     override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {
@@ -116,8 +116,8 @@ class WarnPlugin(
                 DebugInfo(null, ex.message, null)
             ))
         }
-        val stdout = executionResult.stdout.joinToString("\n")
-        val stderr = executionResult.stderr.joinToString("\n")
+        val stdout = executionResult.stdout
+        val stderr = executionResult.stderr
 
         val actualWarningsMap = executionResult.stdout.mapNotNull {
             with(warnPluginConfig) {
@@ -135,7 +135,10 @@ class WarnPlugin(
                     actualWarningsMap.filter { it.value.any { warning -> warning.fileName == path.name } },
                     warnPluginConfig
                 ),
-                DebugInfo(stdout, stderr, null)
+                DebugInfo(
+                    stdout.filter { it.contains(path.name) }.joinToString("\n"),
+                    stderr.filter { it.contains(path.name) }.joinToString("\n"),
+                    null)
             )
         }
     }
