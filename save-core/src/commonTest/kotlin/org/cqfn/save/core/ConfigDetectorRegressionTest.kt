@@ -10,21 +10,22 @@ import kotlin.test.assertEquals
 class ConfigDetectorRegressionTest {
     @Test
     fun `config detector regression test on directories`() {
+        val baseDir = "../examples/discovery-test"
         val expected = listOf(
-            "../examples/save.toml", "../examples/highlevel/save.toml",
-            "../examples/highlevel/suite1/save.toml", "../examples/highlevel/suite1/subSuite/save.toml",
-            "../examples/highlevel/suite2/inner/save.toml"
+            "$baseDir/save.toml", "$baseDir/highlevel/save.toml",
+            "$baseDir/highlevel/suite1/save.toml", "$baseDir/highlevel/suite1/subSuite/save.toml",
+            "$baseDir/highlevel/suite2/inner/save.toml"
         )
 
         val actual1 = ConfigDetector()
-            .configFromFile("../examples".toPath())
+            .configFromFile(baseDir.toPath())
             .getAllTestConfigs()
             .map { it.location.toString() }
 
         assertEquals(expected, actual1)
 
         val actual2 = ConfigDetector()
-            .configFromFile("../examples/save.toml".toPath())
+            .configFromFile("$baseDir/save.toml".toPath())
             .getAllTestConfigs()
             .map { it.location.toString() }
 

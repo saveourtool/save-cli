@@ -1,13 +1,13 @@
 package org.cqfn.save.core
 
+import org.cqfn.save.core.config.OutputStreamType
 import org.cqfn.save.core.config.ReportType
-import org.cqfn.save.core.config.ResultOutputType
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.config.TestConfigSections.FIX
 import org.cqfn.save.core.config.TestConfigSections.WARN
 import org.cqfn.save.core.files.ConfigDetector
-import org.cqfn.save.core.files.StdoutSink
+import org.cqfn.save.core.files.StdStreamsSink
 import org.cqfn.save.core.logging.isDebugEnabled
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
@@ -105,10 +105,9 @@ class Save(
             }
 
     private fun getReporter(saveProperties: SaveProperties): Reporter {
-        val out = when (saveProperties.resultOutput) {
-            ResultOutputType.FILE -> fs.sink("save.out".toPath()).buffer()
-            ResultOutputType.STDOUT -> StdoutSink().buffer()
-            else -> TODO("Type ${saveProperties.resultOutput} is not yet supported")
+        val out = when (val currentOutputType = saveProperties.resultOutput!!) {
+            OutputStreamType.FILE -> fs.sink("save.out".toPath()).buffer()
+            OutputStreamType.STDOUT, OutputStreamType.STDERR -> StdStreamsSink(currentOutputType).buffer()
         }
         // todo: make `saveProperties.reportType` a collection
         return when (saveProperties.reportType) {
