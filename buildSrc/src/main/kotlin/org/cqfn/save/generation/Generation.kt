@@ -243,6 +243,8 @@ fun createClassName(type: String): TypeName {
 fun extractClassNameFromString(type: String) = ClassName(type.substringBeforeLast("."), type.substringAfterLast("."))
 
 /**
+ * Create the instance with default field values, in aim to use them if no options provided neither from CLI nor from save.properties
+ *
  * @param jsonObject map of cli option names to [Option] objects
  * @return function which returns instance of SaveProperties with default values
  */
@@ -255,7 +257,7 @@ fun generateDefaultConfig(jsonObject: Map<String, Option>): FunSpec.Builder {
         }
     }.joinToString("\n") + "\ntestFiles = emptyList()\n"
 
-    // bad indent https://github.com/square/kotlinpoet/issues/415
+    // bad indent https://github.com/square/kotlinpoet/issues/415, failed to use `%[` and `%]` for now
     return FunSpec.builder("defaultConfig")
         .addStatement(
             "return SaveProperties(" +
