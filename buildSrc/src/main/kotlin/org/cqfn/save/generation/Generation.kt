@@ -282,11 +282,12 @@ fun generateMergeConfigFunc(jsonObject: Map<String, Option>): FunSpec.Builder {
         .addKdoc(kdoc)
         .addParameter("configFromPropertiesFile", ClassName("org.cqfn.save.core.config", "SaveProperties"))
         .returns(ClassName("org.cqfn.save.core.config", "SaveProperties"))
+        .addStatement("val defaultConfig = defaultConfig()")
     val statements = jsonObject.entries.joinToString("\n") {
-        "${it.key} = ${it.key} ?: configFromPropertiesFile.${it.key} ?: defaultConfig().${it.key}".replace(" ", "·")
+        "${it.key} = ${it.key} ?: configFromPropertiesFile.${it.key} ?: defaultConfig.${it.key}".replace(" ", "·")
     }
     mergeFunc.addStatement(statements)
-    mergeFunc.addStatement("testFiles = testFiles ?: configFromPropertiesFile.testFiles ?: defaultConfig().testFiles")
+    mergeFunc.addStatement("testFiles = testFiles ?: configFromPropertiesFile.testFiles ?: defaultConfig.testFiles")
     mergeFunc.addStatement("return this")
     return mergeFunc
 }
