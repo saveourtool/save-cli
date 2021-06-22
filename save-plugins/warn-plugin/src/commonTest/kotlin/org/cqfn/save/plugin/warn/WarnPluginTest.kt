@@ -297,9 +297,8 @@ class WarnPluginTest {
             ),
             GeneralConfig("", "", "", "")
         ) { results ->
-            // fixme: should be 2 after https://github.com/cqfn/save/issues/131
-            assertEquals(1, results.size)
-            assertTrue(results.single().status is Pass)
+            assertEquals(2, results.size)
+            assertTrue(results.all { it.status is Pass })
         }
         fs.delete(tmpDir / "resource")
     }
@@ -331,8 +330,7 @@ class WarnPluginTest {
             ),
             GeneralConfig("", "", "", "")
         ) { results ->
-            // fixme: should be 4 after https://github.com/cqfn/save/issues/131
-            assertEquals(2, results.size)
+            assertEquals(4, results.size)
             assertTrue(results.all { it.status is Pass })
         }
         fs.delete(tmpDir / "resource")
