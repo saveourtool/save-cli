@@ -19,7 +19,7 @@ import org.cqfn.save.core.result.Ignored
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.buildActivePlugins
-import org.cqfn.save.core.utils.withEvaluatedDescendantConfigsFromToml
+import org.cqfn.save.core.utils.processInPlace
 import org.cqfn.save.reporter.plain.PlainTextReporter
 
 import okio.FileSystem
@@ -52,16 +52,19 @@ class Save(
         // get all toml configs in file system
         ConfigDetector()
             .configFromFile(fullPathToConfig)
-            .withEvaluatedDescendantConfigsFromToml()
             .getAllTestConfigs()
             .forEach { testConfig ->
                 // iterating top-down
                 reporter.beforeAll()
 
-                testConfig.buildActivePlugins().forEach {
-                    // execute created plugins
-                    executePlugin(it, reporter)
-                }
+                testConfig
+                    // fully process this config's configuration sections
+                    .processInPlace()
+                    // create plugins and choose only active (with test resources) ones
+                    .buildActivePlugins().forEach {
+                        // execute created plugins
+                        executePlugin(it, reporter)
+                    }
 
                 reporter.afterAll()
             }

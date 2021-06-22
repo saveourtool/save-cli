@@ -15,7 +15,7 @@ import org.cqfn.save.plugins.fix.FixPlugin
  *
  * @return [this] config with all descendants being evaluated (`pluginConfigs` are filled with data and merged with parents)
  */
-fun TestConfig.withEvaluatedDescendantConfigsFromToml() = withEvaluatedDescendantConfigs {
+fun TestConfig.processInPlace() = processInPlace {
     createPluginConfigListFromToml(it.location)
 }
 

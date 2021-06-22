@@ -81,15 +81,13 @@ data class TestConfig(
      * @param createPluginConfigList a function which can create a list of [PluginConfig]s for this [TestConfig]
      * @return an update this [TestConfig]
      */
-    fun withEvaluatedDescendantConfigs(createPluginConfigList: (TestConfig) -> List<PluginConfig>): TestConfig {
-        getAllTestConfigs().forEach { testConfig ->
-            // discover plugins from the test configuration
-            createPluginConfigList(testConfig).forEach {
-                testConfig.pluginConfigs.add(it)
-            }
-            // merge configurations with parents
-            testConfig.mergeConfigWithParents()
+    fun processInPlace(createPluginConfigList: (TestConfig) -> List<PluginConfig>): TestConfig {
+        // discover plugins from the test configuration
+        createPluginConfigList(this).forEach {
+            this.pluginConfigs.add(it)
         }
+        // merge configurations with parents
+        this.mergeConfigWithParents()
         return this
     }
 
