@@ -11,14 +11,15 @@ import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.result.TestStatus
-import org.cqfn.save.core.utils.AtomicInt
+import org.cqfn.save.core.utils.ProcessExecutionException
 import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
 
 import okio.FileSystem
 import okio.Path
 
-private typealias LineColumn = Pair<Int, Int>
+private typealias WarningMap = MutableMap<LineColumn?, List<Warning>>
+internal typealias LineColumn = Pair<Int, Int>
 
 /**
  * A plugin that runs an executable and verifies that it produces required warning messages.
@@ -45,20 +46,20 @@ class WarnPlugin(
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
 
-        return files.chunked(warnPluginConfig.batchSize ?: 1).map { resources ->
-            handleTestFile(resources.single(), warnPluginConfig, generalConfig)
+        return files.chunked(warnPluginConfig.batchSize ?: 1).map { chunk ->
+            handleTestFile(chunk.map { it.single() }, warnPluginConfig, generalConfig)
         }
     }
 
     override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val regex = warnPluginConfig.resourceNamePattern
-        return resourceDirectories
-            .map { directory ->
-                FileSystem.SYSTEM.list(directory)
-                    .filter { (regex).matches(it.name) }
-            }
-            .filter { it.isNotEmpty() }
+        // returned sequence is a sequence of groups of size 1
+        return resourceDirectories.flatMap { directory ->
+            fs.list(directory)
+                .filter { regex.matches(it.name) }
+                .map { listOf(it) }
+        }
     }
 
     override fun cleanupTempDir() {
@@ -105,26 +106,29 @@ class WarnPlugin(
             if (generalConfig!!.ignoreSaveComments == true) createTestFile(it, warnPluginConfig.warningsInputPattern!!) else it.toString()
         }
         val execCmd = "${generalConfig!!.execCmd} ${warnPluginConfig.execFlags} $fileNames"
-
-        val executionResult = pb.exec(execCmd, null)
+        val executionResult = try {
+            pb.exec(execCmd, null)
+        } catch (ex: ProcessExecutionException) {
+            return TestResult(
+                paths,
+                Fail(ex.message!!),
+                DebugInfo(null, ex.message, null)
+            )
+        }
         val stdout = executionResult.stdout.joinToString("\n")
         val stderr = executionResult.stderr.joinToString("\n")
-        val status = if (executionResult.code == 0) {
-            val actualWarningsMap = executionResult.stdout.mapNotNull {
-                with(warnPluginConfig) {
-                    it.extractWarning(warningsOutputPattern!!, fileNameCaptureGroupOut!!, lineCaptureGroupOut, columnCaptureGroupOut, messageCaptureGroupOut!!)
-                }
+
+        val actualWarningsMap = executionResult.stdout.mapNotNull {
+            with(warnPluginConfig) {
+                it.extractWarning(warningsOutputPattern!!, fileNameCaptureGroupOut!!, lineCaptureGroupOut, columnCaptureGroupOut, messageCaptureGroupOut!!)
             }
-                .groupBy { if (it.line != null && it.column != null) it.line to it.column else null }
-                .mapValues { (_, warning) -> warning.sortedBy { it.message } }
-            checkResults(expectedWarnings, actualWarningsMap, warnPluginConfig)
-        } else {
-            Fail(stderr)
         }
+            .groupBy { if (it.line != null && it.column != null) it.line to it.column else null }
+            .mapValues { (_, warning) -> warning.sortedBy { it.message } }
 
         return TestResult(
             paths,
-            status,
+            checkResults(expectedWarnings, actualWarningsMap, warnPluginConfig),
             DebugInfo(stdout, stderr, null)
         )
     }
@@ -139,7 +143,7 @@ class WarnPlugin(
 
         createTempDir(tmpDir)
 
-        val fileName = tmpDir / testFileName()
+        val fileName = tmpDir / path.name
         fs.write(fs.createFile(fileName)) {
             fs.readLines(path).forEach {
                 if (!warningsInputPattern.matches(it)) {
@@ -152,12 +156,20 @@ class WarnPlugin(
         return fileName.toString()
     }
 
+    /**
+     * Compares actual and expected warnings and returns TestResult
+     *
+     * @param expectedWarningsMap expected warnings, grouped by LineCol
+     * @param actualWarningsMap actual warnings, grouped by LineCol
+     * @param warnPluginConfig configuration of warn plugin
+     * @return [TestResult]
+     */
     @Suppress("TYPE_ALIAS")
-    private fun checkResults(expectedWarningsMap: Map<LineColumn?, List<Warning>>,
-                             actualWarningsMap: Map<LineColumn?, List<Warning>>,
-                             warnPluginConfig: WarnPluginConfig): TestStatus {
-        val missingWarnings = expectedWarningsMap.filterValues { it !in actualWarningsMap.values }.values
-        val unexpectedWarnings = actualWarningsMap.filterValues { it !in expectedWarningsMap.values }.values
+    internal fun checkResults(expectedWarningsMap: Map<LineColumn?, List<Warning>>,
+                              actualWarningsMap: Map<LineColumn?, List<Warning>>,
+                              warnPluginConfig: WarnPluginConfig): TestStatus {
+        val missingWarnings = expectedWarningsMap.valuesNotIn(actualWarningsMap)
+        val unexpectedWarnings = actualWarningsMap.valuesNotIn(expectedWarningsMap)
 
         return when (missingWarnings.isEmpty() to unexpectedWarnings.isEmpty()) {
             false to true -> Fail("Some warnings were expected but not received: $missingWarnings")
@@ -172,11 +184,14 @@ class WarnPlugin(
             else -> Fail("")
         }
     }
-
-    private fun testFileName(): String = "test_file${atomicInt.addAndGet(1)}"
-
-    companion object {
-        val atomicInt: AtomicInt = AtomicInt(0)
-    }
 }
-typealias WarningMap = MutableMap<Pair<Int, Int>?, List<Warning>>
+
+/**
+ * Collect all values that are present in [this] map, but absent in [other]
+ */
+private fun <K, V> Map<K, List<V>>.valuesNotIn(other: Map<K, List<V>>): List<V> = flatMap { (key, value) ->
+    other[key]?.let { otherValue ->
+        value.filter { it !in otherValue }
+    }
+        ?: value
+}

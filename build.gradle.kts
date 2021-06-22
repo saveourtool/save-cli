@@ -17,7 +17,12 @@ configureVersioning()
 allprojects {
     repositories {
         mavenCentral()
-        maven(url = "https://kotlin.bintray.com/kotlinx/")
+        maven("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven") {
+            // detekt requires kotlinx.html (until detekt version 1.17)
+            content {
+                includeModule("org.jetbrains.kotlinx", "kotlinx-html-jvm")
+            }
+        }
     }
     configureDiktat()
     configureDetekt()

@@ -11,6 +11,7 @@ import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
+import org.cqfn.save.core.utils.ProcessExecutionException
 
 import io.github.petertrr.diffutils.diff
 import io.github.petertrr.diffutils.patch.ChangeDelta
@@ -57,22 +58,26 @@ class FixPlugin(
             .map { (expected, test) ->
                 val testCopy = createTestFile(test)
                 val execCmd = "${(generalConfig!!.execCmd)} ${fixPluginConfig.execFlags} $testCopy"
-                val executionResult = pb.exec(execCmd, null)
+                val executionResult = try {
+                    pb.exec(execCmd, null)
+                } catch (ex: ProcessExecutionException) {
+                    return@map TestResult(
+                        listOf(expected, test),
+                        Fail(ex.message!!),
+                        DebugInfo(null, ex.message, null)
+                    )
+                }
                 val stdout = executionResult.stdout.joinToString("\n")
                 val stderr = executionResult.stderr.joinToString("\n")
 
                 val fixedLines = FileSystem.SYSTEM.readLines(testCopy)
                 val expectedLines = FileSystem.SYSTEM.readLines(expected)
-                val status = if (executionResult.code == 0) {
-                    diff(expectedLines, fixedLines).let { patch ->
-                        if (patch.deltas.isEmpty()) {
-                            Pass(null)
-                        } else {
-                            Fail(patch.formatToString())
-                        }
+                val status = diff(expectedLines, fixedLines).let { patch ->
+                    if (patch.deltas.isEmpty()) {
+                        Pass(null)
+                    } else {
+                        Fail(patch.formatToString())
                     }
-                } else {
-                    Fail(stderr)
                 }
                 TestResult(
                     listOf(expected, test),

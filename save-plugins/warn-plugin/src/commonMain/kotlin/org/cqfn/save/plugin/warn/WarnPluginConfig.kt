@@ -112,7 +112,7 @@ data class WarnPluginConfig(
         requirePositiveIfNotNull(columnCaptureGroup)
         requirePositiveIfNotNull(messageCaptureGroup)
         return WarnPluginConfig(
-            execFlags,
+            execFlags ?: "",
             warningsInputPattern ?: defaultInputPattern,
             warningsOutputPattern ?: defaultOutputPattern,
             newWarningTextHasLine,

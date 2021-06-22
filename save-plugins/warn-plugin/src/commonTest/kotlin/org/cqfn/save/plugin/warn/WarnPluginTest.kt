@@ -104,8 +104,8 @@ class WarnPluginTest {
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
-            val nameWarn = "Some warnings were unexpected: [[Warning(message=Variable name should be in lowerCamelCase, line=5, column=8, fileName=Test1Test.java)]]"
-            assertEquals((results.single().status as Pass).message, nameWarn)
+            val nameWarn = "Some warnings were unexpected: [Warning(message=Variable name should be in lowerCamelCase, line=5, column=8, fileName=Test1Test.java)]"
+            assertEquals(nameWarn, (results.single().status as Pass).message)
         }
         fs.delete(tmpDir / "resource")
     }
@@ -268,6 +268,7 @@ class WarnPluginTest {
                 """.trimMargin().encodeToByteArray()
             )
         }
+        val batchSize = 2
         val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
             listOf(
@@ -292,12 +293,47 @@ class WarnPluginTest {
                 "$catCmd ${tmpDir / "resource"} && set stub=",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 Regex("(.+):(\\d+):(\\d+): (.+)"),
-                true, true, 2, 1, 2, 3, 1, 2, 3, 4
+                true, true, batchSize, 1, 2, 3, 1, 2, 3, 4
             ),
             GeneralConfig("", "", "", "")
         ) { results ->
+            // fixme: should be 2 after https://github.com/cqfn/save/issues/131
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
+        }
+        fs.delete(tmpDir / "resource")
+    }
+
+    @Test
+    @Suppress("TOO_LONG_FUNCTION")
+    fun `regression - test resources in multiple directories`() {
+        fs.write(fs.createFile(tmpDir / "resource")) {
+            write(
+                """
+                |
+                """.trimMargin().encodeToByteArray()
+            )
+        }
+        fs.createFile(tmpDir / "Test1Test.java")
+        fs.createFile(tmpDir / "Test2Test.java")
+        fs.createDirectory(tmpDir / "inner")
+        fs.createFile(tmpDir / "inner" / "Test3Test.java")
+        fs.createFile(tmpDir / "inner" / "Test4Test.java")
+        val batchSize = 2
+        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
+        performTest(
+            emptyList(),  // files will be discovered in tmpDir, because they are already created
+            WarnPluginConfig(
+                "$catCmd ${tmpDir / "resource"} && set stub=",
+                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
+                Regex("(.+):(\\d+):(\\d+): (.+)"),
+                true, true, batchSize, 1, 2, 3, 1, 2, 3, 4
+            ),
+            GeneralConfig("", "", "", "")
+        ) { results ->
+            // fixme: should be 4 after https://github.com/cqfn/save/issues/131
+            assertEquals(2, results.size)
+            assertTrue(results.all { it.status is Pass })
         }
         fs.delete(tmpDir / "resource")
     }
@@ -313,11 +349,10 @@ class WarnPluginTest {
         generalConfig: GeneralConfig,
         assertion: (List<TestResult>) -> Unit) {
         val config = fs.createFile(tmpDir / "save.toml")
-        var i = 1
-        texts.forEach {
-            val testFileName = "Test${i++}Test.java"
+        texts.forEachIndexed { idx, text ->
+            val testFileName = "Test${idx + 1}Test.java"
             fs.write(fs.createFile(tmpDir / testFileName)) {
-                write(it.encodeToByteArray())
+                write(text.encodeToByteArray())
             }
         }
 
