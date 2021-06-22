@@ -48,7 +48,7 @@ class WarnPlugin(
 
         return files.chunked(warnPluginConfig.batchSize ?: 1).map { chunk ->
             handleTestFile(chunk.map { it.single() }, warnPluginConfig, generalConfig)
-        }
+        }.flatten()
     }
 
     override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {
@@ -71,11 +71,12 @@ class WarnPlugin(
 
     @Suppress(
         "TOO_LONG_FUNCTION",
-        "SAY_NO_TO_VAR")
+        "SAY_NO_TO_VAR",
+        "LongMethod")
     private fun handleTestFile(
         paths: List<Path>,
         warnPluginConfig: WarnPluginConfig,
-        generalConfig: GeneralConfig?): TestResult {
+        generalConfig: GeneralConfig?): List<TestResult> {
         val expectedWarnings: WarningMap = mutableMapOf()
         paths.forEach { path ->
             expectedWarnings.putAll(
@@ -109,14 +110,14 @@ class WarnPlugin(
         val executionResult = try {
             pb.exec(execCmd, null)
         } catch (ex: ProcessExecutionException) {
-            return TestResult(
+            return listOf(TestResult(
                 paths,
                 Fail(ex.message!!),
                 DebugInfo(null, ex.message, null)
-            )
+            ))
         }
-        val stdout = executionResult.stdout.joinToString("\n")
-        val stderr = executionResult.stderr.joinToString("\n")
+        val stdout = executionResult.stdout
+        val stderr = executionResult.stderr
 
         val actualWarningsMap = executionResult.stdout.mapNotNull {
             with(warnPluginConfig) {
@@ -126,11 +127,20 @@ class WarnPlugin(
             .groupBy { if (it.line != null && it.column != null) it.line to it.column else null }
             .mapValues { (_, warning) -> warning.sortedBy { it.message } }
 
-        return TestResult(
-            paths,
-            checkResults(expectedWarnings, actualWarningsMap, warnPluginConfig),
-            DebugInfo(stdout, stderr, null)
-        )
+        return paths.map { path ->
+            TestResult(
+                listOf(path),
+                checkResults(
+                    expectedWarnings.filter { it.value.any { warning -> warning.fileName == path.name } },
+                    actualWarningsMap.filter { it.value.any { warning -> warning.fileName == path.name } },
+                    warnPluginConfig
+                ),
+                DebugInfo(
+                    stdout.filter { it.contains(path.name) }.joinToString("\n"),
+                    stderr.filter { it.contains(path.name) }.joinToString("\n"),
+                    null)
+            )
+        }
     }
 
     /**
