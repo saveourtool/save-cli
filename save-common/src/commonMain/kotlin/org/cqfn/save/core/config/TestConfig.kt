@@ -6,6 +6,7 @@ package org.cqfn.save.core.config
 
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.plugin.GeneralConfig
+import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.plugin.PluginConfig
 
 import okio.FileSystem
@@ -73,6 +74,36 @@ data class TestConfig(
     fun getAllTestConfigs(): List<TestConfig> {
         return listOf(this) + this.childConfigs.flatMap { it.getAllTestConfigs() }
     }
+
+    /**
+     * Walk all descendant configs and merge them with their parents
+     *
+     * @param createPluginConfigList a function which can create a list of [PluginConfig]s for this [TestConfig]
+     * @return an update this [TestConfig]
+     */
+    fun processInPlace(createPluginConfigList: (TestConfig) -> List<PluginConfig>): TestConfig {
+        // discover plugins from the test configuration
+        createPluginConfigList(this).forEach {
+            this.pluginConfigs.add(it)
+        }
+        // merge configurations with parents
+        this.mergeConfigWithParents()
+        return this
+    }
+
+    /**
+     * Construct plugins from this config and filter out those, that don't have any test resources
+     *
+     * @param pluginFromConfig a function which can create a list of [Plugin]s for this [TestConfig]
+     * @return a list of [Plugin]s from this config with non-empty test resources
+     */
+    fun buildActivePlugins(pluginFromConfig: (PluginConfig, TestConfig) -> Plugin): List<Plugin> =
+            pluginConfigsWithoutGeneralConfig().map {
+                // create plugins from the configuration
+                pluginFromConfig(it, this)
+            }
+                // filter out plugins that don't have any resources
+                .filter { it.discoverTestFiles(directory).any() }
 
     /**
      * filtering out general configs
