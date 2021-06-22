@@ -97,6 +97,52 @@ class FixPluginTest {
         }
     }
 
+    @Test
+    @Suppress("TOO_LONG_FUNCTION")
+    fun `test for batchSize`() {
+        val config = fs.createFile(tmpDir / "save.toml")
+        val testFile1 = fs.createFile(tmpDir / "Test3Test.java")
+        val testFile2 = fs.createFile(tmpDir / "Test4Test.java")
+        fs.write(testFile1) {
+            write("Original file".encodeToByteArray())
+        }
+        fs.write(testFile2) {
+            write("Original file".encodeToByteArray())
+        }
+        val expectedFile1 = fs.createFile(tmpDir / "Test3Expected.java")
+        val expectedFile2 = fs.createFile(tmpDir / "Test4Expected.java")
+        fs.write(expectedFile1) {
+            write("Expected file".encodeToByteArray())
+        }
+        fs.write(expectedFile2) {
+            write("Expected file".encodeToByteArray())
+        }
+        val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").lowercase()} && " else ""
+        val executionCmd = "${diskWithTmpDir}cd $tmpDir && echo Expected file | tee"
+
+        val results = FixPlugin(TestConfig(config,
+            null,
+            mutableListOf(
+                FixPluginConfig(executionCmd, 2),
+                GeneralConfig("", "", "", "")
+            )
+        ), useInternalRedirections = false).execute()
+
+        assertEquals(2, results.count(), "Size of results should equal number of pairs")
+        assertTrue(results.all {
+            it.status == Pass(null)
+        })
+        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
+        assertTrue("Files should be identical") {
+            diff(fs.readLines(tmpDir / "Test3Test.java"), fs.readLines(expectedFile1))
+                .deltas.isEmpty()
+        }
+        assertTrue("Files should be identical") {
+            diff(fs.readLines(tmpDir / "Test4Test.java"), fs.readLines(expectedFile2))
+                .deltas.isEmpty()
+        }
+    }
+
     @AfterTest
     fun tearDown() {
         fs.deleteRecursively(tmpDir)
