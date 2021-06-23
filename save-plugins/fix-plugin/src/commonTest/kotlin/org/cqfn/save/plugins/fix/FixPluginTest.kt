@@ -107,7 +107,7 @@ class FixPluginTest {
             write("Original file".encodeToByteArray())
         }
         fs.write(testFile2) {
-            write("Original file".encodeToByteArray())
+            write("Expected file".encodeToByteArray())
         }
         val expectedFile1 = fs.createFile(tmpDir / "Test3Expected.java")
         val expectedFile2 = fs.createFile(tmpDir / "Test4Expected.java")
@@ -118,7 +118,7 @@ class FixPluginTest {
             write("Expected file".encodeToByteArray())
         }
         val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").lowercase()} && " else ""
-        val executionCmd = "${diskWithTmpDir}cd $tmpDir && echo Expected file | tee"
+        val executionCmd = "${diskWithTmpDir}cd $tmpDir && echo Expected file >"
 
         val results = FixPlugin(TestConfig(config,
             null,

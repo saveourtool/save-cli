@@ -84,7 +84,7 @@ batchSize = 1
 ```
 
 When executed from project root (where `save.propertes` is located), SAVE will cd to `rootDir` and discover all files
-matching `inputFilePattern`. It will then execute `$execCmd $testFile` (since we specified
+matching `inputFilePattern`. It will then execute `$execCmd $testFile`. `batchSize` it controls how many files execCmd will process at a time. (since we specified
 `batchSize = 1`, it will provide inputs one by one) and compare warnings its stdout (as per `output` option) parsed using `warningsOutputPattern` with warnings
 parsed from the same `$testFile` using `warningsInputPattern`.
 

@@ -52,7 +52,7 @@ resourceNameExpectedSuffix = "Expected" #(default value)
 ```
 
 When executed from project root (where `save.propertes` is located), SAVE will cd to `rootDir` and discover all pairs of files
-matching `testFilePattern` and `expectedFilePattern` with same prefix. It will then execute `$execCmd $testFile` (since we specified
+matching `testFilePattern` and `expectedFilePattern` with same prefix. It will then execute `$execCmd $testFile`. `batchSize` it controls how many files execCmd will process at a time. (since we specified
 `batchSize = 1`, it will provide inputs one by one) and compare its stdout (as per `output` option) with respecting `$expectedFile`.
 Results will be written in plain text as well as JSON.
 `resourceNameTestSuffix` must include suffix name of the test file. `resourceNameExpectedSuffix` must include suffix name of the expected file.
