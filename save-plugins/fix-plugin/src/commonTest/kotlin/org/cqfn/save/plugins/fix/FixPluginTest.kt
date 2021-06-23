@@ -104,7 +104,7 @@ class FixPluginTest {
         val testFile1 = fs.createFile(tmpDir / "Test3Test.java")
         val testFile2 = fs.createFile(tmpDir / "Test4Test.java")
         fs.write(testFile1) {
-            write("Original file".encodeToByteArray())
+            write("Expected file".encodeToByteArray())
         }
         fs.write(testFile2) {
             write("Expected file".encodeToByteArray())
