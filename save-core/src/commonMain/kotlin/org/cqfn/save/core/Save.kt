@@ -25,6 +25,7 @@ import org.cqfn.save.reporter.plain.PlainTextReporter
 import okio.FileSystem
 import okio.Path.Companion.toPath
 import okio.buffer
+import org.cqfn.save.core.config.SAVE_VERSION
 
 /**
  * @property saveProperties an instance of [SaveProperties]
@@ -45,6 +46,8 @@ class Save(
      * @throws PluginException when we receive invalid type of PluginConfig
      */
     fun performAnalysis() {
+        logInfo("Welcome to SAVE version $SAVE_VERSION")
+
         // FixMe: now we work only with the save.toml config and it's hierarchy, but we should work properly here with directories as well
         // constructing the file path to the configuration file
         val fullPathToConfig = with (saveProperties) {

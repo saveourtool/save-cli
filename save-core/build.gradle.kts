@@ -75,9 +75,23 @@ tasks.withType<KotlinJvmTest> {
 val generateCodeTaskProvider = tasks.register("generateConfigOptions") {
     inputs.file(configFilePath())
     val generatedFile = File("$buildDir/generated/src/org/cqfn/save/core/config/SaveProperties.kt")
+    val versionsFile = File("$buildDir/generated/src/org/cqfn/save/core/config/Versions.kt")
     outputs.file(generatedFile)
+    outputs.file(versionsFile)
     doFirst {
         generateConfigOptions(generatedFile)
+    }
+
+    doLast {
+        versionsFile.parentFile.mkdirs()
+        versionsFile.writeText(
+            """
+            package org.cqfn.save.core.config
+
+            internal const val SAVE_VERSION = "$version"
+
+            """.trimIndent()
+        )
     }
 }
 val generatedKotlinSrc = kotlin.sourceSets.create("generated") {
