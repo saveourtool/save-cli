@@ -28,7 +28,7 @@ fun SaveProperties.validate(): SaveProperties {
     this.testRootPath ?: logErrorAndExit(ExitCodes.INVALID_CONFIGURATION,
         "`testRootPath` option is missing or null. " +
                 "Save is not able to start processing without an information about the tests that should be run.")
-    val fullConfigPath = propertiesFile!!.toPath() / testRootPath!! / testConfigPath!!
+    val fullConfigPath = propertiesFile!!.toPath().parent!! / testRootPath!! / testConfigPath!!
     try {
         FileSystem.SYSTEM.metadata(fullConfigPath)
     } catch (e: FileNotFoundException) {

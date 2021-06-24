@@ -8,7 +8,8 @@ class PerformAnalysisTest {
     @Test
     fun `detect plugins`() {
         val saveProperties = SaveProperties(
-            testRootPath = "../examples/discovery-test",
+            propertiesFile = "../examples/discovery-test/save.properties",
+            testRootPath = ".",
             reportType = ReportType.PLAIN,
         )
         // In this test we need to merge with emulated empty save.properties file in aim to use default values,

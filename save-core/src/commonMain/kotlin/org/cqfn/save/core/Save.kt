@@ -51,7 +51,7 @@ class Save(
         // FixMe: now we work only with the save.toml config and it's hierarchy, but we should work properly here with directories as well
         // constructing the file path to the configuration file
         val fullPathToConfig = with (saveProperties) {
-            propertiesFile!!.toPath() / testRootPath!! / testConfigPath!!
+            propertiesFile!!.toPath().parent!! / testRootPath!! / testConfigPath!!
         }
         val reporter = getReporter(saveProperties)
         // get all toml configs in file system
