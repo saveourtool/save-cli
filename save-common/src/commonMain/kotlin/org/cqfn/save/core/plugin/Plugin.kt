@@ -108,7 +108,7 @@ abstract class Plugin(
     protected fun createTempDir(tmpDir: Path) {
         try {
             if (!fs.exists(tmpDir)) {
-                fs.createDirectory(tmpDir)
+                fs.createDirectories(tmpDir)
             }
         } catch (e: Exception) {
             throw TempDirException("Could not create temp dir, cause: ${e.message}")

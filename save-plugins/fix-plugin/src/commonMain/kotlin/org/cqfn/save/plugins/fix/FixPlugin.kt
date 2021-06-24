@@ -19,6 +19,8 @@ import io.github.petertrr.diffutils.patch.Patch
 import io.github.petertrr.diffutils.text.DiffRowGenerator
 import okio.FileSystem
 import okio.Path
+import okio.Path.Companion.DIRECTORY_SEPARATOR
+import okio.Path.Companion.toPath
 
 /**
  * A plugin that runs an executable on a file and compares output with expected output.
@@ -89,8 +91,17 @@ class FixPlugin(
 
     private fun createTestFile(path: Path): Path {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
-        createTempDir(tmpDir)
-        val pathCopy: Path = tmpDir / path.name
+        println("tmpDir ${tmpDir}")
+        println("PATH ${path}")
+        println("UNION ${tmpDir / path}")
+        println("UNION2 ${(tmpDir.toString() + DIRECTORY_SEPARATOR + path).toPath()}")
+        //createTempDir(tmpDir)
+        //val pathCopy: Path = tmpDir / path.name
+
+        val pathCopy: Path = (tmpDir.toString() + DIRECTORY_SEPARATOR + path).toPath()
+        createTempDir(pathCopy.parent ?: tmpDir)
+        println("PATH COPY ${pathCopy}")
+        println("CREATED DIRS: ${pathCopy.parent ?: tmpDir}")
         fs.write(fs.createFile(pathCopy)) {
             write(
                 (fs.readFile(path)).encodeToByteArray()

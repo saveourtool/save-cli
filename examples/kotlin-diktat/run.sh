@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 KTLINT_VERSION=0.39.0
-DIKTAT_VERSION=0.6.2
+DIKTAT_VERSION=0.6.3
 SAVE_VERSION=0.1.0-alpha.2
 
 # Download tools that will be tested
