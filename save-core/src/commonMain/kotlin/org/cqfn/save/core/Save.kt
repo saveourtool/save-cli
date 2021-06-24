@@ -2,6 +2,7 @@ package org.cqfn.save.core
 
 import org.cqfn.save.core.config.OutputStreamType
 import org.cqfn.save.core.config.ReportType
+import org.cqfn.save.core.config.SAVE_VERSION
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.files.StdStreamsSink
@@ -25,7 +26,6 @@ import org.cqfn.save.reporter.plain.PlainTextReporter
 import okio.FileSystem
 import okio.Path.Companion.toPath
 import okio.buffer
-import org.cqfn.save.core.config.SAVE_VERSION
 
 /**
  * @property saveProperties an instance of [SaveProperties]
@@ -50,7 +50,7 @@ class Save(
 
         // FixMe: now we work only with the save.toml config and it's hierarchy, but we should work properly here with directories as well
         // constructing the file path to the configuration file
-        val fullPathToConfig = with (saveProperties) {
+        val fullPathToConfig = with(saveProperties) {
             propertiesFile!!.toPath().parent!! / testRootPath!! / testConfigPath!!
         }
         val reporter = getReporter(saveProperties)

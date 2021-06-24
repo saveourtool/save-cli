@@ -13,13 +13,11 @@ import org.cqfn.save.core.logging.logInfo
 import okio.FileNotFoundException
 import okio.FileSystem
 import okio.IOException
-import okio.Path.Companion.DIRECTORY_SEPARATOR
 import okio.Path.Companion.toPath
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.properties.Properties
 import kotlinx.serialization.serializer
-import okio.Path
 
 /**
  * @return this config in case we have valid configuration
