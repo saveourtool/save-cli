@@ -13,7 +13,6 @@ import org.cqfn.save.core.logging.logInfo
 import okio.FileNotFoundException
 import okio.FileSystem
 import okio.IOException
-import okio.Path.Companion.DIRECTORY_SEPARATOR
 import okio.Path.Companion.toPath
 
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -24,13 +23,12 @@ import kotlinx.serialization.serializer
  * @return this config in case we have valid configuration
  */
 fun SaveProperties.validate(): SaveProperties {
-    val fullConfigPath = testRootPath + DIRECTORY_SEPARATOR + testConfigPath
+    this.testRootPath ?: logErrorAndExit(ExitCodes.INVALID_CONFIGURATION,
+        "`testRootPath` option is missing or null. " +
+                "Save is not able to start processing without an information about the tests that should be run.")
+    val fullConfigPath = propertiesFile!!.toPath().parent!! / testRootPath!! / testConfigPath!!
     try {
-        this.testRootPath ?: logErrorAndExit(ExitCodes.INVALID_CONFIGURATION,
-            "`testRootPath` option is missing or null. " +
-                    "Save is not able to start processing without an information about the tests that should be run.")
-
-        FileSystem.SYSTEM.metadata(fullConfigPath.toPath())
+        FileSystem.SYSTEM.metadata(fullConfigPath)
     } catch (e: FileNotFoundException) {
         logErrorAndExit(
             ExitCodes.INVALID_CONFIGURATION, "Not able to find configuration file '$fullConfigPath'." +

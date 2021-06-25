@@ -2,6 +2,7 @@ package org.cqfn.save.core
 
 import org.cqfn.save.core.config.OutputStreamType
 import org.cqfn.save.core.config.ReportType
+import org.cqfn.save.core.config.SAVE_VERSION
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.files.StdStreamsSink
@@ -45,9 +46,13 @@ class Save(
      * @throws PluginException when we receive invalid type of PluginConfig
      */
     fun performAnalysis() {
+        logInfo("Welcome to SAVE version $SAVE_VERSION")
+
         // FixMe: now we work only with the save.toml config and it's hierarchy, but we should work properly here with directories as well
         // constructing the file path to the configuration file
-        val fullPathToConfig = saveProperties.testRootPath!!.toPath() / saveProperties.testConfigPath!!.toPath()
+        val fullPathToConfig = with(saveProperties) {
+            propertiesFile!!.toPath().parent!! / testRootPath!! / testConfigPath!!
+        }
         val reporter = getReporter(saveProperties)
         // get all toml configs in file system
         ConfigDetector()
