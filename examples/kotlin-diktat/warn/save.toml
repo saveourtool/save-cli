@@ -14,6 +14,6 @@ fileNameCaptureGroupOut = 1
 lineCaptureGroupOut = 2
 columnCaptureGroupOut = 3
 messageCaptureGroupOut = 4
-exactWarningsMatch = true
+exactWarningsMatch = false
 warningTextHasColumn = true
 warningTextHasLine = true

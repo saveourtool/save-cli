@@ -24,9 +24,7 @@ interface Reporter {
     /**
      * This function is called before any tests are executed
      */
-    fun beforeAll() {
-        out.write("Initializing reporter ${this::class.qualifiedName} of type $type\n".encodeToByteArray())
-    }
+    fun beforeAll()
 
     /**
      * This function is called after all tests are executed

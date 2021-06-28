@@ -8,7 +8,6 @@ import org.cqfn.save.cli.logging.logErrorAndExit
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.defaultConfig
 import org.cqfn.save.core.logging.logDebug
-import org.cqfn.save.core.logging.logInfo
 
 import okio.FileNotFoundException
 import okio.FileSystem
@@ -58,7 +57,7 @@ fun createConfigFromArgs(args: Array<String>): SaveProperties {
     val configFromPropertiesFile = readPropertiesFile(configFromCli.propertiesFile ?: defaultConfig().propertiesFile)
     // merging two configurations into single [SaveProperties] class with a priority to command line arguments
     val mergedProperties = configFromCli.mergeConfigWithPriorityToThis(configFromPropertiesFile)
-    logInfo("Using the following properties for SAVE execution:\n${mergedProperties.getFields()}")
+    logDebug("Using the following properties for SAVE execution:\n${mergedProperties.getFields()}")
     return mergedProperties.validate()
 }
 
