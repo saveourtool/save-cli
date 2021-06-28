@@ -16,8 +16,9 @@ data class Pass(val message: String?) : TestStatus()
 
 /**
  * @property reason reason of failure
+ * @property shortReason
  */
-data class Fail(val reason: String) : TestStatus()
+data class Fail(val reason: String, val shortReason: String) : TestStatus()
 
 /**
  * @property reason reason of test ignoring

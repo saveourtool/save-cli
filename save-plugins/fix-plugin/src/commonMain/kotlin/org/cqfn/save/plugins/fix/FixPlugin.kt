@@ -4,7 +4,6 @@ import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readFile
 import org.cqfn.save.core.files.readLines
-import org.cqfn.save.core.logging.logInfo
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.DebugInfo
@@ -15,6 +14,8 @@ import org.cqfn.save.core.utils.ProcessExecutionException
 
 import io.github.petertrr.diffutils.diff
 import io.github.petertrr.diffutils.patch.ChangeDelta
+import io.github.petertrr.diffutils.patch.Delta
+import io.github.petertrr.diffutils.patch.DeltaType
 import io.github.petertrr.diffutils.patch.Patch
 import io.github.petertrr.diffutils.text.DiffRowGenerator
 import okio.FileSystem
@@ -45,12 +46,6 @@ class FixPlugin(
 
     @Suppress("TOO_LONG_FUNCTION")
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
-        val flattenedResources = files.toList()
-        if (flattenedResources.isEmpty()) {
-            return emptySequence()
-        }
-        logInfo("Discovered the following file pairs for comparison: $flattenedResources")
-
         testConfig.validateAndSetDefaults()
 
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
@@ -65,7 +60,7 @@ class FixPlugin(
                 } catch (ex: ProcessExecutionException) {
                     return@map TestResult(
                         listOf(expected, test),
-                        Fail(ex.message!!),
+                        Fail("${ex::class.simpleName}: ${ex.message}", ex::class.simpleName ?: "Unknown exception"),
                         DebugInfo(null, ex.message, null)
                     )
                 }
@@ -78,7 +73,7 @@ class FixPlugin(
                     if (patch.deltas.isEmpty()) {
                         Pass(null)
                     } else {
-                        Fail(patch.formatToString())
+                        Fail(patch.formatToString(), patch.formatToShortString())
                     }
                 }
                 TestResult(
@@ -154,4 +149,13 @@ class FixPlugin(
             else -> delta.toString()
         }
     }
+
+    private fun Patch<String>.formatToShortString(): String = deltas.groupingBy {
+        it.type
+    }
+        .aggregate<Delta<String>, DeltaType, Int> { _, acc, delta, _ ->
+            (acc ?: 0) + delta.source.lines.size
+        }
+        .toList()
+        .joinToString { (type, lines) -> "$type: $lines lines" }
 }

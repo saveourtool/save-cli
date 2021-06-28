@@ -3,7 +3,6 @@ package org.cqfn.save.plugin.warn
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
-import org.cqfn.save.core.logging.logInfo
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.DebugInfo
@@ -33,14 +32,10 @@ class WarnPlugin(
     testFiles,
     useInternalRedirections) {
     private val fs = FileSystem.SYSTEM
+    private val expectedAndNotReceived = "Some warnings were expected but not received"
+    private val unexpected = "Some warnings were unexpected"
 
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
-        val flattenedResources = files.toList().flatten()
-        if (flattenedResources.isEmpty()) {
-            return emptySequence()
-        }
-        logInfo("Discovered the following test resources: $flattenedResources")
-
         testConfig.validateAndSetDefaults()
 
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
@@ -112,7 +107,7 @@ class WarnPlugin(
         } catch (ex: ProcessExecutionException) {
             return listOf(TestResult(
                 paths,
-                Fail(ex.message!!),
+                Fail("${ex::class.simpleName}: ${ex.message}", ex::class.simpleName ?: "Unknown exception"),
                 DebugInfo(null, ex.message, null)
             ))
         }
@@ -182,18 +177,22 @@ class WarnPlugin(
         val unexpectedWarnings = actualWarningsMap.valuesNotIn(expectedWarningsMap)
 
         return when (missingWarnings.isEmpty() to unexpectedWarnings.isEmpty()) {
-            false to true -> Fail("Some warnings were expected but not received: $missingWarnings")
-            false to false -> Fail("Some warnings were expected but not received: $missingWarnings, " +
-                    "and others were unexpected: $unexpectedWarnings")
+            false to true -> createFail(expectedAndNotReceived, missingWarnings)
+            false to false -> Fail(
+                "$expectedAndNotReceived: $missingWarnings, and ${unexpected.lowercase()}: $unexpectedWarnings",
+                "$expectedAndNotReceived (${missingWarnings.size}), and ${unexpected.lowercase()} (${unexpectedWarnings.size})"
+            )
             true to false -> if (warnPluginConfig.exactWarningsMatch == false) {
-                Pass("Some warnings were unexpected: $unexpectedWarnings")
+                Pass("$unexpected: $unexpectedWarnings")
             } else {
-                Fail("Some warnings were unexpected: $unexpectedWarnings")
+                createFail(unexpected, unexpectedWarnings)
             }
             true to true -> Pass(null)
-            else -> Fail("")
+            else -> Fail("", "")
         }
     }
+
+    private fun createFail(baseText: String, warnings: List<Warning>) = Fail("$baseText: $warnings", "$baseText (${warnings.size})")
 }
 
 /**
