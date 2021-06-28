@@ -72,12 +72,30 @@ tasks.withType<KotlinJvmTest> {
     useJUnitPlatform()
 }
 
-val generateCodeTaskProvider = tasks.register("generateConfigOptions") {
+val generateConfigOptionsTaskProvider = tasks.register("generateConfigOptions") {
     inputs.file(configFilePath())
     val generatedFile = File("$buildDir/generated/src/org/cqfn/save/core/config/SaveProperties.kt")
     outputs.file(generatedFile)
+
     doFirst {
         generateConfigOptions(generatedFile)
+    }
+}
+val generateVersionFileTaskProvider = tasks.register("generateVersionsFile") {
+    inputs.property("project version", version.toString())
+    val versionsFile = File("$buildDir/generated/src/org/cqfn/save/core/config/Versions.kt")
+    outputs.file(versionsFile)
+
+    doFirst {
+        versionsFile.parentFile.mkdirs()
+        versionsFile.writeText(
+            """
+            package org.cqfn.save.core.config
+
+            internal const val SAVE_VERSION = "$version"
+
+            """.trimIndent()
+        )
     }
 }
 val generatedKotlinSrc = kotlin.sourceSets.create("generated") {
@@ -90,5 +108,6 @@ val generatedKotlinSrc = kotlin.sourceSets.create("generated") {
 }
 kotlin.sourceSets.getByName("commonMain").dependsOn(generatedKotlinSrc)
 tasks.withType<KotlinCompile<*>>().forEach {
-    it.dependsOn(generateCodeTaskProvider)
+    it.dependsOn(generateConfigOptionsTaskProvider)
+    it.dependsOn(generateVersionFileTaskProvider)
 }
