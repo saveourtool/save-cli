@@ -44,12 +44,6 @@ class FixPlugin(
 
     @Suppress("TOO_LONG_FUNCTION")
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
-        val flattenedResources = files.toList()
-        if (flattenedResources.isEmpty()) {
-            return emptySequence()
-        }
-        logInfo("Discovered the following file pairs for comparison: $flattenedResources")
-
         testConfig.validateAndSetDefaults()
 
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
