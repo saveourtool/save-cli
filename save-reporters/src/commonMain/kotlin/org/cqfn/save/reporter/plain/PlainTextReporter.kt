@@ -25,14 +25,19 @@ class PlainTextReporter(override val out: BufferedSink) : Reporter {
     }
 
     override fun onEvent(event: TestResult) {
-        val comment = when (val status = event.status) {
+        val comment: String = when (val status = event.status) {
             is Pass -> status.message ?: ""
             is Fail -> status.reason
             is Ignored -> status.reason
-            is Crash -> status.throwable.message
+            is Crash -> status.throwable.message ?: status.throwable::class.simpleName ?: "Unknown exception"
         }
+        val shortComment = comment.lineSequence()
+            .firstOrNull()
+            ?.takeIf { it.isNotBlank() }
+            ?.plus("...")
+            ?: ""
         out.write(
-            "| ${event.resources.first()} | ${event.status} | $comment |\n"
+            "| ${event.resources.first()} | ${event.status::class.simpleName} | $shortComment |\n"
                 .encodeToByteArray()
         )
     }
