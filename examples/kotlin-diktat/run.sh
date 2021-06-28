@@ -22,5 +22,5 @@ if [ "$1" == "--help" ]; then
 For example, `./run.sh warn/chapter1/save.toml` to execute tests located in warn/chapter1
 `./run.sh EnumValueSnakeCaseTest.kt to execute a single test`'
 else
-    ./save $1
+    ./save $@
 fi

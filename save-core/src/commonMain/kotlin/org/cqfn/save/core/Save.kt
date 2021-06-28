@@ -78,12 +78,12 @@ class Save(
 
     private fun executePlugin(plugin: Plugin, reporter: Reporter) {
         reporter.onPluginInitialization(plugin)
-        logInfo("=> Executing plugin: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
+        logDebug("=> Executing plugin: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
         reporter.onPluginExecutionStart(plugin)
         try {
             val events = plugin.execute().toList()
             if (events.isEmpty()) {
-                logInfo("No resources discovered for ${plugin::class.simpleName} in [${plugin.testConfig.location}], skipping")
+                logDebug("No resources discovered for ${plugin::class.simpleName} in [${plugin.testConfig.location}], skipping")
                 reporter.onPluginExecutionSkip(plugin)
             }
             events
@@ -93,7 +93,7 @@ class Save(
             reporter.onPluginExecutionError(ex)
             logError("${plugin::class.simpleName} has crashed: ${ex.message}")
         }
-        logInfo("<= Finished execution of: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
+        logDebug("<= Finished execution of: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
         reporter.onPluginExecutionEnd(plugin)
     }
 

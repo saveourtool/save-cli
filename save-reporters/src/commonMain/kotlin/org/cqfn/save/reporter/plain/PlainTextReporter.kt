@@ -1,6 +1,7 @@
 package org.cqfn.save.reporter.plain
 
 import org.cqfn.save.core.config.ReportType
+import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.plugin.PluginException
 import org.cqfn.save.core.reporter.Reporter
@@ -20,21 +21,28 @@ import okio.BufferedSink
 class PlainTextReporter(override val out: BufferedSink) : Reporter {
     override val type: ReportType = ReportType.PLAIN
 
+    override fun beforeAll() {
+        logDebug("Initializing reporter ${this::class.qualifiedName} of type $type\n")
+    }
+
     override fun afterAll() {
-        out.write("Finished\n".encodeToByteArray())
+        logDebug("Finished reporter ${this::class.qualifiedName} of type $type\n")
     }
 
     override fun onEvent(event: TestResult) {
         val comment: String = when (val status = event.status) {
             is Pass -> status.message ?: ""
-            is Fail -> status.reason
+            is Fail -> status.shortReason
             is Ignored -> status.reason
             is Crash -> status.throwable.message ?: status.throwable::class.simpleName ?: "Unknown exception"
         }
-        val shortComment = comment.lineSequence()
-            .firstOrNull()
-            ?.takeIf { it.isNotBlank() }
-            ?.plus("...")
+        val shortComment = comment.lines().let { lines ->
+            lines.firstOrNull()
+                ?.takeIf { it.isNotBlank() }
+                ?.plus(
+                    if (lines.size > 1) "..." else ""
+                )
+        }
             ?: ""
         out.write(
             "| ${event.resources.first()} | ${event.status::class.simpleName} | $shortComment |\n"
@@ -47,7 +55,7 @@ class PlainTextReporter(override val out: BufferedSink) : Reporter {
     }
 
     override fun onPluginExecutionStart(plugin: Plugin) {
-        out.write("Starting plugin ${plugin::class.simpleName}\n".encodeToByteArray())
+        out.write("Executing plugin ${plugin::class.simpleName}\n".encodeToByteArray())
         out.write("--------------------------------\n".encodeToByteArray())
         out.write("| Test name | result | comment |\n".encodeToByteArray())
     }

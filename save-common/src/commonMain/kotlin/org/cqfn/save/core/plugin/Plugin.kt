@@ -3,6 +3,7 @@ package org.cqfn.save.core.plugin
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.config.isSaveTomlConfig
 import org.cqfn.save.core.files.findDescendantDirectoriesBy
+import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.ProcessBuilder
 
@@ -32,10 +33,14 @@ abstract class Plugin(
      */
     fun execute(): Sequence<TestResult> {
         clean()
-        return handleFiles(
-            // todo: pass individual groups of files to handleFiles? Or it will play bad with batch mode?
-            discoverTestFiles(testConfig.directory)
-        )
+        // todo: pass individual groups of files to handleFiles? Or it will play bad with batch mode?
+        val testFilesSequence = discoverTestFiles(testConfig.directory)
+        return if (testFilesSequence.any()) {
+            logDebug("Discovered the following test resources: ${testFilesSequence.toList()}")
+            handleFiles(testFilesSequence)
+        } else {
+            emptySequence()
+        }
     }
 
     /**
