@@ -7,6 +7,7 @@ import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
+import org.cqfn.save.core.utils.ProcessBuilder
 import org.cqfn.save.core.utils.isCurrentOsWindows
 
 import io.github.petertrr.diffutils.diff
@@ -104,10 +105,10 @@ class FixPluginTest {
         val testFile1 = fs.createFile(tmpDir / "Test3Test.java")
         val testFile2 = fs.createFile(tmpDir / "Test4Test.java")
         fs.write(testFile1) {
-            write("Expected file".encodeToByteArray())
+            write("Original file".encodeToByteArray())
         }
         fs.write(testFile2) {
-            write("Expected file".encodeToByteArray())
+            write("Original file".encodeToByteArray())
         }
         val expectedFile1 = fs.createFile(tmpDir / "Test3Expected.java")
         val expectedFile2 = fs.createFile(tmpDir / "Test4Expected.java")
@@ -127,6 +128,9 @@ class FixPluginTest {
                 GeneralConfig("", "", "", "")
             )
         ), useInternalRedirections = false).execute()
+
+        // We call ProcessBuilder ourselves, because the command ">" does not work for the list of files
+        ProcessBuilder(false).exec("echo Expected file > $testFile2", null)
 
         assertEquals(2, results.count(), "Size of results should equal number of pairs")
         assertTrue(results.all {
