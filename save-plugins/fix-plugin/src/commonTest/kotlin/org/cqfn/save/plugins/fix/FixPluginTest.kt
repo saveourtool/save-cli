@@ -119,7 +119,14 @@ class FixPluginTest {
             write("Expected file".encodeToByteArray())
         }
         val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").lowercase()} && " else ""
-        val executionCmd = "${diskWithTmpDir}cd $tmpDir && echo Expected file >"
+        val executionCmd = if (isCurrentOsWindows()) {
+            // We call ProcessBuilder ourselves, because the command ">" does not work for the list of files
+            ProcessBuilder(false).exec("echo Expected file > $testFile2", null)
+            "${diskWithTmpDir}cd $tmpDir && echo Expected file >"
+        }
+        else {
+            "${diskWithTmpDir}cd $tmpDir && echo Expected file | tee"
+        }
 
         val results = FixPlugin(TestConfig(config,
             null,
