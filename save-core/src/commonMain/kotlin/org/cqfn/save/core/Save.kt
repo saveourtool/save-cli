@@ -66,7 +66,7 @@ class Save(
                     // fully process this config's configuration sections
                     .processInPlace()
                     // create plugins and choose only active (with test resources) ones
-                    .buildActivePlugins().forEach {
+                    .buildActivePlugins(saveProperties.testFiles!!).forEach {
                         // execute created plugins
                         executePlugin(it, reporter)
                     }

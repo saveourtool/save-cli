@@ -24,10 +24,10 @@ fun TestConfig.processInPlace() = processInPlace {
  *
  * @return a list of plugins. Includes only plugins with non-empty test resources.
  */
-fun TestConfig.buildActivePlugins() = buildActivePlugins { pluginConfig, testConfig ->
+fun TestConfig.buildActivePlugins(testFiles: List<String>) = buildActivePlugins { pluginConfig, testConfig ->
     when (pluginConfig.type) {
-        TestConfigSections.FIX -> FixPlugin(testConfig)
-        TestConfigSections.WARN -> WarnPlugin(testConfig)
+        TestConfigSections.FIX -> FixPlugin(testConfig, testFiles)
+        TestConfigSections.WARN -> WarnPlugin(testConfig, testFiles)
         else -> throw PluginException("Unknown type <${pluginConfig::class}> of plugin config was provided")
     }
 }

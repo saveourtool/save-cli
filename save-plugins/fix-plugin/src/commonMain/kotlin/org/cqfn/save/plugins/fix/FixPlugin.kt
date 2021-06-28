@@ -28,7 +28,7 @@ import okio.Path
 @Suppress("INLINE_CLASS_CAN_BE_USED")
 class FixPlugin(
     testConfig: TestConfig,
-    testFiles: List<String> = emptyList(),
+    testFiles: List<String>,
     useInternalRedirections: Boolean = true) : Plugin(
     testConfig,
     testFiles,

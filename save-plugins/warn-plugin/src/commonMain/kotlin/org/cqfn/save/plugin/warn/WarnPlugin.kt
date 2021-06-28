@@ -26,7 +26,7 @@ internal typealias LineColumn = Pair<Int, Int>
  */
 class WarnPlugin(
     testConfig: TestConfig,
-    testFiles: List<String> = emptyList(),
+    testFiles: List<String>,
     useInternalRedirections: Boolean = true) : Plugin(
     testConfig,
     testFiles,
