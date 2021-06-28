@@ -88,8 +88,20 @@ class FixPlugin(
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
         println("tmpDir ${tmpDir}")
         println("PATH ${path}")
-        println("UNION ${tmpDir / path}")
-        println("UNION2 ${(tmpDir.toString() + DIRECTORY_SEPARATOR + path).toPath()}")
+        val parentConfigPath = if (testConfig.parentConfig != null) testConfig.parentConfigs().toList().last().location else testConfig.location
+        println("parentConfigPath: ${parentConfigPath}")
+        val parentConfigDirectory = parentConfigPath.parent
+        println("parentConfigDirectory ${parentConfigDirectory}")
+
+        var newAbsolutePath = ""
+        var currentDir: Path = path
+        while (currentDir != parentConfigDirectory) {
+            currentDir = currentDir.parent!!
+            newAbsolutePath = currentDir.toString() + DIRECTORY_SEPARATOR + newAbsolutePath
+            println("CURRENT DIR ${currentDir.name}")
+        }
+        println("newAbsolutePath ${newAbsolutePath}")
+
         //createTempDir(tmpDir)
         //val pathCopy: Path = tmpDir / path.name
 
