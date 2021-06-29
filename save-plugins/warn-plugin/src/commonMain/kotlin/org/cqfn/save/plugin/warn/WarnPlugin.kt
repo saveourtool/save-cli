@@ -2,6 +2,7 @@ package org.cqfn.save.plugin.warn
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
@@ -145,7 +146,7 @@ class WarnPlugin(
      */
     internal fun createTestFile(path: Path, warningsInputPattern: Regex): String {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPlugin::class.simpleName!!)
-        val relativePath = createPathRelativeToTheParentConfig(path)
+        val relativePath = path.createRelativePathToTheRoot(testConfig.getRootConfig().location)
         val tmpPath: Path = tmpDir / relativePath
         createTempDir(tmpPath)
 

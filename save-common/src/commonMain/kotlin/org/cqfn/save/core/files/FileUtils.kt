@@ -2,7 +2,10 @@
  * Utility methods for common operations with file system using okio.
  */
 
-@file:Suppress("FILE_NAME_MATCH_CLASS", "MatchingDeclarationName")
+@file:Suppress(
+    "FILE_NAME_MATCH_CLASS",
+    "MatchingDeclarationName",
+    "TooManyFunctions")
 
 package org.cqfn.save.core.files
 
@@ -145,3 +148,35 @@ fun Path.findDescendantDirectoriesBy(withSelf: Boolean = false, directoryPredica
                 .flatMap { it.findDescendantDirectoriesBy(withSelf = true, directoryPredicate) }
                 .let { yieldAll(it) }
         }
+
+/**
+ * Create relative path from the current path to the root
+ *
+ * @param rootPath root of the file tree, relates to which path will be created
+ * @return string representation of relative path
+ */
+fun Path.createRelativePathToTheRoot(rootPath: Path): String {
+    val rootDirectory = rootPath.getCurrentDirectory()
+    var currentDirectory = this.getCurrentDirectory()
+    
+    // Files located at the same directory, no need additional operations
+    if (rootDirectory == currentDirectory) {
+        return ""
+    }
+    // Goes through all intermediate dirs and construct relative path
+    var relativePath = ""
+    while (currentDirectory != rootDirectory) {
+        relativePath = currentDirectory.name + Path.DIRECTORY_SEPARATOR + relativePath
+        currentDirectory = currentDirectory.parent!!
+    }
+    return relativePath
+}
+
+/**
+ * @return if provided path is file then return parent directory, otherwise return itself
+ */
+fun Path.getCurrentDirectory() = if (FileSystem.SYSTEM.metadata(this).isRegularFile) {
+    this.parent!!
+} else {
+    this
+}
