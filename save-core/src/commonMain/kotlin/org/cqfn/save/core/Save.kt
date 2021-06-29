@@ -66,11 +66,8 @@ class Save(
             .filter { testConfig ->
                 if (requestedConfigs.isEmpty()) true
                 else requestedConfigs.any {
-                    logInfo("Checking whether $it is a parent of ${testConfig.location} or vice versa")
                     it.toPath().parent in testConfig.location.parents() ||
                             testConfig.directory in it.toPath().parents()
-                }.also {
-                    logInfo("it is $it")
                 }
             }
             .forEach { testConfig ->
