@@ -49,7 +49,7 @@ class FixPlugin(
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
 
-        return files.chunked(fixPluginConfig.batchSize ?: 1).map { chunk ->
+        return files.chunked(fixPluginConfig.batchSize!!).map { chunk ->
             val pathMap = chunk.map { it.first() to it.last() }
             val pathCopyMap = pathMap.map { (expected, test) -> expected to createTestFile(test) }
             val testCopyNames = pathCopyMap.joinToString { (_, testCopy) -> testCopy.toString() }
@@ -58,11 +58,11 @@ class FixPlugin(
             val executionResult = try {
                 pb.exec(execCmd, null)
             } catch (ex: ProcessExecutionException) {
-                return@map listOf(TestResult(
+                return@map chunk.map { TestResult(
                     pathMap.map { (expected, test) -> listOf(expected, test) }.flatten(),
                     Fail("${ex::class.simpleName}: ${ex.message}", ex::class.simpleName ?: "Unknown exception"),
                     DebugInfo(null, ex.message, null)
-                ))
+                )}
             }
 
             val stdout = executionResult.stdout
@@ -72,7 +72,7 @@ class FixPlugin(
                 val fixedLines = FileSystem.SYSTEM.readLines(testCopy)
                 val expectedLines = FileSystem.SYSTEM.readLines(expected)
 
-                val test = pathMap.filter { (_, test) -> test.name == testCopy.name }.map { (_, test) -> test }.first()
+                val test = pathMap.first { (_, test) -> test.name == testCopy.name }.second
 
                 TestResult(
                     listOf(expected, test),
