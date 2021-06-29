@@ -20,8 +20,6 @@ import io.github.petertrr.diffutils.patch.Patch
 import io.github.petertrr.diffutils.text.DiffRowGenerator
 import okio.FileSystem
 import okio.Path
-import okio.Path.Companion.DIRECTORY_SEPARATOR
-import okio.Path.Companion.toPath
 
 /**
  * A plugin that runs an executable on a file and compares output with expected output.
@@ -86,29 +84,10 @@ class FixPlugin(
 
     private fun createTestFile(path: Path): Path {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
-        println("tmpDir ${tmpDir}")
-        println("PATH ${path}")
-        val parentConfigPath = if (testConfig.parentConfig != null) testConfig.parentConfigs().toList().last().location else testConfig.location
-        println("parentConfigPath: ${parentConfigPath}")
-        val parentConfigDirectory = parentConfigPath.parent
-        println("parentConfigDirectory ${parentConfigDirectory}")
-
-        var newAbsolutePath = ""
-        var currentDir: Path = path
-        while (currentDir != parentConfigDirectory) {
-            currentDir = currentDir.parent!!
-            newAbsolutePath = currentDir.toString() + DIRECTORY_SEPARATOR + newAbsolutePath
-            println("CURRENT DIR ${currentDir.name}")
-        }
-        println("newAbsolutePath ${newAbsolutePath}")
-
-        //createTempDir(tmpDir)
-        //val pathCopy: Path = tmpDir / path.name
-
-        val pathCopy: Path = (tmpDir.toString() + DIRECTORY_SEPARATOR + path).toPath()
-        createTempDir(pathCopy.parent ?: tmpDir)
-        println("PATH COPY ${pathCopy}")
-        println("CREATED DIRS: ${pathCopy.parent ?: tmpDir}")
+        val relativePath = createPathRelativeToTheParentConfig(path)
+        val tmpPath: Path = tmpDir / relativePath
+        createTempDir(tmpPath)
+        val pathCopy: Path = tmpPath / path.name
         fs.write(fs.createFile(pathCopy)) {
             write(
                 (fs.readFile(path)).encodeToByteArray()

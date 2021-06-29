@@ -121,6 +121,37 @@ abstract class Plugin(
     }
 
     /**
+     * Create path relative to the parent toml config location
+     *
+     * @param path path of the current test resource
+     * @return string representation of relative path to the parent toml config
+     */
+    protected fun createPathRelativeToTheParentConfig(path: Path): String {
+        // Looking for location of parent toml config
+        val parentConfigPath = testConfig.parentConfig?.let {
+            testConfig.parentConfigs().toList().last()
+                .location
+        } ?: run {
+            testConfig.location
+        }
+        val parentConfigDirectory = parentConfigPath.parent!!
+        val testResourceDirectory = path.parent!!
+        // Test resource and config located at the same directory, no need additional operations
+        if (parentConfigDirectory == testResourceDirectory) {
+            return testResourceDirectory.name
+        }
+        // Parent toml config located higher in the hierarchical tree,
+        // go through all intermediate dirs (starting from test resource dir till the toml config dir) and construct relative path
+        var relativePath = ""
+        var currentDir: Path = testResourceDirectory
+        while (currentDir != parentConfigDirectory) {
+            relativePath = currentDir.name + Path.DIRECTORY_SEPARATOR + relativePath
+            currentDir = currentDir.parent!!
+        }
+        return relativePath
+    }
+
+    /**
      * Returns a sequence of directories, where resources for this plugin may be located.
      * This takes into account, that if underlying directory contains it's own SAVE config,
      * then this plugin shouldn't touch these resources; it should be done by plugins from that config.

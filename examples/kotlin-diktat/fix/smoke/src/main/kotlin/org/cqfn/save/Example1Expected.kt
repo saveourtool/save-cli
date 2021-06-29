@@ -1,4 +1,4 @@
-package org.cqfn.diktat
+package org.cqfn.save
 
 class Example {
     @get:JvmName("getIsValid")
