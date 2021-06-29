@@ -26,6 +26,8 @@ import org.cqfn.save.reporter.plain.PlainTextReporter
 import okio.FileSystem
 import okio.Path.Companion.toPath
 import okio.buffer
+import org.cqfn.save.core.config.isSaveTomlConfig
+import org.cqfn.save.core.files.parents
 
 /**
  * @property saveProperties an instance of [SaveProperties]
@@ -54,10 +56,23 @@ class Save(
             propertiesFile!!.toPath().parent!! / testRootPath!! / testConfigPath!!
         }
         val reporter = getReporter(saveProperties)
+        val requestedConfigs = saveProperties.testFiles!!.filter {
+            it.toPath().isSaveTomlConfig()
+        }
         // get all toml configs in file system
         ConfigDetector()
             .configFromFile(fullPathToConfig)
             .getAllTestConfigs()
+            .filter { testConfig ->
+                if (requestedConfigs.isEmpty()) true
+                else requestedConfigs.any {
+                    logInfo("Checking whether $it is a parent of ${testConfig.location} or vice versa")
+                    it.toPath().parent in testConfig.location.parents() ||
+                            testConfig.directory in it.toPath().parents()
+                }.also {
+                    logInfo("it is $it")
+                }
+            }
             .forEach { testConfig ->
                 // iterating top-down
                 reporter.beforeAll()
@@ -66,7 +81,9 @@ class Save(
                     // fully process this config's configuration sections
                     .processInPlace()
                     // create plugins and choose only active (with test resources) ones
-                    .buildActivePlugins(saveProperties.testFiles!!).forEach {
+                    .buildActivePlugins(saveProperties.testFiles!!.filterNot {
+                        it.toPath().isSaveTomlConfig()
+                    }).forEach {
                         // execute created plugins
                         executePlugin(it, reporter)
                     }
