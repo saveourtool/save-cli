@@ -3,6 +3,7 @@ package org.cqfn.save.plugin.warn
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
+import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.DebugInfo
@@ -107,7 +108,7 @@ class WarnPlugin(
         } catch (ex: ProcessExecutionException) {
             return listOf(TestResult(
                 paths,
-                Fail("${ex::class.simpleName}: ${ex.message}", ex::class.simpleName ?: "Unknown exception"),
+                Fail(ex.describe(), ex.describe()),
                 DebugInfo(null, ex.message, null)
             ))
         }
