@@ -51,7 +51,10 @@ class ComparisonTest {
         val warnPluginConfig = WarnPluginConfig(exactWarningsMatch = false)
         val config = fs.createFile(tmpDir / "save.toml")
 
-        val testStatus = WarnPlugin(TestConfig(config, null, mutableListOf(warnPluginConfig)))
+        val testStatus = WarnPlugin(
+            TestConfig(config, null, mutableListOf(warnPluginConfig)),
+            testFiles = emptyList(),
+        )
             .checkResults(expectedWarningsMap, actualWarningsMap, warnPluginConfig)
 
         assertTrue(testStatus is Pass, "Actual type of status is ${testStatus::class}")
