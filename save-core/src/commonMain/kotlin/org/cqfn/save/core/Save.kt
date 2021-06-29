@@ -4,6 +4,7 @@ import org.cqfn.save.core.config.OutputStreamType
 import org.cqfn.save.core.config.ReportType
 import org.cqfn.save.core.config.SAVE_VERSION
 import org.cqfn.save.core.config.SaveProperties
+import org.cqfn.save.core.config.isSaveTomlConfig
 import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.files.StdStreamsSink
 import org.cqfn.save.core.logging.isDebugEnabled
@@ -26,8 +27,6 @@ import org.cqfn.save.reporter.plain.PlainTextReporter
 import okio.FileSystem
 import okio.Path.Companion.toPath
 import okio.buffer
-import org.cqfn.save.core.config.isSaveTomlConfig
-import org.cqfn.save.core.files.parents
 
 /**
  * @property saveProperties an instance of [SaveProperties]
@@ -62,14 +61,7 @@ class Save(
         // get all toml configs in file system
         ConfigDetector()
             .configFromFile(fullPathToConfig)
-            .getAllTestConfigs()
-            .filter { testConfig ->
-                if (requestedConfigs.isEmpty()) true
-                else requestedConfigs.any {
-                    it.toPath().parent in testConfig.location.parents() ||
-                            testConfig.directory in it.toPath().parents()
-                }
-            }
+            .getAllTestConfigsForFiles(requestedConfigs)
             .forEach { testConfig ->
                 // iterating top-down
                 reporter.beforeAll()

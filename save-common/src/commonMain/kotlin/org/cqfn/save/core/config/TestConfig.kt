@@ -4,6 +4,7 @@
 
 package org.cqfn.save.core.config
 
+import org.cqfn.save.core.files.parents
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
@@ -11,6 +12,7 @@ import org.cqfn.save.core.plugin.PluginConfig
 
 import okio.FileSystem
 import okio.Path
+import okio.Path.Companion.toPath
 
 /**
  * Configuration for a test suite, that is read from test suite configuration file (toml config)
@@ -67,13 +69,28 @@ data class TestConfig(
             generateSequence(if (withSelf) this else parentConfig) { it.parentConfig }
 
     /**
-     * recursively (till leafs) return all configs from the configuration Tree
-     *
+     * recursively (till leaves) return all configs from the configuration Tree
      */
-    @Suppress("WRONG_NEWLINES")
-    fun getAllTestConfigs(): List<TestConfig> {
-        return listOf(this) + this.childConfigs.flatMap { it.getAllTestConfigs() }
-    }
+    fun getAllTestConfigs(): List<TestConfig> =
+            listOf(this) + this.childConfigs.flatMap { it.getAllTestConfigs() }
+
+    /**
+     * recursively return all configs from the configuration Tree, belonging to [testFiles]
+     *
+     * @param testFiles a list of files (test resources or save.toml configs) to run individual test suites or tests
+     * @return a list of corresponding test configs
+     */
+    fun getAllTestConfigsForFiles(testFiles: List<String>): List<TestConfig> =
+            if (testFiles.isEmpty()) {
+                getAllTestConfigs()
+            } else {
+                getAllTestConfigs().filter { testConfig ->
+                    testFiles.any {
+                        // `testConfig`'s directory is above `testFile`'s directory
+                        testConfig.directory in it.toPath().parents()
+                    }
+                }
+            }
 
     /**
      * Walk all descendant configs and merge them with their parents
