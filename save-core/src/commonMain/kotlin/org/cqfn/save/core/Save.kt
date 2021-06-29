@@ -55,7 +55,7 @@ class Save(
             propertiesFile!!.toPath().parent!! / testRootPath!! / testConfigPath!!
         }
         val reporter = getReporter(saveProperties)
-        val requestedConfigs = saveProperties.testFiles!!.filter {
+        val (requestedConfigs, requestedTests) = saveProperties.testFiles!!.partition {
             it.toPath().isSaveTomlConfig()
         }
         // get all toml configs in file system
@@ -70,9 +70,8 @@ class Save(
                     // fully process this config's configuration sections
                     .processInPlace()
                     // create plugins and choose only active (with test resources) ones
-                    .buildActivePlugins(saveProperties.testFiles!!.filterNot {
-                        it.toPath().isSaveTomlConfig()
-                    }).forEach {
+                    .buildActivePlugins(requestedTests)
+                    .forEach {
                         // execute created plugins
                         executePlugin(it, reporter)
                     }

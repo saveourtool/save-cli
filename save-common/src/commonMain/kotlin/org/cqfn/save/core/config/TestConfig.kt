@@ -75,19 +75,21 @@ data class TestConfig(
             listOf(this) + this.childConfigs.flatMap { it.getAllTestConfigs() }
 
     /**
-     * recursively return all configs from the configuration Tree, belonging to [testFiles]
+     * recursively return all configs from the configuration Tree, belonging to [requestedConfigs]
      *
-     * @param testFiles a list of files (test resources or save.toml configs) to run individual test suites or tests
-     * @return a list of corresponding test configs
+     * @param requestedConfigs a list of save.toml configs
+     * @return a list of test configs in the sub-tree with [requestedConfigs] in the inheritance tree
      */
-    fun getAllTestConfigsForFiles(testFiles: List<String>): List<TestConfig> =
-            if (testFiles.isEmpty()) {
+    fun getAllTestConfigsForFiles(requestedConfigs: List<String>): List<TestConfig> =
+            if (requestedConfigs.isEmpty()) {
                 getAllTestConfigs()
             } else {
                 getAllTestConfigs().filter { testConfig ->
-                    testFiles.any {
-                        // `testConfig`'s directory is above `testFile`'s directory
-                        testConfig.directory in it.toPath().parents()
+                    requestedConfigs.any {
+                        // `testConfig`'s directory is a parent of `requestedConfig`'s directory
+                        testConfig.directory in it.toPath().parents() ||
+                                // or `testConfig`'s directory is a child of `requestedConfig`'s directory
+                                it.toPath().parent!! in testConfig.location.parents()
                     }
                 }
             }
