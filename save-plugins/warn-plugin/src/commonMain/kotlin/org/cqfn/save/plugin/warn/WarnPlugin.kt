@@ -145,10 +145,11 @@ class WarnPlugin(
      */
     internal fun createTestFile(path: Path, warningsInputPattern: Regex): String {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPlugin::class.simpleName!!)
+        val relativePath = createPathRelativeToTheParentConfig(path)
+        val tmpPath: Path = tmpDir / relativePath
+        createTempDir(tmpPath)
 
-        createTempDir(tmpDir)
-
-        val fileName = tmpDir / path.name
+        val fileName = tmpPath / path.name
         fs.write(fs.createFile(fileName)) {
             fs.readLines(path).forEach {
                 if (!warningsInputPattern.matches(it)) {
