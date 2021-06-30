@@ -4,6 +4,7 @@ import org.cqfn.save.buildutils.configurePublishing
 import org.cqfn.save.buildutils.configureVersioning
 import org.cqfn.save.buildutils.createDetektTask
 import org.cqfn.save.buildutils.createDiktatTask
+import org.cqfn.save.buildutils.disableRedundantKmpTargets
 import org.cqfn.save.buildutils.installGitHooks
 
 plugins {
@@ -26,6 +27,8 @@ allprojects {
     }
     configureDiktat()
     configureDetekt()
+
+    disableRedundantKmpTargets()
 }
 createDiktatTask()
 createDetektTask()
