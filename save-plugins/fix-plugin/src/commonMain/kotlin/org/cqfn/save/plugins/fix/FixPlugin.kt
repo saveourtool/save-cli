@@ -2,6 +2,7 @@ package org.cqfn.save.plugins.fix
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.readFile
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
@@ -99,8 +100,10 @@ class FixPlugin(
 
     private fun createTestFile(path: Path): Path {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
-        createTempDir(tmpDir)
-        val pathCopy: Path = tmpDir / path.name
+        val relativePath = path.createRelativePathToTheRoot(testConfig.getRootConfig().location)
+        val tmpPath: Path = tmpDir / relativePath
+        createTempDir(tmpPath)
+        val pathCopy: Path = tmpPath / path.name
         fs.write(fs.createFile(pathCopy)) {
             write(
                 (fs.readFile(path)).encodeToByteArray()
