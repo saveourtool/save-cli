@@ -58,11 +58,13 @@ class FixPlugin(
             val executionResult = try {
                 pb.exec(execCmd, null)
             } catch (ex: ProcessExecutionException) {
-                return@map chunk.map { TestResult(
-                    pathMap.map { (expected, test) -> listOf(expected, test) }.flatten(),
-                    Fail("${ex::class.simpleName}: ${ex.message}", ex::class.simpleName ?: "Unknown exception"),
-                    DebugInfo(null, ex.message, null)
-                )}
+                return@map chunk.map {
+                    TestResult(
+                        pathMap.map { (expected, test) -> listOf(expected, test) }.flatten(),
+                        Fail("${ex::class.simpleName}: ${ex.message}", ex::class.simpleName ?: "Unknown exception"),
+                        DebugInfo(null, ex.message, null)
+                    )
+                }
             }
 
             val stdout = executionResult.stdout
