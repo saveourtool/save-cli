@@ -4,6 +4,7 @@ import org.cqfn.save.core.config.OutputStreamType
 import org.cqfn.save.core.config.ReportType
 import org.cqfn.save.core.config.SAVE_VERSION
 import org.cqfn.save.core.config.SaveProperties
+import org.cqfn.save.core.config.isSaveTomlConfig
 import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.files.StdStreamsSink
 import org.cqfn.save.core.logging.isDebugEnabled
@@ -54,10 +55,13 @@ class Save(
             propertiesFile!!.toPath().parent!! / testRootPath!! / testConfigPath!!
         }
         val reporter = getReporter(saveProperties)
+        val (requestedConfigs, requestedTests) = saveProperties.testFiles!!.partition {
+            it.toPath().isSaveTomlConfig()
+        }
         // get all toml configs in file system
         ConfigDetector()
             .configFromFile(fullPathToConfig)
-            .getAllTestConfigs()
+            .getAllTestConfigsForFiles(requestedConfigs)
             .forEach { testConfig ->
                 // iterating top-down
                 reporter.beforeAll()
@@ -66,7 +70,8 @@ class Save(
                     // fully process this config's configuration sections
                     .processInPlace()
                     // create plugins and choose only active (with test resources) ones
-                    .buildActivePlugins().forEach {
+                    .buildActivePlugins(requestedTests)
+                    .forEach {
                         // execute created plugins
                         executePlugin(it, reporter)
                     }

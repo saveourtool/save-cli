@@ -5,6 +5,7 @@ import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.readFile
 import org.cqfn.save.core.files.readLines
+import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.DebugInfo
@@ -29,7 +30,7 @@ import okio.Path
 @Suppress("INLINE_CLASS_CAN_BE_USED")
 class FixPlugin(
     testConfig: TestConfig,
-    testFiles: List<String> = emptyList(),
+    testFiles: List<String>,
     useInternalRedirections: Boolean = true) : Plugin(
     testConfig,
     testFiles,
@@ -62,7 +63,7 @@ class FixPlugin(
                 return@map chunk.map {
                     TestResult(
                         pathMap.map { (expected, test) -> listOf(expected, test) }.flatten(),
-                        Fail("${ex::class.simpleName}: ${ex.message}", ex::class.simpleName ?: "Unknown exception"),
+                        Fail(ex.describe(), ex.describe()),
                         DebugInfo(null, ex.message, null)
                     )
                 }

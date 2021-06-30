@@ -183,6 +183,7 @@ In case you would like to have several plugins to work in your directory with sa
 ### Build
 The project uses gradle as a build system and can be built with the command `./gradlew build`.
 To compile native artifacts, you will need to install prerequisites as described in Kotlin/Native documentation.
+For example, on Ubuntu you need the following packages: `libncurses5`.
 
 Because of generated code, you will need to run the build once to correctly import project in IDE with resolved imports.
 
