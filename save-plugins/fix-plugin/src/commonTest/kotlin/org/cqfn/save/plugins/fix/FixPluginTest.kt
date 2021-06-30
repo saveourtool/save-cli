@@ -119,6 +119,7 @@ class FixPluginTest {
             write("Expected file".encodeToByteArray())
         }
         val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").lowercase()} && " else ""
+        // FixMe: after https://github.com/cqfn/save/issues/158
         val executionCmd = if (isCurrentOsWindows()) {
             // We call ProcessBuilder ourselves, because the command ">" does not work for the list of files
             ProcessBuilder(false).exec("echo Expected file > $testFile2", null)
