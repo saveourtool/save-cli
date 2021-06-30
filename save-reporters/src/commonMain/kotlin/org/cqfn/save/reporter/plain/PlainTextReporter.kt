@@ -1,6 +1,7 @@
 package org.cqfn.save.reporter.plain
 
 import org.cqfn.save.core.config.ReportType
+import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.plugin.PluginException
@@ -34,7 +35,7 @@ class PlainTextReporter(override val out: BufferedSink) : Reporter {
             is Pass -> status.message ?: ""
             is Fail -> status.shortReason
             is Ignored -> status.reason
-            is Crash -> status.throwable.message ?: status.throwable::class.simpleName ?: "Unknown exception"
+            is Crash -> status.throwable.describe()
         }
         val shortComment = comment.lines().let { lines ->
             lines.firstOrNull()
@@ -71,6 +72,6 @@ class PlainTextReporter(override val out: BufferedSink) : Reporter {
     }
 
     override fun onPluginExecutionError(ex: PluginException) {
-        out.write("Error during plugin execution: ${ex.message}\n".encodeToByteArray())
+        out.write("Error during plugin execution: ${ex.describe()}\n".encodeToByteArray())
     }
 }
