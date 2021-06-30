@@ -14,7 +14,7 @@ import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
  * @throws GradleException if executed on some exotic OS
  */
 fun Project.disableRedundantKmpTargets() {
-    if (hasProperty("disableRedundantTargets") && (property("disableRedundantTargets") as String).toBoolean()) {
+    if (hasProperty("disableRedundantTargets") && (property("disableRedundantTargets") as String?) != "false") {
         afterEvaluate {
             val currentOs = DefaultNativePlatform.getCurrentOperatingSystem()
             val redundantTarget: String? = when {
