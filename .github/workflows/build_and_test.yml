@@ -37,7 +37,7 @@ jobs:
             buildSrc/**/Versions.kt
       # Until https://github.com/burrunan/gradle-cache-action/issues/42 is addressed, gradle should be run as a separate step
       - name: Run gradle command
-        run: ./gradlew build --build-cache -x linkReleaseExecutableLinuxX64 -x linkReleaseExecutableMingwX64 -x linkReleaseExecutableMacosX64
+        run: ./gradlew build --build-cache -PdisableRedundantTargets -x linkReleaseExecutableLinuxX64 -x linkReleaseExecutableMingwX64 -x linkReleaseExecutableMacosX64
       - name: Upload gradle reports
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
