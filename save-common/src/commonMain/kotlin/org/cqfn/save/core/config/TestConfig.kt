@@ -65,7 +65,7 @@ data class TestConfig(
      * @return root config from hierarchy tree
      */
     fun getRootConfig() = if (!isRoot()) {
-        this.parentConfigs().toList().last()
+        this.parentConfigs().last()
     } else {
         this
     }
