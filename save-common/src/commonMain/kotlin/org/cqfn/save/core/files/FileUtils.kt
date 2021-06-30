@@ -10,6 +10,7 @@
 package org.cqfn.save.core.files
 
 import org.cqfn.save.core.config.OutputStreamType
+import org.cqfn.save.core.logging.logError
 import org.cqfn.save.core.utils.writeToStream
 
 import okio.Buffer
@@ -150,26 +151,20 @@ fun Path.findDescendantDirectoriesBy(withSelf: Boolean = false, directoryPredica
         }
 
 /**
- * Create relative path from the current path to the root
+ * Wrapper function in case of incorrect usage:
+ * rootPath should be hierarchically higher than [this], also it should be in the same
+ * branch of the file tree
  *
  * @param rootPath root of the file tree, relates to which path will be created
  * @return string representation of relative path
  */
-fun Path.createRelativePathToTheRoot(rootPath: Path): String {
-    val rootDirectory = rootPath.getCurrentDirectory()
-    var currentDirectory = this.getCurrentDirectory()
-    
-    // Files located at the same directory, no need additional operations
-    if (rootDirectory == currentDirectory) {
-        return ""
-    }
-    // Goes through all intermediate dirs and construct relative path
-    var relativePath = ""
-    while (currentDirectory != rootDirectory) {
-        relativePath = currentDirectory.name + Path.DIRECTORY_SEPARATOR + relativePath
-        currentDirectory = currentDirectory.parent!!
-    }
-    return relativePath
+@Suppress("TooGenericExceptionCaught")
+fun Path.createRelativePathToTheRoot(rootPath: Path) = try {
+    createRelativePathFromThisToTheRoot(this, rootPath)
+} catch (ex: NullPointerException) {
+    logError("Incorrect usage of `createRelativePathToTheRoot`: rootPath should be hierarchically higher than [this], " +
+            "also it should be in the same branch of the file tree")
+    throw ex
 }
 
 /**
@@ -179,4 +174,28 @@ fun Path.getCurrentDirectory() = if (FileSystem.SYSTEM.metadata(this).isRegularF
     this.parent!!
 } else {
     this
+}
+
+/**
+ * Create relative path from the current path to the root
+ *
+ * @param currentPath current path
+ * @param rootPath root of the file tree, relates to which path will be created
+ * @return string representation of relative path
+ */
+private fun createRelativePathFromThisToTheRoot(currentPath: Path, rootPath: Path): String {
+    val rootDirectory = rootPath.getCurrentDirectory()
+    var parentDirectory = currentPath.parent!!
+
+    // Files located at the same directory, no need additional operations
+    if (rootDirectory == parentDirectory) {
+        return ""
+    }
+    // Goes through all intermediate dirs and construct relative path
+    var relativePath = ""
+    while (parentDirectory != rootDirectory) {
+        relativePath = parentDirectory.name + Path.DIRECTORY_SEPARATOR + relativePath
+        parentDirectory = parentDirectory.parent!!
+    }
+    return relativePath
 }

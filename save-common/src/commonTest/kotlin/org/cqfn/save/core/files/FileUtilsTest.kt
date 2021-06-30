@@ -104,6 +104,7 @@ class FileUtilsTest {
     fun `create relative path in case of branchy file tree`() {
         fs.createDirectories(tmpDir / "dir2" / "dir3" / "dir4")
         fs.createDirectory(tmpDir / "dir2" / "dir3" / "dir33")
+
         val config1 = fs.createFile(tmpDir / "save.toml")
         val testFile1 = fs.createFile(tmpDir / "Test1Test.java")
 
@@ -113,18 +114,19 @@ class FileUtilsTest {
         val config3 = fs.createFile(tmpDir / "dir2" / "dir3" / "save.toml")
         val testFile3 = fs.createFile(tmpDir / "dir2" / "dir3" / "Test3Test.java")
 
-        val config33 = fs.createFile(tmpDir / "dir2" / "dir3" / "dir33" / "save.toml")
         val testFile33 = fs.createFile(tmpDir / "dir2" / "dir3" / "dir33" / "Test33Test.java")
 
         val separator = Path.DIRECTORY_SEPARATOR
 
         assertEquals("", testFile1.createRelativePathToTheRoot(config1))
-        assertEquals(("dir2$separator"), testFile2.createRelativePathToTheRoot(config1))
+        assertEquals("dir2$separator", testFile2.createRelativePathToTheRoot(config1))
         assertEquals("dir2${separator}dir3$separator", testFile3.createRelativePathToTheRoot(config1))
         assertEquals("dir2${separator}dir3${separator}dir33$separator", testFile33.createRelativePathToTheRoot(config1))
 
         assertEquals("dir33$separator", testFile33.createRelativePathToTheRoot(config3))
         assertEquals("dir3${separator}dir33$separator", testFile33.createRelativePathToTheRoot(config2))
-        assertEquals("dir2${separator}dir3${separator}dir4$separator", (tmpDir / "dir2" / "dir3" / "dir4").createRelativePathToTheRoot(config1))
+        val dir4 = tmpDir / "dir2" / "dir3" / "dir4"
+        assertEquals("dir2${separator}dir3$separator", dir4.createRelativePathToTheRoot(config1))
+        assertEquals("dir2${separator}dir3$separator", dir4.createRelativePathToTheRoot(tmpDir))
     }
 }
