@@ -49,38 +49,52 @@ class FixPlugin(
 
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
-        return files
-            .map { it.first() to it.last() }
-            .map { (expected, test) ->
-                val testCopy = createTestFile(test)
-                val execCmd = "${(generalConfig!!.execCmd)} ${fixPluginConfig.execFlags} $testCopy"
-                val executionResult = try {
-                    pb.exec(execCmd, null)
-                } catch (ex: ProcessExecutionException) {
-                    return@map TestResult(
-                        listOf(expected, test),
+
+        return files.chunked(fixPluginConfig.batchSize!!).map { chunk ->
+            val pathMap = chunk.map { it.first() to it.last() }
+            val pathCopyMap = pathMap.map { (expected, test) -> expected to createTestFile(test) }
+            val testCopyNames = pathCopyMap.joinToString { (_, testCopy) -> testCopy.toString() }
+
+            val execCmd = "${(generalConfig!!.execCmd)} ${fixPluginConfig.execFlags} $testCopyNames"
+            val executionResult = try {
+                pb.exec(execCmd, null)
+            } catch (ex: ProcessExecutionException) {
+                return@map chunk.map {
+                    TestResult(
+                        pathMap.map { (expected, test) -> listOf(expected, test) }.flatten(),
                         Fail(ex.describe(), ex.describe()),
                         DebugInfo(null, ex.message, null)
                     )
                 }
-                val stdout = executionResult.stdout.joinToString("\n")
-                val stderr = executionResult.stderr.joinToString("\n")
+            }
 
+            val stdout = executionResult.stdout
+            val stderr = executionResult.stderr
+
+            pathCopyMap.map { (expected, testCopy) ->
                 val fixedLines = FileSystem.SYSTEM.readLines(testCopy)
                 val expectedLines = FileSystem.SYSTEM.readLines(expected)
-                val status = diff(expectedLines, fixedLines).let { patch ->
-                    if (patch.deltas.isEmpty()) {
-                        Pass(null)
-                    } else {
-                        Fail(patch.formatToString(), patch.formatToShortString())
-                    }
-                }
+
+                val test = pathMap.first { (_, test) -> test.name == testCopy.name }.second
+
                 TestResult(
                     listOf(expected, test),
-                    status,
-                    DebugInfo(stdout, stderr, null)
+                    checkStatus(expectedLines, fixedLines),
+                    DebugInfo(
+                        stdout.filter { it.contains(testCopy.name) }.joinToString("\n"),
+                        stderr.filter { it.contains(testCopy.name) }.joinToString("\n"),
+                        null)
                 )
             }
+        }.flatten()
+    }
+
+    private fun checkStatus(expectedLines: List<String>, fixedLines: List<String>) = diff(expectedLines, fixedLines).let { patch ->
+        if (patch.deltas.isEmpty()) {
+            Pass(null)
+        } else {
+            Fail(patch.formatToString(), patch.formatToShortString())
+        }
     }
 
     private fun createTestFile(path: Path): Path {
