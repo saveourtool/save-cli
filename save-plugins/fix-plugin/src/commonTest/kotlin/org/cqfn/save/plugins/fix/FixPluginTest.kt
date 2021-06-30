@@ -145,8 +145,10 @@ class FixPluginTest {
             mutableListOf(
                 FixPluginConfig(executionCmd, 2),
                 GeneralConfig("", "", "", "")
-            )
-        ), useInternalRedirections = false).execute()
+            )),
+            testFiles = emptyList(),
+            useInternalRedirections = false
+        ).execute()
 
         // We call ProcessBuilder ourselves, because the command ">" does not work for the list of files
         ProcessBuilder(false).exec("echo Expected file > $testFile2", null)
