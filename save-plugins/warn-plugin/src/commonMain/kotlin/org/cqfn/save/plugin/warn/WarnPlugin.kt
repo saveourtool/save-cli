@@ -19,8 +19,9 @@ import org.cqfn.save.plugin.warn.utils.extractWarning
 import okio.FileSystem
 import okio.Path
 
-private typealias WarningMap = MutableMap<LineColumn?, List<Warning>>
 internal typealias LineColumn = Pair<Int, Int>
+
+private typealias WarningMap = MutableMap<LineColumn?, List<Warning>>
 
 /**
  * A plugin that runs an executable and verifies that it produces required warning messages.
