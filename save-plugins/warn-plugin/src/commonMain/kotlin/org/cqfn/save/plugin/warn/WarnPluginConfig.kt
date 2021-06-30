@@ -40,7 +40,7 @@ import kotlinx.serialization.UseSerializers
  * corresponding to the whole string.
  * @property exactWarningsMatch exact match of errors
  * @property testNameSuffix suffix name of the test file.
- * @property batchSize
+ * @property batchSize it controls how many files execCmd will process at a time.
  */
 @Serializable
 data class WarnPluginConfig(

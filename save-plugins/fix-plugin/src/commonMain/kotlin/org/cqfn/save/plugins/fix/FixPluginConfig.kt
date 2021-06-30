@@ -19,12 +19,14 @@ import kotlinx.serialization.UseSerializers
  * The logic of the default value processing will be provided in stage of validation
  *
  * @property execFlags a command that will be executed to mutate test file contents
+ * @property batchSize it controls how many files execCmd will process at a time.
  * @property resourceNameTestSuffix suffix name of the test file.
  * @property resourceNameExpectedSuffix suffix name of the expected file.
  */
 @Serializable
 data class FixPluginConfig(
     val execFlags: String? = null,
+    val batchSize: Int? = null,
     val resourceNameTestSuffix: String? = null,
     val resourceNameExpectedSuffix: String? = null,
 ) : PluginConfig {
@@ -52,6 +54,7 @@ data class FixPluginConfig(
         val other = otherConfig as FixPluginConfig
         return FixPluginConfig(
             this.execFlags ?: other.execFlags,
+            this.batchSize ?: other.batchSize,
             this.resourceNameTestSuffix ?: other.resourceNameTestSuffix,
             this.resourceNameExpectedSuffix ?: other.resourceNameExpectedSuffix,
         )
@@ -59,6 +62,7 @@ data class FixPluginConfig(
 
     override fun validateAndSetDefaults() = FixPluginConfig(
         execFlags ?: "",
+        batchSize ?: 1,
         resourceNameTest,
         resourceNameExpected
     )
