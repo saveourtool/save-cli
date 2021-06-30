@@ -2,6 +2,7 @@ package org.cqfn.save.plugin.warn
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.plugin.GeneralConfig
@@ -18,8 +19,9 @@ import org.cqfn.save.plugin.warn.utils.extractWarning
 import okio.FileSystem
 import okio.Path
 
-private typealias WarningMap = MutableMap<LineColumn?, List<Warning>>
 internal typealias LineColumn = Pair<Int, Int>
+
+private typealias WarningMap = MutableMap<LineColumn?, List<Warning>>
 
 /**
  * A plugin that runs an executable and verifies that it produces required warning messages.
@@ -146,10 +148,11 @@ class WarnPlugin(
      */
     internal fun createTestFile(path: Path, warningsInputPattern: Regex): String {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPlugin::class.simpleName!!)
+        val relativePath = path.createRelativePathToTheRoot(testConfig.getRootConfig().location)
+        val tmpPath: Path = tmpDir / relativePath
+        createTempDir(tmpPath)
 
-        createTempDir(tmpDir)
-
-        val fileName = tmpDir / path.name
+        val fileName = tmpPath / path.name
         fs.write(fs.createFile(fileName)) {
             fs.readLines(path).forEach {
                 if (!warningsInputPattern.matches(it)) {
