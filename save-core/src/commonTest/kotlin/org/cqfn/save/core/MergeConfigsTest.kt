@@ -44,7 +44,7 @@ class MergeConfigsTest {
     private val warnConfig4 = WarnPluginConfig("execCmd4", warningsInputPattern2, warningsOutputPattern2,
         batchSize = 1, lineCaptureGroup = 4, columnCaptureGroup = 4, messageCaptureGroup = 4,
         fileNameCaptureGroupOut = 4, lineCaptureGroupOut = 4, columnCaptureGroupOut = 4, messageCaptureGroupOut = 4)
-    private val fixConfig1 = FixPluginConfig("fixCmd1", "Suffix")
+    private val fixConfig1 = FixPluginConfig("fixCmd1", 1, "Suffix")
     private val fixConfig2 = FixPluginConfig("fixCmd2")
     private val fixConfig3 = FixPluginConfig("fixCmd3", null)
     private val fixConfig4 = FixPluginConfig("fixCmd4")
@@ -115,7 +115,7 @@ class MergeConfigsTest {
         val expectedGeneralConfig = GeneralConfig("", "Tag11, Tag12, Tag21", "Description2", "suiteName2", "excludedTests: test3", "includedTests: test4")
         val expectedWarnConfig = WarnPluginConfig("execCmd3", warningsInputPattern2, warningsOutputPattern2,
             true, false, 1, 3, 3, 3, 3, 3, 3, 3, true)
-        val expectedFixConfig = FixPluginConfig("fixCmd2", "Suffix")
+        val expectedFixConfig = FixPluginConfig("fixCmd2", 1, "Suffix")
 
         val actualGeneralConfig = config2.pluginConfigs.filterIsInstance<GeneralConfig>().first()
         val actualWarnConfig = config2.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
@@ -140,7 +140,7 @@ class MergeConfigsTest {
         val expectedGeneralConfig = GeneralConfig("", "Tag11, Tag12, Tag21, Tag31, Tag32", "Description2", "suiteName4", "excludedTests: test7", "includedTests: test8")
         val expectedWarnConfig = WarnPluginConfig("execCmd4", warningsInputPattern2, warningsOutputPattern2,
             true, false, 1, 4, 4, 4, 4, 4, 4, 4, true)
-        val expectedFixConfig = FixPluginConfig("fixCmd4", "Suffix")
+        val expectedFixConfig = FixPluginConfig("fixCmd4", 1, "Suffix")
 
         val actualGeneralConfig = config4.pluginConfigs.filterIsInstance<GeneralConfig>().first()
         val actualWarnConfig = config4.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()

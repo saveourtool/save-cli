@@ -7,6 +7,7 @@ import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
+import org.cqfn.save.core.utils.ProcessBuilder
 import org.cqfn.save.core.utils.isCurrentOsWindows
 
 import io.github.petertrr.diffutils.diff
@@ -93,6 +94,64 @@ class FixPluginTest {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
         assertTrue("Files should be identical") {
             diff(fs.readLines(tmpDir / "Test3Test.java"), fs.readLines(expectedFile))
+                .deltas.isEmpty()
+        }
+    }
+
+    @Test
+    @Suppress("TOO_LONG_FUNCTION")
+    fun `test for batchSize`() {
+        val config = fs.createFile(tmpDir / "save.toml")
+        val testFile1 = fs.createFile(tmpDir / "Test3Test.java")
+        val testFile2 = fs.createFile(tmpDir / "Test4Test.java")
+        fs.write(testFile1) {
+            write("Original file".encodeToByteArray())
+        }
+        fs.write(testFile2) {
+            write("Original file".encodeToByteArray())
+        }
+        val expectedFile1 = fs.createFile(tmpDir / "Test3Expected.java")
+        val expectedFile2 = fs.createFile(tmpDir / "Test4Expected.java")
+        fs.write(expectedFile1) {
+            write("Expected file".encodeToByteArray())
+        }
+        fs.write(expectedFile2) {
+            write("Expected file".encodeToByteArray())
+        }
+        val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").lowercase()} && " else ""
+        // FixMe: after https://github.com/cqfn/save/issues/158
+        val executionCmd = if (isCurrentOsWindows()) {
+            // We call ProcessBuilder ourselves, because the command ">" does not work for the list of files
+            ProcessBuilder(false).exec("echo Expected file > $testFile2", null)
+            "${diskWithTmpDir}cd $tmpDir && echo Expected file >"
+        } else {
+            // We call ProcessBuilder ourselves, because the command ">" does not work for the list of files with separator ", "
+            ProcessBuilder(false).exec("echo Expected file > $testFile1", null)
+            "${diskWithTmpDir}cd $tmpDir && echo Expected file | tee"
+        }
+
+        val results = FixPlugin(TestConfig(config,
+            null,
+            mutableListOf(
+                FixPluginConfig(executionCmd, 2),
+                GeneralConfig("", "", "", "")
+            )
+        ), useInternalRedirections = false).execute()
+
+        // We call ProcessBuilder ourselves, because the command ">" does not work for the list of files
+        ProcessBuilder(false).exec("echo Expected file > $testFile2", null)
+
+        assertEquals(2, results.count(), "Size of results should equal number of pairs")
+        assertTrue(results.all {
+            it.status == Pass(null)
+        })
+        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
+        assertTrue("Files should be identical") {
+            diff(fs.readLines(tmpDir / "Test3Test.java"), fs.readLines(expectedFile1))
+                .deltas.isEmpty()
+        }
+        assertTrue("Files should be identical") {
+            diff(fs.readLines(tmpDir / "Test4Test.java"), fs.readLines(expectedFile2))
                 .deltas.isEmpty()
         }
     }
