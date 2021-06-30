@@ -7,7 +7,7 @@ repositories {
 }
 
 dependencies {
-    implementation("org.cqfn.diktat:diktat-gradle-plugin:0.6.1")
+    implementation("org.cqfn.diktat:diktat-gradle-plugin:1.0.0-rc.1")
     implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.16.0")
     runtimeOnly(kotlin("gradle-plugin", "1.5.0"))
     implementation("io.github.gradle-nexus:publish-plugin:1.1.0")
