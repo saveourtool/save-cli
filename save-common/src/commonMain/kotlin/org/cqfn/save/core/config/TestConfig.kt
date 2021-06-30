@@ -4,6 +4,7 @@
 
 package org.cqfn.save.core.config
 
+import org.cqfn.save.core.files.parents
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
@@ -11,6 +12,7 @@ import org.cqfn.save.core.plugin.PluginConfig
 
 import okio.FileSystem
 import okio.Path
+import okio.Path.Companion.toPath
 
 /**
  * Configuration for a test suite, that is read from test suite configuration file (toml config)
@@ -67,13 +69,30 @@ data class TestConfig(
             generateSequence(if (withSelf) this else parentConfig) { it.parentConfig }
 
     /**
-     * recursively (till leafs) return all configs from the configuration Tree
-     *
+     * recursively (till leaves) return all configs from the configuration Tree
      */
-    @Suppress("WRONG_NEWLINES")
-    fun getAllTestConfigs(): List<TestConfig> {
-        return listOf(this) + this.childConfigs.flatMap { it.getAllTestConfigs() }
-    }
+    fun getAllTestConfigs(): List<TestConfig> =
+            listOf(this) + this.childConfigs.flatMap { it.getAllTestConfigs() }
+
+    /**
+     * recursively return all configs from the configuration Tree, belonging to [requestedConfigs]
+     *
+     * @param requestedConfigs a list of save.toml configs
+     * @return a list of test configs in the sub-tree with [requestedConfigs] in the inheritance tree
+     */
+    fun getAllTestConfigsForFiles(requestedConfigs: List<String>): List<TestConfig> =
+            if (requestedConfigs.isEmpty()) {
+                getAllTestConfigs()
+            } else {
+                getAllTestConfigs().filter { testConfig ->
+                    requestedConfigs.any {
+                        // `testConfig`'s directory is a parent of `requestedConfig`'s directory
+                        testConfig.directory in it.toPath().parents() ||
+                                // or `testConfig`'s directory is a child of `requestedConfig`'s directory
+                                it.toPath().parent!! in testConfig.location.parents()
+                    }
+                }
+            }
 
     /**
      * Walk all descendant configs and merge them with their parents
