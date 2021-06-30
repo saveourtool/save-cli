@@ -90,4 +90,43 @@ class FileUtilsTest {
         assertEquals(directory12, result.first())
         assertEquals(directory13, result[1])
     }
+
+    @Test
+    fun `create relative path, when config and test resource located in the same directory`() {
+        val config = fs.createFile(tmpDir / "save.toml")
+        val testFile = fs.createFile(tmpDir / "Test1Test.java")
+
+        // Should be nothing, since they located in the same dir
+        assertEquals("", testFile.createRelativePathToTheRoot(config))
+    }
+
+    @Test
+    fun `create relative path in case of branchy file tree`() {
+        fs.createDirectories(tmpDir / "dir2" / "dir3" / "dir4")
+        fs.createDirectory(tmpDir / "dir2" / "dir3" / "dir33")
+
+        val config1 = fs.createFile(tmpDir / "save.toml")
+        val testFile1 = fs.createFile(tmpDir / "Test1Test.java")
+
+        val config2 = fs.createFile(tmpDir / "dir2" / "save.toml")
+        val testFile2 = fs.createFile(tmpDir / "dir2" / "Test2Test.java")
+
+        val config3 = fs.createFile(tmpDir / "dir2" / "dir3" / "save.toml")
+        val testFile3 = fs.createFile(tmpDir / "dir2" / "dir3" / "Test3Test.java")
+
+        val testFile33 = fs.createFile(tmpDir / "dir2" / "dir3" / "dir33" / "Test33Test.java")
+
+        val separator = Path.DIRECTORY_SEPARATOR
+
+        assertEquals("", testFile1.createRelativePathToTheRoot(config1))
+        assertEquals("dir2$separator", testFile2.createRelativePathToTheRoot(config1))
+        assertEquals("dir2${separator}dir3$separator", testFile3.createRelativePathToTheRoot(config1))
+        assertEquals("dir2${separator}dir3${separator}dir33$separator", testFile33.createRelativePathToTheRoot(config1))
+
+        assertEquals("dir33$separator", testFile33.createRelativePathToTheRoot(config3))
+        assertEquals("dir3${separator}dir33$separator", testFile33.createRelativePathToTheRoot(config2))
+        val dir4 = tmpDir / "dir2" / "dir3" / "dir4"
+        assertEquals("dir2${separator}dir3$separator", dir4.createRelativePathToTheRoot(config1))
+        assertEquals("dir2${separator}dir3$separator", dir4.createRelativePathToTheRoot(tmpDir))
+    }
 }
