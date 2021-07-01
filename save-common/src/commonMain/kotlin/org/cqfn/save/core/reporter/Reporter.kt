@@ -32,6 +32,20 @@ interface Reporter {
     fun afterAll()
 
     /**
+     * This function is called on test suite execution start
+     *
+     * @param suiteName test suite name
+     */
+    fun onSuiteStart(suiteName: String)
+
+    /**
+     * This function is called on test suite execution finish
+     *
+     * @param suiteName test suite name
+     */
+    fun onSuiteEnd(suiteName: String)
+
+    /**
      * This function is called whenever a new [TestResult] is available
      *
      * @param event an instance of [TestResult]
@@ -53,11 +67,14 @@ interface Reporter {
     fun onPluginExecutionStart(plugin: Plugin)
 
     /**
-     * This function is called when plugin should be skipped
+     * This function is called when plugin should be skipped.
+     * TODO: we have moved resources emptiness check inside `buildActivePlugins`, so reporter can't access it anymore
      *
      * @param plugin a [Plugin]
      */
-    fun onPluginExecutionSkip(plugin: Plugin)
+    fun onPluginExecutionSkip(plugin: Plugin) {
+        TODO("Not yet implemented, check method's docs")
+    }
 
     /**
      * This function is called when plugin finishes execution

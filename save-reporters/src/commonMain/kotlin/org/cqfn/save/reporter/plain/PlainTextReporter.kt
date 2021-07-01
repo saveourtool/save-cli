@@ -30,6 +30,12 @@ class PlainTextReporter(override val out: BufferedSink) : Reporter {
         logDebug("Finished reporter ${this::class.qualifiedName} of type $type\n")
     }
 
+    override fun onSuiteStart(suiteName: String) {
+        out.write("Test suite $suiteName\n".encodeToByteArray())
+    }
+
+    override fun onSuiteEnd(suiteName: String) = Unit
+
     override fun onEvent(event: TestResult) {
         val comment: String = when (val status = event.status) {
             is Pass -> status.message ?: ""

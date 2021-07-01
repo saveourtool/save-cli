@@ -71,6 +71,11 @@ data class TestConfig(
     }
 
     /**
+     * Find [GeneralConfig] among this config's sections and return it, or `null` if not found
+     */
+    fun getGeneralConfig() = pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
+
+    /**
      * @param withSelf if true, include this config as the first element of the sequence or start with parent config otherwise
      * @return a [Sequence] of parent config files
      */
