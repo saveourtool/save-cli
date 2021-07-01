@@ -10,6 +10,7 @@ import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.PluginConfig
 import org.cqfn.save.core.plugin.PluginException
 import org.cqfn.save.plugin.warn.WarnPluginConfig
+import org.cqfn.save.plugins.fixandwarn.FixAndWarnPluginConfig
 import org.cqfn.save.plugins.fix.FixPluginConfig
 
 import com.akuleshov7.ktoml.decoders.DecoderConf
@@ -71,6 +72,10 @@ fun createPluginConfigListFromToml(testConfigPath: Path): MutableList<PluginConf
         // we don't convert sectionName to enum, because we don't want to get Kotlin exception
         val sectionPluginConfig = when (sectionName) {
             TestConfigSections.FIX.name -> testConfigPath.createPluginConfig<FixPluginConfig>(
+                fakeFileNode,
+                sectionName
+            )
+            TestConfigSections.FIX_AND_WARN.name -> testConfigPath.createPluginConfig<FixAndWarnPluginConfig>(
                 fakeFileNode,
                 sectionName
             )
