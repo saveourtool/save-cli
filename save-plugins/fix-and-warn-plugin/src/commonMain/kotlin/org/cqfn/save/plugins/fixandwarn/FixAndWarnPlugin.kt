@@ -15,9 +15,10 @@ class FixAndWarnPlugin(
     testConfig,
     testFiles,
     useInternalRedirections) {
+    val fixPlugin = FixPlugin(testConfig, testFiles)
+    val warnPlugin = WarnPlugin(testConfig, testFiles)
+
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
-        val fixPlugin = FixPlugin(testConfig, testFiles)
-        val warnPlugin = WarnPlugin(testConfig, testFiles)
         TODO("Not yet implemented")
     }
 
