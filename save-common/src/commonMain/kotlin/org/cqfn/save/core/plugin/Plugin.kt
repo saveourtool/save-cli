@@ -17,9 +17,9 @@ import okio.Path
  */
 abstract class Plugin(
     open val testConfig: TestConfig,
-    private val testFiles: List<String>,
+    protected val testFiles: List<String>,
     private val useInternalRedirections: Boolean) {
-    private val fs = FileSystem.SYSTEM
+    protected val fs = FileSystem.SYSTEM
 
     /**
      * Instance that is capable of executing processes

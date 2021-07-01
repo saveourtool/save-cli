@@ -34,7 +34,6 @@ class WarnPlugin(
     testConfig,
     testFiles,
     useInternalRedirections) {
-    private val fs = FileSystem.SYSTEM
     private val expectedAndNotReceived = "Some warnings were expected but not received"
     private val unexpected = "Some warnings were unexpected"
 

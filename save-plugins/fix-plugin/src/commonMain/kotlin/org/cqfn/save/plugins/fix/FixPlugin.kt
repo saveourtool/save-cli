@@ -35,7 +35,6 @@ class FixPlugin(
     testConfig,
     testFiles,
     useInternalRedirections) {
-    private val fs = FileSystem.SYSTEM
     private val diffGenerator = DiffRowGenerator.create()
         .showInlineDiffs(true)
         .mergeOriginalRevised(false)
