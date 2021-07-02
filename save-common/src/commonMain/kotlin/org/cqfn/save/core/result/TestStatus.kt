@@ -4,6 +4,7 @@
 
 package org.cqfn.save.core.result
 
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 /**
@@ -36,5 +37,5 @@ data class Ignored(val reason: String) : TestStatus()
  *
  * @property throwable an exception that caused crash of SAVE
  */
-//@Serializable
-data class Crash(val throwable: Throwable) : TestStatus()
+@Serializable
+data class Crash(@Contextual val throwable: Throwable) : TestStatus()
