@@ -10,9 +10,7 @@ import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.isCurrentOsWindows
-import org.cqfn.save.plugin.warn.WarnPlugin
 import org.cqfn.save.plugin.warn.WarnPluginConfig
-import org.cqfn.save.plugins.fix.FixPlugin
 import org.cqfn.save.plugins.fix.FixPluginConfig
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -36,71 +34,85 @@ class FixAndWarnPluginTest {
     @Test
     fun `base test`() {
         val config = fs.createFile(tmpDir / "save.toml")
-        fs.write(fs.createFile(tmpDir / "resource")) {
+        val warningFile = tmpDir / "warning"
+        fs.write(fs.createFile(warningFile)) {
             write(
                 """
                 |Test1Test.java:4:6: Class name should be in PascalCase
                 """.trimMargin().encodeToByteArray()
             )
         }
-        val testFile = fs.createFile(tmpDir / "Test1Test.java")
-        fs.write(testFile) {
-            write("Original file".encodeToByteArray())
-        }
-        val expectedFile = fs.createFile(tmpDir / "Test1Expected.java")
-        fs.write(expectedFile) {
-            write("Expected file".encodeToByteArray())
-        }
 
-        val text =
+        val textBeforeFixAndWarn =
             """
                 package org.cqfn.save.example
                 
-                // ;warn:4:6: Class name should be in PascalCase
                 class example {
                     int foo = 42;
                 }
             """.trimIndent()
 
-        fs.write(fs.createFile(tmpDir / "Test1Test.java")) {
-            write(text.encodeToByteArray())
+        val testFile = fs.createFile(tmpDir / "Test1Test.java")
+        fs.write(testFile) {
+            write(textBeforeFixAndWarn.encodeToByteArray())
+        }
+
+        val textAfterFixAndWarn =
+            """
+                package org.cqfn.save.example
+                
+                // ;warn:4:6: Class name should be in PascalCase
+                class Example {
+                    int foo = 42;
+                }
+            """.trimIndent()
+
+        val expectedFile = fs.createFile(tmpDir / "Test1Expected.java")
+        fs.write(expectedFile) {
+            write(textAfterFixAndWarn.encodeToByteArray())
         }
 
         val catCmd = if (isCurrentOsWindows()) "type" else "cat"
-        val warnExecutionCmd = "$catCmd ${tmpDir / "resource"} && set stub="
+        val warnExecutionCmd = "$catCmd $warningFile && set stub="
 
         val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").lowercase()} && " else ""
-        val fixExecutionCmd = "${diskWithTmpDir}cd $tmpDir && echo Expected file >"
+        val fixExecutionCmd = "${diskWithTmpDir}cd $tmpDir && echo $textAfterFixAndWarn >" // TODO probably should be additional quotes for multi line echo
 
         val results = FixAndWarnPlugin(
-            TestConfig(config,
-            null,
-            mutableListOf(
-                FixPluginConfig(fixExecutionCmd),
-                WarnPluginConfig(warnExecutionCmd,
-                    Regex("// ;warn:(\\d+):(\\d+): (.*)"),
-                    Regex("(.+):(\\d+):(\\d+): (.+)"),
-                    true, true, 1, 1, 2, 3, 1, 2, 3, 4
-                ),
-                GeneralConfig("", "", "", "")
-            )),
+            TestConfig(
+                config,
+                null,
+                mutableListOf(
+                    FixAndWarnPluginConfig(
+                        FixPluginConfig(fixExecutionCmd),
+                        WarnPluginConfig(warnExecutionCmd,
+                            Regex("// ;warn:(\\d+):(\\d+): (.*)"),
+                            Regex("(.+):(\\d+):(\\d+): (.+)"),
+                            true, true, 1, 1, 2, 3, 1, 2, 3, 4
+                        )
+                    ),
+                    GeneralConfig("", "", "", "")
+                )
+            ),
             testFiles = emptyList(),
             useInternalRedirections = false
-        ).execute()
+        ).execute().toList()
 
-        println(results)
-
-        assertEquals(1, results.count(), "Size of results should equal number of pairs")
+        println("\n\nResults ${results.toList()}")
+        assertEquals(2, results.count(), "Size of results should equal number of pairs")
+        // Check FixPlugin results
         assertEquals(
             TestResult(listOf(expectedFile, testFile), Pass(null),
-            DebugInfo(results.single().debugInfo?.stdout, results.single().debugInfo?.stderr, null)
-            ), results.single())
+            DebugInfo(results.first().debugInfo?.stdout, results.first().debugInfo?.stderr, null)
+            ), results.first())
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixAndWarnPlugin::class.simpleName!!)
         assertTrue("Files should be identical") {
             diff(fs.readLines(tmpDir / "Test1Test.java"), fs.readLines(expectedFile))
                 .deltas.isEmpty()
         }
-        fs.delete(tmpDir / "resource")
+        // Check WarnPlugin results
+        assertTrue(results.last().status is Pass)
+        fs.delete(tmpDir / "warning")
     }
 
     @AfterTest
