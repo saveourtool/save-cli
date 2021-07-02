@@ -4,6 +4,8 @@
 
 package org.cqfn.save.reporter.utils
 
+import org.cqfn.save.core.logging.describe
+
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializer
@@ -19,11 +21,10 @@ import kotlinx.serialization.encoding.Encoder
 object ThrowableSerializer : KSerializer<Throwable> {
     override val descriptor: SerialDescriptor = buildClassSerialDescriptor("throwable") {
         element("message", PrimitiveSerialDescriptor("message", PrimitiveKind.STRING), isOptional = true)
-        // element("cause",)
     }
 
     override fun serialize(encoder: Encoder, value: Throwable) {
-        encoder.encodeString(value.message!!)
+        encoder.encodeString(value.describe())
     }
 
     override fun deserialize(decoder: Decoder): Throwable = Throwable(decoder.decodeString())
