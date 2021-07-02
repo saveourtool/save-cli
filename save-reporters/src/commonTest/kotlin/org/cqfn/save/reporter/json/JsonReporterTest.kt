@@ -23,6 +23,9 @@ class JsonReporterTest {
 
     @BeforeTest
     fun setUp() {
+        if (fs.exists(tmpDir)) {
+            fs.deleteRecursively(tmpDir)
+        }
         fs.createDirectory(tmpDir)
     }
 

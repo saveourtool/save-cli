@@ -2,6 +2,8 @@
  * Custom serializers that can be useful for reporting
  */
 
+@file:Suppress("MatchingDeclarationName")
+
 package org.cqfn.save.reporter.utils
 
 import org.cqfn.save.core.logging.describe

@@ -31,10 +31,12 @@ class PlainTextReporter(override val out: BufferedSink) : Reporter {
     }
 
     override fun onSuiteStart(suiteName: String) {
-        out.write("Test suite $suiteName\n".encodeToByteArray())
+        out.write("Test suite [$suiteName]\n".encodeToByteArray())
     }
 
-    override fun onSuiteEnd(suiteName: String) = Unit
+    override fun onSuiteEnd(suiteName: String) {
+        out.write("Completed test suite [$suiteName]\n".encodeToByteArray())
+    }
 
     override fun onEvent(event: TestResult) {
         val comment: String = when (val status = event.status) {
