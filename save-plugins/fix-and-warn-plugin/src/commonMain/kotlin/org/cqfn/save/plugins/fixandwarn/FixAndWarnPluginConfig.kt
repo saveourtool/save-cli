@@ -29,6 +29,7 @@ data class FixAndWarnPluginConfig(
     }
 
     override fun validateAndSetDefaults(): PluginConfig {
+        // TODO: test patterns should be the same in fix and warn plugins
         return FixAndWarnPluginConfig(
             fixPluginConfig.validateAndSetDefaults(),
             warnPluginConfig.validateAndSetDefaults()

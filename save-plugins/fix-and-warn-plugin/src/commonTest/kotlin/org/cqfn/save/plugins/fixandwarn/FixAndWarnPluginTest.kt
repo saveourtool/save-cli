@@ -11,6 +11,7 @@ import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.isCurrentOsWindows
 import org.cqfn.save.plugin.warn.WarnPluginConfig
+import org.cqfn.save.plugins.fix.FixPlugin
 import org.cqfn.save.plugins.fix.FixPluginConfig
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -34,14 +35,6 @@ class FixAndWarnPluginTest {
     @Test
     fun `base test`() {
         val config = fs.createFile(tmpDir / "save.toml")
-        val warningFile = tmpDir / "warning"
-        fs.write(fs.createFile(warningFile)) {
-            write(
-                """
-                |Test1Test.java:4:6: Class name should be in PascalCase
-                """.trimMargin().encodeToByteArray()
-            )
-        }
 
         val textBeforeFixAndWarn =
             """
@@ -61,7 +54,7 @@ class FixAndWarnPluginTest {
             """
                 package org.cqfn.save.example
                 
-                // ;warn:4:6: Class name should be in PascalCase
+                // ;warn:4:6: Some Warning
                 class Example {
                     int foo = 42;
                 }
@@ -72,11 +65,11 @@ class FixAndWarnPluginTest {
             write(textAfterFixAndWarn.encodeToByteArray())
         }
 
-        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
-        val warnExecutionCmd = "$catCmd $warningFile && set stub="
+        val warnExecutionCmd = "echo Test1Test.java:4:6: Some Warning && set stub="
 
         val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").lowercase()} && " else ""
-        val fixExecutionCmd = "${diskWithTmpDir}cd $tmpDir && echo $textAfterFixAndWarn >" // TODO probably should be additional quotes for multi line echo
+        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
+        val fixExecutionCmd = "${diskWithTmpDir}cd $tmpDir && $catCmd $expectedFile >"
 
         val results = FixAndWarnPlugin(
             TestConfig(
@@ -105,14 +98,13 @@ class FixAndWarnPluginTest {
             TestResult(listOf(expectedFile, testFile), Pass(null),
             DebugInfo(results.first().debugInfo?.stdout, results.first().debugInfo?.stderr, null)
             ), results.first())
-        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixAndWarnPlugin::class.simpleName!!)
+        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
         assertTrue("Files should be identical") {
             diff(fs.readLines(tmpDir / "Test1Test.java"), fs.readLines(expectedFile))
                 .deltas.isEmpty()
         }
         // Check WarnPlugin results
         assertTrue(results.last().status is Pass)
-        fs.delete(tmpDir / "warning")
     }
 
     @AfterTest

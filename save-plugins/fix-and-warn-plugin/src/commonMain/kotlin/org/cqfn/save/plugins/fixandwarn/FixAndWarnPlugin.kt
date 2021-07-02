@@ -5,6 +5,7 @@ import okio.Path
 import okio.Path.Companion.toPath
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.config.TestConfigSections
+import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
@@ -51,12 +52,33 @@ class FixAndWarnPlugin(
         testConfig.validateAndSetDefaults() // TODO need this? plugins will do this by themselves
 
         val fixTestFiles = files.takeWhile { it != testFilesSeparator }
+
+        /*
+        val warnTestFilesTemp = mutableListOf<List<Path>>()
+        val expectedFilesPattern = testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>()
+            .single().fixPluginConfig.resourceNameExpected
+
+        fixTestFiles.forEach { testFiles ->
+            warnTestFilesTemp.add(testFiles.filter {
+                !it.toString().contains(expectedFilesPattern)
+            })
+        }
+         */
         val warnTestFiles = files.dropWhile { it != testFilesSeparator }.drop(1)
+        val warnTestFilesTemp = mutableListOf<List<Path>>()
+        warnTestFiles.forEach {
+            val path = it.single()
+            val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
+            val relativePath = path.createRelativePathToTheRoot(testConfig.getRootConfig().location)
+            warnTestFilesTemp.add(listOf(tmpDir / relativePath / path.name))
+        }
+        println("warnTestFilesTemp ${warnTestFilesTemp}")
         logDebug("WarnPlugin test resources: ${warnTestFiles.toList()}")
         logDebug("FixPlugin test resources: ${fixTestFiles.toList()}")
 
         val fixTestResults = fixPlugin.handleFiles(fixTestFiles)
-        val warnTestResults = warnPlugin.handleFiles(warnTestFiles)
+        // TODO Warn actually need to look at the fix plugin results
+        val warnTestResults = warnPlugin.handleFiles(warnTestFilesTemp.asSequence())
         return fixTestResults + warnTestResults
     }
 
