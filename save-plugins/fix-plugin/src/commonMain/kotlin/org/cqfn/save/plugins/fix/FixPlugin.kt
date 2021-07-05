@@ -97,11 +97,9 @@ class FixPlugin(
     }
 
     private fun createTestFile(path: Path): Path {
-        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
-        val relativePath = path.createRelativePathToTheRoot(testConfig.getRootConfig().location)
-        val tmpPath: Path = tmpDir / relativePath
-        createTempDir(tmpPath)
-        val pathCopy: Path = tmpPath / path.name
+        val pathCopy: Path = constructPathForCopyOfTestFile(FixPlugin::class.simpleName!!, path)
+        createTempDir(pathCopy.parent!!)
+
         fs.write(fs.createFile(pathCopy)) {
             write(
                 (fs.readFile(path)).encodeToByteArray()

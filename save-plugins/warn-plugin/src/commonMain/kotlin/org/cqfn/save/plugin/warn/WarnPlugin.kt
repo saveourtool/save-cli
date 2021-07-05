@@ -146,12 +146,9 @@ class WarnPlugin(
      * @return name of the temporary file
      */
     internal fun createTestFile(path: Path, warningsInputPattern: Regex): String {
-        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPlugin::class.simpleName!!)
-        val relativePath = path.createRelativePathToTheRoot(testConfig.getRootConfig().location)
-        val tmpPath: Path = tmpDir / relativePath
-        createTempDir(tmpPath)
+        val fileName = constructPathForCopyOfTestFile(WarnPlugin::class.simpleName!!, path)
+        createTempDir(fileName.parent!!)
 
-        val fileName = tmpPath / path.name
         fs.write(fs.createFile(fileName)) {
             fs.readLines(path).forEach {
                 if (!warningsInputPattern.matches(it)) {

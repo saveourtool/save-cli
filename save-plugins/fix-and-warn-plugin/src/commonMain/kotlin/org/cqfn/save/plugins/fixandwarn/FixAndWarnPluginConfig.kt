@@ -18,18 +18,26 @@ data class FixAndWarnPluginConfig(
 
     @Transient
     override var configLocation: Path = "undefined_toml_location".toPath()
+
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as FixAndWarnPluginConfig
-        val mergedFixPlugin = fixPluginConfig.mergeWith(other.fixPluginConfig)
-        val mergedWarnPlugin = warnPluginConfig.mergeWith(other.warnPluginConfig)
+        val mergedFixPluginConfig = fixPluginConfig.mergeWith(other.fixPluginConfig)
+        val mergedWarnPluginConfig = warnPluginConfig.mergeWith(other.warnPluginConfig)
         return FixAndWarnPluginConfig(
-            mergedFixPlugin as FixPluginConfig,
-            mergedWarnPlugin as WarnPluginConfig
+            mergedFixPluginConfig as FixPluginConfig,
+            mergedWarnPluginConfig as WarnPluginConfig
         )
     }
 
     override fun validateAndSetDefaults(): PluginConfig {
-        // TODO: test patterns should be the same in fix and warn plugins
+        require(fixPluginConfig.resourceNameTest == warnPluginConfig.testName
+                && fixPluginConfig.batchSize == warnPluginConfig.batchSize) {
+           """
+               Test files suffix names and batch sizes should be identical for [fix] and [warn] plugins.
+               But found [fix]: {${fixPluginConfig.resourceNameTest}, ${fixPluginConfig.batchSize}},
+                         [warn]: {${warnPluginConfig.testName}, ${warnPluginConfig.batchSize}}
+           """
+        }
         return FixAndWarnPluginConfig(
             fixPluginConfig.validateAndSetDefaults(),
             warnPluginConfig.validateAndSetDefaults()

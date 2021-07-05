@@ -31,7 +31,6 @@ class FixAndWarnPluginTest {
         fs.createDirectory(tmpDir)
     }
 
-    // FixME: make it work
     @Test
     fun `base test`() {
         val config = fs.createFile(tmpDir / "save.toml")
@@ -77,7 +76,7 @@ class FixAndWarnPluginTest {
                 null,
                 mutableListOf(
                     FixAndWarnPluginConfig(
-                        FixPluginConfig(fixExecutionCmd),
+                        FixPluginConfig(fixExecutionCmd, batchSize = 1),
                         WarnPluginConfig(warnExecutionCmd,
                             Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                             Regex("(.+):(\\d+):(\\d+): (.+)"),

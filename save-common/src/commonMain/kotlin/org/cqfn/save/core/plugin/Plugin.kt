@@ -9,6 +9,7 @@ import org.cqfn.save.core.utils.ProcessBuilder
 
 import okio.FileSystem
 import okio.Path
+import org.cqfn.save.core.files.createRelativePathToTheRoot
 
 /**
  * Plugin that can be injected into SAVE during execution. Plugins accept contents of configuration file and then perform some work.
@@ -118,6 +119,19 @@ abstract class Plugin(
         } catch (e: Exception) {
             throw TempDirException("Could not create temp dir, cause: ${e.message}")
         }
+    }
+
+    /**
+     *  Construct path for copy of test file, over which the plugins will be working on
+     *
+     *  @param dirName name of the tmp subdirectory
+     *  @param path original path of test file
+     *  @return path for copy of test file
+     */
+    protected fun constructPathForCopyOfTestFile(dirName: String, path: Path): Path {
+        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / dirName)
+        val relativePath = path.createRelativePathToTheRoot(testConfig.getRootConfig().location)
+        return tmpDir / relativePath / path.name
     }
 
     /**

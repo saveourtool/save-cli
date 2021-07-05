@@ -49,36 +49,25 @@ class FixAndWarnPlugin(
     }
 
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
-        testConfig.validateAndSetDefaults() // TODO need this? plugins will do this by themselves
+        testConfig.validateAndSetDefaults()
 
         val fixTestFiles = files.takeWhile { it != testFilesSeparator }
-
-        /*
-        val warnTestFilesTemp = mutableListOf<List<Path>>()
-        val expectedFilesPattern = testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>()
-            .single().fixPluginConfig.resourceNameExpected
-
-        fixTestFiles.forEach { testFiles ->
-            warnTestFilesTemp.add(testFiles.filter {
-                !it.toString().contains(expectedFilesPattern)
-            })
-        }
-         */
         val warnTestFiles = files.dropWhile { it != testFilesSeparator }.drop(1)
-        val warnTestFilesTemp = mutableListOf<List<Path>>()
+
+        // Warn plugin should process the files, which was fixed by fix plugin and
+        // since suffix of [fix] test files and [warn] test files should be the same,
+        // we can get the path of fixed files from warn test files, just applying the same algorithm as in fix plugin
+        val testFilesAfterFix = mutableListOf<List<Path>>()
         warnTestFiles.forEach {
             val path = it.single()
-            val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
-            val relativePath = path.createRelativePathToTheRoot(testConfig.getRootConfig().location)
-            warnTestFilesTemp.add(listOf(tmpDir / relativePath / path.name))
+            testFilesAfterFix.add(listOf(constructPathForCopyOfTestFile(FixPlugin::class.simpleName!!, path)))
         }
-        println("warnTestFilesTemp ${warnTestFilesTemp}")
-        logDebug("WarnPlugin test resources: ${warnTestFiles.toList()}")
+
         logDebug("FixPlugin test resources: ${fixTestFiles.toList()}")
+        logDebug("WarnPlugin test resources: ${testFilesAfterFix.toList()}")
 
         val fixTestResults = fixPlugin.handleFiles(fixTestFiles)
-        // TODO Warn actually need to look at the fix plugin results
-        val warnTestResults = warnPlugin.handleFiles(warnTestFilesTemp.asSequence())
+        val warnTestResults = warnPlugin.handleFiles(testFilesAfterFix.asSequence())
         return fixTestResults + warnTestResults
     }
 
