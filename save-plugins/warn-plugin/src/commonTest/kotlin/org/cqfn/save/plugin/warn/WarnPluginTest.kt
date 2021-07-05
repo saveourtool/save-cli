@@ -62,7 +62,7 @@ class WarnPluginTest {
                 "$catCmd ${tmpDir / "resource"} && set stub=",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 Regex("(.+):(\\d+):(\\d+): (.+)"),
-                true, true, 1, 1, 2, 3, 1, 2, 3, 4
+                true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
             ),
             GeneralConfig("", "", "", "")
         ) { results ->
@@ -98,7 +98,7 @@ class WarnPluginTest {
                 "$catCmd ${tmpDir / "resource"} && set stub=",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 Regex("(.+):(\\d+):(\\d+): (.+)"),
-                true, true, 1, 1, 2, 3, 1, 2, 3, 4, false
+                true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4, false
             ),
             GeneralConfig("", "", "", "")
         ) { results ->
@@ -129,7 +129,7 @@ class WarnPluginTest {
                 "echo Test1Test.java:4:6: Class name should be in PascalCase",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 Regex("(.+):(\\d+):(\\d+): (.+)"),
-                true, true, 1, 1, 2, 3, 1, 2, 3, 4
+                true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
             ),
             GeneralConfig("", "", "", "")
         ) { results ->
@@ -167,7 +167,7 @@ class WarnPluginTest {
                 "$catCmd ${tmpDir / "resource"} && set stub=",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 Regex("(.+):(\\d+):(\\d+): (.+)"),
-                true, true, 1, 1, 2, 3, 1, 2, 3, 4
+                true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
             ),
             GeneralConfig("", "", "", "")
         ) { results ->
@@ -207,7 +207,7 @@ class WarnPluginTest {
                 "$catCmd ${tmpDir / "resource"} && set stub=",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 Regex("(.+):(\\d+):(\\d+): (.+)"),
-                true, true, 1, 1, 2, 3, 1, 2, 3, 4
+                true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
             ),
             GeneralConfig("", "", "", "")
         ) { results ->
@@ -246,7 +246,7 @@ class WarnPluginTest {
                 "$catCmd ${tmpDir / "resource"} && set stub=",
                 Regex("// ;warn: (.*)"),
                 Regex("(.+): (.+)"),
-                false, false, 1, null, null, 1, 1, null, null, 2
+                false, false, 1, ", ", null, null, 1, 1, null, null, 2
             ), GeneralConfig("", "", "", "")
         ) { results ->
             assertEquals(1, results.size)
@@ -293,7 +293,7 @@ class WarnPluginTest {
                 "$catCmd ${tmpDir / "resource"} && set stub=",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 Regex("(.+):(\\d+):(\\d+): (.+)"),
-                true, true, batchSize, 1, 2, 3, 1, 2, 3, 4
+                true, true, batchSize, ", ", 1, 2, 3, 1, 2, 3, 4
             ),
             GeneralConfig("", "", "", "")
         ) { results ->
@@ -326,7 +326,7 @@ class WarnPluginTest {
                 "$catCmd ${tmpDir / "resource"} && set stub=",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 Regex("(.+):(\\d+):(\\d+): (.+)"),
-                true, true, batchSize, 1, 2, 3, 1, 2, 3, 4
+                true, true, batchSize, ", ", 1, 2, 3, 1, 2, 3, 4
             ),
             GeneralConfig("", "", "", "")
         ) { results ->

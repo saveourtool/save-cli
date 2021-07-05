@@ -135,15 +135,15 @@ class FixPluginTest {
             ProcessBuilder(false).exec("echo Expected file > $testFile2", null)
             "${diskWithTmpDir}cd $tmpDir && echo Expected file >"
         } else {
-            // We call ProcessBuilder ourselves, because the command ">" does not work for the list of files with separator ", "
-            ProcessBuilder(false).exec("echo Expected file > $testFile1", null)
             "${diskWithTmpDir}cd $tmpDir && echo Expected file | tee"
         }
+
+        val fixPluginConfig = if (isCurrentOsWindows()) FixPluginConfig(executionCmd, 2) else FixPluginConfig(executionCmd, 2, " ")
 
         val results = FixPlugin(TestConfig(config,
             null,
             mutableListOf(
-                FixPluginConfig(executionCmd, 2),
+                fixPluginConfig,
                 GeneralConfig("", "", "", "")
             )),
             testFiles = emptyList(),
