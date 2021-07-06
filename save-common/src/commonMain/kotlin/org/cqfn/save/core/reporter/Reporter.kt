@@ -67,16 +67,6 @@ interface Reporter {
     fun onPluginExecutionStart(plugin: Plugin)
 
     /**
-     * This function is called when plugin should be skipped.
-     * TODO: we have moved resources emptiness check inside `buildActivePlugins`, so reporter can't access it anymore
-     *
-     * @param plugin a [Plugin]
-     */
-    fun onPluginExecutionSkip(plugin: Plugin) {
-        TODO("Not yet implemented, check method's docs")
-    }
-
-    /**
      * This function is called when plugin finishes execution
      *
      * @param plugin a [Plugin]
@@ -121,13 +111,6 @@ fun Collection<Reporter>.onPluginInitialization(plugin: Plugin): Unit = forEach 
  * @param plugin
  */
 fun Collection<Reporter>.onPluginExecutionStart(plugin: Plugin): Unit = forEach { it.onPluginExecutionStart(plugin) }
-
-/**
- * Calls [Reporter.onPluginExecutionSkip] on all elements in [this] collection
- *
- * @param plugin
- */
-fun Collection<Reporter>.onPluginExecutionSkip(plugin: Plugin): Unit = forEach { it.onPluginExecutionSkip(plugin) }
 
 /**
  * Calls [Reporter.onPluginExecutionEnd] on all elements in [this] collection

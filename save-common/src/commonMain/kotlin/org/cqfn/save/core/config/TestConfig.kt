@@ -136,7 +136,14 @@ data class TestConfig(
                 pluginFromConfig(it, this)
             }
                 // filter out plugins that don't have any resources
-                .filter { it.discoverTestFiles(directory).any() }
+                .filter { plugin ->
+                    plugin.discoverTestFiles(directory).any().also { isNotEmpty ->
+                        if (!isNotEmpty) {
+                            logDebug("Plugin <${plugin::class.simpleName}> in config file ${plugin.testConfig.location} has no test resources; " +
+                                    "it's config will only be used for inheritance")
+                        }
+                    }
+                }
 
     /**
      * filtering out general configs
