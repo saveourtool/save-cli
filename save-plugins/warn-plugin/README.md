@@ -81,13 +81,13 @@ warningTextHasColumn = true # (default value)
 warningTextHasLine = true # (default value)
 testNameSuffix = "Test" # (default value)
 batchSize = 1 # (default value)
-separator = ", " # (default value)
+batchSeparator  = ", " # (default value)
 ```
 
 When executed from project root (where `save.propertes` is located), SAVE will cd to `rootDir` and discover all files
 matching `inputFilePattern`. It will then execute `$execCmd $testFile`. `batchSize` it controls how many files execCmd will process at a time. (since we specified
 `batchSize = 1`, it will provide inputs one by one) and compare warnings its stdout (as per `output` option) parsed using `warningsOutputPattern` with warnings
-parsed from the same `$testFile` using `warningsInputPattern`. . `separator` is a setting for batchSize.
+parsed from the same `$testFile` using `warningsInputPattern`. `batchSeparator` is separator for filenames in `execCmd` if `batchSize > 1`.
 
 `warningsInputPattern` and `warningsOutputPattern` must include some mandatory capture groups: for line number (if `warningTextHasLine` is true),
 for column number (if `warningTextHasColumn` is true) and for warning text. Their indices can be customized

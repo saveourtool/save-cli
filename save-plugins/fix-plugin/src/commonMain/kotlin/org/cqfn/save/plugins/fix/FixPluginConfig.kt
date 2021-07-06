@@ -22,13 +22,13 @@ import kotlinx.serialization.UseSerializers
  * @property batchSize it controls how many files execCmd will process at a time.
  * @property resourceNameTestSuffix suffix name of the test file.
  * @property resourceNameExpectedSuffix suffix name of the expected file.
- * @property separator
+ * @property batchSeparator
  */
 @Serializable
 data class FixPluginConfig(
     val execFlags: String? = null,
     val batchSize: Int? = null,
-    val separator: String? = null,
+    val batchSeparator: String? = null,
     val resourceNameTestSuffix: String? = null,
     val resourceNameExpectedSuffix: String? = null,
 ) : PluginConfig {
@@ -57,7 +57,7 @@ data class FixPluginConfig(
         return FixPluginConfig(
             this.execFlags ?: other.execFlags,
             this.batchSize ?: other.batchSize,
-            this.separator ?: other.separator,
+            this.batchSeparator ?: other.batchSeparator,
             this.resourceNameTestSuffix ?: other.resourceNameTestSuffix,
             this.resourceNameExpectedSuffix ?: other.resourceNameExpectedSuffix,
         )
@@ -66,7 +66,7 @@ data class FixPluginConfig(
     override fun validateAndSetDefaults() = FixPluginConfig(
         execFlags ?: "",
         batchSize ?: 1,
-        separator ?: ", ",
+        batchSeparator ?: ", ",
         resourceNameTest,
         resourceNameExpected
     )
