@@ -46,7 +46,6 @@ expect class ProcessBuilderInternal(
  *
  * @property useInternalRedirections whether to collect output for future usage, if false, [redirectTo] will be ignored
  */
-@Suppress("INLINE_CLASS_CAN_BE_USED")
 class ProcessBuilder(private val useInternalRedirections: Boolean) {
     /**
      * Singleton that describes the current file system
