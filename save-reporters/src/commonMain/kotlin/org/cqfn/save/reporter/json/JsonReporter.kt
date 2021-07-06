@@ -1,5 +1,3 @@
-@file:UseSerializers(ThrowableSerializer::class)
-
 package org.cqfn.save.reporter.json
 
 import org.cqfn.save.core.config.ReportType
@@ -7,14 +5,11 @@ import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.plugin.PluginException
 import org.cqfn.save.core.reporter.Reporter
 import org.cqfn.save.core.result.TestResult
-import org.cqfn.save.reporter.utils.ThrowableSerializer
 
 import okio.BufferedSink
 
-import kotlinx.serialization.UseSerializers
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.modules.serializersModuleOf
 
 /**
  * Reporter that produces a JSON report as a [Report]
@@ -27,7 +22,7 @@ class JsonReporter(override val out: BufferedSink) : Reporter {
     /**
      * Formatter to serialize/deserialize to JSON
      */
-    internal val json = Json { serializersModule = serializersModuleOf(ThrowableSerializer) }
+    internal val json = Json
 
     private var isFirstEvent = true  // todo: use AtomicBoolean
 

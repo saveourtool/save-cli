@@ -43,7 +43,7 @@ class PlainTextReporter(override val out: BufferedSink) : Reporter {
             is Pass -> status.message ?: ""
             is Fail -> status.shortReason
             is Ignored -> status.reason
-            is Crash -> status.throwable.describe()
+            is Crash -> status.description
         }
         val shortComment = comment.lines().let { lines ->
             lines.firstOrNull()
@@ -67,11 +67,6 @@ class PlainTextReporter(override val out: BufferedSink) : Reporter {
         out.write("Executing plugin ${plugin::class.simpleName}\n".encodeToByteArray())
         out.write("--------------------------------\n".encodeToByteArray())
         out.write("| Test name | result | comment |\n".encodeToByteArray())
-    }
-
-    override fun onPluginExecutionSkip(plugin: Plugin) {
-        out.write("--------------------------------\n".encodeToByteArray())
-        out.write("Plugin ${plugin::class.simpleName} has been skipped\n".encodeToByteArray())
     }
 
     override fun onPluginExecutionEnd(plugin: Plugin) {

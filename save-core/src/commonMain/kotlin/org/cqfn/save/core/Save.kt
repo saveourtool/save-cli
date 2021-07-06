@@ -135,7 +135,7 @@ class Save(
             is Fail -> logWarn("Test on resources [${testResult.resources}] has failed: ${status.reason}")
             is Ignored -> logWarn("Test on resources [${testResult.resources}] has been ignored: ${status.reason}")
             is Crash -> logError(
-                "Test on resources [${testResult.resources}] has crashed: ${status.throwable.message}." +
+                "Test on resources [${testResult.resources}] has crashed: ${status.description}." +
                         "Please report an issue at https://github.com/cqfn/save"
             )
         }

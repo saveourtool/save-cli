@@ -4,7 +4,6 @@
 
 package org.cqfn.save.core.result
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 /**
@@ -35,7 +34,7 @@ data class Ignored(val reason: String) : TestStatus()
 /**
  * Represents the case when test execution crashed because of an unhandled internal error in SAVE framework.
  *
- * @property throwable an exception that caused crash of SAVE
+ * @property description description of an exception that caused crash of SAVE
  */
 @Serializable
-data class Crash(@Contextual val throwable: Throwable) : TestStatus()
+data class Crash(val description: String) : TestStatus()
