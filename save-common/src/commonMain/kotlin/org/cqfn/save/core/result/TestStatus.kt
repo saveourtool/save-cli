@@ -35,10 +35,14 @@ data class Ignored(val reason: String) : TestStatus()
 /**
  * Represents the case when test execution crashed because of an unhandled internal error in SAVE framework.
  *
- * @property description description of an exception that caused crash of SAVE
+ * @property exceptionType type of the exception that caused the crash
+ * @property message message from the exception that caused the crash
  */
 @Serializable
 data class Crash(val exceptionType: String, val message: String) : TestStatus() {
+    /**
+     * description of an exception that caused crash of SAVE
+     */
     @Transient
     val description = "$exceptionType: $message"
 }
