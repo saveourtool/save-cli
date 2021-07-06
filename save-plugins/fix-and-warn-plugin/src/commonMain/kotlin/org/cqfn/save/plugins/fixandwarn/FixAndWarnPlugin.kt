@@ -101,18 +101,25 @@ class FixAndWarnPlugin(
         val expectedFiles = files.filterTestResources(testFilePattern, match = false)
 
         // TODO Don't hold all original data in memory, it will be enough to hold just warning and number of line of this warning
-        val filesAndTheirOriginalDataMap = removeWarningsFromExpectedFiles(expectedFiles)
+        val filesWithListOfWarnings = removeWarningsFromExpectedFiles(expectedFiles)
+        println(filesWithListOfWarnings)
 
         val fixTestResults = fixPlugin.handleFiles(files)
 
         // Fill back original data with warnings
-        filesAndTheirOriginalDataMap.forEach { (filePath, originalData) ->
+
+        filesWithListOfWarnings.forEach { (filePath, warningsList) ->
+            val fileData = fs.readLines(filePath) as MutableList
+            warningsList.forEach { (line, warningMsg) ->
+                fileData.add(line, warningMsg)
+            }
             fs.write(filePath) {
-                originalData.forEach {
+                fileData.forEach {
                     write((it + "\n").encodeToByteArray())
                 }
             }
         }
+
 
         // TODO: If we receive just one command for execution, then warn plugin should look at the fix plugin output
         //  for warnings, and not execute command one more time.
@@ -134,19 +141,38 @@ class FixAndWarnPlugin(
      * @files files to be modified
      * @return map of files and theirs original data
      */
-    private fun removeWarningsFromExpectedFiles(files: List<Path>): MutableMap<Path, List<String>> {
-        val originalData: MutableMap<Path, List<String>> = mutableMapOf()
-        files.forEach { filePath ->
-            val originalFile = fs.readLines(filePath)
-            originalData.put(filePath, originalFile)
-            val fileWithoutWarnings = originalFile.filter { warnPluginConfig.warningsInputPattern!!.find(it)?.groups == null }
-            fs.write(filePath) {
-                fileWithoutWarnings.forEach {
+    private fun removeWarningsFromExpectedFiles(files: List<Path>): MutableMap<Path, MutableList<Pair<Int, String>>> {
+        val filesWithWarnings: MutableMap<Path, MutableList<Pair<Int, String>>> = mutableMapOf()
+        files.forEach { file ->
+            val fileData = fs.readLines(file)
+            filesWithWarnings[file] = mutableListOf()
+
+            val fileDataWithoutWarnings = fileData.filterIndexed { index, line ->
+                val isLineWithWarning = (warnPluginConfig.warningsInputPattern!!.find(line)?.groups != null)
+                if (isLineWithWarning) {
+                    filesWithWarnings[file]!!.add(index to line)
+                }
+                !isLineWithWarning
+            }
+            writeDataWithoutWarnings(file, filesWithWarnings, fileDataWithoutWarnings)
+        }
+        return filesWithWarnings
+    }
+
+    private fun writeDataWithoutWarnings(
+        file: Path,
+        filesWithWarnings: MutableMap<Path, MutableList<Pair<Int, String>>>,
+        fileDataWithoutWarnings: List<String>
+    ) {
+        if (filesWithWarnings[file]!!.isEmpty()) {
+            filesWithWarnings.remove(file)
+        } else {
+            fs.write(file) {
+                fileDataWithoutWarnings.forEach {
                     write((it + "\n").encodeToByteArray())
                 }
             }
         }
-        return originalData
     }
 
     override fun cleanupTempDir() {
