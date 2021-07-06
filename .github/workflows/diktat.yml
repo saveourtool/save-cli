@@ -23,6 +23,7 @@ jobs:
           # additional files to calculate key for dependency cache
           gradle-dependencies-cache-key: |
             buildSrc/**/Versions.kt
-      # Until https://github.com/burrunan/gradle-cache-action/issues/42 is addressed, gradle should be run as a separate step
-      - name: Run gradle command
-        run: ./gradlew diktatCheckAll --build-cache
+          arguments: |
+            diktatCheckAll
+          properties: |
+            detekt.multiplatform.disabled=true
