@@ -107,11 +107,12 @@ class Save(
     }
 
     private fun getReporter(saveProperties: SaveProperties): Reporter {
+        val outFileBaseName = "save.out"  // todo: make configurable
         val outFileName = when (saveProperties.reportType!!) {
-            ReportType.PLAIN -> "save.out"
-            ReportType.JSON -> "save.out.json"
-            ReportType.XML -> "save.out.xml"
-            ReportType.TOML -> "save.out.toml"
+            ReportType.PLAIN -> outFileBaseName
+            ReportType.JSON -> "$outFileBaseName.json"
+            ReportType.XML -> "$outFileBaseName.xml"
+            ReportType.TOML -> "$outFileBaseName.toml"
         }
         val out = when (val currentOutputType = saveProperties.resultOutput!!) {
             OutputStreamType.FILE -> fs.sink(outFileName.toPath()).buffer()
