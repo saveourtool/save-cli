@@ -41,6 +41,7 @@ import kotlinx.serialization.UseSerializers
  * @property exactWarningsMatch exact match of errors
  * @property testNameSuffix suffix name of the test file.
  * @property batchSize it controls how many files execCmd will process at a time.
+ * @property batchSeparator
  */
 @Serializable
 data class WarnPluginConfig(
@@ -50,6 +51,7 @@ data class WarnPluginConfig(
     val warningTextHasLine: Boolean? = null,
     val warningTextHasColumn: Boolean? = null,
     val batchSize: Int? = null,
+    val batchSeparator: String? = null,
     val lineCaptureGroup: Int? = null,
     val columnCaptureGroup: Int? = null,
     val messageCaptureGroup: Int? = null,
@@ -81,6 +83,7 @@ data class WarnPluginConfig(
             this.warningTextHasLine ?: other.warningTextHasLine,
             this.warningTextHasColumn ?: other.warningTextHasColumn,
             this.batchSize ?: other.batchSize,
+            this.batchSeparator ?: other.batchSeparator,
             this.lineCaptureGroup ?: other.lineCaptureGroup,
             this.columnCaptureGroup ?: other.columnCaptureGroup,
             this.messageCaptureGroup ?: other.messageCaptureGroup,
@@ -101,6 +104,7 @@ data class WarnPluginConfig(
         val newWarningTextHasLine = warningTextHasLine ?: true
         val newWarningTextHasColumn = warningTextHasColumn ?: true
         val newBatchSize = batchSize ?: 1
+        val newBatchSeparator = batchSeparator ?: ", "
         val newLineCaptureGroup = if (newWarningTextHasLine) (lineCaptureGroup ?: 1) else null
         val newColumnCaptureGroup = if (newWarningTextHasColumn) (columnCaptureGroup ?: 2) else null
         val newMessageCaptureGroup = messageCaptureGroup ?: 3
@@ -118,6 +122,7 @@ data class WarnPluginConfig(
             newWarningTextHasLine,
             newWarningTextHasColumn,
             newBatchSize,
+            newBatchSeparator,
             newLineCaptureGroup,
             newColumnCaptureGroup,
             newMessageCaptureGroup,
