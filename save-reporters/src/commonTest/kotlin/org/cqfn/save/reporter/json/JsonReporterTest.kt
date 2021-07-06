@@ -42,7 +42,7 @@ class JsonReporterTest {
         jsonReporter.onSuiteStart("suite1")
         jsonReporter.onSuiteEnd("suite1")
         jsonReporter.afterAll()
-        jsonReporter.out.flush()
+        jsonReporter.out.close()
 
         val reports: List<Report> = jsonReporter.json.decodeFromString(fs.readFile(tmpFile))
         assertEquals(1, reports.size)
@@ -66,7 +66,7 @@ class JsonReporterTest {
         jsonReporter.onPluginExecutionEnd(mockPlugin)
         jsonReporter.onSuiteEnd("suite1")
         jsonReporter.afterAll()
-        jsonReporter.out.flush()
+        jsonReporter.out.close()
 
         val serializedReports = fs.readFile(tmpFile)
         println("Serialized representation of reports: $serializedReports")
