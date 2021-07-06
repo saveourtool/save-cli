@@ -60,7 +60,7 @@ class JsonReporterTest {
         jsonReporter.onEvent(
             TestResult(
                 emptyList(),
-                Crash("IllegalArgumentException: foo")
+                Crash("IllegalArgumentException", "foo")
             )
         )
         jsonReporter.onPluginExecutionEnd(mockPlugin)

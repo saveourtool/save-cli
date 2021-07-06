@@ -5,6 +5,7 @@
 package org.cqfn.save.core.result
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 /**
  * Base class for final statuses of test execution
@@ -37,4 +38,7 @@ data class Ignored(val reason: String) : TestStatus()
  * @property description description of an exception that caused crash of SAVE
  */
 @Serializable
-data class Crash(val description: String) : TestStatus()
+data class Crash(val exceptionType: String, val message: String) : TestStatus() {
+    @Transient
+    val description = "$exceptionType: $message"
+}
