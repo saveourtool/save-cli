@@ -37,11 +37,7 @@ class JsonReporter(override val out: BufferedSink) : Reporter {
     }
 
     override fun onSuiteStart(suiteName: String) {
-        if (!isFirstSuite) {
-            out.write(",\n".encodeToByteArray())
-        } else {
-            isFirstSuite = false
-        }
+        isFirstSuite = out.appendCommaUnless(isFirstSuite)
         out.write("{\n\"testSuite\": \"$suiteName\",\n\"pluginExecutions\":\n[\n".encodeToByteArray())
     }
 
@@ -50,11 +46,7 @@ class JsonReporter(override val out: BufferedSink) : Reporter {
     }
 
     override fun onEvent(event: TestResult) {
-        if (!isFirstEvent) {
-            out.write(",".encodeToByteArray())
-        } else {
-            isFirstEvent = false
-        }
+        isFirstEvent = out.appendCommaUnless(isFirstEvent)
         out.write("${json.encodeToString(event)}\n".encodeToByteArray())
     }
 
@@ -72,11 +64,21 @@ class JsonReporter(override val out: BufferedSink) : Reporter {
     }
 
     override fun onPluginExecutionError(ex: PluginException) {
-        if (!isFirstEvent) {
-            out.write(",".encodeToByteArray())
-        } else {
-            isFirstEvent = false
-        }
+        isFirstEvent = out.appendCommaUnless(isFirstEvent)
         out.write("${Json.encodeToString(ex)}\n".encodeToByteArray())
+    }
+
+    /**
+     * Writes a comma into [this] [BufferedSink], if [condition] is `false`.
+     *
+     * @return `true` if comma has been written, `false` otherwise
+     */
+    private fun BufferedSink.appendCommaUnless(condition: Boolean): Boolean {
+        return if (!condition) {
+            write(",".encodeToByteArray())
+            true
+        } else {
+            false
+        }
     }
 }
