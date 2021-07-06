@@ -15,7 +15,6 @@ import kotlinx.serialization.Transient
 /**
  * Core interface for plugin configuration (like warnPlugin/fixPluin/e.t.c)
  */
-@Suppress("INLINE_CLASS_CAN_BE_USED")
 interface PluginConfig {
     /**
      * type of the config (usually related to the class: WARN/FIX/e.t.c)
