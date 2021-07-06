@@ -3,16 +3,15 @@ package org.cqfn.save.core.utils
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@Suppress("LOCAL_VARIABLE_EARLY_DECLARATION", "SAY_NO_TO_VAR")
+@Suppress("SAY_NO_TO_VAR")
 class ProcessBuilderInternalTest {
     private val processBuilder = ProcessBuilder(useInternalRedirections = true)
 
     @Test
     fun `check stderr`() {
         val actualResult = processBuilder.exec("cd non_existent_dir", null)
-        val expectedStdout: List<String> = emptyList()
         lateinit var expectedStderr: List<String>
-        var expectedCode: Int
+        val expectedCode: Int
         when (getCurrentOs()) {
             CurrentOs.LINUX -> {
                 expectedCode = 512
@@ -29,16 +28,15 @@ class ProcessBuilderInternalTest {
             else -> return
         }
         assertEquals(expectedCode, actualResult.code)
-        assertEquals(expectedStdout, actualResult.stdout)
+        assertEquals(emptyList(), actualResult.stdout)
         assertEquals(expectedStderr, actualResult.stderr)
     }
 
     @Test
     fun `check stderr with additional warning`() {
         val actualResult = processBuilder.exec("cd non_existent_dir 2>/dev/null", null)
-        val expectedStdout: List<String> = emptyList()
         lateinit var expectedStderr: List<String>
-        var expectedCode: Int
+        val expectedCode: Int
         when (getCurrentOs()) {
             CurrentOs.LINUX -> {
                 expectedCode = 512
@@ -55,7 +53,7 @@ class ProcessBuilderInternalTest {
             else -> return
         }
         assertEquals(expectedCode, actualResult.code)
-        assertEquals(expectedStdout, actualResult.stdout)
+        assertEquals(emptyList(), actualResult.stdout)
         assertEquals(expectedStderr, actualResult.stderr)
     }
 }

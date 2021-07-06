@@ -11,7 +11,7 @@ import org.cqfn.save.core.utils.isCurrentOsWindows
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@Suppress("INLINE_CLASS_CAN_BE_USED", "LOCAL_VARIABLE_EARLY_DECLARATION")
+@Suppress("INLINE_CLASS_CAN_BE_USED")
 class ProcessBuilderTest {
     private val processBuilder = ProcessBuilder(useInternalRedirections = true)
 
@@ -29,18 +29,16 @@ class ProcessBuilderTest {
         val actualResult = processBuilder.exec("echo something", null)
         val expectedCode = 0
         val expectedStdout = listOf("something")
-        val expectedStderr: List<String> = emptyList()
         assertEquals(expectedCode, actualResult.code)
         assertEquals(expectedStdout, actualResult.stdout)
-        assertEquals(expectedStderr, actualResult.stderr)
+        assertEquals(emptyList(), actualResult.stderr)
     }
 
     @Test
     @Suppress("SAY_NO_TO_VAR")
     fun `check stdout with redirection`() {
         val actualResult = processBuilder.exec("echo something >/dev/null", null)
-        var expectedCode: Int
-        val expectedStdout: List<String> = emptyList()
+        val expectedCode: Int
         lateinit var expectedStderr: List<String>
         when {
             isCurrentOsWindows() -> {
@@ -53,7 +51,7 @@ class ProcessBuilderTest {
             }
         }
         assertEquals(expectedCode, actualResult.code)
-        assertEquals(expectedStdout, actualResult.stdout)
+        assertEquals(emptyList(), actualResult.stdout)
         assertEquals(expectedStderr, actualResult.stderr)
     }
 

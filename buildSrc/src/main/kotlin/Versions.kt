@@ -1,4 +1,4 @@
-@file:Suppress("PACKAGE_NAME_MISSING", "CONSTANT_UPPERCASE")
+@file:Suppress("CONSTANT_UPPERCASE")
 
 object Versions {
     const val kotlin = "1.5.0"

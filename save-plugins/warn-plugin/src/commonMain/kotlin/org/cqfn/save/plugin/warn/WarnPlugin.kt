@@ -100,7 +100,7 @@ class WarnPlugin(
             )
         }
 
-        val fileNames = paths.joinToString {
+        val fileNames = paths.joinToString(separator = warnPluginConfig.batchSeparator!!) {
             if (generalConfig!!.ignoreSaveComments == true) createTestFile(it, warnPluginConfig.warningsInputPattern!!) else it.toString()
         }
         val execCmd = "${generalConfig!!.execCmd} ${warnPluginConfig.execFlags} $fileNames"

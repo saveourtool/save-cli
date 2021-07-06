@@ -2,8 +2,6 @@
  * Version configuration file.
  */
 
-@file:Suppress("UNUSED_IMPORT")
-
 package org.cqfn.save.buildutils
 
 import org.ajoberstar.grgit.Grgit
