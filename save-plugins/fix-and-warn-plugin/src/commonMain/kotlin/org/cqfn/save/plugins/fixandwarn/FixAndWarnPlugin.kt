@@ -15,6 +15,11 @@ import okio.Path
 
 private typealias WarningsList = MutableList<Pair<Int, String>>
 
+/**
+ * A plugin that runs an executable on a file, and combines two actions: fix and warn
+ * Plugin fix test file, warns if something couldn't be auto-corrected after fix
+ * and compares output with expected output during one execution.
+ */
 class FixAndWarnPlugin(
     testConfig: TestConfig,
     testFiles: List<String>,
@@ -62,14 +67,14 @@ class FixAndWarnPlugin(
         // Warn plugin should process the files, which were fixed by fix plugin
         // We can get the paths of fixed files from warn test files (since they are the same for fix plugin),
         // and then just add relative path from FixPlugin tmp dir
-        val testFilesAfterFix = mutableListOf<List<Path>>()
+        val testFilesAfterFix: MutableList<List<Path>> = mutableListOf()
         warnTestFiles.forEach { path ->
             // TODO change location from hardcoded FixPlugin::simpleName after https://github.com/cqfn/save/issues/156
             testFilesAfterFix.add(listOf(constructPathForCopyOfTestFile(FixPlugin::class.simpleName!!, path)))
         }
 
         logDebug("FixPlugin test resources: ${files.toList()}")
-        logDebug("WarnPlugin test resources: ${testFilesAfterFix.toList()}")
+        logDebug("WarnPlugin test resources: $testFilesAfterFix")
 
         val expectedFiles = files.filterTestResources(testFilePattern, match = false)
 
@@ -92,10 +97,10 @@ class FixAndWarnPlugin(
         }
 
         // TODO: If we receive just one command for execution, then warn plugin should look at the fix plugin output
-        // for warnings, and not execute command one more time.
-        // Current approach works too, but in this case we have extra actions, which is not good.
-        // For the proper work it should be produced refactoring of warn plugin https://github.com/cqfn/save/issues/164,
-        // after which methods of warning comparison will be separated from the common logic
+        // TODO: for warnings, and not execute command one more time.
+        // TODO: Current approach works too, but in this case we have extra actions, which is not good.
+        // TODO: For the proper work it should be produced refactoring of warn plugin https://github.com/cqfn/save/issues/164,
+        // TODO: after which methods of warning comparison will be separated from the common logic
         val warnTestResults = warnPlugin.handleFiles(testFilesAfterFix.asSequence())
         return fixTestResults + warnTestResults
     }
@@ -113,7 +118,7 @@ class FixAndWarnPlugin(
      * @return filtered list of files
      */
     private fun Sequence<List<Path>>.filterTestResources(suffix: Regex, match: Boolean): List<Path> {
-        val filteredFiles = mutableListOf<Path>()
+        val filteredFiles: MutableList<Path> = mutableListOf()
         this.forEach { resources ->
             filteredFiles.add(resources.single { path ->
                 if (match) {
@@ -130,6 +135,7 @@ class FixAndWarnPlugin(
      * Remove warnings from the given files, which satisfy pattern from [warn] plugin and save data about warnings, which were deleted
      *
      * @files files to be modified
+     *
      * @return map of files and theirs list of warnings
      */
     private fun removeWarningsFromExpectedFiles(files: List<Path>): MutableMap<Path, WarningsList> {

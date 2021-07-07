@@ -26,7 +26,6 @@ import okio.Path
  * A plugin that runs an executable on a file and compares output with expected output.
  * @property testConfig
  */
-@Suppress("INLINE_CLASS_CAN_BE_USED")
 class FixPlugin(
     testConfig: TestConfig,
     testFiles: List<String>,

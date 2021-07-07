@@ -34,6 +34,7 @@ class FixAndWarnPluginTest {
     }
 
     @Test
+    @Suppress("TOO_LONG_FUNCTION")
     fun `base test`() {
         val config = fs.createFile(tmpDir / "save.toml")
 
@@ -66,11 +67,10 @@ class FixAndWarnPluginTest {
             write(textAfterFixAndWarn.encodeToByteArray())
         }
 
-        val warnExecutionCmd = "echo Test1Test.java:4:6: Some Warning && set stub="
-
         val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").lowercase()} && " else ""
         val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         val fixExecutionCmd = "${diskWithTmpDir}cd $tmpDir && $catCmd $expectedFile >"
+        val warnExecutionCmd = "echo Test1Test.java:4:6: Some Warning && set stub="
 
         val results = FixAndWarnPlugin(
             TestConfig(

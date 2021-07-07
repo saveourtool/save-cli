@@ -21,6 +21,9 @@ abstract class Plugin(
     open val testConfig: TestConfig,
     protected val testFiles: List<String>,
     private val useInternalRedirections: Boolean) {
+    /**
+     * Singleton, that describes the current file system
+     */
     protected val fs = FileSystem.SYSTEM
 
     /**
