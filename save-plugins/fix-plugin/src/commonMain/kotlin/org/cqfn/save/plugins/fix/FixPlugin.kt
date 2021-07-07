@@ -52,6 +52,7 @@ class FixPlugin(
             val pathMap = chunk.map { it.first() to it.last() }
             val pathCopyMap = pathMap.map { (expected, test) -> expected to createTestFile(test) }
             val testCopyNames = pathCopyMap.joinToString(separator = fixPluginConfig.batchSeparator!!) { (_, testCopy) -> testCopy.toString() }
+
             val execCmd = "${(generalConfig!!.execCmd)} ${fixPluginConfig.execFlags} $testCopyNames"
             val executionResult = try {
                 pb.exec(execCmd, null)
