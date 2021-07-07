@@ -13,6 +13,8 @@ import org.cqfn.save.plugin.warn.WarnPlugin
 
 import org.cqfn.save.plugins.fix.FixPlugin
 
+private typealias WarningsList = MutableList<Pair<Int, String>>
+
 class FixAndWarnPlugin(
     testConfig: TestConfig,
     testFiles: List<String>,
@@ -20,7 +22,6 @@ class FixAndWarnPlugin(
     testConfig,
     testFiles,
     useInternalRedirections) {
-
     private val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().fixPluginConfig
 
     private val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().warnPluginConfig
@@ -33,7 +34,6 @@ class FixAndWarnPlugin(
         createTestConfigForPlugins(TestConfigSections.WARN),
         testFiles
     )
-
 
     /**
      * Create TestConfig same as current, but with corresponding plugin configs list for nested [fix] and [warn] sections
@@ -56,6 +56,60 @@ class FixAndWarnPlugin(
         )
     }
 
+    override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
+        testConfig.validateAndSetDefaults()
+
+        // Test files for warn plugin could be obtained by filtering of `fix` resources: excluding `expected` files
+        val testFilePattern = warnPluginConfig.resourceNamePattern
+        val warnTestFiles = files.filterTestResources(testFilePattern, match = true)
+
+        // Warn plugin should process the files, which were fixed by fix plugin
+        // We can get the paths of fixed files from warn test files (since they are the same for fix plugin),
+        // and then just add relative path from FixPlugin tmp dir
+        val testFilesAfterFix = mutableListOf<List<Path>>()
+        warnTestFiles.forEach { path ->
+            // TODO change location from hardcoded FixPlugin::simpleName after https://github.com/cqfn/save/issues/156
+            testFilesAfterFix.add(listOf(constructPathForCopyOfTestFile(FixPlugin::class.simpleName!!, path)))
+        }
+
+        logDebug("FixPlugin test resources: ${files.toList()}")
+        logDebug("WarnPlugin test resources: ${testFilesAfterFix.toList()}")
+
+        val expectedFiles = files.filterTestResources(testFilePattern, match = false)
+
+        // Remove (in place) warnings from test files before fix plugin execution
+        val filesAndTheirWarningsMap = removeWarningsFromExpectedFiles(expectedFiles)
+
+        val fixTestResults = fixPlugin.handleFiles(files)
+
+        // Fill back original data with warnings
+        filesAndTheirWarningsMap.forEach { (filePath, warningsList) ->
+            val fileData = fs.readLines(filePath) as MutableList
+            warningsList.forEach { (line, warningMsg) ->
+                fileData.add(line, warningMsg)
+            }
+            fs.write(filePath) {
+                fileData.forEach {
+                    write((it + "\n").encodeToByteArray())
+                }
+            }
+        }
+
+        // TODO: If we receive just one command for execution, then warn plugin should look at the fix plugin output
+        //  for warnings, and not execute command one more time.
+        //  Current approach works too, but in this case we have extra actions, which is not good.
+        //  For the proper work it should be produced refactoring of warn plugin https://github.com/cqfn/save/issues/164,
+        //  after which methods of warning comparison will be separated from the common logic
+        val warnTestResults = warnPlugin.handleFiles(testFilesAfterFix.asSequence())
+        return fixTestResults + warnTestResults
+    }
+
+    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {
+        // Test files for fix and warn plugin should be the same, so this will be enough
+        return fixPlugin.rawDiscoverTestFiles(resourceDirectories)
+    }
+
+
     /**
      * Filter test resources
      *
@@ -77,95 +131,37 @@ class FixAndWarnPlugin(
         return filteredFiles
     }
 
-
-    override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
-        testConfig.validateAndSetDefaults()
-
-        // Test files for warn plugin could be obtained by filtering of `fix` resources: excluding `expected` files
-        val testFilePattern = warnPluginConfig.resourceNamePattern
-        val warnTestFiles = files.filterTestResources(testFilePattern, match = true)
-
-        // Warn plugin should process the files, which were fixed by fix plugin
-        // We can get the paths of fixed files from warn test files (since they are the same for fix plugin),
-        // and then just add relative path from FixPlugin tmp dir
-        val testFilesAfterFix = mutableListOf<List<Path>>()
-        warnTestFiles.forEach { path ->
-            // TODO change location from hardcoded FixPlugin::simpleName after https://github.com/cqfn/save/issues/156
-            testFilesAfterFix.add(listOf(constructPathForCopyOfTestFile(FixPlugin::class.simpleName!!, path)))
-        }
-
-        logDebug("FixPlugin test resources: ${files.toList()}")
-        logDebug("WarnPlugin test resources: ${testFilesAfterFix.toList()}")
-
-        // Remove (in place) warnings from test files before fix plugin execution
-        val expectedFiles = files.filterTestResources(testFilePattern, match = false)
-
-        // TODO Don't hold all original data in memory, it will be enough to hold just warning and number of line of this warning
-        val filesWithListOfWarnings = removeWarningsFromExpectedFiles(expectedFiles)
-        println(filesWithListOfWarnings)
-
-        val fixTestResults = fixPlugin.handleFiles(files)
-
-        // Fill back original data with warnings
-
-        filesWithListOfWarnings.forEach { (filePath, warningsList) ->
-            val fileData = fs.readLines(filePath) as MutableList
-            warningsList.forEach { (line, warningMsg) ->
-                fileData.add(line, warningMsg)
-            }
-            fs.write(filePath) {
-                fileData.forEach {
-                    write((it + "\n").encodeToByteArray())
-                }
-            }
-        }
-
-
-        // TODO: If we receive just one command for execution, then warn plugin should look at the fix plugin output
-        //  for warnings, and not execute command one more time.
-        //  Current approach works too, but in this case we have extra actions, which is not good.
-        //  For the proper work it should be produced refactoring of warn plugin https://github.com/cqfn/save/issues/164,
-        //  after which methods of warning comparison will be separated from the common logic
-        val warnTestResults = warnPlugin.handleFiles(testFilesAfterFix.asSequence())
-        return fixTestResults + warnTestResults
-    }
-
-    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {
-        // Test files for fix and warn plugin should be the same, so this will be enough
-        return fixPlugin.rawDiscoverTestFiles(resourceDirectories)
-    }
-
     /**
-     * Remove warnings from the given files, which satisfy pattern from [warn] plugin and save original data of file
+     * Remove warnings from the given files, which satisfy pattern from [warn] plugin and save data about warnings, which were deleted
      *
      * @files files to be modified
-     * @return map of files and theirs original data
+     * @return map of files and theirs list of warnings
      */
-    private fun removeWarningsFromExpectedFiles(files: List<Path>): MutableMap<Path, MutableList<Pair<Int, String>>> {
-        val filesWithWarnings: MutableMap<Path, MutableList<Pair<Int, String>>> = mutableMapOf()
+    private fun removeWarningsFromExpectedFiles(files: List<Path>): MutableMap<Path, WarningsList> {
+        val filesAndTheirWarningsMap: MutableMap<Path, WarningsList> = mutableMapOf()
         files.forEach { file ->
             val fileData = fs.readLines(file)
-            filesWithWarnings[file] = mutableListOf()
+            filesAndTheirWarningsMap[file] = mutableListOf()
 
             val fileDataWithoutWarnings = fileData.filterIndexed { index, line ->
                 val isLineWithWarning = (warnPluginConfig.warningsInputPattern!!.find(line)?.groups != null)
                 if (isLineWithWarning) {
-                    filesWithWarnings[file]!!.add(index to line)
+                    filesAndTheirWarningsMap[file]!!.add(index to line)
                 }
                 !isLineWithWarning
             }
-            writeDataWithoutWarnings(file, filesWithWarnings, fileDataWithoutWarnings)
+            writeDataWithoutWarnings(file, filesAndTheirWarningsMap, fileDataWithoutWarnings)
         }
-        return filesWithWarnings
+        return filesAndTheirWarningsMap
     }
 
     private fun writeDataWithoutWarnings(
         file: Path,
-        filesWithWarnings: MutableMap<Path, MutableList<Pair<Int, String>>>,
+        filesAndTheirWarningsMap: MutableMap<Path, WarningsList>,
         fileDataWithoutWarnings: List<String>
     ) {
-        if (filesWithWarnings[file]!!.isEmpty()) {
-            filesWithWarnings.remove(file)
+        if (filesAndTheirWarningsMap[file]!!.isEmpty()) {
+            filesAndTheirWarningsMap.remove(file)
         } else {
             fs.write(file) {
                 fileDataWithoutWarnings.forEach {
