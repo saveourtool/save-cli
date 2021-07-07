@@ -63,7 +63,9 @@ abstract class Plugin(
         return if (testFiles.isNotEmpty()) {
             rawTestFiles.filter { paths ->
                 // test can be specified by the name of one of it's files
-                paths.any { it.name in testFiles }
+                paths.any { path ->
+                    testFiles.any { it in path.toString() }
+                }
             }
         } else {
             rawTestFiles
