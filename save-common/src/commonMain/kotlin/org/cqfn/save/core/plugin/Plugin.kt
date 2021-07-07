@@ -2,6 +2,7 @@ package org.cqfn.save.core.plugin
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.config.isSaveTomlConfig
+import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.findDescendantDirectoriesBy
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.result.TestResult
@@ -9,11 +10,11 @@ import org.cqfn.save.core.utils.ProcessBuilder
 
 import okio.FileSystem
 import okio.Path
-import org.cqfn.save.core.files.createRelativePathToTheRoot
 
 /**
  * Plugin that can be injected into SAVE during execution. Plugins accept contents of configuration file and then perform some work.
  * @property testConfig
+ * @property testFiles a list of files (test resources or save.toml configs)
  * @property useInternalRedirections whether to redirect stdout/stderr for internal purposes
  */
 abstract class Plugin(

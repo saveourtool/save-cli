@@ -1,7 +1,5 @@
 package org.cqfn.save.plugins.fixandwarn
 
-import okio.FileSystem
-import okio.Path
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.config.TestConfigSections
 import org.cqfn.save.core.files.readLines
@@ -10,8 +8,10 @@ import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.plugin.warn.WarnPlugin
-
 import org.cqfn.save.plugins.fix.FixPlugin
+
+import okio.FileSystem
+import okio.Path
 
 private typealias WarningsList = MutableList<Pair<Int, String>>
 
@@ -23,9 +23,7 @@ class FixAndWarnPlugin(
     testFiles,
     useInternalRedirections) {
     private val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().fixPluginConfig
-
     private val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().warnPluginConfig
-
     private val fixPlugin = FixPlugin(
         createTestConfigForPlugins(TestConfigSections.FIX),
         testFiles
@@ -41,20 +39,18 @@ class FixAndWarnPlugin(
      * @param type type of nested section
      * @return TestConfig for corresponding section
      */
-    private fun createTestConfigForPlugins(type: TestConfigSections): TestConfig {
-        return TestConfig(
-            testConfig.location,
-            testConfig.parentConfig,
-            mutableListOf(
-                testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single(),
-                if (type == TestConfigSections.FIX) {
-                    fixPluginConfig
-                } else {
-                    warnPluginConfig
-                }
-            )
+    private fun createTestConfigForPlugins(type: TestConfigSections) = TestConfig(
+        testConfig.location,
+        testConfig.parentConfig,
+        mutableListOf(
+            testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single(),
+            if (type == TestConfigSections.FIX) {
+                fixPluginConfig
+            } else {
+                warnPluginConfig
+            }
         )
-    }
+    )
 
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
         testConfig.validateAndSetDefaults()
@@ -96,10 +92,10 @@ class FixAndWarnPlugin(
         }
 
         // TODO: If we receive just one command for execution, then warn plugin should look at the fix plugin output
-        //  for warnings, and not execute command one more time.
-        //  Current approach works too, but in this case we have extra actions, which is not good.
-        //  For the proper work it should be produced refactoring of warn plugin https://github.com/cqfn/save/issues/164,
-        //  after which methods of warning comparison will be separated from the common logic
+        // for warnings, and not execute command one more time.
+        // Current approach works too, but in this case we have extra actions, which is not good.
+        // For the proper work it should be produced refactoring of warn plugin https://github.com/cqfn/save/issues/164,
+        // after which methods of warning comparison will be separated from the common logic
         val warnTestResults = warnPlugin.handleFiles(testFilesAfterFix.asSequence())
         return fixTestResults + warnTestResults
     }
@@ -108,7 +104,6 @@ class FixAndWarnPlugin(
         // Test files for fix and warn plugin should be the same, so this will be enough
         return fixPlugin.rawDiscoverTestFiles(resourceDirectories)
     }
-
 
     /**
      * Filter test resources

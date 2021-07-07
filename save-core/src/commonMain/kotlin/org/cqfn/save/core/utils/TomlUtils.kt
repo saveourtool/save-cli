@@ -10,8 +10,8 @@ import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.PluginConfig
 import org.cqfn.save.core.plugin.PluginException
 import org.cqfn.save.plugin.warn.WarnPluginConfig
-import org.cqfn.save.plugins.fixandwarn.FixAndWarnPluginConfig
 import org.cqfn.save.plugins.fix.FixPluginConfig
+import org.cqfn.save.plugins.fixandwarn.FixAndWarnPluginConfig
 
 import com.akuleshov7.ktoml.decoders.DecoderConf
 import com.akuleshov7.ktoml.decoders.TomlDecoder

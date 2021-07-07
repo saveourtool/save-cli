@@ -1,7 +1,5 @@
 package org.cqfn.save.plugins.fixandwarn
 
-import io.github.petertrr.diffutils.diff
-import okio.FileSystem
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
@@ -13,11 +11,15 @@ import org.cqfn.save.core.utils.isCurrentOsWindows
 import org.cqfn.save.plugin.warn.WarnPluginConfig
 import org.cqfn.save.plugins.fix.FixPlugin
 import org.cqfn.save.plugins.fix.FixPluginConfig
+
+import io.github.petertrr.diffutils.diff
+import okio.FileSystem
+
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.AfterTest
-import kotlin.test.assertTrue
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class FixAndWarnPluginTest {
     private val fs = FileSystem.SYSTEM
@@ -36,13 +38,13 @@ class FixAndWarnPluginTest {
         val config = fs.createFile(tmpDir / "save.toml")
 
         val textBeforeFixAndWarn =
-            """
-                package org.cqfn.save.example
-                
-                class example {
-                    int foo = 42;
-                }
-            """.trimIndent()
+                """
+                    package org.cqfn.save.example
+                    
+                    class example {
+                        int foo = 42;
+                    }
+                """.trimIndent()
 
         val testFile = fs.createFile(tmpDir / "Test1Test.java")
         fs.write(testFile) {
@@ -50,14 +52,14 @@ class FixAndWarnPluginTest {
         }
 
         val textAfterFixAndWarn =
-            """
-                package org.cqfn.save.example
-                
-                // ;warn:4:6: Some Warning
-                class Example {
-                    int foo = 42;
-                }
-            """.trimIndent()
+                """
+                    package org.cqfn.save.example
+                    
+                    // ;warn:4:6: Some Warning
+                    class Example {
+                        int foo = 42;
+                    }
+                """.trimIndent()
 
         val expectedFile = fs.createFile(tmpDir / "Test1Expected.java")
         fs.write(expectedFile) {
@@ -90,12 +92,12 @@ class FixAndWarnPluginTest {
             useInternalRedirections = false
         ).execute().toList()
 
-        println("\n\nResults ${results.toList()}")
+        println("Results ${results.toList()}")
         assertEquals(2, results.count(), "Size of results should equal number of pairs")
         // Check FixPlugin results
         assertEquals(
             TestResult(listOf(expectedFile, testFile), Pass(null),
-            DebugInfo(results.first().debugInfo?.stdout, results.first().debugInfo?.stderr, null)
+                DebugInfo(results.first().debugInfo?.stdout, results.first().debugInfo?.stderr, null)
             ), results.first())
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
         assertTrue("Files should be identical") {
