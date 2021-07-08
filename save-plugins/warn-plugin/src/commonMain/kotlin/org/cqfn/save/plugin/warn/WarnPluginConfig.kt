@@ -66,7 +66,11 @@ data class WarnPluginConfig(
 
     @Transient
     override var configLocation: Path = "undefined_toml_location".toPath()
-    private val testName: String = testNameSuffix ?: "Test"
+
+    /**
+     * @property suffix name of the test file.
+     */
+    val testName: String = testNameSuffix ?: "Test"
 
     /**
      *  @property resourceNamePattern regex for the name of the test files.

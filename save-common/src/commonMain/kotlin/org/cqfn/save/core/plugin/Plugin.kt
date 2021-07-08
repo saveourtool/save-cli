@@ -2,6 +2,7 @@ package org.cqfn.save.core.plugin
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.config.isSaveTomlConfig
+import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.findDescendantDirectoriesBy
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.result.TestResult
@@ -13,13 +14,17 @@ import okio.Path
 /**
  * Plugin that can be injected into SAVE during execution. Plugins accept contents of configuration file and then perform some work.
  * @property testConfig
+ * @property testFiles a list of files (test resources or save.toml configs)
  * @property useInternalRedirections whether to redirect stdout/stderr for internal purposes
  */
 abstract class Plugin(
     open val testConfig: TestConfig,
-    private val testFiles: List<String>,
+    protected val testFiles: List<String>,
     private val useInternalRedirections: Boolean) {
-    private val fs = FileSystem.SYSTEM
+    /**
+     * Singleton, that describes the current file system
+     */
+    protected val fs = FileSystem.SYSTEM
 
     /**
      * Instance that is capable of executing processes
@@ -120,6 +125,19 @@ abstract class Plugin(
         } catch (e: Exception) {
             throw TempDirException("Could not create temp dir, cause: ${e.message}")
         }
+    }
+
+    /**
+     *  Construct path for copy of test file, over which the plugins will be working on
+     *
+     *  @param dirName name of the tmp subdirectory
+     *  @param path original path of test file
+     *  @return path for copy of test file
+     */
+    protected fun constructPathForCopyOfTestFile(dirName: String, path: Path): Path {
+        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / dirName)
+        val relativePath = path.createRelativePathToTheRoot(testConfig.getRootConfig().location)
+        return tmpDir / relativePath / path.name
     }
 
     /**

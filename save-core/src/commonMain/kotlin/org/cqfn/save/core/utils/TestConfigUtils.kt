@@ -9,6 +9,7 @@ import org.cqfn.save.core.config.TestConfigSections
 import org.cqfn.save.core.plugin.PluginException
 import org.cqfn.save.plugin.warn.WarnPlugin
 import org.cqfn.save.plugins.fix.FixPlugin
+import org.cqfn.save.plugins.fixandwarn.FixAndWarnPlugin
 
 /**
  * Evaluate all descendants of [this] config, reading individual plugin configurations from TOML file.
@@ -28,6 +29,7 @@ fun TestConfig.processInPlace() = processInPlace {
 fun TestConfig.buildActivePlugins(testFiles: List<String>) = buildActivePlugins { pluginConfig, testConfig ->
     when (pluginConfig.type) {
         TestConfigSections.FIX -> FixPlugin(testConfig, testFiles)
+        TestConfigSections.FIX_AND_WARN -> FixAndWarnPlugin(testConfig, testFiles)
         TestConfigSections.WARN -> WarnPlugin(testConfig, testFiles)
         else -> throw PluginException("Unknown type <${pluginConfig::class}> of plugin config was provided")
     }

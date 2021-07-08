@@ -2,7 +2,6 @@ package org.cqfn.save.plugins.fix
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
-import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.readFile
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
@@ -27,7 +26,6 @@ import okio.Path
  * A plugin that runs an executable on a file and compares output with expected output.
  * @property testConfig
  */
-@Suppress("INLINE_CLASS_CAN_BE_USED")
 class FixPlugin(
     testConfig: TestConfig,
     testFiles: List<String>,
@@ -35,7 +33,6 @@ class FixPlugin(
     testConfig,
     testFiles,
     useInternalRedirections) {
-    private val fs = FileSystem.SYSTEM
     private val diffGenerator = DiffRowGenerator.create()
         .showInlineDiffs(true)
         .mergeOriginalRevised(false)
@@ -99,11 +96,9 @@ class FixPlugin(
     }
 
     private fun createTestFile(path: Path): Path {
-        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
-        val relativePath = path.createRelativePathToTheRoot(testConfig.getRootConfig().location)
-        val tmpPath: Path = tmpDir / relativePath
-        createTempDir(tmpPath)
-        val pathCopy: Path = tmpPath / path.name
+        val pathCopy: Path = constructPathForCopyOfTestFile(FixPlugin::class.simpleName!!, path)
+        createTempDir(pathCopy.parent!!)
+
         fs.write(fs.createFile(pathCopy)) {
             write(
                 (fs.readFile(path)).encodeToByteArray()

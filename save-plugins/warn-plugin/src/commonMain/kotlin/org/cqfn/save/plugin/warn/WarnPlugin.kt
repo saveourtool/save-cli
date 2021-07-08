@@ -2,7 +2,6 @@ package org.cqfn.save.plugin.warn
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
-import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.plugin.GeneralConfig
@@ -34,7 +33,6 @@ class WarnPlugin(
     testConfig,
     testFiles,
     useInternalRedirections) {
-    private val fs = FileSystem.SYSTEM
     private val expectedAndNotReceived = "Some warnings were expected but not received"
     private val unexpected = "Some warnings were unexpected"
 
@@ -147,12 +145,9 @@ class WarnPlugin(
      * @return name of the temporary file
      */
     internal fun createTestFile(path: Path, warningsInputPattern: Regex): String {
-        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPlugin::class.simpleName!!)
-        val relativePath = path.createRelativePathToTheRoot(testConfig.getRootConfig().location)
-        val tmpPath: Path = tmpDir / relativePath
-        createTempDir(tmpPath)
+        val fileName = constructPathForCopyOfTestFile(WarnPlugin::class.simpleName!!, path)
+        createTempDir(fileName.parent!!)
 
-        val fileName = tmpPath / path.name
         fs.write(fs.createFile(fileName)) {
             fs.readLines(path).forEach {
                 if (!warningsInputPattern.matches(it)) {

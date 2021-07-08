@@ -192,7 +192,7 @@ data class TestConfig(
  * Sections of a toml configuration for tests (including standard plugins)
  */
 enum class TestConfigSections {
-    FIX, GENERAL, WARN;
+    FIX, FIX_AND_WARN, GENERAL, WARN;
 }
 
 /**
