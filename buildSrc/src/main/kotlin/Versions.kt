@@ -5,6 +5,7 @@ object Versions {
     const val junit = "5.7.2"
     const val okio = "3.0.0-alpha.1"
     const val ktoml = "0.2.5"
+    const val multiplatformDiff = "0.2.0"
 
     object Kotlinx {
         const val serialization = "1.1.0"

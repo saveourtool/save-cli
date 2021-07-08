@@ -3,7 +3,6 @@ package org.cqfn.save.plugins.fixandwarn
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.config.TestConfigSections
 import org.cqfn.save.core.files.readLines
-import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.TestResult
@@ -17,7 +16,7 @@ private typealias WarningsList = MutableList<Pair<Int, String>>
 
 /**
  * A plugin that runs an executable on a file, and combines two actions: fix and warn
- * Plugin fix test file, warns if something couldn't be auto-corrected after fix
+ * Plugin fixes test file, warns if something couldn't be auto-corrected after fix
  * and compares output with expected output during one execution.
  */
 class FixAndWarnPlugin(
@@ -60,22 +59,7 @@ class FixAndWarnPlugin(
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
         testConfig.validateAndSetDefaults()
 
-        // Test files for warn plugin could be obtained by filtering of `fix` resources: excluding `expected` files
         val testFilePattern = warnPluginConfig.resourceNamePattern
-        val warnTestFiles = files.filterTestResources(testFilePattern, match = true)
-
-        // Warn plugin should process the files, which were fixed by fix plugin
-        // We can get the paths of fixed files from warn test files (since they are the same for fix plugin),
-        // and then just add relative path from FixPlugin tmp dir
-        val testFilesAfterFix: MutableList<List<Path>> = mutableListOf()
-        warnTestFiles.forEach { path ->
-            // TODO change location from hardcoded FixPlugin::simpleName after https://github.com/cqfn/save/issues/156
-            testFilesAfterFix.add(listOf(constructPathForCopyOfTestFile(FixPlugin::class.simpleName!!, path)))
-        }
-
-        logDebug("FixPlugin test resources: ${files.toList()}")
-        logDebug("WarnPlugin test resources: $testFilesAfterFix")
-
         val expectedFiles = files.filterTestResources(testFilePattern, match = false)
 
         // Remove (in place) warnings from test files before fix plugin execution
@@ -86,6 +70,7 @@ class FixAndWarnPlugin(
         // Fill back original data with warnings
         filesAndTheirWarningsMap.forEach { (filePath, warningsList) ->
             val fileData = fs.readLines(filePath) as MutableList
+            // Append warnings into appropriate place
             warningsList.forEach { (line, warningMsg) ->
                 fileData.add(line, warningMsg)
             }
@@ -96,12 +81,11 @@ class FixAndWarnPlugin(
             }
         }
 
-        // TODO: If we receive just one command for execution, then warn plugin should look at the fix plugin output
-        // TODO: for warnings, and not execute command one more time.
-        // TODO: Current approach works too, but in this case we have extra actions, which is not good.
-        // TODO: For the proper work it should be produced refactoring of warn plugin https://github.com/cqfn/save/issues/164,
-        // TODO: after which methods of warning comparison will be separated from the common logic
-        val warnTestResults = warnPlugin.handleFiles(testFilesAfterFix.asSequence())
+        // TODO: If we receive just one command for execution, and want to avoid extra executions
+        // TODO: then warn plugin should look at the fix plugin output for actual warnings, and not execute command one more time.
+        // TODO: However it's required changes in warn plugin logic (it's should be able to compare expected and actual warnings from different places),
+        // TODO: this probably could be obtained after https://github.com/cqfn/save/issues/164,
+        val warnTestResults = warnPlugin.handleFiles(expectedFiles.map { listOf(it) })
         return fixTestResults + warnTestResults
     }
 
@@ -117,18 +101,14 @@ class FixAndWarnPlugin(
      * @param match whether to keep elements which matches current pattern or to keep elements, which is not
      * @return filtered list of files
      */
-    private fun Sequence<List<Path>>.filterTestResources(suffix: Regex, match: Boolean): List<Path> {
-        val filteredFiles: MutableList<Path> = mutableListOf()
-        this.forEach { resources ->
-            filteredFiles.add(resources.single { path ->
-                if (match) {
-                    suffix.matchEntire(path.toString()) != null
-                } else {
-                    suffix.matchEntire(path.toString()) == null
-                }
-            })
+    private fun Sequence<List<Path>>.filterTestResources(suffix: Regex, match: Boolean) = map { resources ->
+        resources.single { path ->
+            if (match) {
+                suffix.matchEntire(path.toString()) != null
+            } else {
+                suffix.matchEntire(path.toString()) == null
+            }
         }
-        return filteredFiles
     }
 
     /**
@@ -138,7 +118,7 @@ class FixAndWarnPlugin(
      *
      * @return map of files and theirs list of warnings
      */
-    private fun removeWarningsFromExpectedFiles(files: List<Path>): MutableMap<Path, WarningsList> {
+    private fun removeWarningsFromExpectedFiles(files: Sequence<Path>): MutableMap<Path, WarningsList> {
         val filesAndTheirWarningsMap: MutableMap<Path, WarningsList> = mutableMapOf()
         files.forEach { file ->
             val fileData = fs.readLines(file)
