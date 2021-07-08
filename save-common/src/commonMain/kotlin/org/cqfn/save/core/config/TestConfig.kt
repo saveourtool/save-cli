@@ -20,7 +20,7 @@ import okio.Path.Companion.toPath
  * @property parentConfig parent config in the hierarchy of configs, `null` if this config is root.
  * @property pluginConfigs list of configurations for plugins that are active in this config
  */
-@Suppress("TYPE_ALIAS")
+@Suppress("TYPE_ALIAS", "TooManyFunctions")
 data class TestConfig(
     val location: Path,
     val parentConfig: TestConfig?,
@@ -69,6 +69,11 @@ data class TestConfig(
     } else {
         this
     }
+
+    /**
+     * Find [GeneralConfig] among this config's sections and return it, or `null` if not found
+     */
+    fun getGeneralConfig() = pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
 
     /**
      * @param withSelf if true, include this config as the first element of the sequence or start with parent config otherwise
@@ -131,7 +136,14 @@ data class TestConfig(
                 pluginFromConfig(it, this)
             }
                 // filter out plugins that don't have any resources
-                .filter { it.discoverTestFiles(directory).any() }
+                .filter { plugin ->
+                    plugin.discoverTestFiles(directory).any().also { isNotEmpty ->
+                        if (!isNotEmpty) {
+                            logDebug("Plugin <${plugin::class.simpleName}> in config file ${plugin.testConfig.location} has no test resources; " +
+                                    "it's config will only be used for inheritance")
+                        }
+                    }
+                }
 
     /**
      * filtering out general configs

@@ -32,6 +32,20 @@ interface Reporter {
     fun afterAll()
 
     /**
+     * This function is called on test suite execution start
+     *
+     * @param suiteName test suite name
+     */
+    fun onSuiteStart(suiteName: String)
+
+    /**
+     * This function is called on test suite execution finish
+     *
+     * @param suiteName test suite name
+     */
+    fun onSuiteEnd(suiteName: String)
+
+    /**
      * This function is called whenever a new [TestResult] is available
      *
      * @param event an instance of [TestResult]
@@ -51,13 +65,6 @@ interface Reporter {
      * @param plugin a [Plugin]
      */
     fun onPluginExecutionStart(plugin: Plugin)
-
-    /**
-     * This function is called when plugin should be skipped
-     *
-     * @param plugin a [Plugin]
-     */
-    fun onPluginExecutionSkip(plugin: Plugin)
 
     /**
      * This function is called when plugin finishes execution
@@ -104,13 +111,6 @@ fun Collection<Reporter>.onPluginInitialization(plugin: Plugin): Unit = forEach 
  * @param plugin
  */
 fun Collection<Reporter>.onPluginExecutionStart(plugin: Plugin): Unit = forEach { it.onPluginExecutionStart(plugin) }
-
-/**
- * Calls [Reporter.onPluginExecutionSkip] on all elements in [this] collection
- *
- * @param plugin
- */
-fun Collection<Reporter>.onPluginExecutionSkip(plugin: Plugin): Unit = forEach { it.onPluginExecutionSkip(plugin) }
 
 /**
  * Calls [Reporter.onPluginExecutionEnd] on all elements in [this] collection

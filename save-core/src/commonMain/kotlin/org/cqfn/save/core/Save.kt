@@ -22,6 +22,7 @@ import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.buildActivePlugins
 import org.cqfn.save.core.utils.processInPlace
+import org.cqfn.save.reporter.json.JsonReporter
 import org.cqfn.save.reporter.plain.PlainTextReporter
 
 import okio.FileSystem
@@ -58,26 +59,33 @@ class Save(
         val (requestedConfigs, requestedTests) = saveProperties.testFiles!!.partition {
             it.toPath().isSaveTomlConfig()
         }
+
+        reporter.beforeAll()
         // get all toml configs in file system
         ConfigDetector()
             .configFromFile(fullPathToConfig)
             .getAllTestConfigsForFiles(requestedConfigs)
             .forEach { testConfig ->
                 // iterating top-down
-                reporter.beforeAll()
-
                 testConfig
                     // fully process this config's configuration sections
                     .processInPlace()
                     // create plugins and choose only active (with test resources) ones
                     .buildActivePlugins(requestedTests)
-                    .forEach {
+                    .takeIf { it.isNotEmpty() }
+                    ?.also {
+                        // configuration has been already validated by this point, and if there are active plugins, then suiteName is not null
+                        reporter.onSuiteStart(testConfig.getGeneralConfig()?.suiteName!!)
+                    }
+                    ?.forEach {
                         // execute created plugins
                         executePlugin(it, reporter)
                     }
-
-                reporter.afterAll()
+                    ?.also {
+                        reporter.onSuiteEnd(testConfig.getGeneralConfig()?.suiteName!!)
+                    }
             }
+        reporter.afterAll()
         reporter.out.close()
     }
 
@@ -87,10 +95,6 @@ class Save(
         reporter.onPluginExecutionStart(plugin)
         try {
             val events = plugin.execute().toList()
-            if (events.isEmpty()) {
-                logDebug("No resources discovered for ${plugin::class.simpleName} in [${plugin.testConfig.location}], skipping")
-                reporter.onPluginExecutionSkip(plugin)
-            }
             events
                 .onEach { event -> reporter.onEvent(event) }
                 .forEach(this::handleResult)
@@ -103,13 +107,21 @@ class Save(
     }
 
     private fun getReporter(saveProperties: SaveProperties): Reporter {
+        val outFileBaseName = "save.out"  // todo: make configurable
+        val outFileName = when (saveProperties.reportType!!) {
+            ReportType.PLAIN -> outFileBaseName
+            ReportType.JSON -> "$outFileBaseName.json"
+            ReportType.XML -> "$outFileBaseName.xml"
+            ReportType.TOML -> "$outFileBaseName.toml"
+        }
         val out = when (val currentOutputType = saveProperties.resultOutput!!) {
-            OutputStreamType.FILE -> fs.sink("save.out".toPath()).buffer()
+            OutputStreamType.FILE -> fs.sink(outFileName.toPath()).buffer()
             OutputStreamType.STDOUT, OutputStreamType.STDERR -> StdStreamsSink(currentOutputType).buffer()
         }
         // todo: make `saveProperties.reportType` a collection
         return when (saveProperties.reportType) {
             ReportType.PLAIN -> PlainTextReporter(out)
+            ReportType.JSON -> JsonReporter(out)
             else -> TODO("Reporter for type ${saveProperties.reportType} is not yet supported")
         }
     }
@@ -124,7 +136,7 @@ class Save(
             is Fail -> logWarn("Test on resources [${testResult.resources}] has failed: ${status.reason}")
             is Ignored -> logWarn("Test on resources [${testResult.resources}] has been ignored: ${status.reason}")
             is Crash -> logError(
-                "Test on resources [${testResult.resources}] has crashed: ${status.throwable.message}." +
+                "Test on resources [${testResult.resources}] has crashed: ${status.description}." +
                         "Please report an issue at https://github.com/cqfn/save"
             )
         }
