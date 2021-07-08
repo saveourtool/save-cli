@@ -61,9 +61,9 @@ abstract class Plugin(
     fun discoverTestFiles(root: Path): Sequence<List<Path>> {
         val rawTestFiles = rawDiscoverTestFiles(root.resourceDirectories())
         return if (testFiles.isNotEmpty()) {
-            rawTestFiles.filter { paths ->
+            rawTestFiles.filter { resourcesGroup ->
                 // test can be specified by the name of one of it's files
-                paths.any { path ->
+                resourcesGroup.any { path ->
                     testFiles.any { it in path.toString() }
                 }
             }
