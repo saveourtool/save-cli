@@ -2,6 +2,9 @@
 
 package org.cqfn.save.core.utils
 
+import okio.Path
+import okio.Path.Companion.toPath
+
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializer
@@ -22,4 +25,17 @@ object RegexSerializer : KSerializer<Regex> {
     }
 
     override fun deserialize(decoder: Decoder): Regex = Regex(decoder.decodeString())
+}
+
+@OptIn(ExperimentalSerializationApi::class)
+@Serializer(forClass = Regex::class)
+object PathSerializer : KSerializer<Path> {
+    override val descriptor: SerialDescriptor =
+            PrimitiveSerialDescriptor("path", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: Path) {
+        encoder.encodeString(value.toString())
+    }
+
+    override fun deserialize(decoder: Decoder): Path = decoder.decodeString().toPath()
 }
