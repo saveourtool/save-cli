@@ -1,6 +1,6 @@
 [general]
-tags = tag1
-description = My suite description
-suiteName = DocsCheck
+tags = "tag1"
+description = "My suite description"
+suiteName = "DocsCheck"
 
 [warn]

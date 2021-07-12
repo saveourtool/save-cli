@@ -13,7 +13,7 @@ import org.cqfn.save.plugin.warn.WarnPluginConfig
 import org.cqfn.save.plugins.fix.FixPluginConfig
 import org.cqfn.save.plugins.fixandwarn.FixAndWarnPluginConfig
 
-import com.akuleshov7.ktoml.decoders.DecoderConf
+import com.akuleshov7.ktoml.KtomlConf
 import com.akuleshov7.ktoml.decoders.TomlDecoder
 import com.akuleshov7.ktoml.exceptions.KtomlException
 import com.akuleshov7.ktoml.parsers.TomlParser
@@ -21,6 +21,7 @@ import com.akuleshov7.ktoml.parsers.node.TomlFile
 import com.akuleshov7.ktoml.parsers.node.TomlNode
 import okio.Path
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.serializer
 
 /**
@@ -29,6 +30,7 @@ import kotlinx.serialization.serializer
  * @param fakeFileNode fake file node to restore the structure and parse only the part of the toml
  * @param pluginSectionName name of plugin section from toml file
  */
+@OptIn(ExperimentalSerializationApi::class)
 private inline fun <reified T : PluginConfig> Path.createPluginConfig(
     fakeFileNode: TomlNode,
     pluginSectionName: String
@@ -37,7 +39,7 @@ private inline fun <reified T : PluginConfig> Path.createPluginConfig(
             TomlDecoder.decode<T>(
                 serializer(),
                 fakeFileNode,
-                DecoderConf()
+                KtomlConf()
             ).apply {
                 configLocation = this@createPluginConfig
             }
@@ -58,7 +60,7 @@ private inline fun <reified T : PluginConfig> Path.createPluginConfig(
  */
 fun createPluginConfigListFromToml(testConfigPath: Path): MutableList<PluginConfig> {
     val configList: MutableList<PluginConfig> = mutableListOf()
-    val parsedTomlConfig = TomlParser(testConfigPath.toString()).readAndParseFile()
+    val parsedTomlConfig = TomlParser(KtomlConf()).readAndParseFile(testConfigPath.toString())
     parsedTomlConfig.getRealTomlTables().forEach { tomlPluginSection ->
 
         // adding a fake file node to restore the structure and parse only the part of the toml

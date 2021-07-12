@@ -151,7 +151,6 @@ class MergeConfigsTest {
         assertEquals(expectedFixConfig, actualFixConfig)
     }
 
-    // FixMe: there should be removed additional quotes in string after new release of ktoml
     @Test
     fun `merge real toml configs with empty execFlag in child`() {
         // stub, since tearDown should delete it anyway
@@ -162,8 +161,8 @@ class MergeConfigsTest {
 
         val parentGeneralConfig = configList1.filterIsInstance<GeneralConfig>().first()
         val parentWarnConfig = configList1.filterIsInstance<WarnPluginConfig>().first()
-        assertEquals("\"echo hello world\"", parentGeneralConfig.execCmd)
-        assertEquals("\"Tag\"", parentGeneralConfig.tags)
+        assertEquals("echo hello world", parentGeneralConfig.execCmd)
+        assertEquals("Tag", parentGeneralConfig.tags)
         assertEquals(null, parentWarnConfig.execFlags)
 
         val toml2 = "src/commonTest/resources/merge_configs/inner/save.toml"
@@ -171,8 +170,8 @@ class MergeConfigsTest {
 
         val childGeneralConfig = configList2.filterIsInstance<GeneralConfig>().first()
         val childWarnConfig = configList2.filterIsInstance<WarnPluginConfig>().first()
-        // FixME: Should be empty string after ktoml release, not '""'
-        assertEquals("\"\"", childGeneralConfig.tags)
+
+        assertEquals("", childGeneralConfig.tags)
         assertEquals(null, childWarnConfig.execFlags)
 
         val testConfig1 = TestConfig(toml1.toPath(), null, configList1)
@@ -183,8 +182,8 @@ class MergeConfigsTest {
 
         val mergedGeneralConfig = mergedTestConfig.pluginConfigs.filterIsInstance<GeneralConfig>().first()
         val mergedWarnConfig = mergedTestConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
-        // FixME: Fix after ktoml release
-        assertEquals("\"Tag\", \"\"", mergedGeneralConfig.tags)
+
+        assertEquals("Tag, ", mergedGeneralConfig.tags)
         // execFlags should be empty, not `"null"`
         assertEquals("", mergedWarnConfig.execFlags)
     }
