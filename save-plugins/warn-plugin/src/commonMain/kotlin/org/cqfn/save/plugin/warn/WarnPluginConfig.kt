@@ -42,6 +42,7 @@ import kotlinx.serialization.UseSerializers
  * @property testNameSuffix suffix name of the test file.
  * @property batchSize it controls how many files execCmd will process at a time.
  * @property batchSeparator
+ * @property defaultLineMode
  */
 @Serializable
 data class WarnPluginConfig(
@@ -61,6 +62,7 @@ data class WarnPluginConfig(
     val messageCaptureGroupOut: Int? = null,
     val exactWarningsMatch: Boolean? = null,
     val testNameSuffix: String? = null,
+    val defaultLineMode: Boolean? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.WARN
 
@@ -96,20 +98,29 @@ data class WarnPluginConfig(
             this.columnCaptureGroupOut ?: other.columnCaptureGroupOut,
             this.messageCaptureGroupOut ?: other.messageCaptureGroupOut,
             this.exactWarningsMatch ?: other.exactWarningsMatch,
-            this.testNameSuffix ?: other.testNameSuffix
+            this.testNameSuffix ?: other.testNameSuffix,
+            this.defaultLineMode ?: other.defaultLineMode
         )
     }
 
     @Suppress(
         "MAGIC_NUMBER",
         "MagicNumber",
-        "ComplexMethod")
+        "ComplexMethod",
+        "TOO_LONG_FUNCTION")
     override fun validateAndSetDefaults(): WarnPluginConfig {
         val newWarningTextHasLine = warningTextHasLine ?: true
         val newWarningTextHasColumn = warningTextHasColumn ?: true
         val newBatchSize = batchSize ?: 1
         val newBatchSeparator = batchSeparator ?: ", "
-        val newLineCaptureGroup = if (newWarningTextHasLine) (lineCaptureGroup ?: 1) else null
+        val newDefaultLineMode = defaultLineMode ?: false
+        val newLineCaptureGroup = if (newDefaultLineMode) {
+            null
+        } else if (newWarningTextHasLine) {
+            (lineCaptureGroup ?: 1)
+        } else {
+            null
+        }
         val newColumnCaptureGroup = if (newWarningTextHasColumn) (columnCaptureGroup ?: 2) else null
         val newMessageCaptureGroup = messageCaptureGroup ?: 3
         val newFileNameCaptureGroupOut = fileNameCaptureGroupOut ?: 1
@@ -135,7 +146,8 @@ data class WarnPluginConfig(
             newColumnCaptureGroupOut,
             newMessageCaptureGroupOut,
             exactWarningsMatch ?: true,
-            testName
+            testName,
+            newDefaultLineMode
         )
     }
 

@@ -26,9 +26,9 @@ data class Warning(
  *
  * @param warningRegex regular expression for warning
  * @param columnGroupIdx index of capture group for column number
- * @param lineGroupIdx index of capture group for line number
  * @param messageGroupIdx index of capture group for waring text
  * @param fileName file name
+ * @param line line number of warning
  * @return a [Warning] or null if [this] string doesn't match [warningRegex]
  * @throws ResourceFormatException when parsing a file
  */
@@ -38,19 +38,11 @@ data class Warning(
     "ThrowsCount")
 internal fun String.extractWarning(warningRegex: Regex,
                                    fileName: String,
-                                   lineGroupIdx: Int?,
+                                   line: Int?,
                                    columnGroupIdx: Int?,
                                    messageGroupIdx: Int,
 ): Warning? {
     val groups = warningRegex.find(this)?.groups ?: return null
-
-    val line = lineGroupIdx?.let {
-        try {
-            groups[lineGroupIdx]!!.value.toInt()
-        } catch (e: Exception) {
-            throw ResourceFormatException("Could not extract line number from line [$this], cause: ${e.message}")
-        }
-    }
 
     val column = columnGroupIdx?.let {
         try {
@@ -102,5 +94,44 @@ internal fun String.extractWarning(warningRegex: Regex,
         throw ResourceFormatException("Could not extract file name from line [$this], cause: ${e.message}")
     }
 
-    return extractWarning(warningRegex, fileName, lineGroupIdx, columnGroupIdx, messageGroupIdx)
+    return extractWarning(false, warningRegex, fileName, lineGroupIdx, columnGroupIdx, messageGroupIdx)
+}
+
+/**
+ * @param defaultLineMode parameter for default line
+ * @param warningRegex regular expression for warning
+ * @param fileName file name
+ * @param lineGroupIdx index of capture group for line number or line number
+ * @param columnGroupIdx index of capture group for column number
+ * @param messageGroupIdx index of capture group for waring text
+ * @return a [Warning] or null if [this] string doesn't match [warningRegex]
+ * @throws ResourceFormatException when parsing a file
+ */
+@Suppress(
+    "TOO_MANY_PARAMETERS",
+    "LongParameterList",
+    "TooGenericExceptionCaught",
+    "SwallowedException")
+internal fun String.extractWarning(defaultLineMode: Boolean,
+                                   warningRegex: Regex,
+                                   fileName: String,
+                                   lineGroupIdx: Int?,
+                                   columnGroupIdx: Int?,
+                                   messageGroupIdx: Int,
+): Warning? {
+    val groups = warningRegex.find(this)?.groups ?: return null
+
+    val line = if (defaultLineMode) {
+        lineGroupIdx
+    } else {
+        lineGroupIdx?.let {
+            try {
+                groups[lineGroupIdx]!!.value.toInt()
+            } catch (e: Exception) {
+                throw ResourceFormatException("Could not extract line number from line [$this], cause: ${e.message}")
+            }
+        }
+    }
+
+    return extractWarning(warningRegex, fileName, line, columnGroupIdx, messageGroupIdx)
 }

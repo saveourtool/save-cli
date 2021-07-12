@@ -65,6 +65,17 @@ class WarnPlugin(
         }
     }
 
+    private fun plusLine(
+        warningRegex: Regex,
+        linesFile: List<String>,
+        lineNum: Int): Int {
+        var x = 0
+        while (lineNum - 1 + x < linesFile.size && warningRegex.find(linesFile[lineNum - 1 + x]) != null) {
+            x++
+        }
+        return lineNum + x
+    }
+
     @Suppress(
         "TOO_LONG_FUNCTION",
         "SAY_NO_TO_VAR",
@@ -75,14 +86,20 @@ class WarnPlugin(
         generalConfig: GeneralConfig?): List<TestResult> {
         val expectedWarnings: WarningMap = mutableMapOf()
         paths.forEach { path ->
+            var i = 1
+            val linesFile = fs.readLines(path)
             expectedWarnings.putAll(
                 fs.readLines(path)
+                    .map {
+                        it to plusLine(warnPluginConfig.warningsInputPattern!!, linesFile, i++)
+                    }
                     .mapNotNull {
                         with(warnPluginConfig) {
-                            it.extractWarning(
+                            it.first.extractWarning(
+                                defaultLineMode!!,
                                 warningsInputPattern!!,
                                 path.name,
-                                lineCaptureGroup,
+                                if (defaultLineMode) it.second else lineCaptureGroup,
                                 columnCaptureGroup,
                                 messageCaptureGroup!!,
                             )

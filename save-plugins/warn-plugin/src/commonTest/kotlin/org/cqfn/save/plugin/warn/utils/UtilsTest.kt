@@ -52,6 +52,7 @@ class UtilsTest {
         text: String,
         expectedWarning: Warning) {
         val warning = text.extractWarning(
+            false,
             warnPluginConfig.warningsInputPattern!!,
             fileName = "Test.kt",
             lineGroupIdx = warnPluginConfig.lineCaptureGroup,
@@ -64,6 +65,7 @@ class UtilsTest {
 
     private fun assertExtractionFails(warnPluginConfig: WarnPluginConfig, text: String) {
         val warning = text.extractWarning(
+            false,
             warnPluginConfig.warningsInputPattern!!,
             fileName = "fileName",
             lineGroupIdx = warnPluginConfig.lineCaptureGroup,
