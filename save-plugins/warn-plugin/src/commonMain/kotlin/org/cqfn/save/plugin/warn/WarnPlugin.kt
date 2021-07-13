@@ -112,7 +112,7 @@ class WarnPlugin(
                             )
                         }
                     }
-                    .mapNotNull { it }
+                    .filterNotNull()
                     .groupBy {
                         if (it.line != null && it.column != null) {
                             it.line to it.column
