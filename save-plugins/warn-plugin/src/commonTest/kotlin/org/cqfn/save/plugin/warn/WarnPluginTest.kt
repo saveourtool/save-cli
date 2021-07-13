@@ -81,6 +81,7 @@ class WarnPluginTest {
                 |Test1Test.java:5: Class name should be in PascalCase
                 |Test1Test.java:5: Class name shouldn't have a number
                 |Test1Test.java:7: Variable name should be in LowerCase
+                |Test1Test.java:10: Class should have a Kdoc
                 """.trimMargin().encodeToByteArray()
             )
         }
@@ -96,6 +97,7 @@ class WarnPluginTest {
                 // ;warn: Variable name should be in LowerCase
                     int Foo = 42;
                 }
+                // ;warn: Class should have a Kdoc
             """.trimIndent()
             ),
             WarnPluginConfig(

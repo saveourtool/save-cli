@@ -4,6 +4,7 @@ import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
+import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.DebugInfo
@@ -71,10 +72,15 @@ class WarnPlugin(
         linesFile: List<String>,
         lineNum: Int): Int {
         var x = 1
-        while (lineNum - 1 + x < linesFile.size && warningRegex.find(linesFile[lineNum - 1 + x]) != null) {
+        val sizeFile = linesFile.size
+        while (lineNum - 1 + x < sizeFile && warningRegex.find(linesFile[lineNum - 1 + x]) != null) {
             x++
         }
-        return lineNum + x
+        val newLine = lineNum + x
+        if (newLine >= sizeFile) {
+            logWarn("Some warnings are at the end of the file. They will be assigned the following line: $newLine")
+        }
+        return newLine
     }
 
     @Suppress(
