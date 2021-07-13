@@ -174,8 +174,8 @@ class MergeConfigsTest {
         assertEquals("", childGeneralConfig.tags)
         assertEquals(null, childWarnConfig.execFlags)
 
-        val testConfig1 = TestConfig(toml1.toPath(), null, configList1)
-        val testConfig2 = TestConfig(toml2.toPath(), testConfig1, configList2)
+        val testConfig1 = TestConfig(toml1.toPath(), null, configList1.toMutableList())
+        val testConfig2 = TestConfig(toml2.toPath(), testConfig1, configList2.toMutableList())
 
         val mergedTestConfig = testConfig2.mergeConfigWithParents()
         testConfig2.validateAndSetDefaults()

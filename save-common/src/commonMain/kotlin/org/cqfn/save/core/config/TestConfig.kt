@@ -191,8 +191,9 @@ data class TestConfig(
 /**
  * Sections of a toml configuration for tests (including standard plugins)
  */
+@Suppress("EnumNaming", "BACKTICKS_PROHIBITED")
 enum class TestConfigSections {
-    FIX, FIX_AND_WARN, GENERAL, WARN;
+    FIX, GENERAL, WARN, `FIX AND WARN`;
 }
 
 /**

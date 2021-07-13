@@ -6,18 +6,41 @@ package org.cqfn.save.core.utils
 
 import org.cqfn.save.core.config.TestConfigSections
 import org.cqfn.save.core.logging.logError
+import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.PluginConfig
 import org.cqfn.save.core.plugin.PluginException
+import org.cqfn.save.plugin.warn.WarnPluginConfig
 import org.cqfn.save.plugins.fix.FixPluginConfig
+import org.cqfn.save.plugins.fixandwarn.FixAndWarnPluginConfig
 
 import com.akuleshov7.ktoml.KtomlConf
 import com.akuleshov7.ktoml.deserializeTomlFile
 import com.akuleshov7.ktoml.exceptions.KtomlException
 import com.akuleshov7.ktoml.parsers.TomlParser
+import com.akuleshov7.ktoml.parsers.node.TomlTable
 import okio.Path
 
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.serializer
+
+private fun Path.testConfigFactory(table: TomlTable) =
+        when (table.fullTableName.uppercase()) {
+            TestConfigSections.FIX.name -> this.createPluginConfig<FixPluginConfig>(
+                table.fullTableName
+            )
+            TestConfigSections.`FIX AND WARN`.name -> this.createPluginConfig<FixAndWarnPluginConfig>(
+                table.fullTableName
+            )
+            TestConfigSections.WARN.name -> this.createPluginConfig<WarnPluginConfig>(
+                table.fullTableName
+            )
+            TestConfigSections.GENERAL.name -> this.createPluginConfig<GeneralConfig>(
+                table.fullTableName
+            )
+            else -> throw PluginException(
+                "Received unknown plugin section name in the input: [${table.fullTableName}]." +
+                        " Please check your <$this> config"
+            )
+        }
 
 /**
  * Create the plugin config according section name
@@ -38,7 +61,7 @@ private inline fun <reified T : PluginConfig> Path.createPluginConfig(
     logError(
         "Plugin extraction failed for $this and [$pluginSectionName] section." +
                 " This file has incorrect toml format or missing section [$pluginSectionName]." +
-                " Valid sections are: ${TestConfigSections.values()}"
+                " Valid sections are: ${TestConfigSections.values()}."
     )
     throw e
 }
@@ -51,7 +74,7 @@ private inline fun <reified T : PluginConfig> Path.createPluginConfig(
  * @throws PluginException in case of unknown plugin
  */
 fun createPluginConfigListFromToml(testConfigPath: Path): List<PluginConfig> =
-    TomlParser(KtomlConf())
-        .readAndParseFile(testConfigPath.toString())
-        .getRealTomlTables()
-        .map { testConfigPath.createPluginConfig<FixPluginConfig>(it.name.uppercase()) }
+        TomlParser(KtomlConf())
+            .readAndParseFile(testConfigPath.toString())
+            .getRealTomlTables()
+            .map { testConfigPath.testConfigFactory(it) }
