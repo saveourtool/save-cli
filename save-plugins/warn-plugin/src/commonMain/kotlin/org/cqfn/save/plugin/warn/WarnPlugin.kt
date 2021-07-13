@@ -14,6 +14,7 @@ import org.cqfn.save.core.result.TestStatus
 import org.cqfn.save.core.utils.ProcessExecutionException
 import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
+import org.cqfn.save.plugin.warn.utils.getLineNumber
 
 import okio.FileSystem
 import okio.Path
@@ -69,7 +70,7 @@ class WarnPlugin(
         warningRegex: Regex,
         linesFile: List<String>,
         lineNum: Int): Int {
-        var x = 0
+        var x = 1
         while (lineNum - 1 + x < linesFile.size && warningRegex.find(linesFile[lineNum - 1 + x]) != null) {
             x++
         }
@@ -86,25 +87,39 @@ class WarnPlugin(
         generalConfig: GeneralConfig?): List<TestResult> {
         val expectedWarnings: WarningMap = mutableMapOf()
         paths.forEach { path ->
-            var i = 1
             val linesFile = fs.readLines(path)
             expectedWarnings.putAll(
-                fs.readLines(path)
-                    .map {
-                        it to plusLine(warnPluginConfig.warningsInputPattern!!, linesFile, i++)
-                    }
-                    .mapNotNull {
-                        with(warnPluginConfig) {
-                            it.first.extractWarning(
-                                defaultLineMode!!,
-                                warningsInputPattern!!,
-                                path.name,
-                                if (defaultLineMode) it.second else lineCaptureGroup,
-                                columnCaptureGroup,
-                                messageCaptureGroup!!,
-                            )
+                if (warnPluginConfig.defaultLineMode!!) {
+                    linesFile
+                        .mapIndexed { index, line ->
+                            line to plusLine(warnPluginConfig.warningsInputPattern!!, linesFile, index)
                         }
-                    }
+                        .mapNotNull {
+                            with(warnPluginConfig) {
+                                it.first.extractWarning(
+                                    warningsInputPattern!!,
+                                    path.name,
+                                    it.second,
+                                    columnCaptureGroup,
+                                    messageCaptureGroup!!,
+                                )
+                            }
+                        }
+                } else {
+                    linesFile
+                        .mapNotNull {
+                            with(warnPluginConfig) {
+                                val line = it.getLineNumber(warningsInputPattern!!, lineCaptureGroup)
+                                it.extractWarning(
+                                    warningsInputPattern,
+                                    path.name,
+                                    line,
+                                    columnCaptureGroup,
+                                    messageCaptureGroup!!,
+                                )
+                            }
+                        }
+                }
                     .groupBy {
                         if (it.line != null && it.column != null) {
                             it.line to it.column
@@ -134,7 +149,8 @@ class WarnPlugin(
 
         val actualWarningsMap = executionResult.stdout.mapNotNull {
             with(warnPluginConfig) {
-                it.extractWarning(warningsOutputPattern!!, fileNameCaptureGroupOut!!, lineCaptureGroupOut, columnCaptureGroupOut, messageCaptureGroupOut!!)
+                val line = it.getLineNumber(warningsOutputPattern!!, lineCaptureGroupOut)
+                it.extractWarning(warningsOutputPattern, fileNameCaptureGroupOut!!, line, columnCaptureGroupOut, messageCaptureGroupOut!!)
             }
         }
             .groupBy { if (it.line != null && it.column != null) it.line to it.column else null }
