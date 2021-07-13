@@ -95,37 +95,24 @@ class WarnPlugin(
         paths.forEach { path ->
             val linesFile = fs.readLines(path)
             expectedWarnings.putAll(
-                if (warnPluginConfig.defaultLineMode!!) {
-                    linesFile
-                        .mapIndexed { index, line ->
-                            line to plusLine(warnPluginConfig.warningsInputPattern!!, linesFile, index)
+                linesFile
+                    .mapIndexed { index, line ->
+                        val newLine = if (warnPluginConfig.defaultLineMode!!) {
+                            plusLine(warnPluginConfig.warningsInputPattern!!, linesFile, index)
+                        } else {
+                            line.getLineNumber(warnPluginConfig.warningsInputPattern!!, warnPluginConfig.lineCaptureGroup)
                         }
-                        .mapNotNull {
-                            with(warnPluginConfig) {
-                                it.first.extractWarning(
-                                    warningsInputPattern!!,
-                                    path.name,
-                                    it.second,
-                                    columnCaptureGroup,
-                                    messageCaptureGroup!!,
-                                )
-                            }
+                        with(warnPluginConfig) {
+                            line.extractWarning(
+                                warningsInputPattern!!,
+                                path.name,
+                                newLine,
+                                columnCaptureGroup,
+                                messageCaptureGroup!!,
+                            )
                         }
-                } else {
-                    linesFile
-                        .mapNotNull {
-                            with(warnPluginConfig) {
-                                val line = it.getLineNumber(warningsInputPattern!!, lineCaptureGroup)
-                                it.extractWarning(
-                                    warningsInputPattern,
-                                    path.name,
-                                    line,
-                                    columnCaptureGroup,
-                                    messageCaptureGroup!!,
-                                )
-                            }
-                        }
-                }
+                    }
+                    .mapNotNull { it }
                     .groupBy {
                         if (it.line != null && it.column != null) {
                             it.line to it.column
