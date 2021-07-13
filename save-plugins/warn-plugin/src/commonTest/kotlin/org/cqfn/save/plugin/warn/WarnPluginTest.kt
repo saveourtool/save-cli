@@ -73,6 +73,48 @@ class WarnPluginTest {
     }
 
     @Test
+    @Suppress("TOO_LONG_FUNCTION")
+    fun `warn-plugin test for defaultLineMode`() {
+        fs.write(fs.createFile(tmpDir / "resource")) {
+            write(
+                """
+                |Test1Test.java:5: Class name should be in PascalCase
+                |Test1Test.java:5: Class name shouldn't have a number
+                |Test1Test.java:7: Variable name should be in LowerCase
+                |Test1Test.java:10: Class should have a Kdoc
+                """.trimMargin().encodeToByteArray()
+            )
+        }
+        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
+        performTest(
+            listOf(
+                """
+                package org.cqfn.save.example
+                
+                // ;warn: Class name should be in PascalCase
+                // ;warn: Class name shouldn't have a number
+                class example1 {
+                // ;warn: Variable name should be in LowerCase
+                    int Foo = 42;
+                }
+                // ;warn: Class should have a Kdoc
+            """.trimIndent()
+            ),
+            WarnPluginConfig(
+                "$catCmd ${tmpDir / "resource"} && set stub=",
+                Regex("// ;warn: (.*)"),
+                Regex("(.+):(\\d+): (.+)"),
+                true, false, 1, ", ", null, null, 1, 1, 2, null, 3, defaultLineMode = true
+            ),
+            GeneralConfig("", "", "", "")
+        ) { results ->
+            assertEquals(1, results.size)
+            assertTrue(results.single().status is Pass)
+        }
+        fs.delete(tmpDir / "resource")
+    }
+
+    @Test
     fun `basic warn-plugin test with exactWarningsMatch = false`() {
         fs.write(fs.createFile(tmpDir / "resource")) {
             write(
