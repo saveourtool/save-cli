@@ -26,9 +26,9 @@ data class Warning(
  *
  * @param warningRegex regular expression for warning
  * @param columnGroupIdx index of capture group for column number
- * @param lineGroupIdx index of capture group for line number
  * @param messageGroupIdx index of capture group for waring text
  * @param fileName file name
+ * @param line line number of warning
  * @return a [Warning] or null if [this] string doesn't match [warningRegex]
  * @throws ResourceFormatException when parsing a file
  */
@@ -38,19 +38,11 @@ data class Warning(
     "ThrowsCount")
 internal fun String.extractWarning(warningRegex: Regex,
                                    fileName: String,
-                                   lineGroupIdx: Int?,
+                                   line: Int?,
                                    columnGroupIdx: Int?,
                                    messageGroupIdx: Int,
 ): Warning? {
     val groups = warningRegex.find(this)?.groups ?: return null
-
-    val line = lineGroupIdx?.let {
-        try {
-            groups[lineGroupIdx]!!.value.toInt()
-        } catch (e: Exception) {
-            throw ResourceFormatException("Could not extract line number from line [$this], cause: ${e.message}")
-        }
-    }
 
     val column = columnGroupIdx?.let {
         try {
@@ -79,9 +71,9 @@ internal fun String.extractWarning(warningRegex: Regex,
  *
  * @param warningRegex regular expression for warning
  * @param columnGroupIdx index of capture group for column number
- * @param lineGroupIdx index of capture group for line number
  * @param messageGroupIdx index of capture group for waring text
  * @param fileNameGroupIdx index of capture group for file name
+ * @param line line number of warning
  * @return a [Warning] or null if [this] string doesn't match [warningRegex]
  * @throws ResourceFormatException when parsing a file
  */
@@ -90,7 +82,7 @@ internal fun String.extractWarning(warningRegex: Regex,
     "SwallowedException")
 internal fun String.extractWarning(warningRegex: Regex,
                                    fileNameGroupIdx: Int,
-                                   lineGroupIdx: Int?,
+                                   line: Int?,
                                    columnGroupIdx: Int?,
                                    messageGroupIdx: Int,
 ): Warning? {
@@ -102,5 +94,30 @@ internal fun String.extractWarning(warningRegex: Regex,
         throw ResourceFormatException("Could not extract file name from line [$this], cause: ${e.message}")
     }
 
-    return extractWarning(warningRegex, fileName, lineGroupIdx, columnGroupIdx, messageGroupIdx)
+    return extractWarning(warningRegex, fileName, line, columnGroupIdx, messageGroupIdx)
+}
+
+/**
+ * @param warningRegex regular expression for warning
+ * @param lineGroupIdx index of capture group for line number
+ * @return a [Warning] or null if [this] string doesn't match [warningRegex]
+ * @throws ResourceFormatException when parsing a file
+ */
+@Suppress(
+    "TooGenericExceptionCaught",
+    "SwallowedException")
+internal fun String.getLineNumber(warningRegex: Regex,
+                                  lineGroupIdx: Int?,
+): Int? {
+    val groups = warningRegex.find(this)?.groups ?: return null
+
+    val line = lineGroupIdx?.let {
+        try {
+            groups[lineGroupIdx]!!.value.toInt()
+        } catch (e: Exception) {
+            throw ResourceFormatException("Could not extract line number from line [$this], cause: ${e.message}")
+        }
+    }
+
+    return line
 }

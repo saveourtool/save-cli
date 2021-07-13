@@ -141,7 +141,7 @@ class ValidationTest {
                         "\nCurrent configuration: execFlags=execFlags, warningsInputPattern=null, warningsOutputPattern=null, " +
                         "warningTextHasLine=null, warningTextHasColumn=null, batchSize=null, batchSeparator=null, lineCaptureGroup=-127, columnCaptureGroup=null, " +
                         "messageCaptureGroup=null, fileNameCaptureGroupOut=null, lineCaptureGroupOut=null, columnCaptureGroupOut=null, messageCaptureGroupOut=null, " +
-                        "exactWarningsMatch=null, testNameSuffix=null",
+                        "exactWarningsMatch=null, testNameSuffix=null, defaultLineMode=null",
                 ex.message
             )
         }
