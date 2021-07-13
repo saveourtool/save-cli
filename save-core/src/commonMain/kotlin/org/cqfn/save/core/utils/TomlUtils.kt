@@ -13,15 +13,34 @@ import org.cqfn.save.plugin.warn.WarnPluginConfig
 import org.cqfn.save.plugins.fix.FixPluginConfig
 import org.cqfn.save.plugins.fixandwarn.FixAndWarnPluginConfig
 
-import com.akuleshov7.ktoml.decoders.DecoderConf
-import com.akuleshov7.ktoml.decoders.TomlDecoder
+import com.akuleshov7.ktoml.KtomlConf
+import com.akuleshov7.ktoml.deserializeTomlFile
 import com.akuleshov7.ktoml.exceptions.KtomlException
 import com.akuleshov7.ktoml.parsers.TomlParser
-import com.akuleshov7.ktoml.parsers.node.TomlFile
-import com.akuleshov7.ktoml.parsers.node.TomlNode
+import com.akuleshov7.ktoml.parsers.node.TomlTable
 import okio.Path
 
-import kotlinx.serialization.serializer
+import kotlinx.serialization.ExperimentalSerializationApi
+
+private fun Path.testConfigFactory(table: TomlTable) =
+        when (table.fullTableName.uppercase()) {
+            TestConfigSections.FIX.name -> this.createPluginConfig<FixPluginConfig>(
+                table.fullTableName
+            )
+            TestConfigSections.`FIX AND WARN`.name -> this.createPluginConfig<FixAndWarnPluginConfig>(
+                table.fullTableName
+            )
+            TestConfigSections.WARN.name -> this.createPluginConfig<WarnPluginConfig>(
+                table.fullTableName
+            )
+            TestConfigSections.GENERAL.name -> this.createPluginConfig<GeneralConfig>(
+                table.fullTableName
+            )
+            else -> throw PluginException(
+                "Received unknown plugin section name in the input: [${table.fullTableName}]." +
+                        " Please check your <$this> config"
+            )
+        }
 
 /**
  * Create the plugin config according section name
@@ -29,25 +48,23 @@ import kotlinx.serialization.serializer
  * @param fakeFileNode fake file node to restore the structure and parse only the part of the toml
  * @param pluginSectionName name of plugin section from toml file
  */
+@OptIn(ExperimentalSerializationApi::class)
 private inline fun <reified T : PluginConfig> Path.createPluginConfig(
-    fakeFileNode: TomlNode,
     pluginSectionName: String
-) =
-        try {
-            TomlDecoder.decode<T>(
-                serializer(),
-                fakeFileNode,
-                DecoderConf()
-            ).apply {
-                configLocation = this@createPluginConfig
-            }
-        } catch (e: KtomlException) {
-            logError(
-                "Plugin extraction failed for $this and [$pluginSectionName] section." +
-                        " This file has incorrect toml format."
-            )
-            throw e
+) = try {
+    this.toString()
+        .deserializeTomlFile<T>(pluginSectionName, KtomlConf())
+        .apply {
+            configLocation = this@createPluginConfig
         }
+} catch (e: KtomlException) {
+    logError(
+        "Plugin extraction failed for $this and [$pluginSectionName] section." +
+                " This file has incorrect toml format or missing section [$pluginSectionName]." +
+                " Valid sections are: ${TestConfigSections.values()}."
+    )
+    throw e
+}
 
 /**
  * Create the list of plugins from toml file with plugin sections
@@ -56,45 +73,8 @@ private inline fun <reified T : PluginConfig> Path.createPluginConfig(
  * @return list of plugin configs from toml file
  * @throws PluginException in case of unknown plugin
  */
-fun createPluginConfigListFromToml(testConfigPath: Path): MutableList<PluginConfig> {
-    val configList: MutableList<PluginConfig> = mutableListOf()
-    val parsedTomlConfig = TomlParser(testConfigPath.toString()).readAndParseFile()
-    parsedTomlConfig.getRealTomlTables().forEach { tomlPluginSection ->
-
-        // adding a fake file node to restore the structure and parse only the part of the toml
-        // this is a hack for easy partial read of Toml configuration
-        val fakeFileNode = TomlFile()
-        tomlPluginSection.children.forEach {
-            fakeFileNode.appendChild(it)
-        }
-
-        val sectionName = tomlPluginSection.name.uppercase()
-        // we don't convert sectionName to enum, because we don't want to get Kotlin exception
-        val sectionPluginConfig = when (sectionName) {
-            TestConfigSections.FIX.name -> testConfigPath.createPluginConfig<FixPluginConfig>(
-                fakeFileNode,
-                sectionName
-            )
-            TestConfigSections.FIX_AND_WARN.name -> testConfigPath.createPluginConfig<FixAndWarnPluginConfig>(
-                fakeFileNode,
-                sectionName
-            )
-            TestConfigSections.WARN.name -> testConfigPath.createPluginConfig<WarnPluginConfig>(
-                fakeFileNode,
-                sectionName
-            )
-            TestConfigSections.GENERAL.name -> testConfigPath.createPluginConfig<GeneralConfig>(
-                fakeFileNode,
-                sectionName
-            )
-            else -> throw PluginException(
-                "Received unknown plugin section name in the input: [$sectionName]." +
-                        " Please check your <$testConfigPath> config"
-            )
-        }
-
-        configList.add(sectionPluginConfig)
-    }
-
-    return configList
-}
+fun createPluginConfigListFromToml(testConfigPath: Path): List<PluginConfig> =
+        TomlParser(KtomlConf())
+            .readAndParseFile(testConfigPath.toString())
+            .getRealTomlTables()
+            .map { testConfigPath.testConfigFactory(it) }

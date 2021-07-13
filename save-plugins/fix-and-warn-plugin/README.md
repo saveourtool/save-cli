@@ -1,4 +1,4 @@
-## Save fix-and-warn plugin
+## Save "fix and warn" plugin
 Plugin that runs provided executable on the initial file with a test source code
 and combines two actions during one execution: 
 [fix](save-plugins/fix-plugin/README.md) and [warn](save-plugins/warn-plugin/README.md).\
@@ -15,14 +15,14 @@ like it described in corresponding README files, additionally requiring the foll
 
 ## Configuration
 Follow the instructions for `[fix]` and `[warn]` plugins and just add
-their configuration as a subsections of `[fix-and-warn]` plugin.
+their configuration as a subsections of `["fix and warn"]` plugin.
 ```toml
 [general]
 execCmd="./ktlint -R diktat-0.4.2.jar"
 description = "My suite description"
 suiteName = "DocsCheck"
 
-[fix-and-warn]
+["fix and warn"]
     [fix]
         execFlags="-F"
         testFilePattern="*Test.kt"

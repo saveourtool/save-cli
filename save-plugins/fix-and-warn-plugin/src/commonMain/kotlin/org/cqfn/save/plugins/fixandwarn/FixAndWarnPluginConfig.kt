@@ -20,7 +20,7 @@ data class FixAndWarnPluginConfig(
     val fixPluginConfig: FixPluginConfig,
     val warnPluginConfig: WarnPluginConfig
 ) : PluginConfig {
-    override val type = TestConfigSections.FIX_AND_WARN
+    override val type = TestConfigSections.`FIX AND WARN`
 
     @Transient
     override var configLocation: Path = "undefined_toml_location".toPath()
