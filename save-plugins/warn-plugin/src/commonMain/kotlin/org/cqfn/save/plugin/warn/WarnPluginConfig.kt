@@ -41,8 +41,9 @@ import kotlinx.serialization.UseSerializers
  * @property exactWarningsMatch exact match of errors
  * @property testNameSuffix suffix name of the test file.
  * @property batchSize it controls how many files execCmd will process at a time.
- * @property batchSeparator
- * @property defaultLineMode
+ * @property batchSeparator separator for batch mode
+ * @property defaultLineMode mode for default value for line number
+ * @property linePlaceholder placeholder for line number
  */
 @Serializable
 data class WarnPluginConfig(
@@ -63,6 +64,7 @@ data class WarnPluginConfig(
     val exactWarningsMatch: Boolean? = null,
     val testNameSuffix: String? = null,
     val defaultLineMode: Boolean? = null,
+    val linePlaceholder: String? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.WARN
 
@@ -99,7 +101,8 @@ data class WarnPluginConfig(
             this.messageCaptureGroupOut ?: other.messageCaptureGroupOut,
             this.exactWarningsMatch ?: other.exactWarningsMatch,
             this.testNameSuffix ?: other.testNameSuffix,
-            this.defaultLineMode ?: other.defaultLineMode
+            this.defaultLineMode ?: other.defaultLineMode,
+            this.linePlaceholder ?: other.linePlaceholder,
         )
     }
 
@@ -127,6 +130,7 @@ data class WarnPluginConfig(
         val newLineCaptureGroupOut = if (newWarningTextHasLine) (lineCaptureGroupOut ?: 2) else null
         val newColumnCaptureGroupOut = if (newWarningTextHasColumn) (columnCaptureGroupOut ?: 3) else null
         val newMessageCaptureGroupOut = messageCaptureGroupOut ?: 4
+        val newLinePlaceholder = linePlaceholder ?: "line"
         requirePositiveIfNotNull(lineCaptureGroup)
         requirePositiveIfNotNull(columnCaptureGroup)
         requirePositiveIfNotNull(messageCaptureGroup)
@@ -147,7 +151,8 @@ data class WarnPluginConfig(
             newMessageCaptureGroupOut,
             exactWarningsMatch ?: true,
             testName,
-            newDefaultLineMode
+            newDefaultLineMode,
+            newLinePlaceholder,
         )
     }
 
@@ -167,7 +172,7 @@ data class WarnPluginConfig(
          * Default regex for expected warnings in test resources, e.g.
          * `// ;warn:2:4: Class name in incorrect case`
          */
-        internal val defaultInputPattern = Regex(";warn:(\\d+):(\\d+): (.+)")
+        internal val defaultInputPattern = Regex(";warn:(.+):(\\d+): (.+)")
 
         /**
          * Default regex for actual warnings in the tool output, e.g.

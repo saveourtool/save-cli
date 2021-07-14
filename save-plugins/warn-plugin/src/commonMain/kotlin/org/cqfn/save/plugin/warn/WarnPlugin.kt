@@ -100,7 +100,12 @@ class WarnPlugin(
                         val newLine = if (warnPluginConfig.defaultLineMode!!) {
                             plusLine(warnPluginConfig.warningsInputPattern!!, linesFile, index)
                         } else {
-                            line.getLineNumber(warnPluginConfig.warningsInputPattern!!, warnPluginConfig.lineCaptureGroup)
+                            val lineMap = line.getLineNumber(warnPluginConfig.warningsInputPattern!!, warnPluginConfig.lineCaptureGroup, warnPluginConfig.linePlaceholder!!)
+                            if (lineMap?.second == false) {
+                                lineMap.first
+                            } else {
+                                index + 1 + (lineMap?.first ?: 0)
+                            }
                         }
                         with(warnPluginConfig) {
                             line.extractWarning(
@@ -142,7 +147,7 @@ class WarnPlugin(
 
         val actualWarningsMap = executionResult.stdout.mapNotNull {
             with(warnPluginConfig) {
-                val line = it.getLineNumber(warningsOutputPattern!!, lineCaptureGroupOut)
+                val line = it.getLineNumber(warningsOutputPattern!!, lineCaptureGroupOut, linePlaceholder!!)?.first
                 it.extractWarning(warningsOutputPattern, fileNameCaptureGroupOut!!, line, columnCaptureGroupOut, messageCaptureGroupOut!!)
             }
         }
