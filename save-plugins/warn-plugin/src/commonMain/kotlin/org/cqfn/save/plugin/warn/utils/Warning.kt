@@ -101,6 +101,7 @@ internal fun String.extractWarning(warningRegex: Regex,
  * @param warningRegex regular expression for warning
  * @param lineGroupIdx index of capture group for line number
  * @param placeholder placeholder for line
+ * @param lineNum number of line
  * @return a [Warning] or null if [this] string doesn't match [warningRegex]
  * @throws ResourceFormatException when parsing a file
  */
@@ -110,25 +111,21 @@ internal fun String.extractWarning(warningRegex: Regex,
 internal fun String.getLineNumber(warningRegex: Regex,
                                   lineGroupIdx: Int?,
                                   placeholder: String,
-): Pair<Int?, Boolean>? {
+                                  lineNum: Int?,
+): Int? {
     val groups = warningRegex.find(this)?.groups ?: return null
 
-    var placeholderMode = false
-
-    val line: Int? = lineGroupIdx?.let {
+    return lineGroupIdx?.let {
         groups[lineGroupIdx]!!.value.toIntOrNull() ?: run {
             val warnLine = groups[lineGroupIdx]!!.value
-            if (warnLine[0] != '$') {
-                throw ResourceFormatException("The placeholder must start with a '$")
+            if (warnLine[0] != placeholder[0]) {
+                throw ResourceFormatException("The placeholder in warning must start with a ${placeholder[0]}")
             }
-            placeholderMode = true
             try {
-                warnLine.substringAfterLast(placeholder).toInt()
+                warnLine.substringAfterLast(placeholder).toInt() + (lineNum ?: 0) + 1
             } catch (e: Exception) {
                 throw ResourceFormatException("Could not extract line number from line [$this], cause: ${e.message}")
             }
         }
     }
-
-    return line to placeholderMode
 }

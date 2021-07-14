@@ -28,6 +28,13 @@ import kotlin.test.assertTrue
 class WarnPluginTest {
     private val fs = FileSystem.SYSTEM
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPluginTest::class.simpleName!!)
+    private val catCmd = if (isCurrentOsWindows()) "type" else "cat"
+    private val defaultWarnConfig = WarnPluginConfig(
+        "$catCmd ${tmpDir / "resource"} && set stub=",
+        Regex("// ;warn:(\\d+):(\\d+): (.*)"),
+        Regex("(.+):(\\d+):(\\d+): (.+)"),
+        true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
+    )
 
     @BeforeTest
     fun setUp() {
@@ -58,12 +65,7 @@ class WarnPluginTest {
                 }
             """.trimIndent()
             ),
-            WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"} && set stub=",
-                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
-                Regex("(.+):(\\d+):(\\d+): (.+)"),
-                true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
-            ),
+            defaultWarnConfig,
             GeneralConfig("", "", "", "")
         ) { results ->
             assertEquals(1, results.size)
@@ -85,7 +87,6 @@ class WarnPluginTest {
                 """.trimMargin().encodeToByteArray()
             )
         }
-        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
             listOf(
                 """
@@ -126,7 +127,6 @@ class WarnPluginTest {
                 """.trimMargin().encodeToByteArray()
             )
         }
-        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
             listOf(
                 """
@@ -140,11 +140,10 @@ class WarnPluginTest {
                 }
             """.trimIndent()
             ),
-            WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"} && set stub=",
-                Regex(";warn:(.+):(\\d+): (.+)"),
-                Regex("(.+):(\\d+):(\\d+): (.+)"),
-                true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4, defaultLineMode = false, linePlaceholder = "l"
+            defaultWarnConfig.copy(
+                warningsInputPattern = Regex(";warn:(.+):(\\d+): (.+)"),
+                defaultLineMode = false,
+                linePlaceholder = "\$l",
             ),
             GeneralConfig("", "", "", "")
         ) { results ->
@@ -164,7 +163,6 @@ class WarnPluginTest {
                 """.trimMargin().encodeToByteArray()
             )
         }
-        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
             listOf(
                 """
@@ -176,11 +174,8 @@ class WarnPluginTest {
                 }
             """.trimIndent()
             ),
-            WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"} && set stub=",
-                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
-                Regex("(.+):(\\d+):(\\d+): (.+)"),
-                true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4, false
+            defaultWarnConfig.copy(
+                exactWarningsMatch = false,
             ),
             GeneralConfig("", "", "", "")
         ) { results ->
@@ -232,7 +227,6 @@ class WarnPluginTest {
                     |""".trimMargin().encodeToByteArray()
             )
         }
-        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
             listOf(
                 """
@@ -245,12 +239,7 @@ class WarnPluginTest {
                 // ;warn:7:1: File should end with trailing newline
             """.trimIndent()
             ),
-            WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"} && set stub=",
-                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
-                Regex("(.+):(\\d+):(\\d+): (.+)"),
-                true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
-            ),
+            defaultWarnConfig.copy(),
             GeneralConfig("", "", "", "")
         ) { results ->
             assertEquals(1, results.size)
@@ -350,8 +339,6 @@ class WarnPluginTest {
                 """.trimMargin().encodeToByteArray()
             )
         }
-        val batchSize = 2
-        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
             listOf(
                 """
@@ -371,11 +358,8 @@ class WarnPluginTest {
                 }
             """.trimIndent()
             ),
-            WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"} && set stub=",
-                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
-                Regex("(.+):(\\d+):(\\d+): (.+)"),
-                true, true, batchSize, ", ", 1, 2, 3, 1, 2, 3, 4
+            defaultWarnConfig.copy(
+                batchSize = 2
             ),
             GeneralConfig("", "", "", "")
         ) { results ->
@@ -400,15 +384,10 @@ class WarnPluginTest {
         fs.createDirectory(tmpDir / "inner")
         fs.createFile(tmpDir / "inner" / "Test3Test.java")
         fs.createFile(tmpDir / "inner" / "Test4Test.java")
-        val batchSize = 2
-        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
             emptyList(),  // files will be discovered in tmpDir, because they are already created
-            WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"} && set stub=",
-                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
-                Regex("(.+):(\\d+):(\\d+): (.+)"),
-                true, true, batchSize, ", ", 1, 2, 3, 1, 2, 3, 4
+            defaultWarnConfig.copy(
+                batchSize = 2,
             ),
             GeneralConfig("", "", "", "")
         ) { results ->
