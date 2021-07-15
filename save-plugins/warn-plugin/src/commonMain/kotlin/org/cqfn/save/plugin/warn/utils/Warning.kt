@@ -120,7 +120,7 @@ internal fun String.getLineNumber(warningRegex: Regex,
         groups[lineGroupIdx]!!.value.toIntOrNull() ?: run {
             val lineGroup = groups[lineGroupIdx]!!.value
             if (lineGroup[0] != placeholder[0]) {
-                throw ResourceFormatException("The group is neither a number nor a placeholder.")
+                throw ResourceFormatException("The group <$lineGroup> is neither a number nor a placeholder.")
             }
             try {
                 lineGroup.substringAfterLast(placeholder).toInt() + (lineNum ?: 0) + 1
