@@ -4,6 +4,7 @@
 
 package org.cqfn.save.plugin.warn.utils
 
+import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.plugin.ResourceFormatException
 
 /**
@@ -117,14 +118,14 @@ internal fun String.getLineNumber(warningRegex: Regex,
 
     return lineGroupIdx?.let {
         groups[lineGroupIdx]!!.value.toIntOrNull() ?: run {
-            val warnLine = groups[lineGroupIdx]!!.value
-            if (warnLine[0] != placeholder[0]) {
-                throw ResourceFormatException("The placeholder in warning must start with a ${placeholder[0]}")
+            val lineGroup = groups[lineGroupIdx]!!.value
+            if (lineGroup[0] != placeholder[0]) {
+                throw ResourceFormatException("The group is neither a number nor a placeholder.")
             }
             try {
-                warnLine.substringAfterLast(placeholder).toInt() + (lineNum ?: 0) + 1
+                lineGroup.substringAfterLast(placeholder).toInt() + (lineNum ?: 0) + 1
             } catch (e: Exception) {
-                throw ResourceFormatException("Could not extract line number from line [$this], cause: ${e.message}")
+                throw ResourceFormatException("Could not extract line number from line [$this], cause: ${e.describe()}")
             }
         }
     }

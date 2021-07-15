@@ -42,8 +42,8 @@ import kotlinx.serialization.UseSerializers
  * @property testNameSuffix suffix name of the test file.
  * @property batchSize it controls how many files execCmd will process at a time.
  * @property batchSeparator separator for batch mode
- * @property defaultLineMode mode for default value for line number
- * @property linePlaceholder placeholder for line number
+ * @property defaultLineMode whether to use default value for line number; when enabled, default value will be equal to the next line
+ * @property linePlaceholder placeholder for line number, which resolved as current line and support addition and subtraction
  */
 @Serializable
 data class WarnPluginConfig(
@@ -114,8 +114,6 @@ data class WarnPluginConfig(
     override fun validateAndSetDefaults(): WarnPluginConfig {
         val newWarningTextHasLine = warningTextHasLine ?: true
         val newWarningTextHasColumn = warningTextHasColumn ?: true
-        val newBatchSize = batchSize ?: 1
-        val newBatchSeparator = batchSeparator ?: ", "
         val newDefaultLineMode = defaultLineMode ?: false
         val newLineCaptureGroup = if (newDefaultLineMode) {
             null
@@ -130,7 +128,6 @@ data class WarnPluginConfig(
         val newLineCaptureGroupOut = if (newWarningTextHasLine) (lineCaptureGroupOut ?: 2) else null
         val newColumnCaptureGroupOut = if (newWarningTextHasColumn) (columnCaptureGroupOut ?: 3) else null
         val newMessageCaptureGroupOut = messageCaptureGroupOut ?: 4
-        val newLinePlaceholder = linePlaceholder ?: "line"
         requirePositiveIfNotNull(lineCaptureGroup)
         requirePositiveIfNotNull(columnCaptureGroup)
         requirePositiveIfNotNull(messageCaptureGroup)
@@ -140,8 +137,8 @@ data class WarnPluginConfig(
             warningsOutputPattern ?: defaultOutputPattern,
             newWarningTextHasLine,
             newWarningTextHasColumn,
-            newBatchSize,
-            newBatchSeparator,
+            batchSize ?: 1,
+            batchSeparator ?: ", ",
             newLineCaptureGroup,
             newColumnCaptureGroup,
             newMessageCaptureGroup,
@@ -152,7 +149,7 @@ data class WarnPluginConfig(
             exactWarningsMatch ?: true,
             testName,
             newDefaultLineMode,
-            newLinePlaceholder,
+            linePlaceholder ?: "line",
         )
     }
 
