@@ -4,6 +4,7 @@
 
 package org.cqfn.save.plugin.warn.utils
 
+import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.plugin.ResourceFormatException
 
 /**
@@ -100,6 +101,8 @@ internal fun String.extractWarning(warningRegex: Regex,
 /**
  * @param warningRegex regular expression for warning
  * @param lineGroupIdx index of capture group for line number
+ * @param placeholder placeholder for line
+ * @param lineNum number of line
  * @return a [Warning] or null if [this] string doesn't match [warningRegex]
  * @throws ResourceFormatException when parsing a file
  */
@@ -108,16 +111,22 @@ internal fun String.extractWarning(warningRegex: Regex,
     "SwallowedException")
 internal fun String.getLineNumber(warningRegex: Regex,
                                   lineGroupIdx: Int?,
+                                  placeholder: String,
+                                  lineNum: Int?,
 ): Int? {
     val groups = warningRegex.find(this)?.groups ?: return null
 
-    val line = lineGroupIdx?.let {
-        try {
-            groups[lineGroupIdx]!!.value.toInt()
-        } catch (e: Exception) {
-            throw ResourceFormatException("Could not extract line number from line [$this], cause: ${e.message}")
+    return lineGroupIdx?.let {
+        groups[lineGroupIdx]!!.value.toIntOrNull() ?: run {
+            val lineGroup = groups[lineGroupIdx]!!.value
+            if (lineGroup[0] != placeholder[0]) {
+                throw ResourceFormatException("The group <$lineGroup> is neither a number nor a placeholder.")
+            }
+            try {
+                lineGroup.substringAfterLast(placeholder).toInt() + lineNum!! + 1
+            } catch (e: Exception) {
+                throw ResourceFormatException("Could not extract line number from line [$this], cause: ${e.describe()}")
+            }
         }
     }
-
-    return line
 }

@@ -41,8 +41,9 @@ import kotlinx.serialization.UseSerializers
  * @property exactWarningsMatch exact match of errors
  * @property testNameSuffix suffix name of the test file.
  * @property batchSize it controls how many files execCmd will process at a time.
- * @property batchSeparator
- * @property defaultLineMode
+ * @property batchSeparator separator for batch mode
+ * @property defaultLineMode whether to use default value for line number; when enabled, default value will be equal to the next line
+ * @property linePlaceholder placeholder for line number, which resolved as current line and support addition and subtraction
  */
 @Serializable
 data class WarnPluginConfig(
@@ -63,6 +64,7 @@ data class WarnPluginConfig(
     val exactWarningsMatch: Boolean? = null,
     val testNameSuffix: String? = null,
     val defaultLineMode: Boolean? = null,
+    val linePlaceholder: String? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.WARN
 
@@ -99,7 +101,8 @@ data class WarnPluginConfig(
             this.messageCaptureGroupOut ?: other.messageCaptureGroupOut,
             this.exactWarningsMatch ?: other.exactWarningsMatch,
             this.testNameSuffix ?: other.testNameSuffix,
-            this.defaultLineMode ?: other.defaultLineMode
+            this.defaultLineMode ?: other.defaultLineMode,
+            this.linePlaceholder ?: other.linePlaceholder,
         )
     }
 
@@ -111,8 +114,6 @@ data class WarnPluginConfig(
     override fun validateAndSetDefaults(): WarnPluginConfig {
         val newWarningTextHasLine = warningTextHasLine ?: true
         val newWarningTextHasColumn = warningTextHasColumn ?: true
-        val newBatchSize = batchSize ?: 1
-        val newBatchSeparator = batchSeparator ?: ", "
         val newDefaultLineMode = defaultLineMode ?: false
         val newLineCaptureGroup = if (newDefaultLineMode) {
             null
@@ -136,8 +137,8 @@ data class WarnPluginConfig(
             warningsOutputPattern ?: defaultOutputPattern,
             newWarningTextHasLine,
             newWarningTextHasColumn,
-            newBatchSize,
-            newBatchSeparator,
+            batchSize ?: 1,
+            batchSeparator ?: ", ",
             newLineCaptureGroup,
             newColumnCaptureGroup,
             newMessageCaptureGroup,
@@ -147,7 +148,8 @@ data class WarnPluginConfig(
             newMessageCaptureGroupOut,
             exactWarningsMatch ?: true,
             testName,
-            newDefaultLineMode
+            newDefaultLineMode,
+            linePlaceholder ?: "line",
         )
     }
 
@@ -167,7 +169,7 @@ data class WarnPluginConfig(
          * Default regex for expected warnings in test resources, e.g.
          * `// ;warn:2:4: Class name in incorrect case`
          */
-        internal val defaultInputPattern = Regex(";warn:(\\d+):(\\d+): (.+)")
+        internal val defaultInputPattern = Regex(";warn:(.+):(\\d+): (.+)")
 
         /**
          * Default regex for actual warnings in the tool output, e.g.

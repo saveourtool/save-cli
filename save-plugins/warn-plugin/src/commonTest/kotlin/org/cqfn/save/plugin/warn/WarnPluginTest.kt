@@ -28,6 +28,13 @@ import kotlin.test.assertTrue
 class WarnPluginTest {
     private val fs = FileSystem.SYSTEM
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPluginTest::class.simpleName!!)
+    private val catCmd = if (isCurrentOsWindows()) "type" else "cat"
+    private val defaultWarnConfig = WarnPluginConfig(
+        "$catCmd ${tmpDir / "resource"} && set stub=",
+        Regex("// ;warn:(\\d+):(\\d+): (.*)"),
+        Regex("(.+):(\\d+):(\\d+): (.+)"),
+        true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
+    )
 
     @BeforeTest
     fun setUp() {
@@ -58,12 +65,7 @@ class WarnPluginTest {
                 }
             """.trimIndent()
             ),
-            WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"} && set stub=",
-                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
-                Regex("(.+):(\\d+):(\\d+): (.+)"),
-                true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
-            ),
+            defaultWarnConfig,
             GeneralConfig("", "", "", "")
         ) { results ->
             assertEquals(1, results.size)
@@ -85,7 +87,6 @@ class WarnPluginTest {
                 """.trimMargin().encodeToByteArray()
             )
         }
-        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
             listOf(
                 """
@@ -115,6 +116,44 @@ class WarnPluginTest {
     }
 
     @Test
+    @Suppress("TOO_LONG_FUNCTION")
+    fun `warn-plugin test for placeholder`() {
+        fs.write(fs.createFile(tmpDir / "resource")) {
+            write(
+                """
+                |Test1Test.java:4:1: Class name should be in PascalCase
+                |Test1Test.java:4:1: Class name shouldn't have a number
+                |Test1Test.java:7:1: Variable name should be in LowerCase
+                """.trimMargin().encodeToByteArray()
+            )
+        }
+        performTest(
+            listOf(
+                """
+                package org.cqfn.save.example
+                
+                // ;warn:${'$'}l+1:1: Class name shouldn't have a number
+                class example1 {
+                // ;warn:${'$'}l-1:1: Class name should be in PascalCase
+                // ;warn:${'$'}l+1:1: Variable name should be in LowerCase
+                    int Foo = 42;
+                }
+            """.trimIndent()
+            ),
+            defaultWarnConfig.copy(
+                warningsInputPattern = Regex(";warn:(.+):(\\d+): (.+)"),
+                defaultLineMode = false,
+                linePlaceholder = "\$l",
+            ),
+            GeneralConfig("", "", "", "")
+        ) { results ->
+            assertEquals(1, results.size)
+            assertTrue(results.single().status is Pass)
+        }
+        fs.delete(tmpDir / "resource")
+    }
+
+    @Test
     fun `basic warn-plugin test with exactWarningsMatch = false`() {
         fs.write(fs.createFile(tmpDir / "resource")) {
             write(
@@ -124,7 +163,6 @@ class WarnPluginTest {
                 """.trimMargin().encodeToByteArray()
             )
         }
-        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
             listOf(
                 """
@@ -136,11 +174,8 @@ class WarnPluginTest {
                 }
             """.trimIndent()
             ),
-            WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"} && set stub=",
-                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
-                Regex("(.+):(\\d+):(\\d+): (.+)"),
-                true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4, false
+            defaultWarnConfig.copy(
+                exactWarningsMatch = false,
             ),
             GeneralConfig("", "", "", "")
         ) { results ->
@@ -192,7 +227,6 @@ class WarnPluginTest {
                     |""".trimMargin().encodeToByteArray()
             )
         }
-        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
             listOf(
                 """
@@ -205,12 +239,7 @@ class WarnPluginTest {
                 // ;warn:7:1: File should end with trailing newline
             """.trimIndent()
             ),
-            WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"} && set stub=",
-                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
-                Regex("(.+):(\\d+):(\\d+): (.+)"),
-                true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
-            ),
+            defaultWarnConfig.copy(),
             GeneralConfig("", "", "", "")
         ) { results ->
             assertEquals(1, results.size)
@@ -310,8 +339,6 @@ class WarnPluginTest {
                 """.trimMargin().encodeToByteArray()
             )
         }
-        val batchSize = 2
-        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
             listOf(
                 """
@@ -331,11 +358,8 @@ class WarnPluginTest {
                 }
             """.trimIndent()
             ),
-            WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"} && set stub=",
-                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
-                Regex("(.+):(\\d+):(\\d+): (.+)"),
-                true, true, batchSize, ", ", 1, 2, 3, 1, 2, 3, 4
+            defaultWarnConfig.copy(
+                batchSize = 2
             ),
             GeneralConfig("", "", "", "")
         ) { results ->
@@ -360,15 +384,10 @@ class WarnPluginTest {
         fs.createDirectory(tmpDir / "inner")
         fs.createFile(tmpDir / "inner" / "Test3Test.java")
         fs.createFile(tmpDir / "inner" / "Test4Test.java")
-        val batchSize = 2
-        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
             emptyList(),  // files will be discovered in tmpDir, because they are already created
-            WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"} && set stub=",
-                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
-                Regex("(.+):(\\d+):(\\d+): (.+)"),
-                true, true, batchSize, ", ", 1, 2, 3, 1, 2, 3, 4
+            defaultWarnConfig.copy(
+                batchSize = 2,
             ),
             GeneralConfig("", "", "", "")
         ) { results ->

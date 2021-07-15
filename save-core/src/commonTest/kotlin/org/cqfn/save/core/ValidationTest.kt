@@ -56,7 +56,7 @@ class ValidationTest {
         assertEquals(1, config.pluginConfigs.size)
 
         val actualWarnConfig = config.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
-        assertEquals(Regex(";warn:(\\d+):(\\d+): (.+)").toString(), actualWarnConfig.warningsInputPattern.toString())
+        assertEquals(Regex(";warn:(.+):(\\d+): (.+)").toString(), actualWarnConfig.warningsInputPattern.toString())
         assertEquals(Regex("(.+):(\\d+):(\\d+): (.+)").toString(), actualWarnConfig.warningsOutputPattern.toString())
         assertEquals(true, actualWarnConfig.warningTextHasLine)
         assertEquals(true, actualWarnConfig.warningTextHasColumn)
@@ -141,7 +141,7 @@ class ValidationTest {
                         "\nCurrent configuration: execFlags=execFlags, warningsInputPattern=null, warningsOutputPattern=null, " +
                         "warningTextHasLine=null, warningTextHasColumn=null, batchSize=null, batchSeparator=null, lineCaptureGroup=-127, columnCaptureGroup=null, " +
                         "messageCaptureGroup=null, fileNameCaptureGroupOut=null, lineCaptureGroupOut=null, columnCaptureGroupOut=null, messageCaptureGroupOut=null, " +
-                        "exactWarningsMatch=null, testNameSuffix=null, defaultLineMode=null",
+                        "exactWarningsMatch=null, testNameSuffix=null, defaultLineMode=null, linePlaceholder=null",
                 ex.message
             )
         }
