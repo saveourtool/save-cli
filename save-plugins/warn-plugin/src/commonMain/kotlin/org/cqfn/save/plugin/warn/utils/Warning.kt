@@ -123,7 +123,7 @@ internal fun String.getLineNumber(warningRegex: Regex,
                 throw ResourceFormatException("The group <$lineGroup> is neither a number nor a placeholder.")
             }
             try {
-                lineGroup.substringAfterLast(placeholder).toInt() + (lineNum ?: 0) + 1
+                lineGroup.substringAfterLast(placeholder).toInt() + lineNum!! + 1
             } catch (e: Exception) {
                 throw ResourceFormatException("Could not extract line number from line [$this], cause: ${e.describe()}")
             }
