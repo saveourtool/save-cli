@@ -95,14 +95,6 @@
       "description" : "Whether configuration files should inherit configurations from the previous level of directories",
       "default" : "true"
     },
-    "ignoreSaveComments" : {
-      "argType" : "ArgType.Boolean",
-      "kotlinType": "kotlin.Boolean",
-      "fullName" : "ignore-save-comments",
-      "shortName" : "",
-      "description" : "If true, ignore technical comments, that SAVE uses to describe warnings, when running tests",
-      "default" : "false"
-    },
     "reportDir" : {
       "argType" : "ArgType.String",
       "kotlinType": "kotlin.String",
