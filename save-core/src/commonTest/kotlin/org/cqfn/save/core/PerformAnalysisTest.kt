@@ -9,8 +9,7 @@ class PerformAnalysisTest {
     @Test
     fun `detect plugins`() {
         val saveProperties = SaveProperties(
-            propertiesFile = "../examples/discovery-test/save.properties",
-            testRootPath = ".",
+            testRootPath = "../examples/discovery-test",
             reportType = ReportType.PLAIN,
         )
         // In this test we need to merge with emulated empty save.properties file in aim to use default values,
@@ -21,8 +20,7 @@ class PerformAnalysisTest {
     @Test
     fun `should execute single test`() {
         val saveProperties = SaveProperties(
-            propertiesFile = "../examples/discovery-test/save.properties",
-            testRootPath = ".",
+            testRootPath = "../examples/discovery-test",
             reportType = ReportType.PLAIN,
             testFiles = listOf("MyTest.java")  // fixme: should support full path
         )

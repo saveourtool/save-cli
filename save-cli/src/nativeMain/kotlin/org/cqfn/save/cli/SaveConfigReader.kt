@@ -12,6 +12,7 @@ import org.cqfn.save.core.logging.logDebug
 import okio.FileNotFoundException
 import okio.FileSystem
 import okio.IOException
+import okio.Path.Companion.DIRECTORY_SEPARATOR
 import okio.Path.Companion.toPath
 
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -25,7 +26,7 @@ fun SaveProperties.validate(): SaveProperties {
     this.testRootPath ?: logErrorAndExit(ExitCodes.INVALID_CONFIGURATION,
         "`testRootPath` option is missing or null. " +
                 "Save is not able to start processing without an information about the tests that should be run.")
-    val fullConfigPath = propertiesFile!!.toPath().parent!! / testRootPath!! / testConfigPath!!
+    val fullConfigPath = testRootPath!!.toPath() / "save.toml"
     try {
         FileSystem.SYSTEM.metadata(fullConfigPath)
     } catch (e: FileNotFoundException) {
@@ -54,7 +55,8 @@ fun createConfigFromArgs(args: Array<String>): SaveProperties {
     val configFromCli = SaveProperties(args)
     logDebug("Properties after parsed command line args:\n${configFromCli.getFields()}")
     // reading configuration from the properties file
-    val configFromPropertiesFile = readPropertiesFile(configFromCli.propertiesFile ?: defaultConfig().propertiesFile)
+    val propertiesFile = (configFromCli.testRootPath ?: defaultConfig().testRootPath) + DIRECTORY_SEPARATOR + "save.properties"
+    val configFromPropertiesFile = readPropertiesFile(propertiesFile)
     // merging two configurations into single [SaveProperties] class with a priority to command line arguments
     val mergedProperties = configFromCli.mergeConfigWithPriorityToThis(configFromPropertiesFile)
     logDebug("Using the following properties for SAVE execution:\n${mergedProperties.getFields()}")

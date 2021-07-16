@@ -7,6 +7,7 @@ import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.isSaveTomlConfig
 import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.files.StdStreamsSink
+import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.logging.isDebugEnabled
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
@@ -51,10 +52,7 @@ class Save(
         logInfo("Welcome to SAVE version $SAVE_VERSION")
 
         // FixMe: now we work only with the save.toml config and it's hierarchy, but we should work properly here with directories as well
-        // constructing the file path to the configuration file
-        val fullPathToConfig = with(saveProperties) {
-            propertiesFile!!.toPath().parent!! / testRootPath!! / testConfigPath!!
-        }
+        val rootTestConfigPath = saveProperties.testRootPath!!.toPath() / "save.toml"
         val reporter = getReporter(saveProperties)
         val (requestedConfigs, requestedTests) = saveProperties.testFiles!!.partition {
             it.toPath().isSaveTomlConfig()
@@ -63,7 +61,7 @@ class Save(
         reporter.beforeAll()
         // get all toml configs in file system
         ConfigDetector()
-            .configFromFile(fullPathToConfig)
+            .configFromFile(rootTestConfigPath)
             .getAllTestConfigsForFiles(requestedConfigs)
             .forEach { testConfig ->
                 // iterating top-down
@@ -94,9 +92,13 @@ class Save(
         logDebug("=> Executing plugin: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
         reporter.onPluginExecutionStart(plugin)
         try {
-            val events = plugin.execute().toList()
-            events
-                .onEach { event -> reporter.onEvent(event) }
+            val rootDir = plugin.testConfig.getRootConfig().location
+            plugin.execute()
+                .onEach { event ->
+                    // calculate relative paths, because reporters don't need paths higher than root dir
+                    val resourcesRelative = event.resources.map { it.createRelativePathToTheRoot(rootDir).toPath() }
+                    reporter.onEvent(event.copy(resources = resourcesRelative))
+                }
                 .forEach(this::handleResult)
         } catch (ex: PluginException) {
             reporter.onPluginExecutionError(ex)
