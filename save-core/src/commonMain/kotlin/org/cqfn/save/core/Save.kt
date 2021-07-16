@@ -51,10 +51,7 @@ class Save(
         logInfo("Welcome to SAVE version $SAVE_VERSION")
 
         // FixMe: now we work only with the save.toml config and it's hierarchy, but we should work properly here with directories as well
-        // constructing the file path to the configuration file
-        val fullPathToConfig = with(saveProperties) {
-            propertiesFile!!.toPath().parent!! / testRootPath!! / testConfigPath!!
-        }
+        val rootTestConfigPath = saveProperties.testRootPath!!.toPath() / "save.toml"
         val reporter = getReporter(saveProperties)
         val (requestedConfigs, requestedTests) = saveProperties.testFiles!!.partition {
             it.toPath().isSaveTomlConfig()
@@ -63,7 +60,7 @@ class Save(
         reporter.beforeAll()
         // get all toml configs in file system
         ConfigDetector()
-            .configFromFile(fullPathToConfig)
+            .configFromFile(rootTestConfigPath)
             .getAllTestConfigsForFiles(requestedConfigs)
             .forEach { testConfig ->
                 // iterating top-down

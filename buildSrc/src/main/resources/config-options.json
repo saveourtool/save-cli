@@ -1,12 +1,4 @@
 {
-    "testConfigPath" : {
-      "argType" : "ArgType.String",
-      "kotlinType": "kotlin.String",
-      "fullName" : "test-config",
-      "shortName" : "c",
-      "description" : "Path to a configuration of a test suite",
-      "default" : "save.toml"
-    },
     "parallelMode" : {
       "argType" : "ArgType.Boolean",
       "kotlinType": "kotlin.Boolean",
@@ -22,14 +14,6 @@
       "shortName" : "t",
       "description" : "Number of threads",
       "default" : "1"
-    },
-    "propertiesFile" : {
-      "argType" : "ArgType.String",
-      "kotlinType": "kotlin.String",
-      "fullName" : "properties-file",
-      "shortName" : "prop",
-      "description" : "Path to the file with configuration properties of save application aka save.properties",
-      "default" : "save.properties"
     },
     "debug" : {
       "argType" : "ArgType.Boolean",
@@ -92,7 +76,7 @@
       "kotlinType": "kotlin.String",
       "fullName" : "test-root-path",
       "shortName" : "",
-      "description" : "Path to directory with tests (relative path from place, where save.properties is stored or absolute path)",
+      "description" : "Path to directory with root save.toml and save.properties",
       "default" : "null"
     },
     "resultOutput" : {

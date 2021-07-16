@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 KTLINT_VERSION=0.39.0
-DIKTAT_VERSION=1.0.0-rc.1
-SAVE_VERSION=0.1.0-rc.1
+DIKTAT_VERSION=1.0.0-rc.2
+SAVE_VERSION=0.1.1
 
 # Download tools that will be tested
 if ! [ -f ktlint ]; then

@@ -46,7 +46,7 @@ Save can be used not only with static analyzers, but can be used as a test frame
 
 ## How to start
 1. Prepare and configure your test base in the proper format. See [test_detection](#test_detection) and [plugins](#plugins)
-2. Run the following: `save --testConfig "/my/path/to/test/save.toml"`
+2. Run the following: `save --testRootPath "/my/path/to/tests"`. Directory `tests` should contain `save.toml` configuration file.
 
 ## How to configure 
 SAVE has a command line interface that runs the framework and your executable. What you need is simply to configure the output of your static analyzer so SAVE will be able to
@@ -57,16 +57,14 @@ To check that the warning is correct for SAVE - your static analyzer must print 
 
 // FixMe: specify options here
 For [save-cloud](https://github.com/cqfn/save-cloud) it is extremely important to detect properties file for SAVE,
-so in case you would like to use both cli application and cloud application we suggest putting the file with name `save.properties` in the root folder of your repository.
-
-Configuration file can be also provided to SAVE via command line: `save -prop $PATH_TO_PROPS/save.properties`
+so in case you would like to use both cli application and cloud application we suggest putting the file with name `save.properties`
+in the same folder as root test config `save.toml`.
 
 Example of `save.properties` file (for full description and possible values, refer to the [corresponding section](#config_options)):
 ```properties
 resultOutput=stdout
 parallelMode=true
 language=c++
-testRootPath=~/my_dir/dir_to_tests_root
 reportDir=~/report
 ```
 
