@@ -7,6 +7,7 @@ import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.isSaveTomlConfig
 import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.files.StdStreamsSink
+import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.logging.isDebugEnabled
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
@@ -91,9 +92,13 @@ class Save(
         logDebug("=> Executing plugin: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
         reporter.onPluginExecutionStart(plugin)
         try {
-            val events = plugin.execute().toList()
-            events
-                .onEach { event -> reporter.onEvent(event) }
+            val rootDir = plugin.testConfig.getRootConfig().location
+            plugin.execute()
+                .onEach { event ->
+                    // calculate relative paths, because reporters don't need paths higher than root dir
+                    val resourcesRelative = event.resources.map { it.createRelativePathToTheRoot(rootDir).toPath() }
+                    reporter.onEvent(event.copy(resources = resourcesRelative))
+                }
                 .forEach(this::handleResult)
         } catch (ex: PluginException) {
             reporter.onPluginExecutionError(ex)
