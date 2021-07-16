@@ -17,5 +17,4 @@ Most (except for `-h` and `-prop`) of the options below can be passed to a SAVE 
 | - | test-root-path | Path to directory with tests (relative path from place, where save.properties is stored or absolute path) | - |
 | out | result-output | Data output stream | STDOUT |
 | - | config-inheritance | Whether configuration files should inherit configurations from the previous level of directories | true |
-| - | ignore-save-comments | If true, ignore technical comments, that SAVE uses to describe warnings, when running tests | false |
 | - | report-dir | Path to directory, where to store output (when `resultOutput` is set to `FILE`) | save-reports |
