@@ -56,9 +56,7 @@ check if the proper error was raised on the proper line of test code.
 To check that the warning is correct for SAVE - your static analyzer must print the result to stderr/stdout or to some log file.
 
 // FixMe: specify options here
-For [save-cloud](https://github.com/cqfn/save-cloud) it is extremely important to detect properties file for SAVE,
-so in case you would like to use both cli application and cloud application we suggest putting the file with name `save.properties`
-in the same folder as root test config `save.toml`.
+General behavior of SAVE can be configured using configuration file `save.properties` in the same folder as root test config `save.toml`.
 
 Example of `save.properties` file (for full description and possible values, refer to the [corresponding section](#config_options)):
 ```properties
