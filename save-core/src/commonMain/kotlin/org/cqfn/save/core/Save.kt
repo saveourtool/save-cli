@@ -142,6 +142,6 @@ class Save(
                         "Please report an issue at https://github.com/cqfn/save"
             )
         }
-        logDebug("Completed test execution for resources [${testResult.resources}]. Additional info: ${testResult.debugInfo}")
+        //logDebug("Completed test execution for resources [${testResult.resources}]. Additional info: ${testResult.debugInfo}")
     }
 }

@@ -61,7 +61,7 @@ private inline fun <reified T : PluginConfig> Path.createPluginConfig(
     logError(
         "Plugin extraction failed for $this and [$pluginSectionName] section." +
                 " This file has incorrect toml format or missing section [$pluginSectionName]." +
-                " Valid sections are: ${TestConfigSections.values()}."
+                " Valid sections are: ${TestConfigSections.values().joinToString().lowercase()}."
     )
     throw e
 }
@@ -76,5 +76,5 @@ private inline fun <reified T : PluginConfig> Path.createPluginConfig(
 fun createPluginConfigListFromToml(testConfigPath: Path): List<PluginConfig> =
         TomlParser(KtomlConf())
             .readAndParseFile(testConfigPath.toString())
-            .getRealTomlTables()
+            .getRealTomlTables().filter { !it.fullTableName.contains(".") } // FixMe
             .map { testConfigPath.testConfigFactory(it) }

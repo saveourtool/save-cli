@@ -74,7 +74,8 @@ class FixPlugin(
                 val expectedLines = FileSystem.SYSTEM.readLines(expected)
 
                 val test = pathMap.first { (_, test) -> test.name == testCopy.name }.second
-
+                println("FIX EXPECTED ${expectedLines}")
+                println("FIX ACTUAL ${fixedLines}")
                 TestResult(
                     listOf(expected, test),
                     checkStatus(expectedLines, fixedLines),

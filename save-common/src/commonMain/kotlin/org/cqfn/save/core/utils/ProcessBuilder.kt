@@ -112,7 +112,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean) {
             fs.write(redirectTo) {
                 write(stdout.joinToString("\n").encodeToByteArray())
             }
-        } ?: logDebug("Execution output:\n$stdout")
+        } ?: print(' ')//logDebug("Execution output:\n$stdout")
         return ExecutionResult(status, stdout, stderr)
     }
 

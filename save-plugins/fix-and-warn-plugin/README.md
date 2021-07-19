@@ -15,15 +15,15 @@ like it described in corresponding README files, additionally requiring the foll
 
 ## Configuration
 Follow the instructions for `[fix]` and `[warn]` plugins and just add
-their configuration as a subsections of `["fix and warn"]` plugin.
+their configuration as a subsections of `[fix and warn]` plugin.
 ```toml
 [general]
 execCmd="./ktlint -R diktat-0.4.2.jar"
 description = "My suite description"
 suiteName = "DocsCheck"
 
-["fix and warn"]
-    [fix]
+[fix and warn]
+    [fix and warn.fix]
         execFlags="-F"
         testFilePattern="*Test.kt"
         expectedFilePattern="*Expected.kt"
@@ -31,7 +31,7 @@ suiteName = "DocsCheck"
         batchSeparator = ", "
         resourceNameTestSuffix = "Test"
         resourceNameExpectedSuffix = "Expected"
-    [warn]
+    [fix and warn.warn]
         execFlags = "--build-upon-default-config -i"
         warningsInputPattern = "// ;warn:(\\d+):(\\d+): (.*)"
         warningsOutputPattern = "\\w+ - (\\d+)/(\\d+) - (.*)$"
