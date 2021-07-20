@@ -11,7 +11,6 @@ like it described in corresponding README files, additionally requiring the foll
 * Expected warnings should be specified in expected files
 * Test resources should have the same postfixes in `[fix]` and `[warn]` sections.\
   By the default for test file it is `Test`, for the file with expected result - it is `Expected`.
-* If your application use the same flag for fix and warn actions, this flag should be provided explicitly in both subsections (for now)
 
 ## Configuration
 Follow the instructions for `[fix]` and `[warn]` plugins and just add

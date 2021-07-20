@@ -76,5 +76,5 @@ private inline fun <reified T : PluginConfig> Path.createPluginConfig(
 fun createPluginConfigListFromToml(testConfigPath: Path): List<PluginConfig> =
         TomlParser(KtomlConf())
             .readAndParseFile(testConfigPath.toString())
-            .getRealTomlTables().filter { !it.fullTableName.contains(".") } // FixMe
+            .getRealTomlTables().filter { !it.fullTableName.contains(".") }  // FixMe
             .map { testConfigPath.testConfigFactory(it) }

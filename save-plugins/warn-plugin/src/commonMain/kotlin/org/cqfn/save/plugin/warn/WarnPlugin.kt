@@ -19,7 +19,6 @@ import org.cqfn.save.plugin.warn.utils.getLineNumber
 
 import okio.FileSystem
 import okio.Path
-import okio.Path.Companion.toPath
 
 internal typealias LineColumn = Pair<Int, Int>
 
@@ -149,14 +148,13 @@ class WarnPlugin(
         }
             .groupBy { if (it.line != null && it.column != null) it.line to it.column else null }
             .mapValues { (_, warning) -> warning.sortedBy { it.message } }
-        println("WARN ACTUAL ${actualWarningsMap}")
-        println("WARN EXPECTED ${expectedWarnings}")
+
         return paths.map { path ->
             TestResult(
                 listOf(path),
                 checkResults(
-                    expectedWarnings.filter { it.value.any { warning -> warning.fileName.toPath().name == path.name } },
-                    actualWarningsMap.filter { it.value.any { warning -> warning.fileName.toPath().name == path.name } },
+                    expectedWarnings.filter { it.value.any { warning -> warning.fileName == path.name } },
+                    actualWarningsMap.filter { it.value.any { warning -> warning.fileName == path.name } },
                     warnPluginConfig
                 ),
                 DebugInfo(
@@ -202,8 +200,7 @@ class WarnPlugin(
                               warnPluginConfig: WarnPluginConfig): TestStatus {
         val missingWarnings = expectedWarningsMap.valuesNotIn(actualWarningsMap)
         val unexpectedWarnings = actualWarningsMap.valuesNotIn(expectedWarningsMap)
-        println("\nMissingWarnings ${missingWarnings}")
-        println("\nUnexpectedWarnings ${unexpectedWarnings}")
+
         return when (missingWarnings.isEmpty() to unexpectedWarnings.isEmpty()) {
             false to true -> createFail(expectedAndNotReceived, missingWarnings)
             false to false -> Fail(

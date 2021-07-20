@@ -4,16 +4,15 @@ import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
+import org.cqfn.save.core.plugin.PluginConfig
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.plugin.warn.WarnPlugin
+import org.cqfn.save.plugin.warn.WarnPluginConfig
 import org.cqfn.save.plugins.fix.FixPlugin
+import org.cqfn.save.plugins.fix.FixPluginConfig
 
 import okio.FileSystem
 import okio.Path
-import org.cqfn.save.core.logging.logDebug
-import org.cqfn.save.core.plugin.PluginConfig
-import org.cqfn.save.plugin.warn.WarnPluginConfig
-import org.cqfn.save.plugins.fix.FixPluginConfig
 
 private typealias WarningsList = MutableList<Pair<Int, String>>
 
@@ -37,8 +36,8 @@ class FixAndWarnPlugin(
     private fun initOrUpdateConfigs() {
         fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().fix
         warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().warn
-        fixPlugin = FixPlugin(createTestConfigForPlugins(fixPluginConfig),testFiles)
-        warnPlugin = WarnPlugin(createTestConfigForPlugins(warnPluginConfig),testFiles)
+        fixPlugin = FixPlugin(createTestConfigForPlugins(fixPluginConfig), testFiles)
+        warnPlugin = WarnPlugin(createTestConfigForPlugins(warnPluginConfig), testFiles)
     }
 
     /**
@@ -57,7 +56,6 @@ class FixAndWarnPlugin(
     )
 
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
-        println("\n\n")
         testConfig.validateAndSetDefaults()
         // Need to update private fields after validation
         initOrUpdateConfigs()
@@ -66,7 +64,9 @@ class FixAndWarnPlugin(
 
         // Remove (in place) warnings from test files before fix plugin execution
         val filesAndTheirWarningsMap = removeWarningsFromExpectedFiles(expectedFiles)
+
         val fixTestResults = fixPlugin.handleFiles(files).toList()
+
         // Fill back original data with warnings
         filesAndTheirWarningsMap.forEach { (filePath, warningsList) ->
             val fileData = fs.readLines(filePath) as MutableList
@@ -86,7 +86,6 @@ class FixAndWarnPlugin(
         // TODO: However it's required changes in warn plugin logic (it's should be able to compare expected and actual warnings from different places),
         // TODO: this probably could be obtained after https://github.com/cqfn/save/issues/164,
         val warnTestResults = warnPlugin.handleFiles(expectedFiles.map { listOf(it) }).toList()
-        println("\n\n")
         return fixTestResults.asSequence() + warnTestResults.asSequence()
     }
 
