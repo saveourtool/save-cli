@@ -76,5 +76,6 @@ private inline fun <reified T : PluginConfig> Path.createPluginConfig(
 fun createPluginConfigListFromToml(testConfigPath: Path): List<PluginConfig> =
         TomlParser(KtomlConf())
             .readAndParseFile(testConfigPath.toString())
-            .getRealTomlTables().filter { !it.fullTableName.contains(".") }  // FixMe
+            // Current function returns all tables (including subtables), however we need to extract only top level sections
+            .getRealTomlTables().filter { it.level == 0 }
             .map { testConfigPath.testConfigFactory(it) }
