@@ -44,7 +44,18 @@ kotlin {
         saveTarget.forEach {
             getByName("${it.name}Main").dependsOn(nativeMain)
         }
-        val commonTest by getting
+
+        val commonTest by getting {
+            dependencies {
+                implementation(project(":save-common"))
+                implementation(project(":save-reporters"))
+                implementation(kotlin("test-common"))
+                implementation(kotlin("test-annotations-common"))
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.Kotlinx.serialization}")
+            }
+        }
+
+        //tasks.getByName("commonTest").dependsOn("linkReleaseExecutableMultiplatform")
 
         val jvmTest by getting {
             dependencies {

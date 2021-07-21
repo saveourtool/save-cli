@@ -1,4 +1,4 @@
-package org.cqfn.save.core
+package org.cqfn.save.cli
 
 import org.cqfn.save.core.files.readFile
 import org.cqfn.save.core.result.Pass
@@ -12,8 +12,11 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import okio.FileSystem
 
 class IntegrationTest {
+    private val fs = FileSystem.SYSTEM
+
     @Test
     fun `examples test`() {
         val examplesDir = "../examples/kotlin-diktat/"
