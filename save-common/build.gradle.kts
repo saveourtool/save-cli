@@ -11,6 +11,7 @@ kotlin {
         compilations.all {
             kotlinOptions {
                 jvmTarget = "11"
+                freeCompilerArgs = freeCompilerArgs + "-Xjvm-default=enable"
             }
         }
     }
