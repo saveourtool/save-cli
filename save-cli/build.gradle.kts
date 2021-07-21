@@ -55,8 +55,6 @@ kotlin {
             }
         }
 
-        //tasks.getByName("commonTest").dependsOn("linkReleaseExecutableMultiplatform")
-
         val jvmTest by getting {
             dependencies {
                 implementation(kotlin("test-junit5"))
@@ -72,6 +70,12 @@ kotlin {
             os.isMacOsX -> dependsOn(tasks.getByName("linkReleaseExecutableMacosX64"))
         }
     }
+
+    // Integration tests should be able to have access to binary during the execution
+    tasks.getByName("jvmTest").dependsOn("linkReleaseExecutableMultiplatform")
+    tasks.getByName("linuxX64Test").dependsOn("linkReleaseExecutableMultiplatform")
+    tasks.getByName("macosX64Test").dependsOn("linkReleaseExecutableMultiplatform")
+    tasks.getByName("mingwX64Test").dependsOn("linkReleaseExecutableMultiplatform")
 }
 
 configurePublishing()
