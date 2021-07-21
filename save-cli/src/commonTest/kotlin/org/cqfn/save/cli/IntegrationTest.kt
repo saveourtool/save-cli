@@ -29,6 +29,12 @@ class IntegrationTest {
             else -> return
         } + "/releaseExecutable"
 
+        println(fs.list(".".toPath()))
+        println(fs.list("../save-cli/".toPath()))
+        println(fs.list("../save-cli/build/".toPath()))
+        println(fs.list("../save-cli/build/bin/".toPath()))
+        println(fs.list("../save-cli/build/bin/linuxX64".toPath()))
+        println(fs.list("../save-cli/build/bin/linuxX64/debugExecutable".toPath()))
         val saveExecutableFiles = fs.list(binDir.toPath())
         // Binary should be created at this moment
         assertTrue(saveExecutableFiles.isNotEmpty())
