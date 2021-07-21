@@ -7,7 +7,13 @@ plugins {
 }
 
 kotlin {
-    jvm()
+    jvm {
+        compilations.all {
+            kotlinOptions {
+                freeCompilerArgs = freeCompilerArgs + "-Xjvm-default=all"
+            }
+        }
+    }
     linuxX64()
     mingwX64()
     macosX64()
