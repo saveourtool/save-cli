@@ -85,8 +85,8 @@ class FixAndWarnPlugin(
         // TODO: then warn plugin should look at the fix plugin output for actual warnings, and not execute command one more time.
         // TODO: However it's required changes in warn plugin logic (it's should be able to compare expected and actual warnings from different places),
         // TODO: this probably could be obtained after https://github.com/cqfn/save/issues/164,
-        val warnTestResults = warnPlugin.handleFiles(expectedFiles.map { listOf(it) }).toList()
-        return fixTestResults.asSequence() + warnTestResults.asSequence()
+        val warnTestResults = warnPlugin.handleFiles(expectedFiles.map { listOf(it) })
+        return fixTestResults.asSequence() + warnTestResults
     }
 
     override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {

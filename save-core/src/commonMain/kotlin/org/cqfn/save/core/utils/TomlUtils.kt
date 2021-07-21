@@ -17,10 +17,16 @@ import com.akuleshov7.ktoml.KtomlConf
 import com.akuleshov7.ktoml.deserializeTomlFile
 import com.akuleshov7.ktoml.exceptions.KtomlException
 import com.akuleshov7.ktoml.parsers.TomlParser
+import com.akuleshov7.ktoml.parsers.node.TomlNode
 import com.akuleshov7.ktoml.parsers.node.TomlTable
 import okio.Path
 
 import kotlinx.serialization.ExperimentalSerializationApi
+
+/**
+ * @return all top level table nodes
+ */
+fun TomlNode.getTopLevelTomlTables() = this.getRealTomlTables().filter { it.level == 0 }
 
 private fun Path.testConfigFactory(table: TomlTable) =
         when (table.fullTableName.uppercase()) {
@@ -76,6 +82,6 @@ private inline fun <reified T : PluginConfig> Path.createPluginConfig(
 fun createPluginConfigListFromToml(testConfigPath: Path): List<PluginConfig> =
         TomlParser(KtomlConf())
             .readAndParseFile(testConfigPath.toString())
-            // Current function returns all tables (including subtables), however we need to extract only top level sections
-            .getRealTomlTables().filter { it.level == 0 }
+            // We need to extract only top level sections, since plugins could have own subtables
+            .getTopLevelTomlTables()
             .map { testConfigPath.testConfigFactory(it) }
