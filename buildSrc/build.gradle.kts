@@ -9,7 +9,7 @@ repositories {
 dependencies {
     implementation("org.cqfn.diktat:diktat-gradle-plugin:1.0.0-rc.2")
     implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.17.1")
-    runtimeOnly(kotlin("gradle-plugin", "1.5.0"))
+    runtimeOnly(kotlin("gradle-plugin", "1.5.21"))
     implementation("io.github.gradle-nexus:publish-plugin:1.1.0")
     implementation("org.ajoberstar.reckon:reckon-gradle:0.13.0")
     implementation("org.ajoberstar.grgit:grgit-core:4.1.0")
