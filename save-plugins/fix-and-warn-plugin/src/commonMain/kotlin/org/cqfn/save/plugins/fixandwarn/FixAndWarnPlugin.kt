@@ -5,6 +5,7 @@ import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.plugin.PluginConfig
+import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.plugin.warn.WarnPlugin
 import org.cqfn.save.plugin.warn.WarnPluginConfig
@@ -70,8 +71,20 @@ class FixAndWarnPlugin(
 
         val fixTestResults = fixPlugin.handleFiles(files).toList()
 
+        val filesAndTheirWarningsMapWithoutFail = filesAndTheirWarningsMap.filter { filesAndTheir ->
+            fixTestResults.filter { fixResult ->
+                fixResult.status !is Fail
+            }.map { it.resources.toList()[0] }.contains(filesAndTheir.key)
+        }
+
+        val expectedFilesWithoutFail = expectedFiles.filter { expectedFile ->
+            fixTestResults.filter { fixResult ->
+                fixResult.status !is Fail
+            }.map { it.resources.toList()[0] }.contains(expectedFile)
+        }
+
         // Fill back original data with warnings
-        filesAndTheirWarningsMap.forEach { (filePath, warningsList) ->
+        filesAndTheirWarningsMapWithoutFail.forEach { (filePath, warningsList) ->
             val fileData = fs.readLines(filePath) as MutableList
             // Append warnings into appropriate place
             warningsList.forEach { (line, warningMsg) ->
@@ -88,7 +101,7 @@ class FixAndWarnPlugin(
         // TODO: then warn plugin should look at the fix plugin output for actual warnings, and not execute command one more time.
         // TODO: However it's required changes in warn plugin logic (it's should be able to compare expected and actual warnings from different places),
         // TODO: this probably could be obtained after https://github.com/cqfn/save/issues/164,
-        val warnTestResults = warnPlugin.handleFiles(expectedFiles.map { listOf(it) })
+        val warnTestResults = warnPlugin.handleFiles(expectedFilesWithoutFail.map { listOf(it) })
         return fixTestResults.asSequence() + warnTestResults
     }
 
