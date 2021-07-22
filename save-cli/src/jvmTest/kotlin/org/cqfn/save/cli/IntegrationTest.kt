@@ -51,7 +51,12 @@ class IntegrationTest {
         if (fs.exists(reportFile)) {
             fs.delete(reportFile)
         }
-        val runCmd = if (isCurrentOsWindows()) "" else "./"
+
+        if (!isCurrentOsWindows()) {
+            ProcessBuilder(true, fs).exec("cd $examplesDir && sudo sed -i.bak 's/\\r$//' run.sh", null)
+        }
+
+        val runCmd = if (isCurrentOsWindows()) "" else "sudo ./"
         val saveFlags = " --result-output FILE --report-type JSON --test-root-path ."
 
         // Execute the script from examples
