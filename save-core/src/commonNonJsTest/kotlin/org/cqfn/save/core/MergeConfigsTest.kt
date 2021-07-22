@@ -156,7 +156,7 @@ class MergeConfigsTest {
         // stub, since tearDown should delete it anyway
         createTomlFiles()
 
-        val toml1 = "src/commonTest/resources/merge_configs/save.toml"
+        val toml1 = "src/commonNonJsTest/resources/merge_configs/save.toml"
         val configList1 = createPluginConfigListFromToml(toml1.toPath())
 
         val parentGeneralConfig = configList1.filterIsInstance<GeneralConfig>().first()
@@ -165,7 +165,7 @@ class MergeConfigsTest {
         assertEquals("Tag", parentGeneralConfig.tags)
         assertEquals(null, parentWarnConfig.execFlags)
 
-        val toml2 = "src/commonTest/resources/merge_configs/inner/save.toml"
+        val toml2 = "src/commonNonJsTest/resources/merge_configs/inner/save.toml"
         val configList2 = createPluginConfigListFromToml(toml2.toPath())
 
         val childGeneralConfig = configList2.filterIsInstance<GeneralConfig>().first()
