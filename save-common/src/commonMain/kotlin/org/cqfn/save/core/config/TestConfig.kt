@@ -25,7 +25,7 @@ data class TestConfig(
     val location: Path,
     val parentConfig: TestConfig?,
     val pluginConfigs: MutableList<PluginConfig> = mutableListOf(),
-    private val fs: FileSystem = FileSystem.SYSTEM,
+    val fs: FileSystem,
 ) {
     /**
      * Getting all neighbour configs to the current config (i.e. all configs with the same parent config)

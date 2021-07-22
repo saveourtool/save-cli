@@ -1,11 +1,14 @@
 package org.cqfn.save.core
 
+import okio.FileSystem
 import org.cqfn.save.core.config.ReportType
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.defaultConfig
 import kotlin.test.Test
 
 class PerformAnalysisTest {
+    private val fs: FileSystem = FileSystem.SYSTEM
+
     @Test
     fun `detect plugins`() {
         val saveProperties = SaveProperties(
@@ -14,7 +17,7 @@ class PerformAnalysisTest {
         )
         // In this test we need to merge with emulated empty save.properties file in aim to use default values,
         // since initially all fields are null
-        Save(saveProperties.mergeConfigWithPriorityToThis(SaveProperties())).performAnalysis()
+        Save(saveProperties.mergeConfigWithPriorityToThis(SaveProperties()), fs).performAnalysis()
     }
 
     @Test
@@ -24,7 +27,7 @@ class PerformAnalysisTest {
             reportType = ReportType.PLAIN,
             testFiles = listOf("MyTest.java")  // fixme: should support full path
         )
-        Save(saveProperties.mergeConfigWithPriorityToThis(defaultConfig())).performAnalysis()
+        Save(saveProperties.mergeConfigWithPriorityToThis(defaultConfig()), fs).performAnalysis()
         // fixme: check that only a single test has been executed
     }
 }

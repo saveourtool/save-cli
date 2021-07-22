@@ -1,5 +1,6 @@
 package org.cqfn.save.core.utils
 
+import okio.FileSystem
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -10,7 +11,7 @@ import kotlin.test.assertEquals
     "MISSING_KDOC_ON_FUNCTION"
 )
 class ProcessBuilderInternalTest {
-    private val processBuilder = ProcessBuilder(useInternalRedirections = true)
+    private val processBuilder = ProcessBuilder(useInternalRedirections = true, FileSystem.SYSTEM)
 
     @Test
     fun `check stderr`() {

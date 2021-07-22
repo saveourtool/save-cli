@@ -4,6 +4,7 @@
 
 package org.cqfn.save.core
 
+import okio.FileSystem
 import org.cqfn.save.core.utils.ProcessBuilder
 import org.cqfn.save.core.utils.ProcessBuilder.Companion.processCommandWithEcho
 import org.cqfn.save.core.utils.ProcessExecutionException
@@ -13,7 +14,7 @@ import kotlin.test.assertEquals
 
 @Suppress("INLINE_CLASS_CAN_BE_USED")
 class ProcessBuilderTest {
-    private val processBuilder = ProcessBuilder(useInternalRedirections = true)
+    private val processBuilder = ProcessBuilder(useInternalRedirections = true, FileSystem.SYSTEM)
 
     @Test
     fun `empty command`() {

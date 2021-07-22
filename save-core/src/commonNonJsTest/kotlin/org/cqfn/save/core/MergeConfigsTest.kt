@@ -52,8 +52,8 @@ class MergeConfigsTest {
     @Test
     fun `merge general configs`() {
         createTomlFiles()
-        val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1))
-        val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2))
+        val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1), fs)
+        val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2), fs)
 
         config2.mergeConfigWithParents()
 
@@ -69,8 +69,8 @@ class MergeConfigsTest {
     @Test
     fun `merge two incomplete configs`() {
         createTomlFiles()
-        val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig1))
-        val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2))
+        val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig1), fs)
+        val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2), fs)
 
         config2.mergeConfigWithParents()
 
@@ -88,8 +88,8 @@ class MergeConfigsTest {
     @Test
     fun `merge two incomplete configs 2`() {
         createTomlFiles()
-        val config1 = TestConfig(toml1, null, mutableListOf())
-        val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, warnConfig1))
+        val config1 = TestConfig(toml1, null, mutableListOf(), fs)
+        val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, warnConfig1), fs)
 
         config2.mergeConfigWithParents()
 
@@ -105,8 +105,8 @@ class MergeConfigsTest {
     @Test
     fun `merge two configs with different fields`() {
         createTomlFiles()
-        val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig2, fixConfig1))
-        val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, warnConfig3, fixConfig2))
+        val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig2, fixConfig1), fs)
+        val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, warnConfig3, fixConfig2), fs)
 
         config2.mergeConfigWithParents()
 
@@ -129,10 +129,10 @@ class MergeConfigsTest {
     @Test
     fun `merge configs with many parents`() {
         createTomlFiles()
-        val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig1, fixConfig1))
-        val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, warnConfig2, fixConfig2))
-        val config3 = TestConfig(toml3, config2, mutableListOf(generalConfig3, warnConfig3, fixConfig3))
-        val config4 = TestConfig(toml4, config3, mutableListOf(generalConfig4, warnConfig4, fixConfig4))
+        val config1 = TestConfig(toml1, null, mutableListOf(generalConfig1, warnConfig1, fixConfig1), fs)
+        val config2 = TestConfig(toml2, config1, mutableListOf(generalConfig2, warnConfig2, fixConfig2), fs)
+        val config3 = TestConfig(toml3, config2, mutableListOf(generalConfig3, warnConfig3, fixConfig3), fs)
+        val config4 = TestConfig(toml4, config3, mutableListOf(generalConfig4, warnConfig4, fixConfig4), fs)
 
         config4.mergeConfigWithParents()
 
@@ -174,8 +174,8 @@ class MergeConfigsTest {
         assertEquals("", childGeneralConfig.tags)
         assertEquals(null, childWarnConfig.execFlags)
 
-        val testConfig1 = TestConfig(toml1.toPath(), null, configList1.toMutableList())
-        val testConfig2 = TestConfig(toml2.toPath(), testConfig1, configList2.toMutableList())
+        val testConfig1 = TestConfig(toml1.toPath(), null, configList1.toMutableList(), fs)
+        val testConfig2 = TestConfig(toml2.toPath(), testConfig1, configList2.toMutableList(), fs)
 
         val mergedTestConfig = testConfig2.mergeConfigWithParents()
         testConfig2.validateAndSetDefaults()

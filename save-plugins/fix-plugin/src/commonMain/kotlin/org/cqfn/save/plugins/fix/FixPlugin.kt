@@ -29,9 +29,11 @@ import okio.Path
 class FixPlugin(
     testConfig: TestConfig,
     testFiles: List<String>,
+    fileSystem: FileSystem,
     useInternalRedirections: Boolean = true) : Plugin(
     testConfig,
     testFiles,
+    fileSystem,
     useInternalRedirections) {
     private val diffGenerator = DiffRowGenerator.create()
         .showInlineDiffs(true)
@@ -70,8 +72,8 @@ class FixPlugin(
             val stderr = executionResult.stderr
 
             pathCopyMap.map { (expected, testCopy) ->
-                val fixedLines = FileSystem.SYSTEM.readLines(testCopy)
-                val expectedLines = FileSystem.SYSTEM.readLines(expected)
+                val fixedLines = fs.readLines(testCopy)
+                val expectedLines = fs.readLines(expected)
 
                 val test = pathMap.first { (_, test) -> test.name == testCopy.name }.second
 
@@ -113,7 +115,7 @@ class FixPlugin(
         val resourceNameTest = fixPluginConfig.resourceNameTest
         val resourceNameExpected = fixPluginConfig.resourceNameExpected
         return resourceDirectories
-            .map { FileSystem.SYSTEM.list(it) }
+            .map { fs.list(it) }
             .flatMap { files ->
                 files.groupBy {
                     val matchResult = (regex).matchEntire(it.name)

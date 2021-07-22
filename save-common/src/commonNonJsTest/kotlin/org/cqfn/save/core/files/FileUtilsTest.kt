@@ -56,7 +56,7 @@ class FileUtilsTest {
         val directory23 = (directory13 / "directory23").also(fs::createDirectory)
         val file231 = fs.createFile(directory23 / "file231")
 
-        val result = directory1.findAllFilesMatching { file ->
+        val result = directory1.findAllFilesMatching(fs) { file ->
             file.name.startsWith("file")
         }
             .toList()
@@ -81,7 +81,7 @@ class FileUtilsTest {
         val directory23 = (directory13 / "directory23").also(fs::createDirectory)
         fs.createFile(directory23 / "file33")
 
-        val result = directory1.findDescendantDirectoriesBy { dir ->
+        val result = directory1.findDescendantDirectoriesBy(fs) { dir ->
             fs.list(dir).none { fs.metadata(it).isRegularFile }
         }
             .toList()
@@ -97,7 +97,7 @@ class FileUtilsTest {
         val testFile = fs.createFile(tmpDir / "Test1Test.java")
 
         // Should be nothing, since they located in the same dir
-        assertEquals("", testFile.createRelativePathToTheRoot(config))
+        assertEquals("", testFile.createRelativePathToTheRoot(fs, config))
     }
 
     @Test
@@ -118,15 +118,15 @@ class FileUtilsTest {
 
         val separator = Path.DIRECTORY_SEPARATOR
 
-        assertEquals("", testFile1.createRelativePathToTheRoot(config1))
-        assertEquals("dir2$separator", testFile2.createRelativePathToTheRoot(config1))
-        assertEquals("dir2${separator}dir3$separator", testFile3.createRelativePathToTheRoot(config1))
-        assertEquals("dir2${separator}dir3${separator}dir33$separator", testFile33.createRelativePathToTheRoot(config1))
+        assertEquals("", testFile1.createRelativePathToTheRoot(fs, config1))
+        assertEquals("dir2$separator", testFile2.createRelativePathToTheRoot(fs, config1))
+        assertEquals("dir2${separator}dir3$separator", testFile3.createRelativePathToTheRoot(fs, config1))
+        assertEquals("dir2${separator}dir3${separator}dir33$separator", testFile33.createRelativePathToTheRoot(fs, config1))
 
-        assertEquals("dir33$separator", testFile33.createRelativePathToTheRoot(config3))
-        assertEquals("dir3${separator}dir33$separator", testFile33.createRelativePathToTheRoot(config2))
+        assertEquals("dir33$separator", testFile33.createRelativePathToTheRoot(fs, config3))
+        assertEquals("dir3${separator}dir33$separator", testFile33.createRelativePathToTheRoot(fs, config2))
         val dir4 = tmpDir / "dir2" / "dir3" / "dir4"
-        assertEquals("dir2${separator}dir3$separator", dir4.createRelativePathToTheRoot(config1))
-        assertEquals("dir2${separator}dir3$separator", dir4.createRelativePathToTheRoot(tmpDir))
+        assertEquals("dir2${separator}dir3$separator", dir4.createRelativePathToTheRoot(fs, config1))
+        assertEquals("dir2${separator}dir3$separator", dir4.createRelativePathToTheRoot(fs, tmpDir))
     }
 }

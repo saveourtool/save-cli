@@ -47,12 +47,12 @@ class StdStreamsSink(private val outputType: OutputStreamType) : Sink {
  * @param condition a condition to match
  * @return a list of files, grouped by directory
  */
-fun Path.findAllFilesMatching(condition: (Path) -> Boolean): List<List<Path>> = FileSystem.SYSTEM.list(this)
-    .partition { FileSystem.SYSTEM.metadata(it).isDirectory }
+fun Path.findAllFilesMatching(fs: FileSystem, condition: (Path) -> Boolean): List<List<Path>> = fs.list(this)
+    .partition { fs.metadata(it).isDirectory }
     .let { (directories, files) ->
         val filesInCurrentDir = files.filter(condition).takeIf { it.isNotEmpty() }
         val resultFromNestedDirs = directories.flatMap {
-            it.findAllFilesMatching(condition)
+            it.findAllFilesMatching(fs, condition)
         }
         filesInCurrentDir?.let {
             listOf(it) + resultFromNestedDirs
@@ -63,11 +63,11 @@ fun Path.findAllFilesMatching(condition: (Path) -> Boolean): List<List<Path>> = 
  * @param condition a condition to match
  * @return a matching child file or null
  */
-fun Path.findChildByOrNull(condition: (Path) -> Boolean): Path? {
+fun Path.findChildByOrNull(fs: FileSystem, condition: (Path) -> Boolean): Path? {
     // Some top-level directories, like /tmp and /var in Linux and MacOS are actually a sticky directories
     // Although, in Linux all is ok, but `okio` can't check it in MacOS by `isDirectory`, so we use `!isRegularFile` instead
-    require(!FileSystem.SYSTEM.metadata(this).isRegularFile)
-    return FileSystem.SYSTEM.list(this).firstOrNull(condition)
+    require(!fs.metadata(this).isRegularFile)
+    return fs.list(this).firstOrNull(condition)
 }
 
 /**
@@ -137,16 +137,16 @@ fun FileSystem.readFile(path: Path): String = this.read(path) {
  * @param directoryPredicate a predicate to match directories
  * @return a sequence of matching directories
  */
-fun Path.findDescendantDirectoriesBy(withSelf: Boolean = false, directoryPredicate: (Path) -> Boolean): Sequence<Path> =
+fun Path.findDescendantDirectoriesBy(fs: FileSystem, withSelf: Boolean = false, directoryPredicate: (Path) -> Boolean): Sequence<Path> =
         sequence {
             if (withSelf) {
                 yield(this@findDescendantDirectoriesBy)
             }
-            FileSystem.SYSTEM.list(this@findDescendantDirectoriesBy)
+            fs.list(this@findDescendantDirectoriesBy)
                 .asSequence()
-                .filter { FileSystem.SYSTEM.metadata(it).isDirectory }
+                .filter { fs.metadata(it).isDirectory }
                 .filter(directoryPredicate)
-                .flatMap { it.findDescendantDirectoriesBy(withSelf = true, directoryPredicate) }
+                .flatMap { it.findDescendantDirectoriesBy(fs, withSelf = true, directoryPredicate) }
                 .let { yieldAll(it) }
         }
 
@@ -159,8 +159,8 @@ fun Path.findDescendantDirectoriesBy(withSelf: Boolean = false, directoryPredica
  * @return string representation of relative path
  */
 @Suppress("TooGenericExceptionCaught")
-fun Path.createRelativePathToTheRoot(rootPath: Path) = try {
-    createRelativePathFromThisToTheRoot(this, rootPath)
+fun Path.createRelativePathToTheRoot(fs: FileSystem, rootPath: Path) = try {
+    createRelativePathFromThisToTheRoot(fs, this, rootPath)
 } catch (ex: NullPointerException) {
     logError("Incorrect usage of `createRelativePathToTheRoot`: rootPath should be hierarchically higher than [this], " +
             "also it should be in the same branch of the file tree")
@@ -170,7 +170,7 @@ fun Path.createRelativePathToTheRoot(rootPath: Path) = try {
 /**
  * @return if provided path is file then return parent directory, otherwise return itself
  */
-fun Path.getCurrentDirectory() = if (FileSystem.SYSTEM.metadata(this).isRegularFile) {
+fun Path.getCurrentDirectory(fs: FileSystem) = if (fs.metadata(this).isRegularFile) {
     this.parent!!
 } else {
     this
@@ -183,8 +183,8 @@ fun Path.getCurrentDirectory() = if (FileSystem.SYSTEM.metadata(this).isRegularF
  * @param rootPath root of the file tree, relates to which path will be created
  * @return string representation of relative path
  */
-private fun createRelativePathFromThisToTheRoot(currentPath: Path, rootPath: Path): String {
-    val rootDirectory = rootPath.getCurrentDirectory()
+private fun createRelativePathFromThisToTheRoot(fs: FileSystem, currentPath: Path, rootPath: Path): String {
+    val rootDirectory = rootPath.getCurrentDirectory(fs)
     var parentDirectory = currentPath.parent!!
 
     // Files located at the same directory, no need additional operations

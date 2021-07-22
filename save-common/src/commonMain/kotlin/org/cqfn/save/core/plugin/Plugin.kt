@@ -15,21 +15,18 @@ import okio.Path
  * Plugin that can be injected into SAVE during execution. Plugins accept contents of configuration file and then perform some work.
  * @property testConfig
  * @property testFiles a list of files (test resources or save.toml configs)
+ * @property fs describes the current file system
  * @property useInternalRedirections whether to redirect stdout/stderr for internal purposes
  */
 abstract class Plugin(
     open val testConfig: TestConfig,
     protected val testFiles: List<String>,
+    protected val fs: FileSystem,
     private val useInternalRedirections: Boolean) {
-    /**
-     * Singleton, that describes the current file system
-     */
-    protected val fs = FileSystem.SYSTEM
-
     /**
      * Instance that is capable of executing processes
      */
-    val pb = ProcessBuilder(useInternalRedirections)
+    val pb = ProcessBuilder(useInternalRedirections, fs)
 
     /**
      * Perform plugin's work.
@@ -64,7 +61,7 @@ abstract class Plugin(
      * @return a sequence of files, grouped by test
      */
     fun discoverTestFiles(root: Path): Sequence<List<Path>> {
-        val rawTestFiles = rawDiscoverTestFiles(root.resourceDirectories())
+        val rawTestFiles = rawDiscoverTestFiles(root.resourceDirectories(fs))
         return if (testFiles.isNotEmpty()) {
             rawTestFiles.filter { resourcesGroup ->
                 // test can be specified by the name of one of it's files
@@ -136,7 +133,7 @@ abstract class Plugin(
      */
     protected fun constructPathForCopyOfTestFile(dirName: String, path: Path): Path {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / dirName)
-        val relativePath = path.createRelativePathToTheRoot(testConfig.getRootConfig().location)
+        val relativePath = path.createRelativePathToTheRoot(fs, testConfig.getRootConfig().location)
         return tmpDir / relativePath / path.name
     }
 
@@ -148,7 +145,7 @@ abstract class Plugin(
      * @param fs a [FileSystem] which is used to traverse the directory hierarchy
      * @return a sequence of directories possibly containing this plugin's test resources
      */
-    fun Path.resourceDirectories(fs: FileSystem = FileSystem.SYSTEM): Sequence<Path> = findDescendantDirectoriesBy(true) { file ->
+    fun Path.resourceDirectories(fs: FileSystem): Sequence<Path> = findDescendantDirectoriesBy(fs, true) { file ->
         // this matches directories which contain their own SAVE config
         fs.metadata(file).isRegularFile || fs.list(file).none { it.isSaveTomlConfig() }
     }

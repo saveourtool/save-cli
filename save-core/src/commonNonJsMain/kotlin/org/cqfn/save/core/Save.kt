@@ -35,10 +35,9 @@ import okio.buffer
  */
 @Suppress("INLINE_CLASS_CAN_BE_USED")  // todo: remove when there are >1 constructor parameters
 class Save(
-    private val saveProperties: SaveProperties
+    private val saveProperties: SaveProperties,
+    private val fs: FileSystem,
 ) {
-    private val fs = FileSystem.SYSTEM
-
     init {
         isDebugEnabled = saveProperties.debug ?: false
     }
@@ -60,7 +59,7 @@ class Save(
 
         reporter.beforeAll()
         // get all toml configs in file system
-        ConfigDetector()
+        ConfigDetector(fs)
             .configFromFile(rootTestConfigPath)
             .getAllTestConfigsForFiles(requestedConfigs)
             .forEach { testConfig ->
@@ -96,7 +95,7 @@ class Save(
             plugin.execute()
                 .onEach { event ->
                     // calculate relative paths, because reporters don't need paths higher than root dir
-                    val resourcesRelative = event.resources.map { it.createRelativePathToTheRoot(rootDir).toPath() / it.name }
+                    val resourcesRelative = event.resources.map { it.createRelativePathToTheRoot(fs, rootDir).toPath() / it.name }
                     reporter.onEvent(event.copy(resources = resourcesRelative))
                 }
                 .forEach(this::handleResult)

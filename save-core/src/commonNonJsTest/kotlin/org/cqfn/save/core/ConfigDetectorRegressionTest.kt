@@ -1,5 +1,6 @@
 package org.cqfn.save.core
 
+import okio.FileSystem
 import org.cqfn.save.core.files.ConfigDetector
 
 import okio.Path.Companion.toPath
@@ -8,6 +9,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ConfigDetectorRegressionTest {
+    private val fs: FileSystem = FileSystem.SYSTEM
+
     @Test
     fun `config detector regression test on directories`() {
         val baseDir = "../examples/discovery-test"
@@ -17,14 +20,14 @@ class ConfigDetectorRegressionTest {
             "$baseDir/highlevel/suite2/inner/save.toml"
         )
 
-        val actual1 = ConfigDetector()
+        val actual1 = ConfigDetector(fs)
             .configFromFile(baseDir.toPath())
             .getAllTestConfigs()
             .map { it.location.toString() }
 
         assertEquals(expected, actual1)
 
-        val actual2 = ConfigDetector()
+        val actual2 = ConfigDetector(fs)
             .configFromFile("$baseDir/save.toml".toPath())
             .getAllTestConfigs()
             .map { it.location.toString() }

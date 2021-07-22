@@ -11,7 +11,7 @@ import okio.Path
 /**
  * A class that is capable of discovering config files hierarchy.
  */
-class ConfigDetector {
+class ConfigDetector(private val fs: FileSystem) {
     /**
      * Try to create SAVE config file from [file].
      *
@@ -30,7 +30,7 @@ class ConfigDetector {
                 // discover all descendant configs of [config]
                 val descendantConfigLocations = config
                     .directory
-                    .findAllFilesMatching { it.isSaveTomlConfig() }
+                    .findAllFilesMatching(fs) { it.isSaveTomlConfig() }
                     .flatten()
 
                 createTestConfigs(descendantConfigLocations, mutableListOf(config))
@@ -57,6 +57,7 @@ class ConfigDetector {
                         TestConfig(
                             path,
                             parentConfig,
+                            fs = fs,
                         )
                     )
                 }
@@ -69,7 +70,7 @@ class ConfigDetector {
      */
     private fun discoverConfigWithParents(file: Path): TestConfig? = when {
         // if provided file is a directory, try to find save.toml inside it
-        FileSystem.SYSTEM.metadata(file).isDirectory -> getTestConfigFromDirectory(file)
+        fs.metadata(file).isDirectory -> getTestConfigFromDirectory(file)
         // if provided file is save.toml, create config from it
         file.isSaveTomlConfig() -> getTestConfigFromTomlFile(file)
         // if provided file is an individual test file, we search a config file in this and parent directories
@@ -79,13 +80,13 @@ class ConfigDetector {
 
     private fun getTestConfigFromSingleTestFile(file: Path) = file
         .parents()
-        .mapNotNull { it.findChildByOrNull { it.isSaveTomlConfig() } }
+        .mapNotNull { it.findChildByOrNull(fs) { it.isSaveTomlConfig() } }
         .firstOrNull()
         ?.let { discoverConfigWithParents(it) }
         .also { logDebug("Processing test config for a single test file: $file") }
 
     private fun getTestConfigFromDirectory(file: Path) = file
-        .findChildByOrNull { it.isSaveTomlConfig() }
+        .findChildByOrNull(fs) { it.isSaveTomlConfig() }
         ?.let { discoverConfigWithParents(it) }
         .also { logDebug("Processing test config from directory: $file") }
 
@@ -94,7 +95,7 @@ class ConfigDetector {
         val parentConfig = file.parents()
             .drop(1)  // because immediate parent already contains [this] config
             .mapNotNull { parentDir ->
-                parentDir.findChildByOrNull {
+                parentDir.findChildByOrNull(fs) {
                     it.isSaveTomlConfig()
                 }
             }
@@ -105,7 +106,8 @@ class ConfigDetector {
 
         return TestConfig(
             file,
-            parentConfig
+            parentConfig,
+            fs = fs,
         )
     }
 }

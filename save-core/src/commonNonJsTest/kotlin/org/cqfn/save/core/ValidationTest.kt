@@ -1,5 +1,6 @@
 package org.cqfn.save.core
 
+import okio.FileSystem
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.plugin.warn.WarnPluginConfig
@@ -9,11 +10,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ValidationTest {
+    private val fs: FileSystem = FileSystem.SYSTEM
+
     @Test
     fun `set defaults to general section`() {
         createTomlFiles()
         val generalConfig = GeneralConfig("exeCmd", tags = "Tag11, Tag12", description = "Description1", suiteName = "suiteName1")
-        val config = TestConfig(toml1, null, mutableListOf(generalConfig))
+        val config = TestConfig(toml1, null, mutableListOf(generalConfig), fs)
 
         config.validateAndSetDefaults()
 
@@ -29,7 +32,7 @@ class ValidationTest {
     fun `invalid general section`() {
         createTomlFiles()
         val generalConfig = GeneralConfig()
-        val config = TestConfig(toml1, null, mutableListOf(generalConfig))
+        val config = TestConfig(toml1, null, mutableListOf(generalConfig), fs)
         generalConfig.configLocation = config.location
         try {
             config.validateAndSetDefaults()
@@ -49,7 +52,7 @@ class ValidationTest {
     fun `set defaults to warn section`() {
         createTomlFiles()
         val warnConfig = WarnPluginConfig(execFlags = "execFlags", messageCaptureGroup = 4)
-        val config = TestConfig(toml1, null, mutableListOf(warnConfig))
+        val config = TestConfig(toml1, null, mutableListOf(warnConfig), fs)
 
         config.validateAndSetDefaults()
 
@@ -77,7 +80,7 @@ class ValidationTest {
     fun `validate warn section`() {
         createTomlFiles()
         val warnConfig = WarnPluginConfig(execFlags = "execFlags", warningTextHasLine = true, warningTextHasColumn = false)
-        val config = TestConfig(toml1, null, mutableListOf(warnConfig))
+        val config = TestConfig(toml1, null, mutableListOf(warnConfig), fs)
 
         config.validateAndSetDefaults()
 
@@ -95,7 +98,7 @@ class ValidationTest {
     fun `validate warn section 2`() {
         createTomlFiles()
         val warnConfig = WarnPluginConfig(execFlags = "execFlags", warningTextHasLine = false, lineCaptureGroup = 1)
-        val config = TestConfig(toml1, null, mutableListOf(warnConfig))
+        val config = TestConfig(toml1, null, mutableListOf(warnConfig), fs)
 
         config.validateAndSetDefaults()
 
@@ -113,7 +116,7 @@ class ValidationTest {
     fun `validate warn section 3`() {
         createTomlFiles()
         val warnConfig = WarnPluginConfig(execFlags = "execFlags", lineCaptureGroup = 5)
-        val config = TestConfig(toml1, null, mutableListOf(warnConfig))
+        val config = TestConfig(toml1, null, mutableListOf(warnConfig), fs)
 
         config.validateAndSetDefaults()
 
@@ -131,7 +134,7 @@ class ValidationTest {
     fun `validate warn section 4`() {
         createTomlFiles()
         val warnConfig = WarnPluginConfig(execFlags = "execFlags", lineCaptureGroup = -127)
-        val config = TestConfig(toml1, null, mutableListOf(warnConfig))
+        val config = TestConfig(toml1, null, mutableListOf(warnConfig), fs)
         warnConfig.configLocation = config.location
         try {
             config.validateAndSetDefaults()
@@ -151,7 +154,7 @@ class ValidationTest {
     fun `set defaults to fix section`() {
         createTomlFiles()
         val fixConfig = FixPluginConfig(execFlags = "execFlags")
-        val config = TestConfig(toml1, null, mutableListOf(fixConfig))
+        val config = TestConfig(toml1, null, mutableListOf(fixConfig), fs)
 
         config.validateAndSetDefaults()
 

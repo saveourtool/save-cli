@@ -19,7 +19,7 @@ class ConfigDetectorTest {
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / ConfigDetectorTest::class.simpleName!!).also {
         fs.createDirectory(it)
     }
-    private val configDetector = ConfigDetector()
+    private val configDetector = ConfigDetector(fs)
 
     @Test
     fun `should detect single file`() {
