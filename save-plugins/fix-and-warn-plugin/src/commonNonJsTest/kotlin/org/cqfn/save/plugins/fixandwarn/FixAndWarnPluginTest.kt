@@ -86,9 +86,11 @@ class FixAndWarnPluginTest {
                         )
                     ),
                     GeneralConfig("", "", "", "")
-                )
+                ),
+                fs,
             ),
             testFiles = emptyList(),
+            fs,
             useInternalRedirections = false
         ).execute().toList()
 
