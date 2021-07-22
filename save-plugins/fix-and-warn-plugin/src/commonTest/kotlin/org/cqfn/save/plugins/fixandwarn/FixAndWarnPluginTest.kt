@@ -101,7 +101,8 @@ class FixAndWarnPluginTest {
             ), results.first())
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
         assertTrue("Files should be identical") {
-            diff(fs.readLines(tmpDir / "Test1Test.java"), fs.readLines(expectedFile))
+            // Additionally ignore warnings in expected file
+            diff(fs.readLines(tmpDir / "Test1Test.java"), fs.readLines(expectedFile).filterNot { it.contains("warn") })
                 .deltas.isEmpty()
         }
         // Check WarnPlugin results
