@@ -1,4 +1,4 @@
-import org.cqfn.save.buildutils.configurePublishing
+
 
 plugins {
     `kotlin-library`

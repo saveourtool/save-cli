@@ -1,9 +1,7 @@
 
-import org.cqfn.save.buildutils.configurePublishing
 import org.cqfn.save.generation.configFilePath
 import org.cqfn.save.generation.generateConfigOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
-import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 
 plugins {
     `kotlin-library`
@@ -23,6 +21,9 @@ kotlin {
                 implementation(project(":save-plugins:fix-and-warn-plugin"))
                 implementation(project(":save-plugins:warn-plugin"))
             }
+        }
+        val nativeMain by getting {
+            dependsOn(commonNonJsMain)
         }
     }
 }

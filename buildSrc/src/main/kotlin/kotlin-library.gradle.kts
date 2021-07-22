@@ -21,15 +21,28 @@ kotlin {
     }
     val nativeTargets = listOf(linuxX64(), mingwX64(), macosX64())
 
+    /**
+     * Common structure for MPP libraries:
+     * common
+     * |
+     * nonJs
+     * / \
+     * native JVM
+     * / | \
+     * linux mingw macos
+     */
     sourceSets {
         all {
             languageSettings.useExperimentalAnnotation("kotlin.RequiresOptIn")
             languageSettings.useExperimentalAnnotation("okio.ExperimentalFileSystem")
         }
+        val commonMain by getting
+        val commonTest by getting
         val commonNonJsTest by creating {
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
+//                implementation("com.squareup.okio:okio-fakefilesystem-multiplatform:${Versions.okio}")
             }
         }
         val jvmTest by getting {
@@ -39,7 +52,17 @@ kotlin {
                 implementation("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
             }
         }
+        val nativeMain by creating {
+            dependsOn(commonMain)
+        }
+        val nativeTest by creating {
+            dependsOn(commonTest)
+        }
         nativeTargets.forEach {
+            getByName("${it.name}Main").dependsOn(nativeMain)
+        }
+        nativeTargets.forEach {
+            getByName("${it.name}Test").dependsOn(nativeTest)
             getByName("${it.name}Test").dependsOn(commonNonJsTest)
         }
     }
