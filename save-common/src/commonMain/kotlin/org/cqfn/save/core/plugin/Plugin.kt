@@ -61,7 +61,7 @@ abstract class Plugin(
      * @return a sequence of files, grouped by test
      */
     fun discoverTestFiles(root: Path): Sequence<List<Path>> {
-        val rawTestFiles = rawDiscoverTestFiles(root.resourceDirectories(fs))
+        val rawTestFiles = rawDiscoverTestFiles(root.resourceDirectories())
         return if (testFiles.isNotEmpty()) {
             rawTestFiles.filter { resourcesGroup ->
                 // test can be specified by the name of one of it's files
@@ -142,10 +142,9 @@ abstract class Plugin(
      * This takes into account, that if underlying directory contains it's own SAVE config,
      * then this plugin shouldn't touch these resources; it should be done by plugins from that config.
      *
-     * @param fs a [FileSystem] which is used to traverse the directory hierarchy
      * @return a sequence of directories possibly containing this plugin's test resources
      */
-    fun Path.resourceDirectories(fs: FileSystem): Sequence<Path> = findDescendantDirectoriesBy(true) { file ->
+    fun Path.resourceDirectories(): Sequence<Path> = findDescendantDirectoriesBy(true) { file ->
         // this matches directories which contain their own SAVE config
         fs.metadata(file).isRegularFile || fs.list(file).none { it.isSaveTomlConfig() }
     }
