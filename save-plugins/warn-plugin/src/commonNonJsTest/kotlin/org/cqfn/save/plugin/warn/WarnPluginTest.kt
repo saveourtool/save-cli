@@ -11,6 +11,7 @@ import org.cqfn.save.core.utils.isCurrentOsWindows
 import org.cqfn.save.plugin.warn.utils.extractWarning
 
 import okio.FileSystem
+import kotlin.random.Random
 
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -27,7 +28,7 @@ import kotlin.test.assertTrue
  */
 class WarnPluginTest {
     private val fs = FileSystem.SYSTEM
-    private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPluginTest::class.simpleName!!)
+    private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "${WarnPluginTest::class.simpleName!!}-${Random.nextInt()}")
     private val catCmd = if (isCurrentOsWindows()) "type" else "cat"
     private val defaultWarnConfig = WarnPluginConfig(
         "$catCmd ${tmpDir / "resource"} && set stub=",

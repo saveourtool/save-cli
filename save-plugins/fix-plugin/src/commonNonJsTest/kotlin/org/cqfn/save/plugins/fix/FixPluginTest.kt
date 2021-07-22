@@ -12,6 +12,7 @@ import org.cqfn.save.core.utils.isCurrentOsWindows
 
 import io.github.petertrr.diffutils.diff
 import okio.FileSystem
+import kotlin.random.Random
 
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -25,7 +26,7 @@ import kotlin.test.assertTrue
  */
 class FixPluginTest {
     private val fs = FileSystem.SYSTEM
-    private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPluginTest::class.simpleName!!).also {
+    private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "${FixPluginTest::class.simpleName!!}-${Random.nextInt()}").also {
         fs.createDirectory(it)
     }
 
