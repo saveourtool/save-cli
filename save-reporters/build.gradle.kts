@@ -14,9 +14,7 @@ kotlin {
             }
         }
     }
-    linuxX64()
-    mingwX64()
-    macosX64()
+    val nativeTargets = listOf(linuxX64(), mingwX64(), macosX64())
 
     sourceSets {
         all {
@@ -30,17 +28,21 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.Kotlinx.serialization}")
             }
         }
-        val commonTest by getting {
+        val commonNonJsTest by creating {
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
             }
         }
         val jvmTest by getting {
+            dependsOn(commonNonJsTest)
             dependencies {
                 implementation(kotlin("test-junit5"))
                 implementation("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
             }
+        }
+        nativeTargets.forEach {
+            getByName("${it.name}Test").dependsOn(commonNonJsTest)
         }
     }
 }
