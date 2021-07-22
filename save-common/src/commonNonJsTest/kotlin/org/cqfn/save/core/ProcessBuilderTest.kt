@@ -4,11 +4,13 @@
 
 package org.cqfn.save.core
 
-import okio.FileSystem
 import org.cqfn.save.core.utils.ProcessBuilder
 import org.cqfn.save.core.utils.ProcessBuilder.Companion.processCommandWithEcho
 import org.cqfn.save.core.utils.ProcessExecutionException
 import org.cqfn.save.core.utils.isCurrentOsWindows
+
+import okio.FileSystem
+
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

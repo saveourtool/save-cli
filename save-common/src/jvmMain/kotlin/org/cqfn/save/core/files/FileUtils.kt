@@ -1,3 +1,7 @@
+/**
+ * File Utils for JVM
+ */
+
 @file:JvmName("FileUtilsJvm")
 
 package org.cqfn.save.core.files

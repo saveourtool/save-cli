@@ -1,10 +1,12 @@
 package org.cqfn.save.core
 
-import okio.FileSystem
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.plugin.warn.WarnPluginConfig
 import org.cqfn.save.plugins.fix.FixPluginConfig
+
+import okio.FileSystem
+
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -20,6 +20,8 @@ import okio.Path.Companion.toPath
 import okio.Sink
 import okio.Timeout
 
+expect val fs: FileSystem
+
 /**
  * A simple okio [Sink] that writes it's input to stdout/stderr
  */
@@ -39,8 +41,6 @@ class StdStreamsSink(private val outputType: OutputStreamType) : Sink {
         writeToStream(msg, outputType)
     }
 }
-
-expect val fs: FileSystem
 
 /**
  * Find all descendant files in the directory denoted by [this] [Path], that match [condition].

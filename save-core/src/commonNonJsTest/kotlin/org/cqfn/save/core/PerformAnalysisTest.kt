@@ -1,9 +1,11 @@
 package org.cqfn.save.core
 
-import okio.FileSystem
 import org.cqfn.save.core.config.ReportType
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.defaultConfig
+
+import okio.FileSystem
+
 import kotlin.test.Test
 
 class PerformAnalysisTest {

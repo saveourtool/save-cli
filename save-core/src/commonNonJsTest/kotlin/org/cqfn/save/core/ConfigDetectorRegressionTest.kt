@@ -1,8 +1,8 @@
 package org.cqfn.save.core
 
-import okio.FileSystem
 import org.cqfn.save.core.files.ConfigDetector
 
+import okio.FileSystem
 import okio.Path.Companion.toPath
 
 import kotlin.test.Test

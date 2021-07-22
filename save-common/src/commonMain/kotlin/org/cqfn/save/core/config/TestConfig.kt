@@ -19,6 +19,7 @@ import okio.Path.Companion.toPath
  * @property location [Path] denoting the location of this file
  * @property parentConfig parent config in the hierarchy of configs, `null` if this config is root.
  * @property pluginConfigs list of configurations for plugins that are active in this config
+ * @property fs filesystem which can access test configs
  */
 @Suppress("TYPE_ALIAS", "TooManyFunctions")
 data class TestConfig(
