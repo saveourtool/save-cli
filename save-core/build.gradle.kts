@@ -25,7 +25,7 @@ kotlin {
             languageSettings.useExperimentalAnnotation("kotlin.RequiresOptIn")
             languageSettings.useExperimentalAnnotation("okio.ExperimentalFileSystem")
         }
-        val commonMain by getting {
+        val commonNonJsMain by creating {
             dependencies {
                 implementation(project(":save-common"))
                 implementation(project(":save-reporters"))
@@ -38,27 +38,31 @@ kotlin {
                 implementation(project(":save-plugins:warn-plugin"))
             }
         }
-        val commonTest by getting {
+        val commonNonJsTest by creating {
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
             }
         }
         val nativeMain by creating {
-            dependsOn(commonMain)
+            dependsOn(commonNonJsMain)
         }
         hostTarget.forEach {
             getByName("${it.name}Main").dependsOn(nativeMain)
         }
 
         val nativeTest by creating {
-            dependsOn(commonTest)
+            dependsOn(commonNonJsTest)
         }
         hostTarget.forEach {
             getByName("${it.name}Test").dependsOn(nativeTest)
         }
 
+        val jvmMain by getting {
+            dependsOn(commonNonJsMain)
+        }
         val jvmTest by getting {
+            dependsOn(commonNonJsTest)
             dependencies {
                 implementation(kotlin("test-junit5"))
                 implementation("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")

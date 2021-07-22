@@ -31,9 +31,11 @@ private typealias WarningMap = MutableMap<LineColumn?, List<Warning>>
 class WarnPlugin(
     testConfig: TestConfig,
     testFiles: List<String>,
+    fileSystem: FileSystem,
     useInternalRedirections: Boolean = true) : Plugin(
     testConfig,
     testFiles,
+    fileSystem,
     useInternalRedirections) {
     private val expectedAndNotReceived = "Some warnings were expected but not received"
     private val unexpected = "Some warnings were unexpected"

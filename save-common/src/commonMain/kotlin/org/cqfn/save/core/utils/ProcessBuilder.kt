@@ -45,13 +45,9 @@ expect class ProcessBuilderInternal(
  * Class contains common logic for all platforms
  *
  * @property useInternalRedirections whether to collect output for future usage, if false, [redirectTo] will be ignored
+ * @property fs describes the current file system
  */
-class ProcessBuilder(private val useInternalRedirections: Boolean) {
-    /**
-     * Singleton that describes the current file system
-     */
-    private val fs = FileSystem.SYSTEM
-
+class ProcessBuilder(private val useInternalRedirections: Boolean, private val fs: FileSystem) {
     /**
      * Execute [command] and wait for its completion.
      *
