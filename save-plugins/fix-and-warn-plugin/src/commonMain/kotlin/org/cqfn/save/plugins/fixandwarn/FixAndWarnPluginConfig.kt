@@ -12,13 +12,13 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
 /**
- * @property fixPluginConfig config for nested [fix] section
- * @property warnPluginConfig config for nested [warn] section
+ * @property fix config for nested [fix] section
+ * @property warn config for nested [warn] section
  */
 @Serializable
 data class FixAndWarnPluginConfig(
-    val fixPluginConfig: FixPluginConfig,
-    val warnPluginConfig: WarnPluginConfig
+    val fix: FixPluginConfig,
+    val warn: WarnPluginConfig
 ) : PluginConfig {
     override val type = TestConfigSections.`FIX AND WARN`
 
@@ -27,8 +27,8 @@ data class FixAndWarnPluginConfig(
 
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as FixAndWarnPluginConfig
-        val mergedFixPluginConfig = fixPluginConfig.mergeWith(other.fixPluginConfig)
-        val mergedWarnPluginConfig = warnPluginConfig.mergeWith(other.warnPluginConfig)
+        val mergedFixPluginConfig = fix.mergeWith(other.fix)
+        val mergedWarnPluginConfig = warn.mergeWith(other.warn)
         return FixAndWarnPluginConfig(
             mergedFixPluginConfig as FixPluginConfig,
             mergedWarnPluginConfig as WarnPluginConfig
@@ -36,16 +36,16 @@ data class FixAndWarnPluginConfig(
     }
 
     override fun validateAndSetDefaults(): PluginConfig {
-        require(fixPluginConfig.resourceNameTest == warnPluginConfig.testName && fixPluginConfig.batchSize == warnPluginConfig.batchSize) {
+        require(fix.resourceNameTest == warn.testName && fix.batchSize == warn.batchSize) {
             """
                Test files suffix names and batch sizes should be identical for [fix] and [warn] plugins.
-               But found [fix]: {${fixPluginConfig.resourceNameTest}, ${fixPluginConfig.batchSize}},
-                         [warn]: {${warnPluginConfig.testName}, ${warnPluginConfig.batchSize}}
+               But found [fix]: {${fix.resourceNameTest}, ${fix.batchSize}},
+                         [warn]: {${warn.testName}, ${warn.batchSize}}
            """
         }
         return FixAndWarnPluginConfig(
-            fixPluginConfig.validateAndSetDefaults(),
-            warnPluginConfig.validateAndSetDefaults()
+            fix.validateAndSetDefaults(),
+            warn.validateAndSetDefaults()
         )
     }
 }

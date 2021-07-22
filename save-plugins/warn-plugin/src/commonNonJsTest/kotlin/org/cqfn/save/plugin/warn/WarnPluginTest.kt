@@ -54,7 +54,6 @@ class WarnPluginTest {
                 """.trimMargin().encodeToByteArray()
             )
         }
-        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
             listOf(
                 """
