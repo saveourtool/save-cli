@@ -19,13 +19,14 @@ import okio.Path.Companion.toPath
  * @property location [Path] denoting the location of this file
  * @property parentConfig parent config in the hierarchy of configs, `null` if this config is root.
  * @property pluginConfigs list of configurations for plugins that are active in this config
+ * @property fs filesystem which can access test configs
  */
 @Suppress("TYPE_ALIAS", "TooManyFunctions")
 data class TestConfig(
     val location: Path,
     val parentConfig: TestConfig?,
     val pluginConfigs: MutableList<PluginConfig> = mutableListOf(),
-    private val fs: FileSystem = FileSystem.SYSTEM,
+    val fs: FileSystem,
 ) {
     /**
      * Getting all neighbour configs to the current config (i.e. all configs with the same parent config)

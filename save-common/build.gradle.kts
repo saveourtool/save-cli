@@ -11,6 +11,7 @@ kotlin {
         compilations.all {
             kotlinOptions {
                 jvmTarget = "11"
+                freeCompilerArgs = freeCompilerArgs + "-Xjvm-default=all"
             }
         }
     }
@@ -28,7 +29,7 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:${Versions.Kotlinx.datetime}")
             }
         }
-        val commonTest by getting {
+        val commonNonJsTest by creating {
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
@@ -42,13 +43,14 @@ kotlin {
         }
 
         val nativeTest by creating {
-            dependsOn(commonTest)
+            dependsOn(commonNonJsTest)
         }
         hostTarget.forEach {
             getByName("${it.name}Test").dependsOn(nativeTest)
         }
 
         val jvmTest by getting {
+            dependsOn(commonNonJsTest)
             dependencies {
                 implementation(kotlin("test-junit5"))
                 implementation("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")

@@ -14,8 +14,9 @@ private val fs: FileSystem = FileSystem.SYSTEM
  * No-op implementation of [Plugin] that can be used to test reporters, which expect only a class name of the plugin.
  */
 class MockPlugin(baseDir: Path, testFiles: List<String> = emptyList()) : Plugin(
-    TestConfig((baseDir / "save.toml").also { fs.createFile(it) }, null),
+    TestConfig((baseDir / "save.toml").also { fs.createFile(it) }, null, fs = fs),
     testFiles,
+    fs,
     useInternalRedirections = true
 ) {
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> = emptySequence()

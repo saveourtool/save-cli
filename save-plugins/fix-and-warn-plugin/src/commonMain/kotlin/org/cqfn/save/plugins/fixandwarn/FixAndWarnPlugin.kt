@@ -24,9 +24,11 @@ private typealias WarningsList = MutableList<Pair<Int, String>>
 class FixAndWarnPlugin(
     testConfig: TestConfig,
     testFiles: List<String>,
+    fileSystem: FileSystem,
     useInternalRedirections: Boolean = true) : Plugin(
     testConfig,
     testFiles,
+    fileSystem,
     useInternalRedirections) {
     private lateinit var fixPluginConfig: FixPluginConfig
     private lateinit var warnPluginConfig: WarnPluginConfig
@@ -36,8 +38,8 @@ class FixAndWarnPlugin(
     private fun initOrUpdateConfigs() {
         fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().fix
         warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().warn
-        fixPlugin = FixPlugin(createTestConfigForPlugins(fixPluginConfig), testFiles)
-        warnPlugin = WarnPlugin(createTestConfigForPlugins(warnPluginConfig), testFiles)
+        fixPlugin = FixPlugin(createTestConfigForPlugins(fixPluginConfig), testFiles, fs)
+        warnPlugin = WarnPlugin(createTestConfigForPlugins(warnPluginConfig), testFiles, fs)
     }
 
     /**
@@ -52,7 +54,8 @@ class FixAndWarnPlugin(
         mutableListOf(
             testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single(),
             pluginConfig
-        )
+        ),
+        fs,
     )
 
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {

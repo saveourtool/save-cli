@@ -15,21 +15,18 @@ import okio.Path
  * Plugin that can be injected into SAVE during execution. Plugins accept contents of configuration file and then perform some work.
  * @property testConfig
  * @property testFiles a list of files (test resources or save.toml configs)
+ * @property fs describes the current file system
  * @property useInternalRedirections whether to redirect stdout/stderr for internal purposes
  */
 abstract class Plugin(
     open val testConfig: TestConfig,
     protected val testFiles: List<String>,
+    protected val fs: FileSystem,
     private val useInternalRedirections: Boolean) {
-    /**
-     * Singleton, that describes the current file system
-     */
-    protected val fs = FileSystem.SYSTEM
-
     /**
      * Instance that is capable of executing processes
      */
-    val pb = ProcessBuilder(useInternalRedirections)
+    val pb = ProcessBuilder(useInternalRedirections, fs)
 
     /**
      * Perform plugin's work.
@@ -145,10 +142,9 @@ abstract class Plugin(
      * This takes into account, that if underlying directory contains it's own SAVE config,
      * then this plugin shouldn't touch these resources; it should be done by plugins from that config.
      *
-     * @param fs a [FileSystem] which is used to traverse the directory hierarchy
      * @return a sequence of directories possibly containing this plugin's test resources
      */
-    fun Path.resourceDirectories(fs: FileSystem = FileSystem.SYSTEM): Sequence<Path> = findDescendantDirectoriesBy(true) { file ->
+    fun Path.resourceDirectories(): Sequence<Path> = findDescendantDirectoriesBy(true) { file ->
         // this matches directories which contain their own SAVE config
         fs.metadata(file).isRegularFile || fs.list(file).none { it.isSaveTomlConfig() }
     }

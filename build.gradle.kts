@@ -9,7 +9,7 @@ import org.cqfn.save.buildutils.installGitHooks
 
 plugins {
     kotlin("plugin.serialization") version Versions.kotlin apply false
-    id("com.github.ben-manes.versions") version "0.38.0"
+    id("com.github.ben-manes.versions") version "0.39.0"
     id("com.cdsap.talaiot.plugin.base") version "1.4.2"
 }
 
@@ -18,12 +18,6 @@ configureVersioning()
 allprojects {
     repositories {
         mavenCentral()
-        maven("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven") {
-            // detekt requires kotlinx.html (until detekt version 1.17)
-            content {
-                includeModule("org.jetbrains.kotlinx", "kotlinx-html-jvm")
-            }
-        }
     }
     configureDiktat()
     configureDetekt()
