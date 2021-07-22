@@ -24,7 +24,7 @@ import kotlinx.serialization.serializer
  */
 fun SaveProperties.validate(): SaveProperties {
     this.testRootPath ?: logErrorAndExit(ExitCodes.INVALID_CONFIGURATION,
-        "`testRootPath` option is missing or null. " +
+        "`test-root-path` option is missing or null. " +
                 "Save is not able to start processing without an information about the tests that should be run.")
     val fullConfigPath = testRootPath!!.toPath() / "save.toml"
     try {
