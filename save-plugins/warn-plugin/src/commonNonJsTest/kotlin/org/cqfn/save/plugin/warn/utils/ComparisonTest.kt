@@ -52,8 +52,9 @@ class ComparisonTest {
         val config = fs.createFile(tmpDir / "save.toml")
 
         val testStatus = WarnPlugin(
-            TestConfig(config, null, mutableListOf(warnPluginConfig)),
+            TestConfig(config, null, mutableListOf(warnPluginConfig), fs),
             testFiles = emptyList(),
+            fs,
         )
             .checkResults(expectedWarningsMap, actualWarningsMap, warnPluginConfig)
 

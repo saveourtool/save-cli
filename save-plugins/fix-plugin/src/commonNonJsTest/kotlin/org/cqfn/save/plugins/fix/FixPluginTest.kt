@@ -35,8 +35,9 @@ class FixPluginTest {
         fs.createFile(tmpDir / "Test1Expected.java")
 
         val pairs = FixPlugin(
-            TestConfig(tmpDir / "Test1Test.java", null, mutableListOf(FixPluginConfig(""))),
+            TestConfig(tmpDir / "Test1Test.java", null, mutableListOf(FixPluginConfig("")), fs),
             testFiles = emptyList(),
+            fs,
             useInternalRedirections = false
         )
             .discoverTestFiles(tmpDir)
@@ -61,8 +62,9 @@ class FixPluginTest {
         fs.createFile(tmpDir / "AndNowCompletelyDifferent.java")
 
         val pairs = FixPlugin(
-            TestConfig(tmpDir / "Something.java", null, mutableListOf(FixPluginConfig(""))),
+            TestConfig(tmpDir / "Something.java", null, mutableListOf(FixPluginConfig("")), fs),
             testFiles = emptyList(),
+            fs,
             useInternalRedirections = false
         )
             .discoverTestFiles(tmpDir)
@@ -93,8 +95,9 @@ class FixPluginTest {
             mutableListOf(
                 FixPluginConfig(executionCmd),
                 GeneralConfig("", "", "", "")
-            )),
+            ), fs),
             testFiles = emptyList(),
+            fs,
             useInternalRedirections = false
         ).execute()
 
@@ -132,7 +135,7 @@ class FixPluginTest {
         // FixMe: after https://github.com/cqfn/save/issues/158
         val executionCmd = if (isCurrentOsWindows()) {
             // We call ProcessBuilder ourselves, because the command ">" does not work for the list of files
-            ProcessBuilder(false).exec("echo Expected file > $testFile2", null)
+            ProcessBuilder(false, fs).exec("echo Expected file > $testFile2", null)
             "${diskWithTmpDir}cd $tmpDir && echo Expected file >"
         } else {
             "${diskWithTmpDir}cd $tmpDir && echo Expected file | tee"
@@ -145,13 +148,14 @@ class FixPluginTest {
             mutableListOf(
                 fixPluginConfig,
                 GeneralConfig("", "", "", "")
-            )),
+            ), fs),
             testFiles = emptyList(),
+            fs,
             useInternalRedirections = false
         ).execute()
 
         // We call ProcessBuilder ourselves, because the command ">" does not work for the list of files
-        ProcessBuilder(false).exec("echo Expected file > $testFile2", null)
+        ProcessBuilder(false, fs).exec("echo Expected file > $testFile2", null)
 
         assertEquals(2, results.count(), "Size of results should equal number of pairs")
         assertTrue(results.all {

@@ -416,8 +416,9 @@ class WarnPluginTest {
         }
 
         val results = WarnPlugin(
-            TestConfig(config, null, mutableListOf(warnPluginConfig, generalConfig)),
+            TestConfig(config, null, mutableListOf(warnPluginConfig, generalConfig), fs),
             testFiles = emptyList(),
+            fs,
         )
             .execute()
             .toList()
@@ -463,8 +464,9 @@ class WarnPluginTest {
         val generalConfig = GeneralConfig("", "", "", "")
         val config = fs.createFile(tmpDir / "save.toml")
         val nameFile = WarnPlugin(
-            TestConfig(config, null, mutableListOf(warnPluginConfig, generalConfig)),
+            TestConfig(config, null, mutableListOf(warnPluginConfig, generalConfig), fs),
             testFiles = emptyList(),
+            fs,
         )
             .createTestFile(tmpDir / "resource", warnPluginConfig.warningsInputPattern!!)
         val tmpDirTest = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPlugin::class.simpleName!!)
