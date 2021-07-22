@@ -95,7 +95,7 @@ class Save(
             plugin.execute()
                 .onEach { event ->
                     // calculate relative paths, because reporters don't need paths higher than root dir
-                    val resourcesRelative = event.resources.map { it.createRelativePathToTheRoot(fs, rootDir).toPath() / it.name }
+                    val resourcesRelative = event.resources.map { it.createRelativePathToTheRoot(rootDir).toPath() / it.name }
                     reporter.onEvent(event.copy(resources = resourcesRelative))
                 }
                 .forEach(this::handleResult)

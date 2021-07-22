@@ -30,7 +30,7 @@ class ConfigDetector(private val fs: FileSystem) {
                 // discover all descendant configs of [config]
                 val descendantConfigLocations = config
                     .directory
-                    .findAllFilesMatching(fs) { it.isSaveTomlConfig() }
+                    .findAllFilesMatching { it.isSaveTomlConfig() }
                     .flatten()
 
                 createTestConfigs(descendantConfigLocations, mutableListOf(config))
@@ -80,13 +80,13 @@ class ConfigDetector(private val fs: FileSystem) {
 
     private fun getTestConfigFromSingleTestFile(file: Path) = file
         .parents()
-        .mapNotNull { it.findChildByOrNull(fs) { it.isSaveTomlConfig() } }
+        .mapNotNull { it.findChildByOrNull { it.isSaveTomlConfig() } }
         .firstOrNull()
         ?.let { discoverConfigWithParents(it) }
         .also { logDebug("Processing test config for a single test file: $file") }
 
     private fun getTestConfigFromDirectory(file: Path) = file
-        .findChildByOrNull(fs) { it.isSaveTomlConfig() }
+        .findChildByOrNull { it.isSaveTomlConfig() }
         ?.let { discoverConfigWithParents(it) }
         .also { logDebug("Processing test config from directory: $file") }
 
@@ -95,7 +95,7 @@ class ConfigDetector(private val fs: FileSystem) {
         val parentConfig = file.parents()
             .drop(1)  // because immediate parent already contains [this] config
             .mapNotNull { parentDir ->
-                parentDir.findChildByOrNull(fs) {
+                parentDir.findChildByOrNull {
                     it.isSaveTomlConfig()
                 }
             }

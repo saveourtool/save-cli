@@ -133,7 +133,7 @@ abstract class Plugin(
      */
     protected fun constructPathForCopyOfTestFile(dirName: String, path: Path): Path {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / dirName)
-        val relativePath = path.createRelativePathToTheRoot(fs, testConfig.getRootConfig().location)
+        val relativePath = path.createRelativePathToTheRoot(testConfig.getRootConfig().location)
         return tmpDir / relativePath / path.name
     }
 
@@ -145,7 +145,7 @@ abstract class Plugin(
      * @param fs a [FileSystem] which is used to traverse the directory hierarchy
      * @return a sequence of directories possibly containing this plugin's test resources
      */
-    fun Path.resourceDirectories(fs: FileSystem): Sequence<Path> = findDescendantDirectoriesBy(fs, true) { file ->
+    fun Path.resourceDirectories(fs: FileSystem): Sequence<Path> = findDescendantDirectoriesBy(true) { file ->
         // this matches directories which contain their own SAVE config
         fs.metadata(file).isRegularFile || fs.list(file).none { it.isSaveTomlConfig() }
     }
