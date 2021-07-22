@@ -15,6 +15,7 @@ import org.cqfn.save.plugins.fix.FixPluginConfig
 import io.github.petertrr.diffutils.diff
 import okio.FileSystem
 
+import kotlin.random.Random
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -23,7 +24,7 @@ import kotlin.test.assertTrue
 
 class FixAndWarnPluginTest {
     private val fs = FileSystem.SYSTEM
-    private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixAndWarnPluginTest::class.simpleName!!)
+    private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "${FixAndWarnPluginTest::class.simpleName!!}-${Random.nextInt()}")
 
     @BeforeTest
     fun setUp() {
