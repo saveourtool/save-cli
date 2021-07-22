@@ -45,20 +45,17 @@ kotlin {
             getByName("${it.name}Main").dependsOn(nativeMain)
         }
 
-        val commonTest by getting {
-            dependencies {
-                implementation(project(":save-common"))
-                implementation(project(":save-reporters"))
-                implementation(kotlin("test-common"))
-                implementation(kotlin("test-annotations-common"))
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.Kotlinx.serialization}")
-            }
-        }
+        val commonTest by getting
 
         val jvmTest by getting {
             dependencies {
                 implementation(kotlin("test-junit5"))
                 implementation("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
+                implementation(kotlin("test-common"))
+                implementation(kotlin("test-annotations-common"))
+                implementation(project(":save-common"))
+                implementation(project(":save-reporters"))
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.Kotlinx.serialization}")
             }
         }
     }
@@ -73,9 +70,6 @@ kotlin {
 
     // Integration tests should be able to have access to binary during the execution
     tasks.getByName("jvmTest").dependsOn("linkReleaseExecutableMultiplatform")
-    tasks.getByName("linuxX64Test").dependsOn("linkReleaseExecutableMultiplatform")
-    tasks.getByName("macosX64Test").dependsOn("linkReleaseExecutableMultiplatform")
-    tasks.getByName("mingwX64Test").dependsOn("linkReleaseExecutableMultiplatform")
 }
 
 configurePublishing()
