@@ -27,14 +27,10 @@ class IntegrationTest {
             CurrentOs.MACOS -> "macosX64"
             CurrentOs.WINDOWS -> "mingwX64"
             else -> return
-        } + "/releaseExecutable"
+        } + "/debugExecutable"
 
-        println(fs.list(".".toPath()))
-        println(fs.list("../save-cli/".toPath()))
-        println(fs.list("../save-cli/build/".toPath()))
-        println(fs.list("../save-cli/build/bin/".toPath()))
-        println(fs.list("../save-cli/build/bin/linuxX64".toPath()))
-        println(fs.list("../save-cli/build/bin/linuxX64/debugExecutable".toPath()))
+        assertTrue(fs.exists(binDir.toPath()))
+
         val saveExecutableFiles = fs.list(binDir.toPath())
         // Binary should be created at this moment
         assertTrue(saveExecutableFiles.isNotEmpty())
@@ -63,8 +59,6 @@ class IntegrationTest {
         assertTrue(fs.exists(reportFile))
 
         val json: List<Report> = Json.decodeFromString(fs.readFile(reportFile))
-
-        fs.delete(reportFile)
 
         // All result statuses should be Pass
         json.forEach { report ->

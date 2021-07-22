@@ -69,7 +69,14 @@ kotlin {
     }
 
     // Integration tests should be able to have access to binary during the execution
-    tasks.getByName("jvmTest").dependsOn("linkReleaseExecutableMultiplatform")
+    tasks.getByName("jvmTest").dependsOn(tasks.getByName(
+        when {
+            os.isLinux -> "linkDebugExecutableLinuxX64"
+            os.isWindows -> "linkDebugExecutableMingwX64"
+            os.isMacOsX -> "linkDebugExecutableMacosX64"
+            else -> ""
+        }
+    ))
 }
 
 configurePublishing()
