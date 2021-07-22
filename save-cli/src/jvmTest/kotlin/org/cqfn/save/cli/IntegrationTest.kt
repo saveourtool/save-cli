@@ -16,7 +16,10 @@ import kotlin.test.assertTrue
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
-@Suppress("INLINE_CLASS_CAN_BE_USED")
+@Suppress(
+    "INLINE_CLASS_CAN_BE_USED",
+    "MISSING_KDOC_TOP_LEVEL",
+    "MISSING_KDOC_CLASS_ELEMENTS")
 class IntegrationTest {
     private val fs = FileSystem.SYSTEM
 
