@@ -33,9 +33,6 @@ class IntegrationTest {
             else -> return
         } + "/debugExecutable"
 
-        println(fs.list(("../save-cli/build/bin/").toPath()))
-        println(fs.list(("../save-cli/build/bin/macosX64").toPath()))
-        println(fs.list(("../save-cli/build/bin/macosX64/debugExecutable").toPath()))
         assertTrue(fs.exists(binDir.toPath()))
 
         val saveExecutableFiles = fs.list(binDir.toPath()).filter { fs.metadata(it).isRegularFile }
