@@ -72,7 +72,7 @@ class IntegrationTest {
         println(pb.stdout)
         println(pb.stderr)
 
-        Thread.sleep(2_000)
+        Thread.sleep(5_000)
         // Report should be created after successful completion
         assertTrue(fs.exists(reportFile))
 
