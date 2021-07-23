@@ -38,7 +38,7 @@ class IntegrationTest {
         println(fs.list(("../save-cli/build/bin/macosX64/debugExecutable").toPath()))
         assertTrue(fs.exists(binDir.toPath()))
 
-        val saveExecutableFiles = fs.list(binDir.toPath())
+        val saveExecutableFiles = fs.list(binDir.toPath()).filter { fs.metadata(it).isRegularFile }
         // Binary should be created at this moment
         assertTrue(saveExecutableFiles.isNotEmpty())
 
