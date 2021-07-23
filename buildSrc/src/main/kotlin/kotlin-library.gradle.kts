@@ -1,9 +1,14 @@
+/**
+ * Precompiled script plugin, that applies common configuration for a KMP project.
+ * It specifies common targets and sets some common compiler flags.
+ * It creates a number of useful source sets and adds common dependencies.
+ * These source sets can be retrieved in a particular build script and configured further as needed.
+ */
+
 import org.cqfn.save.buildutils.configurePublishing
-import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.kotlin
-import org.gradle.kotlin.dsl.project
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
-//import org.jetbrains.kotlin.gradle.dsl.jvm
 
 plugins {
     kotlin("multiplatform")
@@ -21,16 +26,32 @@ kotlin {
     }
     val nativeTargets = listOf(linuxX64(), mingwX64(), macosX64())
 
+    if (hasProperty("disableRedundantTargets") && (property("disableRedundantTargets") as String?) != "false") {
+        // with this flag we exclude targets that are present on multiple OS to speed up build
+        val currentOs = DefaultNativePlatform.getCurrentOperatingSystem()
+        val redundantTarget: String? = when {
+            currentOs.isWindows -> "linuxX64"
+            currentOs.isMacOsX -> "linuxX64"
+            currentOs.isLinux -> null
+            else -> throw GradleException("Unknown operating system ${currentOs.name}")
+        }
+        tasks.matching { redundantTarget != null && it.name.contains(redundantTarget, ignoreCase = true) }
+            .configureEach {
+                enabled = false
+            }
+    }
+
     /**
      * Common structure for MPP libraries:
-     * common
-     * |
-     * nonJs
-     * / \
-     * native JVM
-     * / | \
-     * linux mingw macos
+     *            common
+     *              |
+     *            nonJs
+     *          /       \
+     *       native      JVM
+     *     /   |    \
+     * linux  mingw macos
      */
+    @Suppress("WRONG_NEWLINES_AROUND_KDOC")
     sourceSets {
         all {
             languageSettings.useExperimentalAnnotation("kotlin.RequiresOptIn")
@@ -42,7 +63,6 @@ kotlin {
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
-//                implementation("com.squareup.okio:okio-fakefilesystem-multiplatform:${Versions.okio}")
             }
         }
         val jvmTest by getting {
