@@ -78,6 +78,7 @@ class IntegrationTest {
         json.forEach { report ->
             report.pluginExecutions.forEach { pluginExecution ->
                 pluginExecution.testResults.forEach { result ->
+                    println(result.status)
                     assertTrue(result.status is Pass)
                 }
             }
