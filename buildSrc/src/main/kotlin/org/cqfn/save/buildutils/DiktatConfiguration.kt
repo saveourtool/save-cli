@@ -17,7 +17,8 @@ fun Project.configureDiktat() {
     apply<DiktatGradlePlugin>()
     configure<DiktatExtension> {
         diktatConfigFile = rootProject.file("diktat-analysis.yml")
-        inputs = files("src/**/*.kt", "**/*.kts")
+        inputs = files("src/**/*.kt", "*.kts", "src/**/*.kts")
+        excludes = files("$projectDir/build")
     }
 }
 
@@ -36,6 +37,7 @@ fun Project.createDiktatTask() {
                 "$rootDir/*.kts",
                 "$rootDir/buildSrc/*.kts"
             )
+            excludes = files("$rootDir/build", "$rootDir/buildSrc/build")
         }
     }
     tasks.register("diktatCheckAll") {
