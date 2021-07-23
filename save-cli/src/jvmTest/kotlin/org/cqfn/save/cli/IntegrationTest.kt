@@ -68,7 +68,11 @@ class IntegrationTest {
             println(it)
         }
         println("Report file: ${reportFile}")
+        val pb = ProcessBuilder(true, fs).exec("curl --version", null)
+        println(pb.stdout)
+        println(pb.stderr)
 
+        Thread.sleep(2_000)
         // Report should be created after successful completion
         assertTrue(fs.exists(reportFile))
 
