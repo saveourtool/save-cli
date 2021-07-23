@@ -1,3 +1,5 @@
+package org.cqfn.save.buildutils
+
 /**
  * Precompiled script plugin, that applies common configuration for a KMP project.
  * It specifies common targets and sets some common compiler flags.
@@ -5,7 +7,6 @@
  * These source sets can be retrieved in a particular build script and configured further as needed.
  */
 
-import org.cqfn.save.buildutils.configurePublishing
 import org.gradle.kotlin.dsl.kotlin
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest

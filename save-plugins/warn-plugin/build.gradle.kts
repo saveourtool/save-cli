@@ -1,7 +1,7 @@
 
 
 plugins {
-    `kotlin-library`
+    id("org.cqfn.save.buildutils.kotlin-library")
 }
 
 kotlin {
