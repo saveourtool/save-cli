@@ -40,9 +40,6 @@ jobs:
             build
             -PdisableRedundantTargets
             -x detekt
-            -x linkReleaseExecutableLinuxX64
-            -x linkReleaseExecutableMingwX64
-            -x linkReleaseExecutableMacosX64
           properties: |
             org.gradle.caching=true
             detekt.multiplatform.disabled=true
