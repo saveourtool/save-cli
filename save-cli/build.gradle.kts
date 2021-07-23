@@ -14,7 +14,12 @@ repositories {
 kotlin {
     jvm()
     val os = getCurrentOperatingSystem()
-    val saveTarget = listOf(macosX64(), linuxX64(), mingwX64())
+    val saveTarget = listOf(when {
+        os.isWindows -> mingwX64()
+        os.isLinux -> linuxX64()
+        os.isMacOsX -> macosX64()
+        else -> throw GradleException("Unknown operating system $os")
+    })
 
     configure(saveTarget) {
         binaries {
