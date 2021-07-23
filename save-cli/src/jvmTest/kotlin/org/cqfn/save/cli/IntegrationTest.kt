@@ -15,6 +15,7 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import org.cqfn.save.core.files.readLines
 
 @Suppress(
     "INLINE_CLASS_CAN_BE_USED",
@@ -73,6 +74,10 @@ class IntegrationTest {
         println(pb.stderr)
 
         Thread.sleep(5_000)
+        println("---------------------------")
+        val output = fs.readLines((examplesDir + "temp.txt").toPath())
+        output.forEach { println(it) }
+        println("---------------------------")
         // Report should be created after successful completion
         assertTrue(fs.exists(reportFile))
 
