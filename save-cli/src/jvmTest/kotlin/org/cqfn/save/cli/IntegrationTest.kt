@@ -52,15 +52,14 @@ class IntegrationTest {
             fs.delete(reportFile)
         }
 
+        // Change CRLF to LF
         if (!isCurrentOsWindows()) {
-            ProcessBuilder(true, fs).exec("cd $examplesDir && sudo sed -i 's/\\r$//' run.sh", null)
+            ProcessBuilder(true, fs).exec("cd $examplesDir && sed -i 's/\\r$//' run.sh", null)
         }
 
-        val runCmd = if (isCurrentOsWindows()) "" else "sudo ./"
+        val runCmd = if (isCurrentOsWindows()) "" else "./"
         val saveFlags = " --result-output FILE --report-type JSON --test-root-path ."
 
-        val tempExecCmd = "cd $examplesDir && ${runCmd}save $saveFlags"
-        ProcessBuilder(true, fs).exec(tempExecCmd, null)
         // Execute the script from examples
         val execCmd = "cd $examplesDir && ${runCmd}run.sh $saveFlags"
         ProcessBuilder(true, fs).exec(execCmd, null)
