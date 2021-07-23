@@ -59,12 +59,21 @@ kotlin {
         }
     }
 
+    val linkReleaseExecutableTaskProvider = when {
+        os.isLinux -> tasks.getByName("linkReleaseExecutableLinuxX64")
+        os.isWindows -> tasks.getByName("linkReleaseExecutableMingwX64")
+        os.isMacOsX -> tasks.getByName("linkReleaseExecutableMacosX64")
+        else -> throw GradleException("Unknown operating system $os")
+    }
     project.tasks.register("linkReleaseExecutableMultiplatform") {
-        when {
-            os.isLinux -> dependsOn(tasks.getByName("linkReleaseExecutableLinuxX64"))
-            os.isWindows -> dependsOn(tasks.getByName("linkReleaseExecutableMingwX64"))
-            os.isMacOsX -> dependsOn(tasks.getByName("linkReleaseExecutableMacosX64"))
-        }
+        dependsOn(linkReleaseExecutableTaskProvider)
+    }
+
+    // disable building of some binaries to speed up build
+    // possible values: `all` - build all binaries, `debug` - build only debug binaries
+    val enabledExecutables = if (hasProperty("enabledExecutables")) property("enabledExecutables") as String else null
+    if (enabledExecutables != null && enabledExecutables != "all" || enabledExecutables == "debug") {
+        linkReleaseExecutableTaskProvider.enabled = false
     }
 }
 

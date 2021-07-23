@@ -38,11 +38,12 @@ jobs:
           # Note: https://github.com/burrunan/gradle-cache-action/issues/42 can possible break this
           arguments: |
             build
-            -PdisableRedundantTargets
             -x detekt
           properties: |
             org.gradle.caching=true
             detekt.multiplatform.disabled=true
+            disableRedundantTargets
+            enabledExecutables=debug
       - name: Upload gradle reports
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
