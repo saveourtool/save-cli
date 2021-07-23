@@ -1,3 +1,4 @@
+@file:UseSerializers(RegexSerializer::class)
 /**
  * Configuration classes for SAVE plugins.
  */
@@ -11,6 +12,8 @@ import okio.Path.Companion.toPath
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import kotlinx.serialization.UseSerializers
+import org.cqfn.save.core.utils.RegexSerializer
 
 /**
  * Core interface for plugin configuration (like warnPlugin/fixPluin/e.t.c)
@@ -52,7 +55,6 @@ interface PluginConfig {
  * @property suiteName
  * @property excludedTests FixMe: after ktoml will support lists we should change it
  * @property includedTests FixMe: after ktoml will support lists we should change it
- * @property ignoreSaveComments if true then ignore warning comments
  */
 @Serializable
 data class GeneralConfig(
@@ -62,7 +64,7 @@ data class GeneralConfig(
     val suiteName: String? = null,
     val excludedTests: String? = null,
     val includedTests: String? = null,
-    val ignoreSaveComments: Boolean? = null
+    val expectedWarningsPattern: Regex? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.GENERAL
 
@@ -86,7 +88,7 @@ data class GeneralConfig(
             this.suiteName ?: other.suiteName,
             this.excludedTests ?: other.excludedTests,
             this.includedTests ?: other.includedTests,
-            this.ignoreSaveComments ?: other.ignoreSaveComments
+            this.expectedWarningsPattern ?: other.expectedWarningsPattern,
         )
     }
 
@@ -110,14 +112,22 @@ data class GeneralConfig(
             suiteName,
             excludedTests ?: "",
             includedTests ?: "",
-            ignoreSaveComments ?: false
+            expectedWarningsPattern ?: defaultInputPattern,
         )
     }
 
     private fun errorMsgForRequireCheck(field: String) =
-            """
+        """
                 Error: Couldn't find `$field` in [general] section of `$configLocation` config.
                 Current configuration: ${this.toString().substringAfter("(").substringBefore(")")}
                 Please provide it in this, or at least in one of the parent configs.
             """.trimIndent()
+
+    companion object {
+        /**
+         * Default regex for expected warnings in test resources, e.g.
+         * `// ;warn:2:4: Class name in incorrect case`
+         */
+        val defaultInputPattern = Regex(";warn:(.+):(\\d+): (.+)")
+    }
 }

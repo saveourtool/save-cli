@@ -1,0 +1,9 @@
+[general]
+tags = "tag1"
+description = "My suite description"
+suiteName = "DocsCheck"
+execCmd = "java -jar D:/save/examples/kotlin-diktat/ktlint -R D:/save/examples/kotlin-diktat/diktat-1.0.0-rc.2.jar"
+
+[warn]
+testNameSuffix = "Test.kt"
+wildCardInDirectoryMode = "**/*"

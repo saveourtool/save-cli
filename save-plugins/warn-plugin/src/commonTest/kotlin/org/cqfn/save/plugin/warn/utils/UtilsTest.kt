@@ -1,7 +1,7 @@
 package org.cqfn.save.plugin.warn.utils
 
 import org.cqfn.save.plugin.warn.WarnPluginConfig
-import org.cqfn.save.plugin.warn.WarnPluginConfig.Companion.defaultInputPattern
+import org.cqfn.save.core.plugin.GeneralConfig.Companion.defaultInputPattern
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -10,50 +10,63 @@ import kotlin.test.assertNull
 class UtilsTest {
     @Test
     fun `should extract warnings from different text with line and col`() {
-        val config = WarnPluginConfig("stub", defaultInputPattern, Regex("stub"), warningTextHasLine = true, warningTextHasColumn = true,
-            lineCaptureGroup = 1, columnCaptureGroup = 2, messageCaptureGroup = 3, linePlaceholder = "line")
-        assertExtracts(config, ";warn:1:2: Foo bar baz", Warning("Foo bar baz", 1, 2, "Test.kt"))
-        assertExtracts(config, ";warn:1:2:  Foo bar baz", Warning(" Foo bar baz", 1, 2, "Test.kt"))
-        assertExtractionFails(config, "warn:1:2 Foo bar baz")
-        assertExtractionFails(config, ";warn:1: Foo bar baz")
-        assertExtractionFails(config, ";warn:1:: Foo bar baz")
-        assertExtractionFails(config, ";warn:1:2:")
-        assertExtractionFails(config, ";warn:1:2: ")
+        val config = WarnPluginConfig(
+            "stub", Regex("stub"), warningTextHasLine = true, warningTextHasColumn = true,
+            lineCaptureGroup = 1, columnCaptureGroup = 2, messageCaptureGroup = 3, linePlaceholder = "line"
+        )
+        assertExtracts(config, ";warn:1:2: Foo bar baz", Warning("Foo bar baz", 1, 2, "Test.kt", ), defaultInputPattern)
+        assertExtracts(config, ";warn:1:2:  Foo bar baz", Warning(" Foo bar baz", 1, 2, "Test.kt"), defaultInputPattern)
+        assertExtractionFails(config, "warn:1:2 Foo bar baz", defaultInputPattern)
+        assertExtractionFails(config, ";warn:1: Foo bar baz", defaultInputPattern)
+        assertExtractionFails(config, ";warn:1:: Foo bar baz", defaultInputPattern)
+        assertExtractionFails(config, ";warn:1:2:", defaultInputPattern)
+        assertExtractionFails(config, ";warn:1:2: ", defaultInputPattern)
     }
 
     @Test
     fun `should extract warnings from different text with no line but col`() {
-        val config = WarnPluginConfig("stub", Regex(";warn:(\\d+): (.+)"), Regex("stub"), warningTextHasLine = false, warningTextHasColumn = true,
-            lineCaptureGroup = null, columnCaptureGroup = 1, messageCaptureGroup = 2, linePlaceholder = "line")
-        assertExtracts(config, ";warn:2: Foo bar baz", Warning("Foo bar baz", null, 2, "Test.kt"))
-        assertExtracts(config, ";warn:2:  Foo bar baz", Warning(" Foo bar baz", null, 2, "Test.kt"))
-        assertExtractionFails(config, "warn:1:2 Foo bar baz")
-        assertExtractionFails(config, ";warn::1 Foo bar baz")
-        assertExtractionFails(config, ";warn:1:: Foo bar baz")
-        assertExtractionFails(config, ";warn:1:")
-        assertExtractionFails(config, ";warn:1: ")
+        val config = WarnPluginConfig(
+            "stub", Regex("stub"), warningTextHasLine = false, warningTextHasColumn = true,
+            lineCaptureGroup = null, columnCaptureGroup = 1, messageCaptureGroup = 2, linePlaceholder = "line"
+        )
+        assertExtracts(config, ";warn:2: Foo bar baz", Warning("Foo bar baz", null, 2, "Test.kt"), Regex(";warn:(\\d+): (.+)"))
+        assertExtracts(config, ";warn:2:  Foo bar baz", Warning(" Foo bar baz", null, 2, "Test.kt"), Regex(";warn:(\\d+): (.+)"))
+        assertExtractionFails(config, "warn:1:2 Foo bar baz", Regex(";warn:(\\d+): (.+)"))
+        assertExtractionFails(config, ";warn::1 Foo bar baz", Regex(";warn:(\\d+): (.+)"))
+        assertExtractionFails(config, ";warn:1:: Foo bar baz",Regex(";warn:(\\d+): (.+)"))
+        assertExtractionFails(config, ";warn:1:", Regex(";warn:(\\d+): (.+)"))
+        assertExtractionFails(config, ";warn:1: ", Regex(";warn:(\\d+): (.+)"))
     }
 
     @Test
     fun `should extract warnings from different text with line but no col`() {
-        val config = WarnPluginConfig("stub", Regex(";warn:(\\d+): (.+)"), Regex("stub"), warningTextHasLine = true, warningTextHasColumn = false,
-            lineCaptureGroup = 1, columnCaptureGroup = null, messageCaptureGroup = 2, linePlaceholder = "line")
-        assertExtracts(config, ";warn:2: Foo bar baz", Warning("Foo bar baz", 2, null, "Test.kt"))
-        assertExtracts(config, ";warn:2:  Foo bar baz", Warning(" Foo bar baz", 2, null, "Test.kt"))
-        assertExtractionFails(config, "warn:1:2 Foo bar baz")
-        assertExtractionFails(config, ";warn::1 Foo bar baz")
-        assertExtractionFails(config, ";warn:1:: Foo bar baz")
-        assertExtractionFails(config, ";warn:1:")
-        assertExtractionFails(config, ";warn:1: ")
+        val config = WarnPluginConfig(
+            "stub", Regex("stub"), warningTextHasLine = true, warningTextHasColumn = false,
+            lineCaptureGroup = 1, columnCaptureGroup = null, messageCaptureGroup = 2, linePlaceholder = "line"
+        )
+        assertExtracts(config, ";warn:2: Foo bar baz", Warning("Foo bar baz", 2, null, "Test.kt"), Regex(";warn:(\\d+): (.+)"))
+        assertExtracts(config, ";warn:2:  Foo bar baz", Warning(" Foo bar baz", 2, null, "Test.kt"), Regex(";warn:(\\d+): (.+)"))
+        assertExtractionFails(config, "warn:1:2 Foo bar baz", Regex(";warn:(\\d+): (.+)"))
+        assertExtractionFails(config, ";warn::1 Foo bar baz", Regex(";warn:(\\d+): (.+)"))
+        assertExtractionFails(config, ";warn:1:: Foo bar baz", Regex(";warn:(\\d+): (.+)"))
+        assertExtractionFails(config, ";warn:1:", Regex(";warn:(\\d+): (.+)"))
+        assertExtractionFails(config, ";warn:1: ", Regex(";warn:(\\d+): (.+)"))
     }
 
     private fun assertExtracts(
         warnPluginConfig: WarnPluginConfig,
         text: String,
-        expectedWarning: Warning) {
-        val line = text.getLineNumber(warnPluginConfig.warningsInputPattern!!, warnPluginConfig.lineCaptureGroup, warnPluginConfig.linePlaceholder!!, null)
+        expectedWarning: Warning,
+        expectedWarningsPattern: Regex
+    ) {
+        val line = text.getLineNumber(
+            expectedWarningsPattern,
+            warnPluginConfig.lineCaptureGroup,
+            warnPluginConfig.linePlaceholder!!,
+            null
+        )
         val warning = text.extractWarning(
-            warnPluginConfig.warningsInputPattern!!,
+            expectedWarningsPattern,
             fileName = "Test.kt",
             line = line,
             columnGroupIdx = warnPluginConfig.columnCaptureGroup,
@@ -63,10 +76,19 @@ class UtilsTest {
         assertEquals(expectedWarning, warning)
     }
 
-    private fun assertExtractionFails(warnPluginConfig: WarnPluginConfig, text: String) {
-        val line = text.getLineNumber(warnPluginConfig.warningsInputPattern!!, warnPluginConfig.lineCaptureGroup, warnPluginConfig.linePlaceholder!!, null)
+    private fun assertExtractionFails(
+        warnPluginConfig: WarnPluginConfig,
+        text: String,
+        expectedWarningsPattern: Regex
+    ) {
+        val line = text.getLineNumber(
+            expectedWarningsPattern,
+            warnPluginConfig.lineCaptureGroup,
+            warnPluginConfig.linePlaceholder!!,
+            null
+        )
         val warning = text.extractWarning(
-            warnPluginConfig.warningsInputPattern!!,
+            expectedWarningsPattern,
             fileName = "fileName",
             line = line,
             columnGroupIdx = warnPluginConfig.columnCaptureGroup,
