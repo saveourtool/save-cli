@@ -64,6 +64,11 @@ class IntegrationTest {
         val execCmd = "cd $examplesDir && ${runCmd}run.sh $saveFlags"
         ProcessBuilder(true, fs).exec(execCmd, null)
 
+        fs.list(examplesDir.toPath()).forEach {
+            println(it)
+        }
+        println("Report file: ${reportFile}")
+
         // Report should be created after successful completion
         assertTrue(fs.exists(reportFile))
 
