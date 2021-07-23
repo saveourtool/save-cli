@@ -22,6 +22,9 @@ kotlin {
                 implementation(project(":save-plugins:warn-plugin"))
             }
         }
+        val commonNonJsTest by getting {
+            dependsOn(commonNonJsMain)
+        }
         val nativeMain by getting {
             dependsOn(commonNonJsMain)
         }
