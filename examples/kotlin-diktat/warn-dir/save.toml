@@ -4,8 +4,8 @@ description = "Test warnings discovered by diKTat"
 suiteName = "warnings"
 
 [warn]
-warningsInputPattern=".*// ;warn:(\\d+):(\\d+) (.*)"
-warningsOutputPattern="(\\w+\\..+):(\\d+):(\\d+): (.*)$"
+expectedWarningsPattern=".*// ;warn:(\\d+):(\\d+) (.*)"
+actualWarningsPattern="(\\w+\\..+):(\\d+):(\\d+): (.*)$"
 lineCaptureGroup = 1
 columnCaptureGroup = 2
 messageCaptureGroup = 3

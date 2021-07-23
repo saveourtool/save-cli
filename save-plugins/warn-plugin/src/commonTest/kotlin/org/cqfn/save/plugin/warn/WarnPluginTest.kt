@@ -53,7 +53,6 @@ class WarnPluginTest {
                 """.trimMargin().encodeToByteArray()
             )
         }
-        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
             listOf(
                 """
@@ -141,7 +140,7 @@ class WarnPluginTest {
             """.trimIndent()
             ),
             defaultWarnConfig.copy(
-                warningsInputPattern = Regex(";warn:(.+):(\\d+): (.+)"),
+                expectedWarningsPattern = Regex(";warn:(.+):(\\d+): (.+)"),
                 defaultLineMode = false,
                 linePlaceholder = "\$l",
             ),
@@ -466,10 +465,10 @@ class WarnPluginTest {
             TestConfig(config, null, mutableListOf(warnPluginConfig, generalConfig)),
             testFiles = emptyList(),
         )
-            .createTestFile(tmpDir / "resource", warnPluginConfig.warningsInputPattern!!)
+            .createTestFile(tmpDir / "resource", warnPluginConfig.expectedWarningsPattern!!)
         val tmpDirTest = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPlugin::class.simpleName!!)
         fs.readLines(tmpDirTest / nameFile).forEach {
-            assertTrue(!warnPluginConfig.warningsInputPattern!!.matches(it))
+            assertTrue(!warnPluginConfig.expectedWarningsPattern!!.matches(it))
         }
     }
 }

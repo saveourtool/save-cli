@@ -125,7 +125,7 @@ class FixAndWarnPlugin(
             filesAndTheirWarningsMap[file] = mutableListOf()
 
             val fileDataWithoutWarnings = fileData.filterIndexed { index, line ->
-                val isLineWithWarning = (warnPluginConfig.warningsInputPattern!!.find(line)?.groups != null)
+                val isLineWithWarning = (warnPluginConfig.expectedWarningsPattern!!.find(line)?.groups != null)
                 if (isLineWithWarning) {
                     filesAndTheirWarningsMap[file]!!.add(index to line)
                 }

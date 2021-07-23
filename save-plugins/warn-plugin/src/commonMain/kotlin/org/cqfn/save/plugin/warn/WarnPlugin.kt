@@ -20,9 +20,7 @@ import org.cqfn.save.plugin.warn.utils.getLineNumber
 import okio.FileSystem
 import okio.Path
 
-internal typealias LineColumn = Pair<Int, Int>
-
-private typealias WarningMap = MutableMap<LineColumn?, List<Warning>>
+private typealias WarningMap = MutableMap<String, List<Warning>>
 
 /**
  * A plugin that runs an executable and verifies that it produces required warning messages.
@@ -31,10 +29,12 @@ private typealias WarningMap = MutableMap<LineColumn?, List<Warning>>
 class WarnPlugin(
     testConfig: TestConfig,
     testFiles: List<String>,
-    useInternalRedirections: Boolean = true) : Plugin(
+    useInternalRedirections: Boolean = true
+) : Plugin(
     testConfig,
     testFiles,
-    useInternalRedirections) {
+    useInternalRedirections
+) {
     private val expectedAndNotReceived = "Some warnings were expected but not received"
     private val unexpected = "Some warnings were unexpected"
 
@@ -42,11 +42,19 @@ class WarnPlugin(
         testConfig.validateAndSetDefaults()
 
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
-        val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
+        val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
 
-        return files.chunked(warnPluginConfig.batchSize ?: 1).map { chunk ->
-            handleTestFile(chunk.map { it.single() }, warnPluginConfig, generalConfig)
-        }.flatten()
+        // Special trick to handle cases when tested tool is able to process directories.
+        // In this case instead of executing the tool with file names, we execute the tool with directories.
+        //
+        // In case user wants to use directory mode, he needs simply not to pass [wildCardInDirectoryMode] and it will be null
+        return warnPluginConfig.wildCardInDirectoryMode?.let {
+            handleTestFile(files.map { it.single() }.toList(), warnPluginConfig, generalConfig).asSequence()
+        } ?: run {
+            files.chunked(warnPluginConfig.batchSize!!).flatMap { chunk ->
+                handleTestFile(chunk.map { it.single() }, warnPluginConfig, generalConfig)
+            }
+        }
     }
 
     override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {
@@ -70,7 +78,8 @@ class WarnPlugin(
     private fun plusLine(
         warningRegex: Regex,
         linesFile: List<String>,
-        lineNum: Int): Int {
+        lineNum: Int
+    ): Int {
         var x = 1
         val sizeFile = linesFile.size
         while (lineNum - 1 + x < sizeFile && warningRegex.find(linesFile[lineNum - 1 + x]) != null) {
@@ -86,86 +95,117 @@ class WarnPlugin(
     @Suppress(
         "TOO_LONG_FUNCTION",
         "SAY_NO_TO_VAR",
-        "LongMethod")
+        "LongMethod"
+    )
     private fun handleTestFile(
         paths: List<Path>,
         warnPluginConfig: WarnPluginConfig,
-        generalConfig: GeneralConfig?): List<TestResult> {
+        generalConfig: GeneralConfig?
+    ): Sequence<TestResult> {
+        // extracting all warnings from test resource files
         val expectedWarnings: WarningMap = mutableMapOf()
-        paths.forEach { path ->
-            val linesFile = fs.readLines(path)
-            expectedWarnings.putAll(
-                linesFile
-                    .mapIndexed { index, line ->
-                        val newLine = if (warnPluginConfig.defaultLineMode!!) {
-                            plusLine(warnPluginConfig.warningsInputPattern!!, linesFile, index)
-                        } else {
-                            line.getLineNumber(warnPluginConfig.warningsInputPattern!!, warnPluginConfig.lineCaptureGroup, warnPluginConfig.linePlaceholder!!, index)
-                        }
-                        with(warnPluginConfig) {
-                            line.extractWarning(
-                                warningsInputPattern!!,
-                                path.name,
-                                newLine,
-                                columnCaptureGroup,
-                                messageCaptureGroup!!,
-                            )
-                        }
-                    }
-                    .filterNotNull()
-                    .groupBy {
-                        if (it.line != null && it.column != null) {
-                            it.line to it.column
-                        } else {
-                            null
-                        }
-                    }
-                    .mapValues { it.value.sortedBy { it.message } }
-            )
+        paths.forEach {
+            val warningsForCurrentPath = it.collectWarningsWithLineNumbers(warnPluginConfig)
+            expectedWarnings.putAll(warningsForCurrentPath)
         }
 
-        val fileNames = paths.joinToString(separator = warnPluginConfig.batchSeparator!!) {
-            if (generalConfig!!.ignoreSaveComments == true) createTestFile(it, warnPluginConfig.warningsInputPattern!!) else it.toString()
-        }
-        val execCmd = "${generalConfig!!.execCmd} ${warnPluginConfig.execFlags} $fileNames"
+        // joining test files to string with a batchSeparator if the tested tool supports processing of file batches
+        val fileNamesForExecCmd =
+            warnPluginConfig.wildCardInDirectoryMode?.let {
+                // a hack to put only the directory path to the execution command
+                // in case we are in a directory mode
+                "${testConfig.location.parent}${it}${warnPluginConfig.testNameSuffix}"
+            } ?: run {
+                paths.joinToString(separator = warnPluginConfig.batchSeparator!!) {
+                    createTestFile(
+                        it,
+                        warnPluginConfig.expectedWarningsPattern!!
+                    )
+                }
+            }
+
+        val execCmd = "${generalConfig!!.execCmd} ${warnPluginConfig.execFlags} $fileNamesForExecCmd"
+
         val executionResult = try {
             pb.exec(execCmd, null)
         } catch (ex: ProcessExecutionException) {
-            return listOf(TestResult(
-                paths,
-                Fail(ex.describe(), ex.describe()),
-                DebugInfo(null, ex.message, null)
-            ))
+            return sequenceOf(
+                TestResult(
+                    paths,
+                    Fail(ex.describe(), ex.describe()),
+                    DebugInfo(null, ex.message, null)
+                )
+            )
         }
         val stdout = executionResult.stdout
         val stderr = executionResult.stderr
 
         val actualWarningsMap = executionResult.stdout.mapNotNull {
             with(warnPluginConfig) {
-                val line = it.getLineNumber(warningsOutputPattern!!, lineCaptureGroupOut, linePlaceholder!!, null)
-                it.extractWarning(warningsOutputPattern, fileNameCaptureGroupOut!!, line, columnCaptureGroupOut, messageCaptureGroupOut!!)
+                val line = it.getLineNumber(actualWarningsPattern!!, lineCaptureGroupOut, linePlaceholder!!, null)
+                it.extractWarning(
+                    actualWarningsPattern,
+                    fileNameCaptureGroupOut!!,
+                    line,
+                    columnCaptureGroupOut,
+                    messageCaptureGroupOut!!
+                )
             }
         }
-            .groupBy { if (it.line != null && it.column != null) it.line to it.column else null }
+            .groupBy { it.fileName }
             .mapValues { (_, warning) -> warning.sortedBy { it.message } }
 
         return paths.map { path ->
             TestResult(
                 listOf(path),
                 checkResults(
-                    expectedWarnings.filter { it.value.any { warning -> warning.fileName == path.name } },
-                    actualWarningsMap.filter { it.value.any { warning -> warning.fileName == path.name } },
+                    expectedWarnings[path.name] ?: listOf(),
+                    actualWarningsMap[path.name] ?: listOf(),
                     warnPluginConfig
                 ),
                 DebugInfo(
                     stdout.filter { it.contains(path.name) }.joinToString("\n"),
                     stderr.filter { it.contains(path.name) }.joinToString("\n"),
-                    null)
+                    null
+                )
             )
+        }.asSequence()
+    }
+
+    private fun Path.collectWarningsWithLineNumbers(warnPluginConfig: WarnPluginConfig): WarningMap {
+        val linesFile = fs.readLines(this)
+        return linesFile.mapIndexed { index, line ->
+            val newLine = if (warnPluginConfig.defaultLineMode!!) {
+                plusLine(warnPluginConfig.expectedWarningsPattern!!, linesFile, index)
+            } else {
+                line.getLineNumber(
+                    warnPluginConfig.expectedWarningsPattern!!,
+                    warnPluginConfig.lineCaptureGroup,
+                    warnPluginConfig.linePlaceholder!!,
+                    index
+                )
+            }
+            with(warnPluginConfig) {
+                line.extractWarning(
+                    expectedWarningsPattern!!,
+                    this@collectWarningsWithLineNumbers.name,
+                    newLine,
+                    columnCaptureGroup,
+                    messageCaptureGroup!!,
+                )
+            }
         }
+            .filterNotNull()
+            .groupBy {
+                it.fileName
+            }
+            .mapValues { it.value.sortedBy { warn -> warn.message } }
+            .toMutableMap()
     }
 
     /**
+     * This method is needed when we need to ignore line numbers with comments (so we won't depend on it).
+     *
      * @param path
      * @param warningsInputPattern
      * @return name of the temporary file
@@ -195,11 +235,13 @@ class WarnPlugin(
      * @return [TestResult]
      */
     @Suppress("TYPE_ALIAS")
-    internal fun checkResults(expectedWarningsMap: Map<LineColumn?, List<Warning>>,
-                              actualWarningsMap: Map<LineColumn?, List<Warning>>,
-                              warnPluginConfig: WarnPluginConfig): TestStatus {
-        val missingWarnings = expectedWarningsMap.valuesNotIn(actualWarningsMap)
-        val unexpectedWarnings = actualWarningsMap.valuesNotIn(expectedWarningsMap)
+    internal fun checkResults(
+        expectedWarningsMap: List<Warning>,
+        actualWarningsMap: List<Warning>,
+        warnPluginConfig: WarnPluginConfig
+    ): TestStatus {
+        val missingWarnings = expectedWarningsMap - actualWarningsMap
+        val unexpectedWarnings = actualWarningsMap - expectedWarningsMap
 
         return when (missingWarnings.isEmpty() to unexpectedWarnings.isEmpty()) {
             false to true -> createFail(expectedAndNotReceived, missingWarnings)
@@ -217,15 +259,6 @@ class WarnPlugin(
         }
     }
 
-    private fun createFail(baseText: String, warnings: List<Warning>) = Fail("$baseText: $warnings", "$baseText (${warnings.size})")
-}
-
-/**
- * Collect all values that are present in [this] map, but absent in [other]
- */
-private fun <K, V> Map<K, List<V>>.valuesNotIn(other: Map<K, List<V>>): List<V> = flatMap { (key, value) ->
-    other[key]?.let { otherValue ->
-        value.filter { it !in otherValue }
-    }
-        ?: value
+    private fun createFail(baseText: String, warnings: List<Warning>) =
+        Fail("$baseText: $warnings", "$baseText (${warnings.size})")
 }

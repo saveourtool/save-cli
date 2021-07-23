@@ -51,9 +51,9 @@ class UtilsTest {
         warnPluginConfig: WarnPluginConfig,
         text: String,
         expectedWarning: Warning) {
-        val line = text.getLineNumber(warnPluginConfig.warningsInputPattern!!, warnPluginConfig.lineCaptureGroup, warnPluginConfig.linePlaceholder!!, null)
+        val line = text.getLineNumber(warnPluginConfig.expectedWarningsPattern!!, warnPluginConfig.lineCaptureGroup, warnPluginConfig.linePlaceholder!!, null)
         val warning = text.extractWarning(
-            warnPluginConfig.warningsInputPattern!!,
+            warnPluginConfig.expectedWarningsPattern!!,
             fileName = "Test.kt",
             line = line,
             columnGroupIdx = warnPluginConfig.columnCaptureGroup,
@@ -64,9 +64,9 @@ class UtilsTest {
     }
 
     private fun assertExtractionFails(warnPluginConfig: WarnPluginConfig, text: String) {
-        val line = text.getLineNumber(warnPluginConfig.warningsInputPattern!!, warnPluginConfig.lineCaptureGroup, warnPluginConfig.linePlaceholder!!, null)
+        val line = text.getLineNumber(warnPluginConfig.expectedWarningsPattern!!, warnPluginConfig.lineCaptureGroup, warnPluginConfig.linePlaceholder!!, null)
         val warning = text.extractWarning(
-            warnPluginConfig.warningsInputPattern!!,
+            warnPluginConfig.expectedWarningsPattern!!,
             fileName = "fileName",
             line = line,
             columnGroupIdx = warnPluginConfig.columnCaptureGroup,
