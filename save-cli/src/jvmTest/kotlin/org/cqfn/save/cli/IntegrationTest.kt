@@ -58,22 +58,21 @@ class IntegrationTest {
             ProcessBuilder(true, fs).exec("cd $examplesDir && sed -i 's/\\r$//' run.sh", null)
         }
 
-        val runCmd = if (isCurrentOsWindows()) "" else "./"
+        val runCmd = if (isCurrentOsWindows()) "start " else "./"
         val saveFlags = " --result-output FILE --report-type JSON --test-root-path ."
 
         // Execute the script from examples
         val execCmd = "cd $examplesDir && ${runCmd}run.sh $saveFlags"
-        ProcessBuilder(true, fs).exec(execCmd, null)
+        val pb = ProcessBuilder(true, fs).exec(execCmd, null)
+        println("Executed:")
+        println(pb.stdout)
+        println(pb.stderr)
 
         fs.list(examplesDir.toPath()).forEach {
             println(it)
         }
         println("Report file: ${reportFile}")
-        val pb = ProcessBuilder(true, fs).exec("curl --version", null)
-        println(pb.stdout)
-        println(pb.stderr)
-
-        Thread.sleep(5_000)
+        Thread.sleep(10_000)
         println("---------------------------")
         val output = fs.readLines((examplesDir + "temp.txt").toPath())
         output.forEach { println(it) }

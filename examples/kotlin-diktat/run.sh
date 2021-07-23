@@ -4,6 +4,7 @@ KTLINT_VERSION=0.39.0
 DIKTAT_VERSION=1.0.0-rc.2
 SAVE_VERSION=0.1.1
 
+echo "" > temp.txt
 # Download tools that will be tested
 if ! [ -f ktlint ]; then
   echo "Downloading ktlint-$KTLINT_VERSION" > temp.txt 2>&1
