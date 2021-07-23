@@ -33,6 +33,9 @@ class IntegrationTest {
             else -> return
         } + "/debugExecutable"
 
+        println(fs.list(("../save-cli/build/bin/").toPath()))
+        println(fs.list(("../save-cli/build/bin/macosX64").toPath()))
+        println(fs.list(("../save-cli/build/bin/macosX64/debugExecutable").toPath()))
         assertTrue(fs.exists(binDir.toPath()))
 
         val saveExecutableFiles = fs.list(binDir.toPath())
@@ -42,6 +45,7 @@ class IntegrationTest {
         val examplesDir = "../examples/kotlin-diktat/"
 
         val actualSaveBinary = saveExecutableFiles.last()
+        println("actualSaveBinary ${actualSaveBinary}")
         val destination = (examplesDir + "save").toPath()
 
         // Copy latest version of save into examples
