@@ -74,7 +74,7 @@ kotlin {
             os.isLinux -> "linkDebugExecutableLinuxX64"
             os.isWindows -> "linkDebugExecutableMingwX64"
             os.isMacOsX -> "linkDebugExecutableMacosX64"
-            else -> ""
+            else -> throw GradleException("Unknown operating system $os")
         }
     ))
 }
