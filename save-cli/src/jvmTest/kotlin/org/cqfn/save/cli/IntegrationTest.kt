@@ -53,23 +53,6 @@ class IntegrationTest {
             fs.delete(reportFile)
         }
 
-        /*
-        val script = fs.readFile((examplesDir + "run.sh").toPath())
-        val containWinLineEndings = script.contains("\r\n")
-        println("winLineEndings " + containWinLineEndings)
-        var correctText = ""
-        if (containWinLineEndings && !isCurrentOsWindows()) {
-            correctText = script.replace("\r\n", "\n")
-        }
-        if (!containWinLineEndings && isCurrentOsWindows()) {
-            correctText = script.replace("\n", "\r\n")
-        }
-        if (correctText.isNotBlank()) {
-            fs.write((examplesDir + "run.sh").toPath()) {
-                correctText
-            }
-        }
-        */
         val runCmd = if (isCurrentOsWindows()) "start " else "./"
         val saveFlags = " --result-output FILE --report-type JSON --test-root-path ."
 
@@ -83,7 +66,6 @@ class IntegrationTest {
         val statusCmd = if (isCurrentOsWindows()) "%ERRORLEVEL%" else "$?"
         val status = ProcessBuilder(true, fs).exec(" echo $statusCmd", null)
         println("Status ${status.stdout}")
-        println("Status ${status.stderr}")
 
         fs.list(examplesDir.toPath()).forEach {
             println(it)
