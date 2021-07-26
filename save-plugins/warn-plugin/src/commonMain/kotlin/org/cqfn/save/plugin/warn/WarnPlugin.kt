@@ -210,7 +210,7 @@ class WarnPlugin(
                 "$expectedAndNotReceived (${missingWarnings.size}), and ${unexpected.lowercase()} (${unexpectedWarnings.size})"
             )
             true to false -> if (warnPluginConfig.exactWarningsMatch == false) {
-                Pass("$unexpected: $unexpectedWarnings")
+                Pass("$unexpected: $unexpectedWarnings", "$unexpected: ${unexpectedWarnings.size} warnings")
             } else {
                 createFail(unexpected, unexpectedWarnings)
             }
