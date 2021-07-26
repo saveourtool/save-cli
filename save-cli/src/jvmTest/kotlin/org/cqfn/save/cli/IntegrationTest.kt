@@ -42,7 +42,6 @@ class IntegrationTest {
         val examplesDir = "../examples/kotlin-diktat/"
 
         val actualSaveBinary = saveExecutableFiles.last()
-        println("actualSaveBinary ${actualSaveBinary}")
         val destination = (examplesDir + "save").toPath()
 
         // Copy latest version of save into examples
@@ -54,11 +53,23 @@ class IntegrationTest {
             fs.delete(reportFile)
         }
 
-        // Change CRLF to LF
-        if (!isCurrentOsWindows()) {
-            ProcessBuilder(true, fs).exec("cd $examplesDir && sed -i 's/\\r$//' run.sh", null)
+        /*
+        val script = fs.readFile((examplesDir + "run.sh").toPath())
+        val containWinLineEndings = script.contains("\r\n")
+        println("winLineEndings " + containWinLineEndings)
+        var correctText = ""
+        if (containWinLineEndings && !isCurrentOsWindows()) {
+            correctText = script.replace("\r\n", "\n")
         }
-
+        if (!containWinLineEndings && isCurrentOsWindows()) {
+            correctText = script.replace("\n", "\r\n")
+        }
+        if (correctText.isNotBlank()) {
+            fs.write((examplesDir + "run.sh").toPath()) {
+                correctText
+            }
+        }
+        */
         val runCmd = if (isCurrentOsWindows()) "start " else "./"
         val saveFlags = " --result-output FILE --report-type JSON --test-root-path ."
 
@@ -78,7 +89,7 @@ class IntegrationTest {
             println(it)
         }
         println("Report file: ${reportFile}")
-        Thread.sleep(10_000)
+        Thread.sleep(15_000)
         println("---------------------------")
         val output = fs.readLines((examplesDir + "temp.txt").toPath())
         output.forEach { println(it) }
