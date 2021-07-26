@@ -28,6 +28,7 @@ class FixAndWarnPlugin(
     useInternalRedirections) {
     private val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().fixPluginConfig
     private val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().warnPluginConfig
+    private val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
     private val fixPlugin = FixPlugin(
         createTestConfigForPlugins(TestConfigSections.FIX),
         testFiles
@@ -47,7 +48,7 @@ class FixAndWarnPlugin(
         testConfig.location,
         testConfig.parentConfig,
         mutableListOf(
-            testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single(),
+            generalConfig,
             if (type == TestConfigSections.FIX) {
                 fixPluginConfig
             } else {
@@ -112,7 +113,7 @@ class FixAndWarnPlugin(
     }
 
     /**
-     * Remove warnings from the given files, which satisfy pattern from [warn] plugin and save data about warnings, which were deleted
+     * Remove warnings from the given files, which satisfy pattern from <warn> plugin and save data about warnings, which were deleted
      *
      * @files files to be modified
      *
@@ -125,7 +126,7 @@ class FixAndWarnPlugin(
             filesAndTheirWarningsMap[file] = mutableListOf()
 
             val fileDataWithoutWarnings = fileData.filterIndexed { index, line ->
-                val isLineWithWarning = (warnPluginConfig.expectedWarningsPattern!!.find(line)?.groups != null)
+                val isLineWithWarning = (generalConfig.expectedWarningsPattern!!.find(line)?.groups != null)
                 if (isLineWithWarning) {
                     filesAndTheirWarningsMap[file]!!.add(index to line)
                 }

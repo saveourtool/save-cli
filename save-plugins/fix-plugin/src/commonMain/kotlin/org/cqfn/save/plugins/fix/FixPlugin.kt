@@ -56,7 +56,7 @@ class FixPlugin(
             val testCopyNames =
                 pathCopyMap.joinToString(separator = fixPluginConfig.batchSeparator!!) { (_, testCopy) -> testCopy.toString() }
 
-            val execCmd = "${(generalConfig!!.execCmd)} ${fixPluginConfig.execFlags} $testCopyNames"
+            val execCmd = "${(generalConfig.execCmd)} ${fixPluginConfig.execFlags} $testCopyNames"
             val executionResult = try {
                 pb.exec(execCmd, null)
             } catch (ex: ProcessExecutionException) {
@@ -100,11 +100,11 @@ class FixPlugin(
             }
         }
 
-    private fun createTestFile(path: Path, generalConfig: GeneralConfig?): Path {
+    private fun createTestFile(path: Path, generalConfig: GeneralConfig): Path {
         val pathCopy: Path = constructPathForCopyOfTestFile(FixPlugin::class.simpleName!!, path)
         createTempDir(pathCopy.parent!!)
 
-        val expectedWarningPattern = generalConfig?.expectedWarningsPattern
+        val expectedWarningPattern = generalConfig.expectedWarningsPattern
 
         fs.write(fs.createFile(pathCopy)) {
             fs.readLines(path).forEach {

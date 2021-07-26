@@ -55,7 +55,6 @@ class ValidationTest {
         assertEquals(1, config.pluginConfigs.size)
 
         val actualWarnConfig = config.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
-        assertEquals(Regex(";warn:(.+):(\\d+): (.+)").toString(), actualWarnConfig.expectedWarningsPattern.toString())
         assertEquals(Regex("(.+):(\\d+):(\\d+): (.+)").toString(), actualWarnConfig.actualWarningsPattern.toString())
         assertEquals(true, actualWarnConfig.warningTextHasLine)
         assertEquals(true, actualWarnConfig.warningTextHasColumn)

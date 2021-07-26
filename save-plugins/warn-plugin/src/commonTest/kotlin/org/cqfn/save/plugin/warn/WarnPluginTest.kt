@@ -32,7 +32,6 @@ class WarnPluginTest {
     private val defaultWarnConfig = WarnPluginConfig(
         "$catCmd ${tmpDir / "resource"} && set stub=",
         Regex("// ;warn:(\\d+):(\\d+): (.*)"),
-        Regex("(.+):(\\d+):(\\d+): (.+)"),
         true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
     )
 
@@ -103,7 +102,6 @@ class WarnPluginTest {
             WarnPluginConfig(
                 "$catCmd ${tmpDir / "resource"} && set stub=",
                 Regex("// ;warn: (.*)"),
-                Regex("(.+):(\\d+): (.+)"),
                 true, false, 1, ", ", null, null, 1, 1, 2, null, 3, defaultLineMode = true
             ),
             GeneralConfig("", "", "", "")
@@ -140,7 +138,6 @@ class WarnPluginTest {
             """.trimIndent()
             ),
             defaultWarnConfig.copy(
-                expectedWarningsPattern = Regex(";warn:(.+):(\\d+): (.+)"),
                 defaultLineMode = false,
                 linePlaceholder = "\$l",
             ),
@@ -180,7 +177,8 @@ class WarnPluginTest {
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
-            val nameWarn = "Some warnings were unexpected: [Warning(message=Variable name should be in lowerCamelCase, line=5, column=8, fileName=Test1Test.java)]"
+            val nameWarn =
+                "Some warnings were unexpected: [Warning(message=Variable name should be in lowerCamelCase, line=5, column=8, fileName=Test1Test.java)]"
             assertEquals(nameWarn, (results.single().status as Pass).message)
         }
         fs.delete(tmpDir / "resource")
@@ -204,7 +202,6 @@ class WarnPluginTest {
             WarnPluginConfig(
                 "echo Test1Test.java:4:6: Class name should be in PascalCase",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
-                Regex("(.+):(\\d+):(\\d+): (.+)"),
                 true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
             ),
             GeneralConfig("", "", "", "")
@@ -276,10 +273,11 @@ class WarnPluginTest {
             WarnPluginConfig(
                 "$catCmd ${tmpDir / "resource"} && set stub=",
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
-                Regex("(.+):(\\d+):(\\d+): (.+)"),
                 true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
             ),
-            GeneralConfig("", "", "", "")
+            GeneralConfig(
+                "", "", "", "", expectedWarningsPattern = Regex("(.+):(\\d+):(\\d+): (.+)"),
+            )
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -315,9 +313,10 @@ class WarnPluginTest {
             WarnPluginConfig(
                 "$catCmd ${tmpDir / "resource"} && set stub=",
                 Regex("// ;warn: (.*)"),
-                Regex("(.+): (.+)"),
                 false, false, 1, ", ", null, null, 1, 1, null, null, 2
-            ), GeneralConfig("", "", "", "")
+            ), GeneralConfig(
+                "", "", "", "", expectedWarningsPattern = Regex("(.+): (.+)"),
+            )
         ) { results ->
             assertEquals(1, results.size)
             results.single().status.let {
@@ -405,7 +404,8 @@ class WarnPluginTest {
         texts: List<String>,
         warnPluginConfig: WarnPluginConfig,
         generalConfig: GeneralConfig,
-        assertion: (List<TestResult>) -> Unit) {
+        assertion: (List<TestResult>) -> Unit
+    ) {
         val config = fs.createFile(tmpDir / "save.toml")
         texts.forEachIndexed { idx, text ->
             val testFileName = "Test${idx + 1}Test.java"
@@ -456,19 +456,20 @@ class WarnPluginTest {
         val warnPluginConfig = WarnPluginConfig(
             "$catCmd ${tmpDir / "resource"} && set stub=",
             Regex("// ;warn: (.*)"),
-            Regex("(.+): (.+)"),
             false, false, 1, null, null, 1, 1, null, null, 2
         )
-        val generalConfig = GeneralConfig("", "", "", "")
+        val generalConfig = GeneralConfig(
+            "", "", "", "", expectedWarningsPattern = Regex("(.+): (.+)"),
+        )
         val config = fs.createFile(tmpDir / "save.toml")
         val nameFile = WarnPlugin(
             TestConfig(config, null, mutableListOf(warnPluginConfig, generalConfig)),
             testFiles = emptyList(),
         )
-            .createTestFile(tmpDir / "resource", warnPluginConfig.expectedWarningsPattern!!)
+            .createTestFile(tmpDir / "resource", generalConfig.expectedWarningsPattern!!)
         val tmpDirTest = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPlugin::class.simpleName!!)
         fs.readLines(tmpDirTest / nameFile).forEach {
-            assertTrue(!warnPluginConfig.expectedWarningsPattern!!.matches(it))
+            assertTrue(!generalConfig.expectedWarningsPattern!!.matches(it))
         }
     }
 }

@@ -1,3 +1,4 @@
+@file:UseSerializers(RegexSerializer::class)
 /**
  * Configuration classes for SAVE plugins.
  */
@@ -11,6 +12,8 @@ import okio.Path.Companion.toPath
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import kotlinx.serialization.UseSerializers
+import org.cqfn.save.core.utils.RegexSerializer
 
 /**
  * Core interface for plugin configuration (like warnPlugin/fixPluin/e.t.c)
@@ -125,6 +128,6 @@ data class GeneralConfig(
          * Default regex for expected warnings in test resources, e.g.
          * `// ;warn:2:4: Class name in incorrect case`
          */
-        internal val defaultInputPattern = Regex(";warn:(.+):(\\d+): (.+)")
+        val defaultInputPattern = Regex(";warn:(.+):(\\d+): (.+)")
     }
 }

@@ -100,12 +100,12 @@ class WarnPlugin(
     private fun handleTestFile(
         paths: List<Path>,
         warnPluginConfig: WarnPluginConfig,
-        generalConfig: GeneralConfig?
+        generalConfig: GeneralConfig
     ): Sequence<TestResult> {
         // extracting all warnings from test resource files
         val expectedWarnings: WarningMap = mutableMapOf()
         paths.forEach {
-            val warningsForCurrentPath = it.collectWarningsWithLineNumbers(warnPluginConfig)
+            val warningsForCurrentPath = it.collectWarningsWithLineNumbers(warnPluginConfig, generalConfig)
             expectedWarnings.putAll(warningsForCurrentPath)
         }
 
@@ -119,12 +119,12 @@ class WarnPlugin(
                 paths.joinToString(separator = warnPluginConfig.batchSeparator!!) {
                     createTestFile(
                         it,
-                        warnPluginConfig.expectedWarningsPattern!!
+                        generalConfig.expectedWarningsPattern!!
                     )
                 }
             }
 
-        val execCmd = "${generalConfig!!.execCmd} ${warnPluginConfig.execFlags} $fileNamesForExecCmd"
+        val execCmd = "${generalConfig.execCmd} ${warnPluginConfig.execFlags} $fileNamesForExecCmd"
 
         val executionResult = try {
             pb.exec(execCmd, null)
@@ -172,14 +172,14 @@ class WarnPlugin(
         }.asSequence()
     }
 
-    private fun Path.collectWarningsWithLineNumbers(warnPluginConfig: WarnPluginConfig): WarningMap {
+    private fun Path.collectWarningsWithLineNumbers(warnPluginConfig: WarnPluginConfig, generalConfig: GeneralConfig): WarningMap {
         val linesFile = fs.readLines(this)
         return linesFile.mapIndexed { index, line ->
             val newLine = if (warnPluginConfig.defaultLineMode!!) {
-                plusLine(warnPluginConfig.expectedWarningsPattern!!, linesFile, index)
+                plusLine(generalConfig.expectedWarningsPattern!!, linesFile, index)
             } else {
                 line.getLineNumber(
-                    warnPluginConfig.expectedWarningsPattern!!,
+                    generalConfig.expectedWarningsPattern!!,
                     warnPluginConfig.lineCaptureGroup,
                     warnPluginConfig.linePlaceholder!!,
                     index
@@ -187,7 +187,7 @@ class WarnPlugin(
             }
             with(warnPluginConfig) {
                 line.extractWarning(
-                    expectedWarningsPattern!!,
+                    generalConfig.expectedWarningsPattern!!,
                     this@collectWarningsWithLineNumbers.name,
                     newLine,
                     columnCaptureGroup,
