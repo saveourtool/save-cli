@@ -69,6 +69,11 @@ class IntegrationTest {
         println(pb.stdout)
         println(pb.stderr)
 
+        val statusCmd = if (isCurrentOsWindows()) "%ERRORLEVEL%" else "$?"
+        val status = ProcessBuilder(true, fs).exec(" echo $statusCmd", null)
+        println("Status ${status.stdout}")
+        println("Status ${status.stderr}")
+
         fs.list(examplesDir.toPath()).forEach {
             println(it)
         }
