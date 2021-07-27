@@ -12,5 +12,6 @@ enum class ReportType {
     @SerialName("plain") PLAIN,
     @SerialName("toml") TOML,
     @SerialName("xml") XML,
+    @SerialName("test") TEST,
     ;
 }

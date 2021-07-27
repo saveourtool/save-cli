@@ -1,7 +1,6 @@
 package org.cqfn.save.plugin.warn
 
 import org.cqfn.save.core.config.TestConfig
-import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.logging.logWarn
@@ -76,18 +75,19 @@ class WarnPlugin(
     }
 
     private fun plusLine(
+        file: Path,
         warningRegex: Regex,
         linesFile: List<String>,
         lineNum: Int
     ): Int {
         var x = 1
-        val sizeFile = linesFile.size
-        while (lineNum - 1 + x < sizeFile && warningRegex.find(linesFile[lineNum - 1 + x]) != null) {
+        val fileSize = linesFile.size
+        while (lineNum - 1 + x < fileSize && warningRegex.find(linesFile[lineNum - 1 + x]) != null) {
             x++
         }
         val newLine = lineNum + x
-        if (newLine >= sizeFile) {
-            logWarn("Some warnings are at the end of the file. They will be assigned the following line: $newLine")
+        if (newLine >= fileSize) {
+            logWarn("Some warnings are at the end of the file: <$file>. They will be assigned the following line: $newLine")
         }
         return newLine
     }
@@ -109,25 +109,36 @@ class WarnPlugin(
             expectedWarnings.putAll(warningsForCurrentPath)
         }
 
+        if (expectedWarnings.isEmpty()) {
+            logWarn(
+                "No expected warnings were found using the following regex pattern:" +
+                        " [${generalConfig.expectedWarningsPattern}] in the test files: $paths." +
+                        " If you have expected any warnings - please check 'expectedWarningsPattern' or capture groups" +
+                        " in your 'save.toml' configuration"
+            )
+        }
+
         // joining test files to string with a batchSeparator if the tested tool supports processing of file batches
+        // NOTE: save will pass relative paths of Tests (calculated from tesRootConfig dir) into the executed tool
         val fileNamesForExecCmd =
             warnPluginConfig.wildCardInDirectoryMode?.let {
+                val directoryPrefix = testConfig
+                    .directory
+                    .toString()
+                    .makeThePathRelativeToTestRoot()
                 // a hack to put only the directory path to the execution command
-                // in case we are in a directory mode
-                "${testConfig.location.parent}${it}${warnPluginConfig.testNameSuffix}"
+                // only in case a directory mode is enabled
+                "$directoryPrefix${it}${warnPluginConfig.testNameSuffix}"
             } ?: run {
                 paths.joinToString(separator = warnPluginConfig.batchSeparator!!) {
-                    createTestFile(
-                        it,
-                        generalConfig.expectedWarningsPattern!!
-                    )
+                    it.toString().makeThePathRelativeToTestRoot()
                 }
             }
 
         val execCmd = "${generalConfig.execCmd} ${warnPluginConfig.execFlags} $fileNamesForExecCmd"
 
         val executionResult = try {
-            pb.exec(execCmd, null)
+            pb.exec("cd ${testConfig.getRootConfig().location.parent} && " + execCmd, null)
         } catch (ex: ProcessExecutionException) {
             return sequenceOf(
                 TestResult(
@@ -172,11 +183,18 @@ class WarnPlugin(
         }.asSequence()
     }
 
-    private fun Path.collectWarningsWithLineNumbers(warnPluginConfig: WarnPluginConfig, generalConfig: GeneralConfig): WarningMap {
+    private fun String.makeThePathRelativeToTestRoot() =
+        this.replace("${testConfig.getRootConfig().directory}", "")
+            .trimStart('/', '\\')
+
+    private fun Path.collectWarningsWithLineNumbers(
+        warnPluginConfig: WarnPluginConfig,
+        generalConfig: GeneralConfig
+    ): WarningMap {
         val linesFile = fs.readLines(this)
         return linesFile.mapIndexed { index, line ->
             val newLine = if (warnPluginConfig.defaultLineMode!!) {
-                plusLine(generalConfig.expectedWarningsPattern!!, linesFile, index)
+                plusLine(this, generalConfig.expectedWarningsPattern!!, linesFile, index)
             } else {
                 line.getLineNumber(
                     generalConfig.expectedWarningsPattern!!,
@@ -201,29 +219,6 @@ class WarnPlugin(
             }
             .mapValues { it.value.sortedBy { warn -> warn.message } }
             .toMutableMap()
-    }
-
-    /**
-     * This method is needed when we need to ignore line numbers with comments (so we won't depend on it).
-     *
-     * @param path
-     * @param warningsInputPattern
-     * @return name of the temporary file
-     */
-    internal fun createTestFile(path: Path, warningsInputPattern: Regex): String {
-        val fileName = constructPathForCopyOfTestFile(WarnPlugin::class.simpleName!!, path)
-        createTempDir(fileName.parent!!)
-
-        fs.write(fs.createFile(fileName)) {
-            fs.readLines(path).forEach {
-                if (!warningsInputPattern.matches(it)) {
-                    write(
-                        (it + "\n").encodeToByteArray()
-                    )
-                }
-            }
-        }
-        return fileName.toString()
     }
 
     /**

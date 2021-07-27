@@ -54,7 +54,7 @@ class ComparisonTest {
             TestConfig(config, null, mutableListOf(warnPluginConfig)),
             testFiles = emptyList(),
         )
-            .checkResults(expectedWarningsMap, actualWarningsMap, warnPluginConfig)
+            .checkResults(expectedWarningsMap["filename"]!!, actualWarningsMap["filename"]!!, warnPluginConfig)
 
         assertTrue(testStatus is Pass, "Actual type of status is ${testStatus::class}")
         assertEquals(

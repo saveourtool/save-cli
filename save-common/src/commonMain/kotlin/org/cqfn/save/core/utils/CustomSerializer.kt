@@ -25,6 +25,7 @@ object RegexSerializer : KSerializer<Regex> {
     }
 
     override fun deserialize(decoder: Decoder): Regex = Regex(decoder.decodeString())
+
 }
 
 @OptIn(ExperimentalSerializationApi::class)

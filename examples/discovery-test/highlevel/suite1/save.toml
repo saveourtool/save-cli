@@ -7,7 +7,7 @@ suiteName = "DocsCheck"
 [warn]
 execFlags = "--build-upon-default-config -i"
 warningsInputPattern = "// ;warn:(\\d+):(\\d+): (.*)"
-warningsOutputPattern = "\\w+ - (\\d+)/(\\d+) - (.*)$"
+actualWarningsPattern = "\\w+ - (\\d+)/(\\d+) - (.*)$"
 lineCaptureGroup = 1
 columnCaptureGroup = 2
 messageCaptureGroup = 3

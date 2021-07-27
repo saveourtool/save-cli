@@ -29,6 +29,8 @@ import org.cqfn.save.reporter.plain.PlainTextReporter
 import okio.FileSystem
 import okio.Path.Companion.toPath
 import okio.buffer
+import org.cqfn.save.reporter.Report
+import org.cqfn.save.reporter.test.TestReporter
 
 /**
  * @property saveProperties an instance of [SaveProperties]
@@ -38,6 +40,7 @@ class Save(
     private val saveProperties: SaveProperties
 ) {
     private val fs = FileSystem.SYSTEM
+    val reporter = getReporter(saveProperties)
 
     init {
         isDebugEnabled = saveProperties.debug ?: false
@@ -48,12 +51,11 @@ class Save(
      *
      * @throws PluginException when we receive invalid type of PluginConfig
      */
-    fun performAnalysis() {
+    fun performAnalysis(): Reporter {
         logInfo("Welcome to SAVE version $SAVE_VERSION")
 
         // FixMe: now we work only with the save.toml config and it's hierarchy, but we should work properly here with directories as well
         val rootTestConfigPath = saveProperties.testRootPath!!.toPath() / "save.toml"
-        val reporter = getReporter(saveProperties)
         val (requestedConfigs, requestedTests) = saveProperties.testFiles!!.partition {
             it.toPath().isSaveTomlConfig()
         }
@@ -85,6 +87,8 @@ class Save(
             }
         reporter.afterAll()
         reporter.out.close()
+
+        return reporter
     }
 
     private fun executePlugin(plugin: Plugin, reporter: Reporter) {
@@ -101,8 +105,8 @@ class Save(
                 }
                 .forEach(this::handleResult)
         } catch (ex: PluginException) {
-            reporter.onPluginExecutionError(ex)
             logError("${plugin::class.simpleName} has crashed: ${ex.message}")
+            reporter.onPluginExecutionError(ex)
         }
         logDebug("<= Finished execution of: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
         reporter.onPluginExecutionEnd(plugin)
@@ -111,7 +115,7 @@ class Save(
     private fun getReporter(saveProperties: SaveProperties): Reporter {
         val outFileBaseName = "save.out"  // todo: make configurable
         val outFileName = when (saveProperties.reportType!!) {
-            ReportType.PLAIN -> outFileBaseName
+            ReportType.PLAIN, ReportType.TEST -> outFileBaseName
             ReportType.JSON -> "$outFileBaseName.json"
             ReportType.XML -> "$outFileBaseName.xml"
             ReportType.TOML -> "$outFileBaseName.toml"
@@ -124,6 +128,7 @@ class Save(
         return when (saveProperties.reportType) {
             ReportType.PLAIN -> PlainTextReporter(out)
             ReportType.JSON -> JsonReporter(out)
+            ReportType.TEST -> TestReporter(out)
             else -> TODO("Reporter for type ${saveProperties.reportType} is not yet supported")
         }
     }

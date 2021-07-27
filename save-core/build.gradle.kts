@@ -42,8 +42,11 @@ kotlin {
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
+                implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
+                implementation("io.ktor:ktor-client-core:${Versions.ktorVersion}")
             }
         }
+
         val nativeMain by creating {
             dependsOn(commonMain)
         }
@@ -53,6 +56,9 @@ kotlin {
 
         val nativeTest by creating {
             dependsOn(commonTest)
+            dependencies {
+                implementation("io.ktor:ktor-client-curl:${Versions.ktorVersion}")
+            }
         }
         hostTarget.forEach {
             getByName("${it.name}Test").dependsOn(nativeTest)
@@ -62,6 +68,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("test-junit5"))
                 implementation("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
+                implementation("io.ktor:ktor-client-apache:${Versions.ktorVersion}")
             }
         }
     }

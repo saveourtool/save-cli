@@ -1,0 +1,7 @@
+[general]
+tags = "tag1"
+description = "chapter 3 tests: with placeholder"
+suiteName = "Chapter3"
+
+[warn]
+linePlaceholder = "$line"
