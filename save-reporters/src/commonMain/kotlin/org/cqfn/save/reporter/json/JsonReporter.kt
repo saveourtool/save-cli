@@ -71,12 +71,13 @@ class JsonReporter(override val out: BufferedSink) : Reporter {
     /**
      * Writes a comma into [this] [BufferedSink], if [condition] is `false`.
      *
-     * @return `true` if comma has been written, `false` otherwise
+     * @return `false` after the invocation
      */
-    private fun BufferedSink.appendCommaUnless(condition: Boolean) = if (!condition) {
-        write(",".encodeToByteArray())
-        true
-    } else {
-        false
+    @Suppress("FUNCTION_BOOLEAN_PREFIX")
+    private fun BufferedSink.appendCommaUnless(condition: Boolean): Boolean {
+        if (!condition) {
+            write(",".encodeToByteArray())
+        }
+        return false
     }
 }
