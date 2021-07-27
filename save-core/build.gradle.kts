@@ -25,6 +25,9 @@ kotlin {
         val commonNonJsTest by getting {
             dependsOn(commonNonJsMain)
         }
+        val jvmMain by getting {
+            dependsOn(commonNonJsMain)
+        }
         val nativeMain by getting {
             dependsOn(commonNonJsMain)
         }
