@@ -4,11 +4,9 @@ import org.cqfn.save.buildutils.configurePublishing
 import org.cqfn.save.buildutils.configureVersioning
 import org.cqfn.save.buildutils.createDetektTask
 import org.cqfn.save.buildutils.createDiktatTask
-import org.cqfn.save.buildutils.disableRedundantKmpTargets
 import org.cqfn.save.buildutils.installGitHooks
 
 plugins {
-    kotlin("plugin.serialization") version Versions.kotlin apply false
     id("com.github.ben-manes.versions") version "0.39.0"
     id("com.cdsap.talaiot.plugin.base") version "1.4.2"
 }
@@ -21,8 +19,6 @@ allprojects {
     }
     configureDiktat()
     configureDetekt()
-
-    disableRedundantKmpTargets()
 }
 createDiktatTask()
 createDetektTask()
