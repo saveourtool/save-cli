@@ -1,30 +1,14 @@
 
-import org.cqfn.save.buildutils.configurePublishing
 import org.cqfn.save.generation.configFilePath
 import org.cqfn.save.generation.generateConfigOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
-import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 
 plugins {
-    kotlin("multiplatform")
-    kotlin("plugin.serialization")
+    id("org.cqfn.save.buildutils.kotlin-library")
 }
 
 kotlin {
-    jvm {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = "11"
-            }
-        }
-    }
-    val hostTarget = listOf(linuxX64(), mingwX64(), macosX64())
-
     sourceSets {
-        all {
-            languageSettings.useExperimentalAnnotation("kotlin.RequiresOptIn")
-            languageSettings.useExperimentalAnnotation("okio.ExperimentalFileSystem")
-        }
         val commonNonJsMain by creating {
             dependencies {
                 implementation(project(":save-common"))
@@ -38,43 +22,13 @@ kotlin {
                 implementation(project(":save-plugins:warn-plugin"))
             }
         }
-        val commonNonJsTest by creating {
-            dependencies {
-                implementation(kotlin("test-common"))
-                implementation(kotlin("test-annotations-common"))
-            }
-        }
-        val nativeMain by creating {
+        val commonNonJsTest by getting {
             dependsOn(commonNonJsMain)
         }
-        hostTarget.forEach {
-            getByName("${it.name}Main").dependsOn(nativeMain)
-        }
-
-        val nativeTest by creating {
-            dependsOn(commonNonJsTest)
-        }
-        hostTarget.forEach {
-            getByName("${it.name}Test").dependsOn(nativeTest)
-        }
-
-        val jvmMain by getting {
+        val nativeMain by getting {
             dependsOn(commonNonJsMain)
-        }
-        val jvmTest by getting {
-            dependsOn(commonNonJsTest)
-            dependencies {
-                implementation(kotlin("test-junit5"))
-                implementation("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
-            }
         }
     }
-}
-
-configurePublishing()
-
-tasks.withType<KotlinJvmTest> {
-    useJUnitPlatform()
 }
 
 val generateConfigOptionsTaskProvider = tasks.register("generateConfigOptions") {
