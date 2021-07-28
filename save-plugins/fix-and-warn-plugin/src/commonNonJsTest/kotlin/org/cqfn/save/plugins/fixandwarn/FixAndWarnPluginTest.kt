@@ -96,10 +96,10 @@ class FixAndWarnPluginTest {
         ).execute().toList()
 
         println("Results ${results.toList()}")
-        assertEquals(2, results.count(), "Size of results should equal number of pairs")
+        assertEquals(1, results.count(), "Size of results should equal number of pairs")
         // Check FixPlugin results
         assertEquals(
-            TestResult(listOf(expectedFile, testFile), Pass(null),
+            TestResult(listOf(expectedFile), Pass(null),
                 DebugInfo(results.first().debugInfo?.stdout, results.first().debugInfo?.stderr, null)
             ), results.first())
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
