@@ -1,13 +1,16 @@
 package org.cqfn.save.plugins.fixandwarn
 
 import org.cqfn.save.core.config.TestConfig
-import org.cqfn.save.core.config.TestConfigSections
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
+import org.cqfn.save.core.plugin.PluginConfig
+import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.plugin.warn.WarnPlugin
+import org.cqfn.save.plugin.warn.WarnPluginConfig
 import org.cqfn.save.plugins.fix.FixPlugin
+import org.cqfn.save.plugins.fix.FixPluginConfig
 
 import okio.FileSystem
 import okio.Path
@@ -22,51 +25,59 @@ private typealias WarningsList = MutableList<Pair<Int, String>>
 class FixAndWarnPlugin(
     testConfig: TestConfig,
     testFiles: List<String>,
+    fileSystem: FileSystem,
     useInternalRedirections: Boolean = true) : Plugin(
     testConfig,
     testFiles,
+    fileSystem,
     useInternalRedirections) {
-    private val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().fixPluginConfig
-    private val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().warnPluginConfig
-    private val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
-    private val fixPlugin = FixPlugin(
-        createTestConfigForPlugins(TestConfigSections.FIX),
-        testFiles
-    )
-    private val warnPlugin = WarnPlugin(
-        createTestConfigForPlugins(TestConfigSections.WARN),
-        testFiles
-    )
+    private val fixPluginConfig: FixPluginConfig =
+            testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().fix
+    private val warnPluginConfig: WarnPluginConfig =
+            testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().warn
+    private val generalConfig: GeneralConfig =
+            testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
+    private lateinit var fixPlugin: FixPlugin
+    private lateinit var warnPlugin: WarnPlugin
+
+    private fun initOrUpdateConfigs() {
+        fixPlugin = FixPlugin(createTestConfigForPlugins(fixPluginConfig), testFiles, fs)
+        warnPlugin = WarnPlugin(createTestConfigForPlugins(warnPluginConfig), testFiles, fs)
+    }
 
     /**
-     * Create TestConfig same as current, but with corresponding plugin configs list for nested [fix] and [warn] sections
+     * Create TestConfig same as current, but with corresponding plugin configs list for nested "fix" and "warn" sections
      *
-     * @param type type of nested section
+     * @param pluginConfig [fix] or [warn] config of nested section
      * @return TestConfig for corresponding section
      */
-    private fun createTestConfigForPlugins(type: TestConfigSections) = TestConfig(
+    private fun createTestConfigForPlugins(pluginConfig: PluginConfig) = TestConfig(
         testConfig.location,
         testConfig.parentConfig,
         mutableListOf(
             generalConfig,
-            if (type == TestConfigSections.FIX) {
-                fixPluginConfig
-            } else {
-                warnPluginConfig
-            }
-        )
+            pluginConfig
+        ),
+        fs,
     )
 
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
         testConfig.validateAndSetDefaults()
-
+        // Need to update private fields after validation
+        initOrUpdateConfigs()
         val testFilePattern = warnPluginConfig.resourceNamePattern
         val expectedFiles = files.filterTestResources(testFilePattern, match = false)
 
         // Remove (in place) warnings from test files before fix plugin execution
         val filesAndTheirWarningsMap = removeWarningsFromExpectedFiles(expectedFiles)
 
-        val fixTestResults = fixPlugin.handleFiles(files)
+        val fixTestResults = fixPlugin.handleFiles(files).toList()
+
+        val (fixTestResultsPassed, fixTestResultsFailed) = fixTestResults.partition { it.status is Pass }
+
+        val expectedFilesWithPass = expectedFiles.filter { expectedFile ->
+            fixTestResultsPassed.map { it.resources.toList()[0] }.contains(expectedFile)
+        }
 
         // Fill back original data with warnings
         filesAndTheirWarningsMap.forEach { (filePath, warningsList) ->
@@ -86,11 +97,12 @@ class FixAndWarnPlugin(
         // TODO: then warn plugin should look at the fix plugin output for actual warnings, and not execute command one more time.
         // TODO: However it's required changes in warn plugin logic (it's should be able to compare expected and actual warnings from different places),
         // TODO: this probably could be obtained after https://github.com/cqfn/save/issues/164,
-        val warnTestResults = warnPlugin.handleFiles(expectedFiles.map { listOf(it) })
-        return fixTestResults + warnTestResults
+        val warnTestResults = warnPlugin.handleFiles(expectedFilesWithPass.map { listOf(it) })
+        return fixTestResultsFailed.asSequence() + warnTestResults
     }
 
     override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {
+        initOrUpdateConfigs()
         // Test files for fix and warn plugin should be the same, so this will be enough
         return fixPlugin.rawDiscoverTestFiles(resourceDirectories)
     }

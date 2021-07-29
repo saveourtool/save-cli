@@ -43,6 +43,8 @@ import kotlinx.serialization.UseSerializers
  * @property batchSeparator separator for batch mode
  * @property defaultLineMode whether to use default value for line number; when enabled, default value will be equal to the next line
  * @property linePlaceholder placeholder for line number, which resolved as current line and support addition and subtraction
+ * @property wildCardInDirectoryMode mode that controls that we are targetting our tested tools on directories (not on files).
+ * This prefix will be added to the name of the directory, if you would like to use directory mode without any prefix simply use ""
  */
 @Serializable
 data class WarnPluginConfig(
@@ -83,7 +85,6 @@ data class WarnPluginConfig(
     } else {
         Regex("""(.+)${(testName)}""")
     }
-
 
     @Suppress("ComplexMethod")
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {

@@ -1,22 +1,9 @@
-import org.cqfn.save.buildutils.configurePublishing
-import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
-
 plugins {
-    kotlin("multiplatform")
-    kotlin("plugin.serialization")
+    id("org.cqfn.save.buildutils.kotlin-library")
 }
 
 kotlin {
-    jvm()
-    linuxX64()
-    mingwX64()
-    macosX64()
-
     sourceSets {
-        all {
-            languageSettings.useExperimentalAnnotation("kotlin.RequiresOptIn")
-            languageSettings.useExperimentalAnnotation("okio.ExperimentalFileSystem")
-        }
         val commonMain by getting {
             dependencies {
                 implementation(project(":save-common"))
@@ -24,23 +11,5 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.Kotlinx.serialization}")
             }
         }
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test-common"))
-                implementation(kotlin("test-annotations-common"))
-            }
-        }
-        val jvmTest by getting {
-            dependencies {
-                implementation(kotlin("test-junit5"))
-                implementation("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
-            }
-        }
     }
-}
-
-configurePublishing()
-
-tasks.withType<KotlinJvmTest> {
-    useJUnitPlatform()
 }

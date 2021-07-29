@@ -3,10 +3,10 @@ execCmd = "./detekt"
 tags = "tag1"
 description = "My suite description"
 suiteName = "DocsCheck"
+expectedWarningsPattern = "// ;warn:(\\d+):(\\d+): (.*)"
 
 [warn]
 execFlags = "--build-upon-default-config -i"
-warningsInputPattern = "// ;warn:(\\d+):(\\d+): (.*)"
 actualWarningsPattern = "\\w+ - (\\d+)/(\\d+) - (.*)$"
 lineCaptureGroup = 1
 columnCaptureGroup = 2

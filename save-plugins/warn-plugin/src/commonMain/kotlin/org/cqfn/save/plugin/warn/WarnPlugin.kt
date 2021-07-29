@@ -28,12 +28,13 @@ private typealias WarningMap = MutableMap<String, List<Warning>>
 class WarnPlugin(
     testConfig: TestConfig,
     testFiles: List<String>,
+    fileSystem: FileSystem,
     useInternalRedirections: Boolean = true
 ) : Plugin(
     testConfig,
     testFiles,
-    useInternalRedirections
-) {
+    fileSystem,
+    useInternalRedirections) {
     private val expectedAndNotReceived = "Some warnings were expected but not received"
     private val unexpected = "Some warnings were unexpected"
 
@@ -45,8 +46,8 @@ class WarnPlugin(
 
         // Special trick to handle cases when tested tool is able to process directories.
         // In this case instead of executing the tool with file names, we execute the tool with directories.
-        //
-        // In case user wants to use directory mode, he needs simply not to pass [wildCardInDirectoryMode] and it will be null
+        // 
+        // In case, when user doesn't want to use directory mode, he needs simply not to pass [wildCardInDirectoryMode] and it will be null
         return warnPluginConfig.wildCardInDirectoryMode?.let {
             handleTestFile(files.map { it.single() }.toList(), warnPluginConfig, generalConfig).asSequence()
         } ?: run {
@@ -86,8 +87,9 @@ class WarnPlugin(
             x++
         }
         val newLine = lineNum + x
-        if (newLine >= fileSize) {
+        if (newLine > fileSize) {
             logWarn("Some warnings are at the end of the file: <$file>. They will be assigned the following line: $newLine")
+            return fileSize
         }
         return newLine
     }
@@ -121,24 +123,24 @@ class WarnPlugin(
         // joining test files to string with a batchSeparator if the tested tool supports processing of file batches
         // NOTE: save will pass relative paths of Tests (calculated from tesRootConfig dir) into the executed tool
         val fileNamesForExecCmd =
-            warnPluginConfig.wildCardInDirectoryMode?.let {
-                val directoryPrefix = testConfig
-                    .directory
-                    .toString()
-                    .makeThePathRelativeToTestRoot()
-                // a hack to put only the directory path to the execution command
-                // only in case a directory mode is enabled
-                "$directoryPrefix${it}${warnPluginConfig.testNameSuffix}"
-            } ?: run {
-                paths.joinToString(separator = warnPluginConfig.batchSeparator!!) {
-                    it.toString().makeThePathRelativeToTestRoot()
+                warnPluginConfig.wildCardInDirectoryMode?.let {
+                    val directoryPrefix = testConfig
+                        .directory
+                        .toString()
+                        .makeThePathRelativeToTestRoot()
+                    // a hack to put only the directory path to the execution command
+                    // only in case a directory mode is enabled
+                    "$directoryPrefix$it${warnPluginConfig.testNameSuffix}"
+                } ?: run {
+                    paths.joinToString(separator = warnPluginConfig.batchSeparator!!) {
+                        it.toString().makeThePathRelativeToTestRoot()
+                    }
                 }
-            }
 
         val execCmd = "${generalConfig.execCmd} ${warnPluginConfig.execFlags} $fileNamesForExecCmd"
 
         val executionResult = try {
-            pb.exec("cd ${testConfig.getRootConfig().location.parent} && " + execCmd, null)
+            pb.exec("cd ${testConfig.getRootConfig().location.parent} && $execCmd", null)
         } catch (ex: ProcessExecutionException) {
             return sequenceOf(
                 TestResult(
@@ -184,9 +186,17 @@ class WarnPlugin(
     }
 
     private fun String.makeThePathRelativeToTestRoot() =
-        this.replace("${testConfig.getRootConfig().directory}", "")
-            .trimStart('/', '\\')
+            this.replace("${testConfig.getRootConfig().directory}", "")
+                .trimStart('/', '\\')
 
+    /**
+     * method for getting warnings from test files:
+     * 1) reading the file
+     * 2) in case of defaultLineMode:
+     *     a) calculate real line number
+     *     b) get line number from the warning
+     * 3) for each line get the warning
+     */
     private fun Path.collectWarningsWithLineNumbers(
         warnPluginConfig: WarnPluginConfig,
         generalConfig: GeneralConfig
@@ -245,7 +255,7 @@ class WarnPlugin(
                 "$expectedAndNotReceived (${missingWarnings.size}), and ${unexpected.lowercase()} (${unexpectedWarnings.size})"
             )
             true to false -> if (warnPluginConfig.exactWarningsMatch == false) {
-                Pass("$unexpected: $unexpectedWarnings")
+                Pass("$unexpected: $unexpectedWarnings", "$unexpected: ${unexpectedWarnings.size} warnings")
             } else {
                 createFail(unexpected, unexpectedWarnings)
             }
@@ -255,5 +265,5 @@ class WarnPlugin(
     }
 
     private fun createFail(baseText: String, warnings: List<Warning>) =
-        Fail("$baseText: $warnings", "$baseText (${warnings.size})")
+            Fail("$baseText: $warnings", "$baseText (${warnings.size})")
 }

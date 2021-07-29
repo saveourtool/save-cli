@@ -2,7 +2,6 @@ package org.cqfn.save.plugins.fix
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
-import org.cqfn.save.core.files.readFile
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.plugin.GeneralConfig
@@ -29,12 +28,13 @@ import okio.Path
 class FixPlugin(
     testConfig: TestConfig,
     testFiles: List<String>,
+    fileSystem: FileSystem,
     useInternalRedirections: Boolean = true
 ) : Plugin(
     testConfig,
     testFiles,
-    useInternalRedirections
-) {
+    fileSystem,
+    useInternalRedirections) {
     private val diffGenerator = DiffRowGenerator.create()
         .showInlineDiffs(true)
         .mergeOriginalRevised(false)
@@ -54,7 +54,7 @@ class FixPlugin(
             val pathMap = chunk.map { it.first() to it.last() }
             val pathCopyMap = pathMap.map { (expected, test) -> expected to createTestFile(test, generalConfig) }
             val testCopyNames =
-                pathCopyMap.joinToString(separator = fixPluginConfig.batchSeparator!!) { (_, testCopy) -> testCopy.toString() }
+                    pathCopyMap.joinToString(separator = fixPluginConfig.batchSeparator!!) { (_, testCopy) -> testCopy.toString() }
 
             val execCmd = "${(generalConfig.execCmd)} ${fixPluginConfig.execFlags} $testCopyNames"
             val executionResult = try {
@@ -73,8 +73,8 @@ class FixPlugin(
             val stderr = executionResult.stderr
 
             pathCopyMap.map { (expected, testCopy) ->
-                val fixedLines = FileSystem.SYSTEM.readLines(testCopy)
-                val expectedLines = FileSystem.SYSTEM.readLines(expected)
+                val fixedLines = fs.readLines(testCopy)
+                val expectedLines = fs.readLines(expected)
 
                 val test = pathMap.first { (_, test) -> test.name == testCopy.name }.second
 
@@ -92,13 +92,13 @@ class FixPlugin(
     }
 
     private fun checkStatus(expectedLines: List<String>, fixedLines: List<String>) =
-        diff(expectedLines, fixedLines).let { patch ->
-            if (patch.deltas.isEmpty()) {
-                Pass(null)
-            } else {
-                Fail(patch.formatToString(), patch.formatToShortString())
+            diff(expectedLines, fixedLines).let { patch ->
+                if (patch.deltas.isEmpty()) {
+                    Pass(null)
+                } else {
+                    Fail(patch.formatToString(), patch.formatToShortString())
+                }
             }
-        }
 
     private fun createTestFile(path: Path, generalConfig: GeneralConfig): Path {
         val pathCopy: Path = constructPathForCopyOfTestFile(FixPlugin::class.simpleName!!, path)
@@ -124,7 +124,7 @@ class FixPlugin(
         val resourceNameTest = fixPluginConfig.resourceNameTest
         val resourceNameExpected = fixPluginConfig.resourceNameExpected
         return resourceDirectories
-            .map { FileSystem.SYSTEM.list(it) }
+            .map { fs.list(it) }
             .flatMap { files ->
                 files.groupBy {
                     val matchResult = (regex).matchEntire(it.name)

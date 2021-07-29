@@ -1,0 +1,12 @@
+[general]
+tags = "fix and warn"
+description = "Autofixing of issues discovered by diKTat and warn about issues, which couldn't be auto-corrected"
+suiteName = "autofix and warn"
+expectedWarningsPattern = ".*// ;warn:(\\d+):(\\d+) (.*)"
+
+[fix and warn]
+    [fix and warn.fix]
+        execFlags = "-F"
+    [fix and warn.warn]
+        actualWarningsPattern = "(\\w+\\..+):(\\d+):(\\d+): (.*)$"
+        exactWarningsMatch = false

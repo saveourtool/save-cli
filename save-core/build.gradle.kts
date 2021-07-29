@@ -1,31 +1,15 @@
 
-import org.cqfn.save.buildutils.configurePublishing
 import org.cqfn.save.generation.configFilePath
 import org.cqfn.save.generation.generateConfigOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
-import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 
 plugins {
-    kotlin("multiplatform")
-    kotlin("plugin.serialization")
+    id("org.cqfn.save.buildutils.kotlin-library")
 }
 
 kotlin {
-    jvm {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = "11"
-            }
-        }
-    }
-    val hostTarget = listOf(linuxX64(), mingwX64(), macosX64())
-
     sourceSets {
-        all {
-            languageSettings.useExperimentalAnnotation("kotlin.RequiresOptIn")
-            languageSettings.useExperimentalAnnotation("okio.ExperimentalFileSystem")
-        }
-        val commonMain by getting {
+        val commonNonJsMain by creating {
             dependencies {
                 implementation(project(":save-common"))
                 implementation(project(":save-reporters"))
@@ -38,46 +22,36 @@ kotlin {
                 implementation(project(":save-plugins:warn-plugin"))
             }
         }
-        val commonTest by getting {
+        val commonNonJsTest by getting {
+            dependsOn(commonNonJsMain)
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
-                implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
                 implementation("io.ktor:ktor-client-core:${Versions.ktorVersion}")
             }
         }
 
-        val nativeMain by creating {
-            dependsOn(commonMain)
-        }
-        hostTarget.forEach {
-            getByName("${it.name}Main").dependsOn(nativeMain)
-        }
-
-        val nativeTest by creating {
-            dependsOn(commonTest)
-            dependencies {
-                implementation("io.ktor:ktor-client-curl:${Versions.ktorVersion}")
-            }
-        }
-        hostTarget.forEach {
-            getByName("${it.name}Test").dependsOn(nativeTest)
-        }
-
         val jvmTest by getting {
+            dependsOn(commonNonJsTest)
             dependencies {
                 implementation(kotlin("test-junit5"))
                 implementation("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
                 implementation("io.ktor:ktor-client-apache:${Versions.ktorVersion}")
             }
         }
+
+        val nativeMain by getting {
+            dependsOn(commonNonJsMain)
+        }
+
+        val nativeTest by getting {
+            dependsOn(commonNonJsTest)
+            dependencies {
+                implementation("io.ktor:ktor-client-curl:${Versions.ktorVersion}")
+            }
+        }
     }
-}
-
-configurePublishing()
-
-tasks.withType<KotlinJvmTest> {
-    useJUnitPlatform()
 }
 
 val generateConfigOptionsTaskProvider = tasks.register("generateConfigOptions") {
@@ -114,7 +88,7 @@ val generatedKotlinSrc = kotlin.sourceSets.create("generated") {
         implementation("org.jetbrains.kotlinx:kotlinx-cli:${Versions.Kotlinx.cli}")
     }
 }
-kotlin.sourceSets.getByName("commonMain").dependsOn(generatedKotlinSrc)
+kotlin.sourceSets.getByName("commonNonJsMain").dependsOn(generatedKotlinSrc)
 tasks.withType<KotlinCompile<*>>().forEach {
     it.dependsOn(generateConfigOptionsTaskProvider)
     it.dependsOn(generateVersionFileTaskProvider)

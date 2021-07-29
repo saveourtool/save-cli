@@ -6,10 +6,6 @@ import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.plugin.PluginException
 import org.cqfn.save.core.reporter.Reporter
-import org.cqfn.save.core.result.Crash
-import org.cqfn.save.core.result.Fail
-import org.cqfn.save.core.result.Ignored
-import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 
 import okio.BufferedSink
@@ -18,8 +14,10 @@ import okio.BufferedSink
  * Reporter that writes execution logs in plain text.
  *
  * @property out a sink for output
+ *
  */
 class TestReporter(override val out: BufferedSink) : Reporter {
+    /** list with results */
     val results: MutableList<TestResult> = mutableListOf()
     override val type: ReportType = ReportType.TEST
 
@@ -32,9 +30,11 @@ class TestReporter(override val out: BufferedSink) : Reporter {
     }
 
     override fun onSuiteStart(suiteName: String) {
+        logDebug("Starting $suiteName")
     }
 
     override fun onSuiteEnd(suiteName: String) {
+        logDebug("Ending $suiteName")
     }
 
     override fun onEvent(event: TestResult) {
@@ -42,12 +42,15 @@ class TestReporter(override val out: BufferedSink) : Reporter {
     }
 
     override fun onPluginInitialization(plugin: Plugin) {
+        logDebug("Init $plugin")
     }
 
     override fun onPluginExecutionStart(plugin: Plugin) {
+        logDebug("Exec start $plugin")
     }
 
     override fun onPluginExecutionEnd(plugin: Plugin) {
+        logDebug("Exec end $plugin")
     }
 
     override fun onPluginExecutionError(ex: PluginException) {

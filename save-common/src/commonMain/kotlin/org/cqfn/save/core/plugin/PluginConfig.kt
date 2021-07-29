@@ -1,11 +1,13 @@
-@file:UseSerializers(RegexSerializer::class)
 /**
  * Configuration classes for SAVE plugins.
  */
 
+@file:UseSerializers(RegexSerializer::class)
+
 package org.cqfn.save.core.plugin
 
 import org.cqfn.save.core.config.TestConfigSections
+import org.cqfn.save.core.utils.RegexSerializer
 
 import okio.Path
 import okio.Path.Companion.toPath
@@ -13,7 +15,6 @@ import okio.Path.Companion.toPath
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.UseSerializers
-import org.cqfn.save.core.utils.RegexSerializer
 
 /**
  * Core interface for plugin configuration (like warnPlugin/fixPluin/e.t.c)
@@ -55,6 +56,7 @@ interface PluginConfig {
  * @property suiteName
  * @property excludedTests FixMe: after ktoml will support lists we should change it
  * @property includedTests FixMe: after ktoml will support lists we should change it
+ * @property expectedWarningsPattern - pattern with warnings that are expected from the test file
  */
 @Serializable
 data class GeneralConfig(
@@ -117,10 +119,10 @@ data class GeneralConfig(
     }
 
     private fun errorMsgForRequireCheck(field: String) =
-        """
-                Error: Couldn't find `$field` in [general] section of `$configLocation` config.
-                Current configuration: ${this.toString().substringAfter("(").substringBefore(")")}
-                Please provide it in this, or at least in one of the parent configs.
+            """
+                    Error: Couldn't find `$field` in [general] section of `$configLocation` config.
+                    Current configuration: ${this.toString().substringAfter("(").substringBefore(")")}
+                    Please provide it in this, or at least in one of the parent configs.
             """.trimIndent()
 
     companion object {
