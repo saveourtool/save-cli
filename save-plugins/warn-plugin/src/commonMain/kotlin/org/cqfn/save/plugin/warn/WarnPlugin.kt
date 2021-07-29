@@ -79,8 +79,9 @@ class WarnPlugin(
             x++
         }
         val newLine = lineNum + x
-        if (newLine >= sizeFile) {
-            logWarn("Some warnings are at the end of the file. They will be assigned the following line: $newLine")
+        if (newLine > sizeFile) {
+            logWarn("Some warnings are at the end of the file. They will be assigned the following line: $sizeFile")
+            return sizeFile
         }
         return newLine
     }

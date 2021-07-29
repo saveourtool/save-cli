@@ -108,7 +108,9 @@ internal fun String.extractWarning(warningRegex: Regex,
  */
 @Suppress(
     "TooGenericExceptionCaught",
-    "SwallowedException")
+    "SwallowedException",
+    "NestedBlockDepth",
+)
 internal fun String.getLineNumber(warningRegex: Regex,
                                   lineGroupIdx: Int?,
                                   placeholder: String,
@@ -123,7 +125,8 @@ internal fun String.getLineNumber(warningRegex: Regex,
                 throw ResourceFormatException("The group <$lineGroup> is neither a number nor a placeholder.")
             }
             try {
-                lineGroup.substringAfterLast(placeholder).toInt() + lineNum!! + 1
+                val line = lineGroup.substringAfterLast(placeholder)
+                lineNum!! + 1 + if (line.isNotEmpty()) line.toInt() else 0
             } catch (e: Exception) {
                 throw ResourceFormatException("Could not extract line number from line [$this], cause: ${e.describe()}")
             }

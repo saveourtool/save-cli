@@ -5,6 +5,7 @@ import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.plugin.PluginConfig
+import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.plugin.warn.WarnPlugin
 import org.cqfn.save.plugin.warn.WarnPluginConfig
@@ -70,6 +71,12 @@ class FixAndWarnPlugin(
 
         val fixTestResults = fixPlugin.handleFiles(files).toList()
 
+        val (fixTestResultsPassed, fixTestResultsFailed) = fixTestResults.partition { it.status is Pass }
+
+        val expectedFilesWithPass = expectedFiles.filter { expectedFile ->
+            fixTestResultsPassed.map { it.resources.toList()[0] }.contains(expectedFile)
+        }
+
         // Fill back original data with warnings
         filesAndTheirWarningsMap.forEach { (filePath, warningsList) ->
             val fileData = fs.readLines(filePath) as MutableList
@@ -88,8 +95,8 @@ class FixAndWarnPlugin(
         // TODO: then warn plugin should look at the fix plugin output for actual warnings, and not execute command one more time.
         // TODO: However it's required changes in warn plugin logic (it's should be able to compare expected and actual warnings from different places),
         // TODO: this probably could be obtained after https://github.com/cqfn/save/issues/164,
-        val warnTestResults = warnPlugin.handleFiles(expectedFiles.map { listOf(it) })
-        return fixTestResults.asSequence() + warnTestResults
+        val warnTestResults = warnPlugin.handleFiles(expectedFilesWithPass.map { listOf(it) })
+        return fixTestResultsFailed.asSequence() + warnTestResults
     }
 
     override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {

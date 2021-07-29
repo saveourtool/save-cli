@@ -83,7 +83,7 @@ class WarnPluginTest {
                 |Test1Test.java:5: Class name should be in PascalCase
                 |Test1Test.java:5: Class name shouldn't have a number
                 |Test1Test.java:7: Variable name should be in LowerCase
-                |Test1Test.java:10: Class should have a Kdoc
+                |Test1Test.java:9: Class should have a Kdoc
                 """.trimMargin().encodeToByteArray()
             )
         }
@@ -124,6 +124,7 @@ class WarnPluginTest {
                 |Test1Test.java:4:1: Class name should be in PascalCase
                 |Test1Test.java:4:1: Class name shouldn't have a number
                 |Test1Test.java:7:1: Variable name should be in LowerCase
+                |Test1Test.java:8:1: Shouldn't space line
                 """.trimMargin().encodeToByteArray()
             )
         }
@@ -137,6 +138,7 @@ class WarnPluginTest {
                 // ;warn:${'$'}l-1:1: Class name should be in PascalCase
                 // ;warn:${'$'}l+1:1: Variable name should be in LowerCase
                     int Foo = 42;
+                // ;warn:${'$'}l:1: Shouldn't space line
                 }
             """.trimIndent()
             ),
