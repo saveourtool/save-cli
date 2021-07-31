@@ -1,3 +1,4 @@
 [general]
-execCmd = "java -jar ktlint -R diktat-1.0.0-rc.2.jar"
+execCmd = "java -jar ktlint -R diktat.jar"
 description = "Test for diktat - linter and formatter for Kotlin"
+

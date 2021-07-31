@@ -67,7 +67,7 @@ private inline fun <reified T : PluginConfig> Path.createPluginConfig(
     logError(
         "Plugin extraction failed for $this and [$pluginSectionName] section." +
                 " This file has incorrect toml format or missing section [$pluginSectionName]." +
-                " Valid sections are: ${TestConfigSections.values().joinToString().lowercase()}."
+                " Valid sections are: ${TestConfigSections.values().map { it.name.lowercase() }}."
     )
     throw e
 }

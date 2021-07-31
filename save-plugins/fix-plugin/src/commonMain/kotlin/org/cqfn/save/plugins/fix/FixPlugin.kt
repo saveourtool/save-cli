@@ -2,7 +2,6 @@ package org.cqfn.save.plugins.fix
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
-import org.cqfn.save.core.files.readFile
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.plugin.GeneralConfig
@@ -30,7 +29,8 @@ class FixPlugin(
     testConfig: TestConfig,
     testFiles: List<String>,
     fileSystem: FileSystem,
-    useInternalRedirections: Boolean = true) : Plugin(
+    useInternalRedirections: Boolean = true
+) : Plugin(
     testConfig,
     testFiles,
     fileSystem,
@@ -48,14 +48,15 @@ class FixPlugin(
         testConfig.validateAndSetDefaults()
 
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
-        val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
+        val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
 
         return files.chunked(fixPluginConfig.batchSize!!).map { chunk ->
             val pathMap = chunk.map { it.first() to it.last() }
-            val pathCopyMap = pathMap.map { (expected, test) -> expected to createTestFile(test) }
-            val testCopyNames = pathCopyMap.joinToString(separator = fixPluginConfig.batchSeparator!!) { (_, testCopy) -> testCopy.toString() }
+            val pathCopyMap = pathMap.map { (expected, test) -> expected to createTestFile(test, generalConfig) }
+            val testCopyNames =
+                    pathCopyMap.joinToString(separator = fixPluginConfig.batchSeparator!!) { (_, testCopy) -> testCopy.toString() }
 
-            val execCmd = "${(generalConfig!!.execCmd)} ${fixPluginConfig.execFlags} $testCopyNames"
+            val execCmd = "${(generalConfig.execCmd)} ${fixPluginConfig.execFlags} $testCopyNames"
             val executionResult = try {
                 pb.exec(execCmd, null)
             } catch (ex: ProcessExecutionException) {
@@ -83,28 +84,36 @@ class FixPlugin(
                     DebugInfo(
                         stdout.filter { it.contains(testCopy.name) }.joinToString("\n"),
                         stderr.filter { it.contains(testCopy.name) }.joinToString("\n"),
-                        null)
+                        null
+                    )
                 )
             }
         }.flatten()
     }
 
-    private fun checkStatus(expectedLines: List<String>, fixedLines: List<String>) = diff(expectedLines, fixedLines).let { patch ->
-        if (patch.deltas.isEmpty()) {
-            Pass(null)
-        } else {
-            Fail(patch.formatToString(), patch.formatToShortString())
-        }
-    }
+    private fun checkStatus(expectedLines: List<String>, fixedLines: List<String>) =
+            diff(expectedLines, fixedLines).let { patch ->
+                if (patch.deltas.isEmpty()) {
+                    Pass(null)
+                } else {
+                    Fail(patch.formatToString(), patch.formatToShortString())
+                }
+            }
 
-    private fun createTestFile(path: Path): Path {
+    private fun createTestFile(path: Path, generalConfig: GeneralConfig): Path {
         val pathCopy: Path = constructPathForCopyOfTestFile(FixPlugin::class.simpleName!!, path)
         createTempDir(pathCopy.parent!!)
 
+        val expectedWarningPattern = generalConfig.expectedWarningsPattern
+
         fs.write(fs.createFile(pathCopy)) {
-            write(
-                (fs.readFile(path)).encodeToByteArray()
-            )
+            fs.readLines(path).forEach {
+                if (expectedWarningPattern == null || !generalConfig.expectedWarningsPattern!!.matches(it)) {
+                    write(
+                        (it + "\n").encodeToByteArray()
+                    )
+                }
+            }
         }
         return pathCopy
     }

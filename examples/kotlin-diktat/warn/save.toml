@@ -2,11 +2,12 @@
 tags = "warn"
 description = "Test warnings discovered by diKTat"
 suiteName = "warnings"
-ignoreSaveComments = true
 
 [warn]
-warningsInputPattern=".*// ;warn:(\\d+):(\\d+) (.*)"
-warningsOutputPattern="(\\w+\\..+):(\\d+):(\\d+): (.*)$"
+# suffix to detect tests
+testNameSuffix = "Test.kt"
+# diktat warnings have the following format: filename.kt:1:15: [WARN_NAME] my waring
+actualWarningsPattern="(\\w+\\..+):(\\d+):(\\d+): (\\[.*\\].*)$"
 lineCaptureGroup = 1
 columnCaptureGroup = 2
 messageCaptureGroup = 3

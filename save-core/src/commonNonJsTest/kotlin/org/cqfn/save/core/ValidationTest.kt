@@ -27,7 +27,6 @@ class ValidationTest {
         val actualGeneralConfig1 = config.pluginConfigs.filterIsInstance<GeneralConfig>().first()
         assertEquals("", actualGeneralConfig1.excludedTests)
         assertEquals("", actualGeneralConfig1.includedTests)
-        assertEquals(false, actualGeneralConfig1.ignoreSaveComments)
     }
 
     @Test
@@ -42,7 +41,7 @@ class ValidationTest {
             assertEquals(
                 """
                     Error: Couldn't find `execCmd` in [general] section of `${generalConfig.configLocation}` config.
-                    Current configuration: execCmd=null, tags=null, description=null, suiteName=null, excludedTests=null, includedTests=null, ignoreSaveComments=null
+                    Current configuration: execCmd=null, tags=null, description=null, suiteName=null, excludedTests=null, includedTests=null, expectedWarningsPattern=null
                     Please provide it in this, or at least in one of the parent configs.
                 """.trimIndent(),
                 ex.message
@@ -61,8 +60,7 @@ class ValidationTest {
         assertEquals(1, config.pluginConfigs.size)
 
         val actualWarnConfig = config.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
-        assertEquals(Regex(";warn:(.+):(\\d+): (.+)").toString(), actualWarnConfig.warningsInputPattern.toString())
-        assertEquals(Regex("(.+):(\\d+):(\\d+): (.+)").toString(), actualWarnConfig.warningsOutputPattern.toString())
+        assertEquals(Regex("(.+):(\\d+):(\\d+): (.+)").toString(), actualWarnConfig.actualWarningsPattern.toString())
         assertEquals(true, actualWarnConfig.warningTextHasLine)
         assertEquals(true, actualWarnConfig.warningTextHasColumn)
         assertEquals(1, actualWarnConfig.lineCaptureGroup)
@@ -143,10 +141,10 @@ class ValidationTest {
         } catch (ex: IllegalArgumentException) {
             assertEquals(
                 "Error: All integer values in [warn] section of `${warnConfig.configLocation}` config should be positive!" +
-                        "\nCurrent configuration: execFlags=execFlags, warningsInputPattern=null, warningsOutputPattern=null, " +
+                        "\nCurrent configuration: execFlags=execFlags, actualWarningsPattern=null, " +
                         "warningTextHasLine=null, warningTextHasColumn=null, batchSize=null, batchSeparator=null, lineCaptureGroup=-127, columnCaptureGroup=null, " +
                         "messageCaptureGroup=null, fileNameCaptureGroupOut=null, lineCaptureGroupOut=null, columnCaptureGroupOut=null, messageCaptureGroupOut=null, " +
-                        "exactWarningsMatch=null, testNameSuffix=null, defaultLineMode=null, linePlaceholder=null",
+                        "exactWarningsMatch=null, testNameSuffix=null, defaultLineMode=null, linePlaceholder=null, wildCardInDirectoryMode=null",
                 ex.message
             )
         }

@@ -24,12 +24,32 @@ kotlin {
         }
         val commonNonJsTest by getting {
             dependsOn(commonNonJsMain)
+            dependencies {
+                implementation(kotlin("test-common"))
+                implementation(kotlin("test-annotations-common"))
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
+                implementation("io.ktor:ktor-client-core:${Versions.ktorVersion}")
+            }
         }
-        val jvmMain by getting {
-            dependsOn(commonNonJsMain)
+
+        val jvmTest by getting {
+            dependsOn(commonNonJsTest)
+            dependencies {
+                implementation(kotlin("test-junit5"))
+                implementation("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
+                implementation("io.ktor:ktor-client-apache:${Versions.ktorVersion}")
+            }
         }
+
         val nativeMain by getting {
             dependsOn(commonNonJsMain)
+        }
+
+        val nativeTest by getting {
+            dependsOn(commonNonJsTest)
+            dependencies {
+                implementation("io.ktor:ktor-client-curl:${Versions.ktorVersion}")
+            }
         }
     }
 }
@@ -68,7 +88,7 @@ val generatedKotlinSrc = kotlin.sourceSets.create("generated") {
         implementation("org.jetbrains.kotlinx:kotlinx-cli:${Versions.Kotlinx.cli}")
     }
 }
-kotlin.sourceSets.getByName("commonMain").dependsOn(generatedKotlinSrc)
+kotlin.sourceSets.getByName("commonNonJsMain").dependsOn(generatedKotlinSrc)
 tasks.withType<KotlinCompile<*>>().forEach {
     it.dependsOn(generateConfigOptionsTaskProvider)
     it.dependsOn(generateVersionFileTaskProvider)

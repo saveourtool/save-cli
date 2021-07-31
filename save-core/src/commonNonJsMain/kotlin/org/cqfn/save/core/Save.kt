@@ -1,3 +1,5 @@
+@file:Suppress("FILE_WILDCARD_IMPORTS")
+
 package org.cqfn.save.core
 
 import org.cqfn.save.core.config.OutputStreamType
@@ -25,6 +27,7 @@ import org.cqfn.save.core.utils.buildActivePlugins
 import org.cqfn.save.core.utils.processInPlace
 import org.cqfn.save.reporter.json.JsonReporter
 import org.cqfn.save.reporter.plain.PlainTextReporter
+import org.cqfn.save.reporter.test.TestReporter
 
 import okio.FileSystem
 import okio.Path.Companion.toPath
@@ -38,6 +41,9 @@ class Save(
     private val saveProperties: SaveProperties,
     private val fs: FileSystem,
 ) {
+    /** reporter that can be used  */
+    internal val reporter = getReporter(saveProperties)
+
     init {
         isDebugEnabled = saveProperties.debug ?: false
     }
@@ -45,14 +51,14 @@ class Save(
     /**
      * Main entrypoint for SAVE framework. Discovers plugins and calls their execution.
      *
+     * @return Reporter
      * @throws PluginException when we receive invalid type of PluginConfig
      */
-    fun performAnalysis() {
+    fun performAnalysis(): Reporter {
         logInfo("Welcome to SAVE version $SAVE_VERSION")
 
         // FixMe: now we work only with the save.toml config and it's hierarchy, but we should work properly here with directories as well
         val rootTestConfigPath = saveProperties.testRootPath!!.toPath() / "save.toml"
-        val reporter = getReporter(saveProperties)
         val (requestedConfigs, requestedTests) = saveProperties.testFiles!!.partition {
             it.toPath().isSaveTomlConfig()
         }
@@ -84,6 +90,8 @@ class Save(
             }
         reporter.afterAll()
         reporter.out.close()
+
+        return reporter
     }
 
     private fun executePlugin(plugin: Plugin, reporter: Reporter) {
@@ -95,13 +103,14 @@ class Save(
             plugin.execute()
                 .onEach { event ->
                     // calculate relative paths, because reporters don't need paths higher than root dir
-                    val resourcesRelative = event.resources.map { it.createRelativePathToTheRoot(rootDir).toPath() / it.name }
+                    val resourcesRelative =
+                            event.resources.map { it.createRelativePathToTheRoot(rootDir).toPath() / it.name }
                     reporter.onEvent(event.copy(resources = resourcesRelative))
                 }
                 .forEach(this::handleResult)
         } catch (ex: PluginException) {
-            reporter.onPluginExecutionError(ex)
             logError("${plugin::class.simpleName} has crashed: ${ex.message}")
+            reporter.onPluginExecutionError(ex)
         }
         logDebug("<= Finished execution of: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
         reporter.onPluginExecutionEnd(plugin)
@@ -110,7 +119,7 @@ class Save(
     private fun getReporter(saveProperties: SaveProperties): Reporter {
         val outFileBaseName = "save.out"  // todo: make configurable
         val outFileName = when (saveProperties.reportType!!) {
-            ReportType.PLAIN -> outFileBaseName
+            ReportType.PLAIN, ReportType.TEST -> outFileBaseName
             ReportType.JSON -> "$outFileBaseName.json"
             ReportType.XML -> "$outFileBaseName.xml"
             ReportType.TOML -> "$outFileBaseName.toml"
@@ -123,6 +132,7 @@ class Save(
         return when (saveProperties.reportType) {
             ReportType.PLAIN -> PlainTextReporter(out)
             ReportType.JSON -> JsonReporter(out)
+            ReportType.TEST -> TestReporter(out)
             else -> TODO("Reporter for type ${saveProperties.reportType} is not yet supported")
         }
     }

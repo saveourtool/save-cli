@@ -31,20 +31,22 @@ class FixAndWarnPlugin(
     testFiles,
     fileSystem,
     useInternalRedirections) {
-    private lateinit var fixPluginConfig: FixPluginConfig
-    private lateinit var warnPluginConfig: WarnPluginConfig
+    private val fixPluginConfig: FixPluginConfig =
+            testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().fix
+    private val warnPluginConfig: WarnPluginConfig =
+            testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().warn
+    private val generalConfig: GeneralConfig =
+            testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
     private lateinit var fixPlugin: FixPlugin
     private lateinit var warnPlugin: WarnPlugin
 
     private fun initOrUpdateConfigs() {
-        fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().fix
-        warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().warn
         fixPlugin = FixPlugin(createTestConfigForPlugins(fixPluginConfig), testFiles, fs)
         warnPlugin = WarnPlugin(createTestConfigForPlugins(warnPluginConfig), testFiles, fs)
     }
 
     /**
-     * Create TestConfig same as current, but with corresponding plugin configs list for nested [fix] and [warn] sections
+     * Create TestConfig same as current, but with corresponding plugin configs list for nested "fix" and "warn" sections
      *
      * @param pluginConfig [fix] or [warn] config of nested section
      * @return TestConfig for corresponding section
@@ -53,7 +55,7 @@ class FixAndWarnPlugin(
         testConfig.location,
         testConfig.parentConfig,
         mutableListOf(
-            testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single(),
+            generalConfig,
             pluginConfig
         ),
         fs,
@@ -123,7 +125,7 @@ class FixAndWarnPlugin(
     }
 
     /**
-     * Remove warnings from the given files, which satisfy pattern from [warn] plugin and save data about warnings, which were deleted
+     * Remove warnings from the given files, which satisfy pattern from <warn> plugin and save data about warnings, which were deleted
      *
      * @files files to be modified
      *
@@ -136,7 +138,7 @@ class FixAndWarnPlugin(
             filesAndTheirWarningsMap[file] = mutableListOf()
 
             val fileDataWithoutWarnings = fileData.filterIndexed { index, line ->
-                val isLineWithWarning = (warnPluginConfig.warningsInputPattern!!.find(line)?.groups != null)
+                val isLineWithWarning = (generalConfig.expectedWarningsPattern!!.find(line)?.groups != null)
                 if (isLineWithWarning) {
                     filesAndTheirWarningsMap[file]!!.add(index to line)
                 }

@@ -20,10 +20,9 @@ import kotlinx.serialization.UseSerializers
  * The logic of the default value processing will be provided in stage of validation
  *
  * @property execFlags a command that will be executed to check resources and emit warnings
- * @property warningsInputPattern a regular expression by which expected warnings will be discovered in test resources
- * @property warningsOutputPattern a regular expression by which warnings will be discovered in the process output
- * @property warningTextHasLine whether line number is included in [warningsOutputPattern]
- * @property warningTextHasColumn whether column number is included in [warningsOutputPattern]
+ * @property actualWarningsPattern a regular expression by which warnings will be discovered in the process output
+ * @property warningTextHasLine whether line number is included in [actualWarningsPattern]
+ * @property warningTextHasColumn whether column number is included in [actualWarningsPattern]
  * @property lineCaptureGroup an index of capture group in regular expressions, corresponding to line number. Indices start at 0 with 0
  * corresponding to the whole string.
  * @property columnCaptureGroup an index of capture group in regular expressions, corresponding to column number. Indices start at 0 with 0
@@ -44,12 +43,13 @@ import kotlinx.serialization.UseSerializers
  * @property batchSeparator separator for batch mode
  * @property defaultLineMode whether to use default value for line number; when enabled, default value will be equal to the next line
  * @property linePlaceholder placeholder for line number, which resolved as current line and support addition and subtraction
+ * @property wildCardInDirectoryMode mode that controls that we are targetting our tested tools on directories (not on files).
+ * This prefix will be added to the name of the directory, if you would like to use directory mode without any prefix simply use ""
  */
 @Serializable
 data class WarnPluginConfig(
     val execFlags: String? = null,
-    val warningsInputPattern: Regex? = null,
-    val warningsOutputPattern: Regex? = null,
+    val actualWarningsPattern: Regex? = null,
     val warningTextHasLine: Boolean? = null,
     val warningTextHasColumn: Boolean? = null,
     val batchSize: Int? = null,
@@ -65,6 +65,7 @@ data class WarnPluginConfig(
     val testNameSuffix: String? = null,
     val defaultLineMode: Boolean? = null,
     val linePlaceholder: String? = null,
+    val wildCardInDirectoryMode: String? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.WARN
 
@@ -79,15 +80,18 @@ data class WarnPluginConfig(
     /**
      *  @property resourceNamePattern regex for the name of the test files.
      */
-    val resourceNamePattern: Regex = Regex("""(.+)${(testName)}\.[\w\d]+""")
+    val resourceNamePattern: Regex = if (testName == "Test") {
+        Regex("""(.+)${(testName)}\.[\w\d]+""")
+    } else {
+        Regex("""(.+)${(testName)}""")
+    }
 
     @Suppress("ComplexMethod")
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as WarnPluginConfig
         return WarnPluginConfig(
             this.execFlags ?: other.execFlags,
-            this.warningsInputPattern ?: other.warningsInputPattern,
-            this.warningsOutputPattern ?: other.warningsOutputPattern,
+            this.actualWarningsPattern ?: other.actualWarningsPattern,
             this.warningTextHasLine ?: other.warningTextHasLine,
             this.warningTextHasColumn ?: other.warningTextHasColumn,
             this.batchSize ?: other.batchSize,
@@ -103,6 +107,7 @@ data class WarnPluginConfig(
             this.testNameSuffix ?: other.testNameSuffix,
             this.defaultLineMode ?: other.defaultLineMode,
             this.linePlaceholder ?: other.linePlaceholder,
+            this.wildCardInDirectoryMode ?: other.wildCardInDirectoryMode,
         )
     }
 
@@ -110,11 +115,13 @@ data class WarnPluginConfig(
         "MAGIC_NUMBER",
         "MagicNumber",
         "ComplexMethod",
-        "TOO_LONG_FUNCTION")
+        "TOO_LONG_FUNCTION"
+    )
     override fun validateAndSetDefaults(): WarnPluginConfig {
         val newWarningTextHasLine = warningTextHasLine ?: true
         val newWarningTextHasColumn = warningTextHasColumn ?: true
         val newDefaultLineMode = defaultLineMode ?: false
+
         val newLineCaptureGroup = if (newDefaultLineMode) {
             null
         } else if (newWarningTextHasLine) {
@@ -133,8 +140,7 @@ data class WarnPluginConfig(
         requirePositiveIfNotNull(messageCaptureGroup)
         return WarnPluginConfig(
             execFlags ?: "",
-            warningsInputPattern ?: defaultInputPattern,
-            warningsOutputPattern ?: defaultOutputPattern,
+            actualWarningsPattern ?: defaultOutputPattern,
             newWarningTextHasLine,
             newWarningTextHasColumn,
             batchSize ?: 1,
@@ -150,6 +156,7 @@ data class WarnPluginConfig(
             testName,
             newDefaultLineMode,
             linePlaceholder ?: "line",
+            wildCardInDirectoryMode,
         )
     }
 
@@ -165,12 +172,6 @@ data class WarnPluginConfig(
     }
 
     companion object {
-        /**
-         * Default regex for expected warnings in test resources, e.g.
-         * `// ;warn:2:4: Class name in incorrect case`
-         */
-        internal val defaultInputPattern = Regex(";warn:(.+):(\\d+): (.+)")
-
         /**
          * Default regex for actual warnings in the tool output, e.g.
          * ```[WARN] /path/to/resources/ClassNameTest.java:2:4: Class name in incorrect case```

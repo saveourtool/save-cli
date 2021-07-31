@@ -61,7 +61,6 @@ class FileUtilsTest {
         }
             .toList()
 
-        println(result)
         assertContentEquals(
             listOf(listOf(file11), listOf(file111, file112), listOf(file211, file212), listOf(file131), listOf(file231)),
             result
