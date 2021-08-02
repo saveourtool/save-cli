@@ -48,11 +48,12 @@ actual suspend fun downloadFile(url: String, fileName: String): String {
     if (!fs.exists(file)) {
         val httpResponse: HttpResponse = client.get(url)
         val responseBody: ByteArray = httpResponse.receive()
+        println("Writing ${responseBody.size} bytes into $file")
         val newPath = fs.createFile(fileName)
         fs.write(newPath) {
             write(responseBody)
         }
-        println("$fileName downloaded to $file")
+        println("$url downloaded to $file")
     }
 
     client.close()

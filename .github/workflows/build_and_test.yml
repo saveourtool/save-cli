@@ -95,7 +95,7 @@ jobs:
       - name: Cache konan
         uses: actions/cache@v2
         with:
-          path: ${{ env.USERPROFILE }}/.konan
+          path: 'C:\Users\runneradmin\.konan'
           key: Windows-gradle-konan
           restore-keys: |
             Windows-gradle-konan
