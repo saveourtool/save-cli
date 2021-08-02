@@ -105,7 +105,7 @@ jobs:
           # additional files to calculate key for dependency cache
           gradle-dependencies-cache-key: |
             buildSrc/**/Versions.kt
-          # Note: https://github.com/burrunan/gradle-cache-action/issues/42 can possible break this
+          # Note: https://github.com/burrunan/gradle-cache-action/issues/42 can possibly break this
           arguments: |
             build
             -x detekt
@@ -114,14 +114,6 @@ jobs:
             detekt.multiplatform.disabled=true
             disableRedundantTargets=true
             enabledExecutables=debug
-      - name: '[DEBUG] Upload downloaded test resources'
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: resources-windows-latest
-          path: |
-            examples/kotlin-diktat/diktat.jar
-            examples/kotlin-diktat/ktlint
       - name: Upload gradle reports
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
