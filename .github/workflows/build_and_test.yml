@@ -80,7 +80,7 @@ jobs:
         with:
           msystem: MINGW64
           update: true
-          install: git mingw-w64-x86_64-toolchain
+          install: git mingw-w64-x86_64-toolchain mingw-w64-x86_64-curl
       - uses: actions/checkout@v2
       # ensure that gradle wrapper files in repository are valid by checking checksums
       - uses: gradle/wrapper-validation-action@v1
@@ -88,10 +88,6 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.11
-      - name: Install curl Windows
-        continue-on-error: true
-        run: pacman -S --noconfirm mingw-w64-x86_64-curl
-        shell: msys2 {0}
       - name: Cache konan
         uses: actions/cache@v2
         with:
