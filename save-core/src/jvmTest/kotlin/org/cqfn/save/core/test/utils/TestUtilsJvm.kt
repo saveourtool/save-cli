@@ -6,15 +6,11 @@
 
 package org.cqfn.save.core.test.utils
 
-import org.cqfn.save.core.logging.logDebug
-
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-
-import java.io.File
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
@@ -27,29 +23,11 @@ import kotlinx.coroutines.runBlocking
  */
 actual fun runTest(block: suspend (scope: CoroutineScope) -> Unit) = runBlocking { block(this) }
 
-/**
- * @param url
- * @param fileName
- * @return path of the downloaded file
- */
-actual suspend fun downloadFile(url: String, fileName: String): String {
-    val client = HttpClient {
-        install(HttpTimeout) {
-            requestTimeoutMillis = TIMEOUT
-            connectTimeoutMillis = TIMEOUT
-            socketTimeoutMillis = TIMEOUT
-        }
+@Suppress("MISSING_KDOC_ON_FUNCTION", "MISSING_KDOC_TOP_LEVEL")  // https://github.com/cqfn/diKTat/issues/1012
+actual suspend fun createHttpClient(): HttpClient = HttpClient {
+    install(HttpTimeout) {
+        requestTimeoutMillis = TIMEOUT
+        connectTimeoutMillis = TIMEOUT
+        socketTimeoutMillis = TIMEOUT
     }
-
-    val file = File(fileName)
-    if (!file.exists()) {
-        val httpResponse: HttpResponse = client.get(url)
-        val responseBody: ByteArray = httpResponse.receive()
-        logDebug("Writing ${responseBody.size} bytes into ${file.path}")
-        file.writeBytes(responseBody)
-        logDebug("$url downloaded to ${file.path}")
-    }
-
-    client.close()
-    return file.absolutePath
 }
