@@ -1,11 +1,11 @@
-package org.cqfn.save.buildutils
-
 /**
  * Precompiled script plugin, that applies common configuration for a KMP project.
  * It specifies common targets and sets some common compiler flags.
  * It creates a number of useful source sets and adds common dependencies.
  * These source sets can be retrieved in a particular build script and configured further as needed.
  */
+
+package org.cqfn.save.buildutils
 
 import org.gradle.kotlin.dsl.kotlin
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
@@ -38,6 +38,7 @@ kotlin {
         }
         tasks.matching { redundantTarget != null && it.name.contains(redundantTarget, ignoreCase = true) }
             .configureEach {
+                logger.lifecycle("Disabling task :${project.name}:$name on host $currentOs")
                 enabled = false
             }
     }
