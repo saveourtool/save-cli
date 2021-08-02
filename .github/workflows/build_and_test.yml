@@ -120,8 +120,8 @@ jobs:
         with:
           name: resources-windows-latest
           path: |
-            'examples/kotlin-diktat/diktat.jar'
-            'examples/kotlin-diktat/ktlint'
+            examples/kotlin-diktat/diktat.jar
+            examples/kotlin-diktat/ktlint
       - name: Upload gradle reports
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
