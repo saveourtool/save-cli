@@ -61,11 +61,16 @@ kotlin {
         }
         val commonMain by getting
         val commonTest by getting
+        val commonNonJsMain by creating
         val commonNonJsTest by creating {
+            dependsOn(commonNonJsMain)
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
             }
+        }
+        val jvmMain by getting {
+            dependsOn(commonNonJsMain)
         }
         val jvmTest by getting {
             dependsOn(commonNonJsTest)
@@ -75,17 +80,16 @@ kotlin {
             }
         }
         val nativeMain by creating {
-            dependsOn(commonMain)
+            dependsOn(commonNonJsMain)
         }
         val nativeTest by creating {
-            dependsOn(commonTest)
+            dependsOn(commonNonJsTest)
         }
         nativeTargets.forEach {
             getByName("${it.name}Main").dependsOn(nativeMain)
         }
         nativeTargets.forEach {
             getByName("${it.name}Test").dependsOn(nativeTest)
-            getByName("${it.name}Test").dependsOn(commonNonJsTest)
         }
     }
 }
