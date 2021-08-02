@@ -53,8 +53,8 @@ actual suspend fun downloadFile(url: String, fileName: String): String {
             write(responseBody)
         }
         println("$fileName downloaded to $file")
-        client.close()
     }
 
+    client.close()
     return file.toString()
 }
