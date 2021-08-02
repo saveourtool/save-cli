@@ -6,9 +6,8 @@
 
 package org.cqfn.save.core.test.utils
 
-import org.cqfn.save.core.logging.logDebug
-
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.logging.logDebug
 
 import io.ktor.client.*
 import io.ktor.client.call.*
