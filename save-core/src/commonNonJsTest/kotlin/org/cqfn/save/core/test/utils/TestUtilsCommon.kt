@@ -17,6 +17,7 @@ import org.cqfn.save.reporter.test.TestReporter
 
 import io.ktor.client.*
 import io.ktor.client.call.receive
+import io.ktor.client.features.HttpTimeout
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -38,13 +39,6 @@ const val TIMEOUT = 100_000L
 expect fun runTest(block: suspend (scope: CoroutineScope) -> Unit)
 
 /**
- * Creates an [HttpClient] on a particular platform
- *
- * @return a new instance of [HttpClient]
- */
-expect suspend fun createHttpClient(): HttpClient
-
-/**
  * Download file from [url] into [fileName]
  *
  * @param url url to download from
@@ -53,7 +47,13 @@ expect suspend fun createHttpClient(): HttpClient
  */
 suspend fun downloadFile(url: String, fileName: String): String {
     val fs = FileSystem.SYSTEM
-    val client = createHttpClient()
+    val client = HttpClient {
+        install(HttpTimeout) {
+            requestTimeoutMillis = TIMEOUT
+            connectTimeoutMillis = TIMEOUT
+            socketTimeoutMillis = TIMEOUT
+        }
+    }
 
     val file = fileName.toPath()
     if (!fs.exists(file)) {

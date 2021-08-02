@@ -22,12 +22,3 @@ import kotlinx.coroutines.CoroutineScope
  * @return simple blocking run to workaround the case with suspend functions
  */
 actual fun runTest(block: suspend (scope: CoroutineScope) -> Unit) = runBlocking { block(this) }
-
-@Suppress("MISSING_KDOC_ON_FUNCTION", "MISSING_KDOC_TOP_LEVEL")  // https://github.com/cqfn/diKTat/issues/1012
-actual suspend fun createHttpClient() = HttpClient {
-    install(HttpTimeout) {
-        requestTimeoutMillis = TIMEOUT
-        connectTimeoutMillis = TIMEOUT
-        socketTimeoutMillis = TIMEOUT
-    }
-}
