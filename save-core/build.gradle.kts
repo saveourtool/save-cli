@@ -9,7 +9,7 @@ plugins {
 
 kotlin {
     sourceSets {
-        val commonNonJsMain by creating {
+        val commonNonJsMain by getting {
             dependencies {
                 implementation(project(":save-common"))
                 implementation(project(":save-reporters"))
@@ -23,7 +23,6 @@ kotlin {
             }
         }
         val commonNonJsTest by getting {
-            dependsOn(commonNonJsMain)
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
@@ -33,20 +32,12 @@ kotlin {
         }
 
         val jvmTest by getting {
-            dependsOn(commonNonJsTest)
             dependencies {
-                implementation(kotlin("test-junit5"))
-                implementation("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
                 implementation("io.ktor:ktor-client-apache:${Versions.ktorVersion}")
             }
         }
 
-        val nativeMain by getting {
-            dependsOn(commonNonJsMain)
-        }
-
         val nativeTest by getting {
-            dependsOn(commonNonJsTest)
             dependencies {
                 implementation("io.ktor:ktor-client-curl:${Versions.ktorVersion}")
             }
