@@ -7,6 +7,7 @@
 package org.cqfn.save.core.test.utils
 
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.logging.logDebug
 
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -48,13 +49,14 @@ actual suspend fun downloadFile(url: String, fileName: String): String {
     if (!fs.exists(file)) {
         val httpResponse: HttpResponse = client.get(url)
         val responseBody: ByteArray = httpResponse.receive()
+        logDebug("Writing ${responseBody.size} bytes into $file")
         val newPath = fs.createFile(fileName)
         fs.write(newPath) {
             write(responseBody)
         }
-        println("$fileName downloaded to $file")
-        client.close()
+        logDebug("$url downloaded to $file")
     }
 
+    client.close()
     return file.toString()
 }

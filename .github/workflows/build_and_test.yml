@@ -55,7 +55,7 @@ jobs:
           properties: |
             org.gradle.caching=true
             detekt.multiplatform.disabled=true
-            disableRedundantTargets
+            disableRedundantTargets=true
             enabledExecutables=debug
 
       - name: Upload gradle reports
@@ -72,7 +72,7 @@ jobs:
           flags: unittests
           fail_ci_if_error: true # optional (default = false)
 
-  build_and_test_with_code_coverage_win:
+  build_and_test_win:
     name: Build and test on Win
     runs-on: windows-latest
     steps:
@@ -80,7 +80,7 @@ jobs:
         with:
           msystem: MINGW64
           update: true
-          install: git mingw-w64-x86_64-toolchain
+          install: git mingw-w64-x86_64-toolchain mingw-w64-x86_64-curl
       - uses: actions/checkout@v2
       # ensure that gradle wrapper files in repository are valid by checking checksums
       - uses: gradle/wrapper-validation-action@v1
@@ -88,16 +88,10 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.11
-
-      - name: Install curl Windows
-        continue-on-error: true
-        run: pacman -S --noconfirm mingw-w64-x86_64-curl
-        shell: msys2 {0}
-
       - name: Cache konan
         uses: actions/cache@v2
         with:
-          path: ~/.konan
+          path: 'C:\Users\runneradmin\.konan'
           key: Windows-gradle-konan
           restore-keys: |
             Windows-gradle-konan
@@ -107,26 +101,18 @@ jobs:
           # additional files to calculate key for dependency cache
           gradle-dependencies-cache-key: |
             buildSrc/**/Versions.kt
-          # Note: https://github.com/burrunan/gradle-cache-action/issues/42 can possible break this
+          # Note: https://github.com/burrunan/gradle-cache-action/issues/42 can possibly break this
           arguments: |
             build
             -x detekt
           properties: |
             org.gradle.caching=true
             detekt.multiplatform.disabled=true
-            disableRedundantTargets
+            disableRedundantTargets=true
             enabledExecutables=debug
-
       - name: Upload gradle reports
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
           name: gradle-reports-windows-latest
           path: '**/build/reports/'
-      - name: Code coverage report
-        #if: ${{ runner.os == 'Linux' }}
-        if: ${{ false }}
-        uses: codecov/codecov-action@v1
-        with:
-          flags: unittests
-          fail_ci_if_error: true # optional (default = false)
