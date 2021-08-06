@@ -58,24 +58,9 @@ class IntegrationTest {
 
         // Execute the script from examples
         val execCmd = "cd $examplesDir && ${runCmd}run.sh $saveFlags"
-        val pb = ProcessBuilder(true, fs).exec(execCmd, null)
-        println("Executed:")
-        println(pb.stdout)
-        println(pb.stderr)
+        ProcessBuilder(true, fs).exec(execCmd, null)
 
-        val statusCmd = if (isCurrentOsWindows()) "%ERRORLEVEL%" else "$?"
-        val status = ProcessBuilder(true, fs).exec(" echo $statusCmd", null)
-        println("Status ${status.stdout}")
-
-        fs.list(examplesDir.toPath()).forEach {
-            println(it)
-        }
-        println("Report file: ${reportFile}")
         Thread.sleep(15_000)
-        println("---------------------------")
-        val output = fs.readLines((examplesDir + "temp.txt").toPath())
-        output.forEach { println(it) }
-        println("---------------------------")
         // Report should be created after successful completion
         assertTrue(fs.exists(reportFile))
 
