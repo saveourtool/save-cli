@@ -42,6 +42,9 @@ data class Warning(
     "ThrowsCount",
     "TOO_LONG_FUNCTION",
     "ReturnCount",
+    "ComplexMethod",
+    "NestedBlockDepth",
+    "AVOID_NULL_CHECKS",
 )
 internal fun String.extractWarning(warningRegex: Regex,
                                    fileName: String,
@@ -51,18 +54,25 @@ internal fun String.extractWarning(warningRegex: Regex,
 ): Warning? {
     val defaultLinePattern = Regex("// ;warn: (.*)")
     val groups = warningRegex.find(this)?.groups
-
-    val defaultLineGroups = groups?.let {
+    val defaultLineGroups = if (groups == null) {
+        defaultLinePattern.find(this)?.groups
+    } else {
         null
     }
-        ?: run {
-            defaultLinePattern.find(this)?.groups ?: return null
-        }
+
+    if (groups == null && defaultLineGroups == null) {
+        return null
+    }
 
     groups?.let {
         val column = columnGroupIdx?.let {
             try {
-                groups[columnGroupIdx]!!.value.toInt()
+                val colValue = groups[columnGroupIdx]!!.value
+                if (colValue.isEmpty()) {
+                    null
+                } else {
+                    colValue.toInt()
+                }
             } catch (e: Exception) {
                 throw ResourceFormatException("Could not extract column number from line [$this], cause: ${e.message}")
             }
@@ -80,9 +90,9 @@ internal fun String.extractWarning(warningRegex: Regex,
         )
     }
         ?: run {
-            defaultLineGroups?.let {
+            defaultLineGroups.let {
                 val message = try {
-                    defaultLineGroups[1]?.value
+                    defaultLineGroups?.get(1)?.value
                 } catch (e: Exception) {
                     throw ResourceFormatException("Could not extract warning message from line [$this], cause: ${e.message}")
                 }
@@ -96,8 +106,6 @@ internal fun String.extractWarning(warningRegex: Regex,
                 }
             }
         }
-
-    return null
 }
 
 /**
@@ -150,6 +158,7 @@ internal fun String.extractWarning(warningRegex: Regex,
     "ComplexMethod",
     "TOO_LONG_FUNCTION",
     "TOO_MANY_PARAMETERS",
+    "AVOID_NULL_CHECKS",
 )
 internal fun String.getLineNumber(warningRegex: Regex,
                                   lineGroupIdx: Int?,
@@ -160,35 +169,42 @@ internal fun String.getLineNumber(warningRegex: Regex,
 ): Int? {
     val defaultLinePattern = Regex("// ;warn: (.*)")
     val groups = warningRegex.find(this)?.groups
-
-    val defaultLineGroups = groups?.let {
+    val defaultLineGroups = if (groups == null) {
+        defaultLinePattern.find(this)?.groups
+    } else {
         null
     }
-        ?: run {
-            defaultLinePattern.find(this)?.groups ?: return null
-        }
+
+    if (groups == null && defaultLineGroups == null) {
+        return null
+    }
 
     groups?.let {
         return lineGroupIdx?.let {
-            groups[lineGroupIdx]!!.value.toIntOrNull() ?: run {
-                val lineGroup = groups[lineGroupIdx]!!.value
-                if (lineGroup[0] != placeholder[0]) {
-                    throw ResourceFormatException("The group <$lineGroup> is neither a number nor a placeholder.")
-                }
-                try {
-                    val line = lineGroup.substringAfterLast(placeholder)
-                    lineNum!! + 1 + if (line.isNotEmpty()) line.toInt() else 0
-                } catch (e: Exception) {
-                    throw ResourceFormatException("Could not extract line number from line [$this], cause: ${e.describe()}")
+            val lineValue = groups[lineGroupIdx]!!.value
+            if (lineValue.isEmpty()) {
+                null
+            } else {
+                lineValue.toIntOrNull() ?: run {
+                    val lineGroup = groups[lineGroupIdx]!!.value
+                    if (lineGroup[0] != placeholder[0]) {
+                        throw ResourceFormatException("The group <$lineGroup> is neither a number nor a placeholder.")
+                    }
+                    try {
+                        val line = lineGroup.substringAfterLast(placeholder)
+                        lineNum!! + 1 + if (line.isNotEmpty()) line.toInt() else 0
+                    } catch (e: Exception) {
+                        throw ResourceFormatException("Could not extract line number from line [$this], cause: ${e.describe()}")
+                    }
                 }
             }
         }
     }
         ?: run {
-            defaultLineGroups?.let {
+            defaultLineGroups.let {
                 var x = 1
                 val fileSize = linesFile!!.size
-                while (lineNum!! - 1 + x < fileSize && defaultLinePattern.find(linesFile[lineNum - 1 + x]) != null) {
+                while (lineNum!! - 1 + x < fileSize && (defaultLinePattern.find(linesFile[lineNum - 1 + x]) != null || warningRegex.find(linesFile[lineNum - 1 + x]) != null)) {
                     x++
                 }
                 val newLine = lineNum + x
@@ -198,8 +214,5 @@ internal fun String.getLineNumber(warningRegex: Regex,
                 }
                 return newLine
             }
-                ?: run {
-                    return null
-                }
         }
 }

@@ -73,6 +73,7 @@ class WarnPluginTest {
     }
 
     @Test
+    @Ignore
     @Suppress("TOO_LONG_FUNCTION")
     fun `warn-plugin test with default warning without line`() {
         fs.write(fs.createFile(tmpDir / "resource")) {
@@ -117,21 +118,25 @@ class WarnPluginTest {
     @Test
     @Ignore
     @Suppress("TOO_LONG_FUNCTION")
-    fun `warn-plugin test for placeholder`() {
+    fun `warn-plugin test for all mods`() {
         fs.write(fs.createFile(tmpDir / "resource")) {
             write(
                 """
-                |Test1Test.java:4:1: Class name should be in PascalCase
-                |Test1Test.java:4:1: Class name shouldn't have a number
-                |Test1Test.java:7:1: Variable name should be in LowerCase
+                |Test1Test.java:1:1: Package name is incorrect
+                |Test1Test.java:6:1: Class name should be in PascalCase too
+                |Test1Test.java:6:1: Class name should be in PascalCase
+                |Test1Test.java:6:1: Class name shouldn't have a number
+                |Test1Test.java:9:1: Variable name should be in LowerCase
                 """.trimMargin().encodeToByteArray()
             )
         }
         performTest(
             listOf(
                 """
+                // ;warn:1:1: Package name is incorrect
                 package org.cqfn.save.example
                 
+                // ;warn: Class name should be in PascalCase too
                 // ;warn:${'$'}l+1:1: Class name shouldn't have a number
                 class example1 {
                 // ;warn:${'$'}l-1:1: Class name should be in PascalCase
@@ -141,9 +146,10 @@ class WarnPluginTest {
             """.trimIndent()
             ),
             defaultWarnConfig.copy(
+                actualWarningsPattern = Regex("(.+):(\\d+):(\\d*): (.*)"),
                 linePlaceholder = "\$l",
             ),
-            GeneralConfig("", "", "", "")
+            GeneralConfig("", "", "", "", expectedWarningsPattern = Regex("// ;warn:(.+):(\\d+): (.*)"))
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
