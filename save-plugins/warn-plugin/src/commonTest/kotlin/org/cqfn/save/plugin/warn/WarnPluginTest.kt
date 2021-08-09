@@ -73,9 +73,8 @@ class WarnPluginTest {
     }
 
     @Test
-    @Ignore
     @Suppress("TOO_LONG_FUNCTION")
-    fun `warn-plugin test for defaultLineMode`() {
+    fun `warn-plugin test with default warning without line`() {
         fs.write(fs.createFile(tmpDir / "resource")) {
             write(
                 """
@@ -83,6 +82,7 @@ class WarnPluginTest {
                 |Test1Test.java:5: Class name shouldn't have a number
                 |Test1Test.java:7: Variable name should be in LowerCase
                 |Test1Test.java:10: Class should have a Kdoc
+                |Test1Test.java:10: Class name should be in PascalCase
                 """.trimMargin().encodeToByteArray()
             )
         }
@@ -98,14 +98,15 @@ class WarnPluginTest {
                     int Foo = 42;
                 }
                 // ;warn: Class should have a Kdoc
+                // ;warn:10: Class name should be in PascalCase
             """.trimIndent()
             ),
             WarnPluginConfig(
                 "$catCmd ${tmpDir / "resource"} && set stub=",
-                Regex("// ;warn: (.*)"),
-                true, false, 1, ", ", null, null, 1, 1, 2, null, 3, defaultLineMode = true
+                actualWarningsPattern = Regex("(.+):(\\d+): (.+)"),
+                true, false, 1, ", ", 1, null, 2, 1, 2, null, 3,
             ),
-            GeneralConfig("", "", "", "")
+            GeneralConfig("", "", "", "", expectedWarningsPattern = Regex("// ;warn:(\\d+): (.*)"))
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -140,7 +141,6 @@ class WarnPluginTest {
             """.trimIndent()
             ),
             defaultWarnConfig.copy(
-                defaultLineMode = false,
                 linePlaceholder = "\$l",
             ),
             GeneralConfig("", "", "", "")

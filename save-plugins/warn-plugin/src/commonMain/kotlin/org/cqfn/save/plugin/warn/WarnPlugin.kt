@@ -75,25 +75,6 @@ class WarnPlugin(
         }
     }
 
-    private fun plusLine(
-        file: Path,
-        warningRegex: Regex,
-        linesFile: List<String>,
-        lineNum: Int
-    ): Int {
-        var x = 1
-        val fileSize = linesFile.size
-        while (lineNum - 1 + x < fileSize && warningRegex.find(linesFile[lineNum - 1 + x]) != null) {
-            x++
-        }
-        val newLine = lineNum + x
-        if (newLine > fileSize) {
-            logWarn("Some warnings are at the end of the file: <$file>. They will be assigned the following line: $newLine")
-            return fileSize
-        }
-        return newLine
-    }
-
     @Suppress(
         "TOO_LONG_FUNCTION",
         "SAY_NO_TO_VAR",
@@ -155,7 +136,7 @@ class WarnPlugin(
 
         val actualWarningsMap = executionResult.stdout.mapNotNull {
             with(warnPluginConfig) {
-                val line = it.getLineNumber(actualWarningsPattern!!, lineCaptureGroupOut, linePlaceholder!!, null)
+                val line = it.getLineNumber(actualWarningsPattern!!, lineCaptureGroupOut, linePlaceholder!!, null, null, null)
                 it.extractWarning(
                     actualWarningsPattern,
                     fileNameCaptureGroupOut!!,
@@ -203,16 +184,14 @@ class WarnPlugin(
     ): WarningMap {
         val linesFile = fs.readLines(this)
         return linesFile.mapIndexed { index, line ->
-            val newLine = if (warnPluginConfig.defaultLineMode!!) {
-                plusLine(this, generalConfig.expectedWarningsPattern!!, linesFile, index)
-            } else {
-                line.getLineNumber(
-                    generalConfig.expectedWarningsPattern!!,
-                    warnPluginConfig.lineCaptureGroup,
-                    warnPluginConfig.linePlaceholder!!,
-                    index
-                )
-            }
+            val newLine = line.getLineNumber(
+                generalConfig.expectedWarningsPattern!!,
+                warnPluginConfig.lineCaptureGroup,
+                warnPluginConfig.linePlaceholder!!,
+                index,
+                this,
+                linesFile,
+            )
             with(warnPluginConfig) {
                 line.extractWarning(
                     generalConfig.expectedWarningsPattern!!,

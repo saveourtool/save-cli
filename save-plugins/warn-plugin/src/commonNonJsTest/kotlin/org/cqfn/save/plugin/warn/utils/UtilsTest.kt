@@ -94,7 +94,9 @@ class UtilsTest {
             expectedWarningsPattern,
             warnPluginConfig.lineCaptureGroup,
             warnPluginConfig.linePlaceholder!!,
-            null
+            null,
+            null,
+            null,
         )
         val warning = text.extractWarning(
             expectedWarningsPattern,
@@ -116,7 +118,9 @@ class UtilsTest {
             expectedWarningsPattern,
             warnPluginConfig.lineCaptureGroup,
             warnPluginConfig.linePlaceholder!!,
-            null
+            null,
+            null,
+            null,
         )
         val warning = text.extractWarning(
             expectedWarningsPattern,
