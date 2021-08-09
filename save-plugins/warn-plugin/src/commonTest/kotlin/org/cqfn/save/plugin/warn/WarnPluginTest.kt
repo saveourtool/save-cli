@@ -10,6 +10,7 @@ import org.cqfn.save.core.utils.isCurrentOsWindows
 import org.cqfn.save.plugin.warn.utils.extractWarning
 
 import okio.FileSystem
+import okio.Path.Companion.toPath
 
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -19,20 +20,21 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-/**
- * Needed tests:
- * - discovering of file pairs
- * - running tool
- */
 class WarnPluginTest {
     private val fs = FileSystem.SYSTEM
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPluginTest::class.simpleName!!)
     private val catCmd = if (isCurrentOsWindows()) "type" else "cat"
+    private val mockScriptFile = tmpDir / "resource"
     private val defaultWarnConfig = WarnPluginConfig(
-        "$catCmd ${tmpDir / "resource"} && set stub=",
+        "$catCmd $mockScriptFile && set stub=",
         Regex("// ;warn:(\\d+):(\\d+): (.*)"),
-        true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
+        true, true, 1, ", ",
+        1, 2, 3, 1, 2, 3, 4
     )
+
+    private fun mockExecCmd(stdout: String) = fs.write(fs.createFile(mockScriptFile)) {
+        write(stdout.encodeToByteArray())
+    }
 
     @BeforeTest
     fun setUp() {
@@ -42,16 +44,18 @@ class WarnPluginTest {
         fs.createDirectory(tmpDir)
     }
 
+    @AfterTest
+    fun tearDown() {
+        fs.deleteRecursively(tmpDir)
+    }
+
     @Test
-    @Ignore
     fun `basic warn-plugin test`() {
-        fs.write(fs.createFile(tmpDir / "resource")) {
-            write(
-                """
+        mockExecCmd(
+            """
                 |Test1Test.java:4:6: Class name should be in PascalCase
-                """.trimMargin().encodeToByteArray()
-            )
-        }
+            """.trimMargin()
+        )
         performTest(
             listOf(
                 """
@@ -69,23 +73,19 @@ class WarnPluginTest {
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
         }
-        fs.delete(tmpDir / "resource")
     }
 
     @Test
-    @Ignore
     @Suppress("TOO_LONG_FUNCTION")
     fun `warn-plugin test for defaultLineMode`() {
-        fs.write(fs.createFile(tmpDir / "resource")) {
-            write(
+        mockExecCmd(
                 """
                 |Test1Test.java:5: Class name should be in PascalCase
                 |Test1Test.java:5: Class name shouldn't have a number
                 |Test1Test.java:7: Variable name should be in LowerCase
                 |Test1Test.java:10: Class should have a Kdoc
-                """.trimMargin().encodeToByteArray()
+                """.trimMargin()
             )
-        }
         performTest(
             listOf(
                 """
@@ -100,32 +100,29 @@ class WarnPluginTest {
                 // ;warn: Class should have a Kdoc
             """.trimIndent()
             ),
-            WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"} && set stub=",
-                Regex("// ;warn: (.*)"),
-                true, false, 1, ", ", null, null, 1, 1, 2, null, 3, defaultLineMode = true
+            defaultWarnConfig.copy(
+                actualWarningsPattern = Regex("// ;warn: (.*)"),
+                warningTextHasColumn = false,
+                lineCaptureGroup = null,
+                columnCaptureGroup = null,
             ),
             GeneralConfig("", "", "", "")
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
         }
-        fs.delete(tmpDir / "resource")
     }
 
     @Test
-    @Ignore
     @Suppress("TOO_LONG_FUNCTION")
     fun `warn-plugin test for placeholder`() {
-        fs.write(fs.createFile(tmpDir / "resource")) {
-            write(
+        mockExecCmd(
                 """
                 |Test1Test.java:4:1: Class name should be in PascalCase
                 |Test1Test.java:4:1: Class name shouldn't have a number
                 |Test1Test.java:7:1: Variable name should be in LowerCase
-                """.trimMargin().encodeToByteArray()
+                """.trimMargin()
             )
-        }
         performTest(
             listOf(
                 """
@@ -148,20 +145,16 @@ class WarnPluginTest {
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
         }
-        fs.delete(tmpDir / "resource")
     }
 
     @Test
-    @Ignore
     fun `basic warn-plugin test with exactWarningsMatch = false`() {
-        fs.write(fs.createFile(tmpDir / "resource")) {
-            write(
+        mockExecCmd(
                 """
                 |Test1Test.java:4:6: Class name should be in PascalCase
                 |Test1Test.java:5:8: Variable name should be in lowerCamelCase
-                """.trimMargin().encodeToByteArray()
+                """.trimMargin()
             )
-        }
         performTest(
             listOf(
                 """
@@ -184,7 +177,6 @@ class WarnPluginTest {
                     "Some warnings were unexpected: [Warning(message=Variable name should be in lowerCamelCase, line=5, column=8, fileName=Test1Test.java)]"
             assertEquals(nameWarn, (results.single().status as Pass).message)
         }
-        fs.delete(tmpDir / "resource")
     }
 
     @Test
@@ -215,18 +207,15 @@ class WarnPluginTest {
     }
 
     @Test
-    @Ignore
     @Suppress("TOO_LONG_FUNCTION")
     fun `warn-plugin test - multiple warnings`() {
-        fs.write(fs.createFile(tmpDir / "resource")) {
-            write(
+        mockExecCmd(
                 """Test1Test.java:1:1: Avoid using default package
                     |Test1Test.java:3:6: Class name should be in PascalCase
                     |Test1Test.java:5:5: Variable name should be in lowerCamelCase
                     |Test1Test.java:7:1: File should end with trailing newline
-                    |""".trimMargin().encodeToByteArray()
+                    |""".trimMargin()
             )
-        }
         performTest(
             listOf(
                 """
@@ -245,22 +234,19 @@ class WarnPluginTest {
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
         }
-        fs.delete(tmpDir / "resource")
     }
 
     @Test
     @Ignore  // this logic is todo
     @Suppress("TOO_LONG_FUNCTION")
     fun `warn-plugin test - multiple warnings & ignore technical comments`() {
-        fs.write(fs.createFile(tmpDir / "resource")) {
-            write(
+        mockExecCmd(
                 """Test1Test.java:1:1: Avoid using default package
                     |Test1Test.java:3:6: Class name should be in PascalCase
                     |Test1Test.java:5:5: Variable name should be in lowerCamelCase
                     |Test1Test.java:7:1: File should end with trailing newline
-                    |""".trimMargin().encodeToByteArray()
+                    |""".trimMargin()
             )
-        }
         val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
             listOf(
@@ -286,22 +272,18 @@ class WarnPluginTest {
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
         }
-        fs.delete(tmpDir / "resource")
     }
 
     @Test
-    @Ignore
     @Suppress("TOO_LONG_FUNCTION")
     fun `warn-plugin test - multiple warnings, no line-col`() {
-        fs.write(fs.createFile(tmpDir / "resource")) {
-            write(
+        mockExecCmd(
                 """Test1Test.java: Avoid using default package
                     |Test1Test.java: Class name should be in PascalCase
                     |Test1Test.java: Variable name should be in lowerCamelCase
                     |Test1Test.java: File should end with trailing newline
-                    |""".trimMargin().encodeToByteArray()
+                    |""".trimMargin()
             )
-        }
         val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
             listOf(
@@ -328,21 +310,17 @@ class WarnPluginTest {
                 assertTrue(it is Pass, "Expected test to pass, but actually got status $it")
             }
         }
-        fs.delete(tmpDir / "resource")
     }
 
     @Test
-    @Ignore
     @Suppress("TOO_LONG_FUNCTION")
     fun `warn-plugin test for batchSize`() {
-        fs.write(fs.createFile(tmpDir / "resource")) {
-            write(
+        mockExecCmd(
                 """
                 |Test1Test.java:4:6: Class name should be in PascalCase
                 |Test2Test.java:2:3: Class name should be in PascalCase
-                """.trimMargin().encodeToByteArray()
+                """.trimMargin()
             )
-        }
         performTest(
             listOf(
                 """
@@ -370,20 +348,16 @@ class WarnPluginTest {
             assertEquals(2, results.size)
             assertTrue(results.all { it.status is Pass })
         }
-        fs.delete(tmpDir / "resource")
     }
 
     @Test
-    @Ignore
     @Suppress("TOO_LONG_FUNCTION")
     fun `regression - test resources in multiple directories`() {
-        fs.write(fs.createFile(tmpDir / "resource")) {
-            write(
+        mockExecCmd(
                 """
                 |
-                """.trimMargin().encodeToByteArray()
+                """.trimMargin()
             )
-        }
         fs.createFile(tmpDir / "Test1Test.java")
         fs.createFile(tmpDir / "Test2Test.java")
         fs.createDirectory(tmpDir / "inner")
@@ -399,12 +373,6 @@ class WarnPluginTest {
             assertEquals(4, results.size)
             assertTrue(results.all { it.status is Pass })
         }
-        fs.delete(tmpDir / "resource")
-    }
-
-    @AfterTest
-    fun tearDown() {
-        fs.deleteRecursively(tmpDir)
     }
 
     private fun performTest(
