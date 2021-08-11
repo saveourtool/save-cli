@@ -169,6 +169,6 @@ data class WarnPluginConfig(
          * Default regex for actual warnings in the tool output, e.g.
          * ```[WARN] /path/to/resources/ClassNameTest.java:2:4: Class name in incorrect case```
          */
-        internal val defaultOutputPattern = Regex("(.+):(\\d+):(\\d+): (.+)")
+        internal val defaultOutputPattern = Regex("(.+):(\\d*):(\\d*): (.+)")
     }
 }

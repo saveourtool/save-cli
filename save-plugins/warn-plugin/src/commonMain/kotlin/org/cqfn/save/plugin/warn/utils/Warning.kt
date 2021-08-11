@@ -10,6 +10,8 @@ import org.cqfn.save.core.plugin.ResourceFormatException
 
 import okio.Path
 
+private val defaultLinePattern = Regex("// ;warn: (.*)")
+
 /**
  * Class for warnings which should be discovered and compared wit analyzer output
  *
@@ -52,7 +54,6 @@ internal fun String.extractWarning(warningRegex: Regex,
                                    columnGroupIdx: Int?,
                                    messageGroupIdx: Int,
 ): Warning? {
-    val defaultLinePattern = Regex("// ;warn: (.*)")
     val groups = warningRegex.find(this)?.groups
     val defaultLineGroups = if (groups == null) {
         defaultLinePattern.find(this)?.groups
@@ -65,18 +66,7 @@ internal fun String.extractWarning(warningRegex: Regex,
     }
 
     groups?.let {
-        val column = columnGroupIdx?.let {
-            try {
-                val colValue = groups[columnGroupIdx]!!.value
-                if (colValue.isEmpty()) {
-                    null
-                } else {
-                    colValue.toInt()
-                }
-            } catch (e: Exception) {
-                throw ResourceFormatException("Could not extract column number from line [$this], cause: ${e.message}")
-            }
-        }
+        val column = getRegexGroupSafe(columnGroupIdx, groups, this)
         val message = try {
             groups[messageGroupIdx]!!.value
         } catch (e: Exception) {
@@ -89,21 +79,19 @@ internal fun String.extractWarning(warningRegex: Regex,
             fileName,
         )
     }
-        ?: run {
-            defaultLineGroups.let {
-                val message = try {
-                    defaultLineGroups?.get(1)?.value
-                } catch (e: Exception) {
-                    throw ResourceFormatException("Could not extract warning message from line [$this], cause: ${e.message}")
-                }
-                return message?.let {
-                    Warning(
-                        it,
-                        line,
-                        null,
-                        fileName,
-                    )
-                }
+        ?: defaultLineGroups.let {
+            val message = try {
+                defaultLineGroups?.get(1)?.value
+            } catch (e: Exception) {
+                throw ResourceFormatException("Could not extract warning message from line [$this], cause: ${e.message}")
+            }
+            return message?.let {
+                Warning(
+                    it,
+                    line,
+                    null,
+                    fileName,
+                )
             }
         }
 }
@@ -167,7 +155,6 @@ internal fun String.getLineNumber(warningRegex: Regex,
                                   file: Path?,
                                   linesFile: List<String>?,
 ): Int? {
-    val defaultLinePattern = Regex("// ;warn: (.*)")
     val groups = warningRegex.find(this)?.groups
     val defaultLineGroups = if (groups == null) {
         defaultLinePattern.find(this)?.groups
@@ -200,19 +187,33 @@ internal fun String.getLineNumber(warningRegex: Regex,
             }
         }
     }
-        ?: run {
-            defaultLineGroups.let {
-                var x = 1
-                val fileSize = linesFile!!.size
-                while (lineNum!! - 1 + x < fileSize && (defaultLinePattern.find(linesFile[lineNum - 1 + x]) != null || warningRegex.find(linesFile[lineNum - 1 + x]) != null)) {
-                    x++
-                }
-                val newLine = lineNum + x
-                if (newLine > fileSize) {
-                    logWarn("Some warnings are at the end of the file: <$file>. They will be assigned the following line: $newLine")
-                    return fileSize
-                }
-                return newLine
+        ?: defaultLineGroups.let {
+            var x = 1
+            val fileSize = linesFile!!.size
+            while (lineNum!! - 1 + x < fileSize && (defaultLinePattern.find(linesFile[lineNum - 1 + x]) != null || warningRegex.find(linesFile[lineNum - 1 + x]) != null)) {
+                x++
             }
+            val newLine = lineNum + x
+            if (newLine > fileSize) {
+                logWarn("Some warnings are at the end of the file: <$file>. They will be assigned the following line: $newLine")
+                return fileSize
+            }
+            return newLine
         }
+}
+
+private fun getRegexGroupSafe(idx: Int?,
+                              groups: MatchGroupCollection,
+                              line: String,
+) = idx?.let {
+    try {
+        val colValue = groups[idx]!!.value
+        if (colValue.isEmpty()) {
+            null
+        } else {
+            colValue.toInt()
+        }
+    } catch (e: Exception) {
+        throw ResourceFormatException("Could not extract column number from line [$line], cause: ${e.message}")
+    }
 }
