@@ -19,6 +19,14 @@ import kotlin.test.Test
  */
 class ClassicWarnTest {
     @Test
+    @Ignore  // fixme: change directory in fix-plugin too?
+    fun `execute warn plugin with default testFiles`() = runTest {
+        runTestsWithDiktat(
+            null, 9
+        )
+    }
+
+    @Test
     fun `execute warn plugin on separate files`() = runTest {
         runTestsWithDiktat(
             listOf(
@@ -57,5 +65,15 @@ class ClassicWarnTest {
                 "warn/chapter1/save.toml"
             ), 2
         )
+    }
+
+    @Test
+    fun `execute warn plugin with included and excluded suites`() = runTest {
+        runTestsWithDiktat(
+            emptyList(), 2
+        ) {
+            includeSuites = "warnings,DocsCheck"
+            excludeSuites = "Chapter1,Chapter2,Chapter3"
+        }
     }
 }
