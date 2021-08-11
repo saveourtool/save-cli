@@ -59,9 +59,12 @@ class Save(
 
         // FixMe: now we work only with the save.toml config and it's hierarchy, but we should work properly here with directories as well
         val rootTestConfigPath = saveProperties.testRootPath!!.toPath() / "save.toml"
-        val (requestedConfigs, requestedTests) = saveProperties.testFiles!!.partition {
-            it.toPath().isSaveTomlConfig()
-        }
+        val (requestedConfigs, requestedTests) = saveProperties.testFiles!!
+            .map { saveProperties.testRootPath!!.toPath() / it }
+            .map { it.toString() }
+            .partition { it.toPath().isSaveTomlConfig() }
+        val includeSuites = saveProperties.includeSuites?.split(",") ?: emptyList()
+        val excludeSuites = saveProperties.excludeSuites?.split(",") ?: emptyList()
 
         reporter.beforeAll()
         // get all toml configs in file system
@@ -75,7 +78,9 @@ class Save(
                     .processInPlace()
                     // create plugins and choose only active (with test resources) ones
                     .buildActivePlugins(requestedTests)
-                    .takeIf { it.isNotEmpty() }
+                    .takeIf { plugins ->
+                        plugins.isNotEmpty() && plugins.first().isFromEnabledSuite(includeSuites, excludeSuites)
+                    }
                     ?.also {
                         // configuration has been already validated by this point, and if there are active plugins, then suiteName is not null
                         reporter.onSuiteStart(testConfig.getGeneralConfig()?.suiteName!!)
@@ -92,6 +97,14 @@ class Save(
         reporter.out.close()
 
         return reporter
+    }
+
+    private fun Plugin.isFromEnabledSuite(includeSuites: List<String>, excludeSuites: List<String>): Boolean {
+        val suiteName = testConfig.getGeneralConfig()?.suiteName
+        // either no specific includes, or current suite is included
+        return (includeSuites.isEmpty() || includeSuites.contains(suiteName)) &&
+                // either no specific excludes, or current suite is not excluded
+                (excludeSuites.isEmpty() || !excludeSuites.contains(suiteName))
     }
 
     private fun executePlugin(plugin: Plugin, reporter: Reporter) {
