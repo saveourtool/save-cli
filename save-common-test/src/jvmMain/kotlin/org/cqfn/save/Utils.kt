@@ -4,5 +4,7 @@
 package org.cqfn.save
 
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
 
+actual typealias BeforeClass = BeforeAll
 actual typealias AfterClass = AfterAll

@@ -36,6 +36,7 @@ const val TIMEOUT = 100_000L
  * Workaround to use suspending functions in unit tests
  *
  * @param block
+ * @return the result of blocked suspend function
  */
 fun runTest(block: suspend (scope: CoroutineScope) -> Unit) = runBlocking { block(this) }
 

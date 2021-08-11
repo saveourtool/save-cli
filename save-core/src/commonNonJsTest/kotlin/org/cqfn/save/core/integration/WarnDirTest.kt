@@ -1,8 +1,14 @@
 package org.cqfn.save.core.integration
 
+import org.cqfn.save.AfterClass
+import org.cqfn.save.BeforeClass
 import org.cqfn.save.core.test.utils.runTest
 import org.cqfn.save.core.test.utils.runTestsWithDiktat
 
+import okio.FileSystem
+import okio.Path.Companion.toPath
+
+import kotlin.jvm.JvmStatic
 import kotlin.test.Ignore
 import kotlin.test.Test
 
@@ -28,5 +34,22 @@ class WarnDirTest {
     @Test
     fun `execute warn plugin on the directory chapter3`() = runTest {
         runTestsWithDiktat(listOf("warn-dir/chapter3"), 1)
+    }
+
+    companion object {
+        @BeforeClass
+        @JvmStatic
+        fun setUp() {
+            numTestsRunning.addAndGet(1)
+        }
+
+        @AfterClass
+        @JvmStatic
+        fun tearDown() {
+            if (numTestsRunning.addAndGet(-1) == 0) {
+                FileSystem.SYSTEM.delete("../examples/kotlin-diktat/ktlint".toPath())
+                FileSystem.SYSTEM.delete("../examples/kotlin-diktat/diktat.jar".toPath())
+            }
+        }
     }
 }

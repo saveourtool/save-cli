@@ -2,4 +2,5 @@
 
 package org.cqfn.save
 
+actual typealias BeforeClass = kotlin.test.BeforeClass
 actual typealias AfterClass = kotlin.test.AfterClass
