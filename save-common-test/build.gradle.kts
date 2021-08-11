@@ -18,5 +18,12 @@ kotlin {
                 implementation(kotlin("test-junit5"))
             }
         }
+        val jvmTest by getting {
+            dependsOn(jvmMain)
+        }
+        val nativeMain by getting
+        val nativeTest by getting {
+            dependsOn(nativeMain)
+        }
     }
 }
