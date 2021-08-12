@@ -35,21 +35,4 @@ class WarnDirTest {
     fun `execute warn plugin on the directory chapter3`() = runTest {
         runTestsWithDiktat(listOf("warn-dir/chapter3"), 1)
     }
-
-    companion object {
-        @BeforeClass
-        @JvmStatic
-        fun setUp() {
-            numTestsRunning.addAndGet(1)
-        }
-
-        @AfterClass
-        @JvmStatic
-        fun tearDown() {
-            if (numTestsRunning.addAndGet(-1) == 0) {
-                FileSystem.SYSTEM.delete("../examples/kotlin-diktat/ktlint".toPath())
-                FileSystem.SYSTEM.delete("../examples/kotlin-diktat/diktat.jar".toPath())
-            }
-        }
-    }
 }
