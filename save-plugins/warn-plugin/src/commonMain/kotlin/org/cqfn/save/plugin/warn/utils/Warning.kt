@@ -192,6 +192,10 @@ internal fun String.getLineNumber(warningRegex: Regex,
         }
 }
 
+@Suppress(
+    "TooGenericExceptionCaught",
+    "SwallowedException",
+)
 private fun getRegexGroupSafe(idx: Int?,
                               groups: MatchGroupCollection,
                               line: String,
