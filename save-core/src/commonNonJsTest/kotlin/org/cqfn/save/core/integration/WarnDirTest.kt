@@ -1,14 +1,8 @@
 package org.cqfn.save.core.integration
 
-import org.cqfn.save.AfterClass
-import org.cqfn.save.BeforeClass
 import org.cqfn.save.core.test.utils.runTest
 import org.cqfn.save.core.test.utils.runTestsWithDiktat
 
-import okio.FileSystem
-import okio.Path.Companion.toPath
-
-import kotlin.jvm.JvmStatic
 import kotlin.test.Ignore
 import kotlin.test.Test
 

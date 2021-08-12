@@ -1,8 +1,9 @@
 
 import org.cqfn.save.generation.configFilePath
 import org.cqfn.save.generation.generateConfigOptions
-import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
+
 import de.undercouch.gradle.tasks.download.Download
+import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
 
 plugins {
     id("org.cqfn.save.buildutils.kotlin-library")
