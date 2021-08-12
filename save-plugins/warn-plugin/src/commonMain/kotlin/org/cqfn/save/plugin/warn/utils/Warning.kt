@@ -170,7 +170,7 @@ internal fun String.getLineNumber(warningRegex: Regex,
         return lineGroupIdx?.let {
             val lineValue = groups[lineGroupIdx]!!.value
             if (lineValue.isEmpty()) {
-                null
+                return plusLine(file, warningRegex, linesFile, lineNum)
             } else {
                 lineValue.toIntOrNull() ?: run {
                     val lineGroup = groups[lineGroupIdx]!!.value
@@ -188,17 +188,7 @@ internal fun String.getLineNumber(warningRegex: Regex,
         }
     }
         ?: defaultLineGroups.let {
-            var x = 1
-            val fileSize = linesFile!!.size
-            while (lineNum!! - 1 + x < fileSize && (defaultLinePattern.find(linesFile[lineNum - 1 + x]) != null || warningRegex.find(linesFile[lineNum - 1 + x]) != null)) {
-                x++
-            }
-            val newLine = lineNum + x
-            if (newLine > fileSize) {
-                logWarn("Some warnings are at the end of the file: <$file>. They will be assigned the following line: $newLine")
-                return fileSize
-            }
-            return newLine
+            return plusLine(file, warningRegex, linesFile, lineNum)
         }
 }
 
@@ -216,4 +206,23 @@ private fun getRegexGroupSafe(idx: Int?,
     } catch (e: Exception) {
         throw ResourceFormatException("Could not extract column number from line [$line], cause: ${e.message}")
     }
+}
+
+private fun plusLine(
+    file: Path?,
+    warningRegex: Regex,
+    linesFile: List<String>?,
+    lineNum: Int?
+): Int {
+    var x = 1
+    val fileSize = linesFile!!.size
+    while (lineNum!! - 1 + x < fileSize && (warningRegex.find(linesFile[lineNum - 1 + x]) != null || defaultLinePattern.find(linesFile[lineNum - 1 + x]) != null)) {
+        x++
+    }
+    val newLine = lineNum + x
+    if (newLine > fileSize) {
+        logWarn("Some warnings are at the end of the file: <$file>. They will be assigned the following line: $newLine")
+        return fileSize
+    }
+    return newLine
 }

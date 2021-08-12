@@ -16,9 +16,6 @@ class WarnDirTest {
     }
 
     @Test
-    // FixMe: this test will fail until we will support proper calculation of line number in the default mode
-    // FixMe: to do that we need: 1) to exclude warning comments from the initial code, so it won't rigger warns
-    // FixMe: 2) to merge the logic for EXPLICIT set of line numbers with the default mode to provide line numbers like "1"
     fun `execute warn plugin on the directory chapter2`() = runTest {
         runTestsWithDiktat(listOf("warn-dir/chapter2"), 1)
     }
