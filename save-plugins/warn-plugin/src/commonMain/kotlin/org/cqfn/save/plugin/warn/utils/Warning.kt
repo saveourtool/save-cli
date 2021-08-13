@@ -127,6 +127,18 @@ internal fun String.getLineNumber(warningRegex: Regex,
     }
 }
 
+/**
+ * @param warningRegex regular expression for warning
+ * @param lineGroupIdx index of capture group for line number
+ * @return line number
+ */
+internal fun String.getLineNumber(warningRegex: Regex,
+                                  lineGroupIdx: Int?,
+): Int? {
+    val groups = warningRegex.find(this)?.groups ?: return null
+    return getRegexGroupSafe(lineGroupIdx, groups, this, "file name")?.toInt()
+}
+
 @Suppress(
     "WRONG_NEWLINES",
     "TooGenericExceptionCaught",

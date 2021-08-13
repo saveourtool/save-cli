@@ -136,7 +136,7 @@ class WarnPlugin(
 
         val actualWarningsMap = executionResult.stdout.mapNotNull {
             with(warnPluginConfig) {
-                val line = it.getLineNumber(actualWarningsPattern!!, lineCaptureGroupOut, linePlaceholder!!, null, null, null)
+                val line = it.getLineNumber(actualWarningsPattern!!, lineCaptureGroupOut)
                 it.extractWarning(
                     actualWarningsPattern,
                     fileNameCaptureGroupOut!!,
