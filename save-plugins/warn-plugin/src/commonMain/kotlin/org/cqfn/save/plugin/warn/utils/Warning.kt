@@ -113,13 +113,11 @@ internal fun String.getLineNumber(warningRegex: Regex,
             return plusLine(file, warningRegex, linesFile, lineNum)
         } else {
             lineValue.toIntOrNull() ?: run {
-                val lineGroup = groups[lineGroupIdx]!!.value
-
-                if (lineGroup[0] != placeholder[0]) {
-                    throw ResourceFormatException("The group <$lineGroup> is neither a number nor a placeholder.")
+                if (lineValue[0] != placeholder[0]) {
+                    throw ResourceFormatException("The group <$lineValue> is neither a number nor a placeholder.")
                 }
                 try {
-                    val line = lineGroup.substringAfterLast(placeholder)
+                    val line = lineValue.substringAfterLast(placeholder)
                     lineNum!! + 1 + if (line.isNotEmpty()) line.toInt() else 0
                 } catch (e: Exception) {
                     throw ResourceFormatException("Could not extract line number from line [$this], cause: ${e.describe()}")
