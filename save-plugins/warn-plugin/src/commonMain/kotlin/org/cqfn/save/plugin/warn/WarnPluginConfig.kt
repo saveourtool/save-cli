@@ -41,7 +41,6 @@ import kotlinx.serialization.UseSerializers
  * @property testNameSuffix suffix name of the test file.
  * @property batchSize it controls how many files execCmd will process at a time.
  * @property batchSeparator separator for batch mode
- * @property defaultLineMode whether to use default value for line number; when enabled, default value will be equal to the next line
  * @property linePlaceholder placeholder for line number, which resolved as current line and support addition and subtraction
  * @property wildCardInDirectoryMode mode that controls that we are targetting our tested tools on directories (not on files).
  * This prefix will be added to the name of the directory, if you would like to use directory mode without any prefix simply use ""
@@ -63,7 +62,6 @@ data class WarnPluginConfig(
     val messageCaptureGroupOut: Int? = null,
     val exactWarningsMatch: Boolean? = null,
     val testNameSuffix: String? = null,
-    val defaultLineMode: Boolean? = null,
     val linePlaceholder: String? = null,
     val wildCardInDirectoryMode: String? = null,
 ) : PluginConfig {
@@ -105,7 +103,6 @@ data class WarnPluginConfig(
             this.messageCaptureGroupOut ?: other.messageCaptureGroupOut,
             this.exactWarningsMatch ?: other.exactWarningsMatch,
             this.testNameSuffix ?: other.testNameSuffix,
-            this.defaultLineMode ?: other.defaultLineMode,
             this.linePlaceholder ?: other.linePlaceholder,
             this.wildCardInDirectoryMode ?: other.wildCardInDirectoryMode,
         )
@@ -120,11 +117,8 @@ data class WarnPluginConfig(
     override fun validateAndSetDefaults(): WarnPluginConfig {
         val newWarningTextHasLine = warningTextHasLine ?: true
         val newWarningTextHasColumn = warningTextHasColumn ?: true
-        val newDefaultLineMode = defaultLineMode ?: false
 
-        val newLineCaptureGroup = if (newDefaultLineMode) {
-            null
-        } else if (newWarningTextHasLine) {
+        val newLineCaptureGroup = if (newWarningTextHasLine) {
             (lineCaptureGroup ?: 1)
         } else {
             null
@@ -154,8 +148,7 @@ data class WarnPluginConfig(
             newMessageCaptureGroupOut,
             exactWarningsMatch ?: true,
             testName,
-            newDefaultLineMode,
-            linePlaceholder ?: "line",
+            linePlaceholder ?: "\$line",
             wildCardInDirectoryMode,
         )
     }
@@ -176,6 +169,6 @@ data class WarnPluginConfig(
          * Default regex for actual warnings in the tool output, e.g.
          * ```[WARN] /path/to/resources/ClassNameTest.java:2:4: Class name in incorrect case```
          */
-        internal val defaultOutputPattern = Regex("(.+):(\\d+):(\\d+): (.+)")
+        internal val defaultOutputPattern = Regex("(.+):(\\d*):(\\d*): (.+)")
     }
 }

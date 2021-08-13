@@ -5,7 +5,10 @@
 package org.cqfn.save.plugin.warn.utils
 
 import org.cqfn.save.core.logging.describe
+import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.plugin.ResourceFormatException
+
+import okio.Path
 
 /**
  * Class for warnings which should be discovered and compared wit analyzer output
@@ -33,10 +36,6 @@ data class Warning(
  * @return a [Warning] or null if [this] string doesn't match [warningRegex]
  * @throws ResourceFormatException when parsing a file
  */
-@Suppress(
-    "TooGenericExceptionCaught",
-    "SwallowedException",
-    "ThrowsCount")
 internal fun String.extractWarning(warningRegex: Regex,
                                    fileName: String,
                                    line: Int?,
@@ -45,20 +44,8 @@ internal fun String.extractWarning(warningRegex: Regex,
 ): Warning? {
     val groups = warningRegex.find(this)?.groups ?: return null
 
-    val column = columnGroupIdx?.let {
-        try {
-            groups[columnGroupIdx]!!.value.toInt()
-        } catch (e: Exception) {
-            throw ResourceFormatException("Could not extract column number from line [$this], cause: ${e.message}")
-        }
-    }
-
-    val message = try {
-        groups[messageGroupIdx]!!.value
-    } catch (e: Exception) {
-        throw ResourceFormatException("Could not extract warning message from line [$this], cause: ${e.message}")
-    }
-
+    val column = getRegexGroupSafe(columnGroupIdx, groups, this, "column number")?.toIntOrNull()
+    val message = getRegexGroupSafe(messageGroupIdx, groups, this, "warning message")!!
     return Warning(
         message,
         line,
@@ -88,12 +75,7 @@ internal fun String.extractWarning(warningRegex: Regex,
                                    messageGroupIdx: Int,
 ): Warning? {
     val groups = warningRegex.find(this)?.groups ?: return null
-
-    val fileName = try {
-        groups[fileNameGroupIdx]!!.value
-    } catch (e: Exception) {
-        throw ResourceFormatException("Could not extract file name from line [$this], cause: ${e.message}")
-    }
+    val fileName = getRegexGroupSafe(fileNameGroupIdx, groups, this, "file name")!!
 
     return extractWarning(warningRegex, fileName, line, columnGroupIdx, messageGroupIdx)
 }
@@ -103,6 +85,8 @@ internal fun String.extractWarning(warningRegex: Regex,
  * @param lineGroupIdx index of capture group for line number
  * @param placeholder placeholder for line
  * @param lineNum number of line
+ * @param file path to test file
+ * @param linesFile lines of file
  * @return a [Warning] or null if [this] string doesn't match [warningRegex]
  * @throws ResourceFormatException when parsing a file
  */
@@ -110,26 +94,81 @@ internal fun String.extractWarning(warningRegex: Regex,
     "TooGenericExceptionCaught",
     "SwallowedException",
     "NestedBlockDepth",
+    "LongParameterList",
+    "ReturnCount",
+    "TOO_MANY_PARAMETERS",
 )
 internal fun String.getLineNumber(warningRegex: Regex,
                                   lineGroupIdx: Int?,
                                   placeholder: String,
                                   lineNum: Int?,
+                                  file: Path?,
+                                  linesFile: List<String>?,
 ): Int? {
     val groups = warningRegex.find(this)?.groups ?: return null
 
     return lineGroupIdx?.let {
-        groups[lineGroupIdx]!!.value.toIntOrNull() ?: run {
-            val lineGroup = groups[lineGroupIdx]!!.value
-            if (lineGroup[0] != placeholder[0]) {
-                throw ResourceFormatException("The group <$lineGroup> is neither a number nor a placeholder.")
-            }
-            try {
-                val line = lineGroup.substringAfterLast(placeholder)
-                lineNum!! + 1 + if (line.isNotEmpty()) line.toInt() else 0
-            } catch (e: Exception) {
-                throw ResourceFormatException("Could not extract line number from line [$this], cause: ${e.describe()}")
+        val lineValue = groups[lineGroupIdx]!!.value
+        if (lineValue.isEmpty() && lineNum != null && linesFile != null) {
+            return plusLine(file, warningRegex, linesFile, lineNum)
+        } else {
+            lineValue.toIntOrNull() ?: run {
+                if (lineValue[0] != placeholder[0]) {
+                    throw ResourceFormatException("The group <$lineValue> is neither a number nor a placeholder.")
+                }
+                try {
+                    val line = lineValue.substringAfterLast(placeholder)
+                    lineNum!! + 1 + if (line.isNotEmpty()) line.toInt() else 0
+                } catch (e: Exception) {
+                    throw ResourceFormatException("Could not extract line number from line [$this], cause: ${e.describe()}")
+                }
             }
         }
     }
+}
+
+/**
+ * @param warningRegex regular expression for warning
+ * @param lineGroupIdx index of capture group for line number
+ * @return line number
+ */
+internal fun String.getLineNumber(warningRegex: Regex,
+                                  lineGroupIdx: Int?,
+): Int? {
+    val groups = warningRegex.find(this)?.groups ?: return null
+    return getRegexGroupSafe(lineGroupIdx, groups, this, "file name")?.toInt()
+}
+
+@Suppress(
+    "WRONG_NEWLINES",
+    "TooGenericExceptionCaught",
+    "SwallowedException",
+)
+private fun getRegexGroupSafe(idx: Int?,
+                              groups: MatchGroupCollection,
+                              line: String,
+                              exceptionMessage: String,
+): String? {
+    return idx?.let {
+        try {
+            return groups[idx]!!.value
+        } catch (e: Exception) {
+            throw ResourceFormatException("Could not extract $exceptionMessage from line [$line], cause: ${e.message}")
+        }
+    }
+}
+
+private fun plusLine(
+    file: Path?,
+    warningRegex: Regex,
+    linesFile: List<String>,
+    lineNum: Int
+): Int {
+    val fileSize = linesFile.size
+    val newLine = lineNum + 1 + linesFile.drop(lineNum).takeWhile { warningRegex.containsMatchIn(it) }.count()
+    if (newLine > fileSize) {
+        logWarn("Some warnings are at the end of the file: <$file>. They will be assigned the following line: $newLine")
+        return fileSize
+    }
+    return newLine
 }
