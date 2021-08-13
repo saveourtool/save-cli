@@ -155,7 +155,7 @@ private fun plusLine(
     lineNum: Int
 ): Int {
     val fileSize = linesFile.size
-    val newLine = lineNum + 1 + linesFile.drop(lineNum).takeWhile { warningRegex.find(it) != null }.count()
+    val newLine = lineNum + 1 + linesFile.drop(lineNum).takeWhile { warningRegex.containsMatchIn(it) }.count()
     if (newLine > fileSize) {
         logWarn("Some warnings are at the end of the file: <$file>. They will be assigned the following line: $newLine")
         return fileSize
