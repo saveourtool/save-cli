@@ -10,8 +10,6 @@ import org.cqfn.save.core.plugin.ResourceFormatException
 
 import okio.Path
 
-private val defaultLinePattern = Regex("// ;warn: (.*)")
-
 /**
  * Class for warnings which should be discovered and compared wit analyzer output
  *
@@ -38,40 +36,17 @@ data class Warning(
  * @return a [Warning] or null if [this] string doesn't match [warningRegex]
  * @throws ResourceFormatException when parsing a file
  */
-@Suppress(
-    "TooGenericExceptionCaught",
-    "SwallowedException",
-    "ThrowsCount",
-    "TOO_LONG_FUNCTION",
-    "ReturnCount",
-    "ComplexMethod",
-    "NestedBlockDepth",
-    "AVOID_NULL_CHECKS",
-)
 internal fun String.extractWarning(warningRegex: Regex,
                                    fileName: String,
                                    line: Int?,
                                    columnGroupIdx: Int?,
                                    messageGroupIdx: Int,
 ): Warning? {
-    val groups = warningRegex.find(this)?.groups
-    val defaultLineGroups = if (groups == null) {
-        defaultLinePattern.find(this)?.groups
-    } else {
-        null
-    }
+    val groups = warningRegex.find(this)?.groups ?: return null
 
-    if (groups == null && defaultLineGroups == null) {
-        return null
-    }
-
-    groups?.let {
-        val column = getRegexGroupSafe(columnGroupIdx, groups, this)
-        val message = try {
-            groups[messageGroupIdx]!!.value
-        } catch (e: Exception) {
-            throw ResourceFormatException("Could not extract warning message from line [$this], cause: ${e.message}")
-        }
+    groups.let {
+        val column = getRegexGroupSafe(columnGroupIdx, groups, this, "column number")?.toIntOrNull()
+        val message = getRegexGroupSafe(messageGroupIdx, groups, this, "warning message")!!
         return Warning(
             message,
             line,
@@ -79,21 +54,6 @@ internal fun String.extractWarning(warningRegex: Regex,
             fileName,
         )
     }
-        ?: defaultLineGroups.let {
-            val message = try {
-                defaultLineGroups?.get(1)?.value
-            } catch (e: Exception) {
-                throw ResourceFormatException("Could not extract warning message from line [$this], cause: ${e.message}")
-            }
-            return message?.let {
-                Warning(
-                    it,
-                    line,
-                    null,
-                    fileName,
-                )
-            }
-        }
 }
 
 /**
@@ -117,12 +77,7 @@ internal fun String.extractWarning(warningRegex: Regex,
                                    messageGroupIdx: Int,
 ): Warning? {
     val groups = warningRegex.find(this)?.groups ?: return null
-
-    val fileName = try {
-        groups[fileNameGroupIdx]!!.value
-    } catch (e: Exception) {
-        throw ResourceFormatException("Could not extract file name from line [$this], cause: ${e.message}")
-    }
+    val fileName = getRegexGroupSafe(fileNameGroupIdx, groups, this, "file name")!!
 
     return extractWarning(warningRegex, fileName, line, columnGroupIdx, messageGroupIdx)
 }
@@ -132,8 +87,8 @@ internal fun String.extractWarning(warningRegex: Regex,
  * @param lineGroupIdx index of capture group for line number
  * @param placeholder placeholder for line
  * @param lineNum number of line
- * @param file
- * @param linesFile
+ * @param file path to test file
+ * @param linesFile lines of file
  * @return a [Warning] or null if [this] string doesn't match [warningRegex]
  * @throws ResourceFormatException when parsing a file
  */
@@ -143,10 +98,7 @@ internal fun String.extractWarning(warningRegex: Regex,
     "NestedBlockDepth",
     "LongParameterList",
     "ReturnCount",
-    "ComplexMethod",
-    "TOO_LONG_FUNCTION",
     "TOO_MANY_PARAMETERS",
-    "AVOID_NULL_CHECKS",
 )
 internal fun String.getLineNumber(warningRegex: Regex,
                                   lineGroupIdx: Int?,
@@ -155,18 +107,9 @@ internal fun String.getLineNumber(warningRegex: Regex,
                                   file: Path?,
                                   linesFile: List<String>?,
 ): Int? {
-    val groups = warningRegex.find(this)?.groups
-    val defaultLineGroups = if (groups == null) {
-        defaultLinePattern.find(this)?.groups
-    } else {
-        null
-    }
+    val groups = warningRegex.find(this)?.groups ?: return null
 
-    if (groups == null && defaultLineGroups == null) {
-        return null
-    }
-
-    groups?.let {
+    groups.let {
         return lineGroupIdx?.let {
             val lineValue = groups[lineGroupIdx]!!.value
             if (lineValue.isEmpty()) {
@@ -187,28 +130,24 @@ internal fun String.getLineNumber(warningRegex: Regex,
             }
         }
     }
-        ?: defaultLineGroups.let {
-            return plusLine(file, warningRegex, linesFile, lineNum)
-        }
 }
 
 @Suppress(
+    "WRONG_NEWLINES",
     "TooGenericExceptionCaught",
     "SwallowedException",
 )
 private fun getRegexGroupSafe(idx: Int?,
                               groups: MatchGroupCollection,
                               line: String,
-) = idx?.let {
-    try {
-        val colValue = groups[idx]!!.value
-        if (colValue.isEmpty()) {
-            null
-        } else {
-            colValue.toInt()
+                              exceptionMessage: String,
+): String? {
+    return idx?.let {
+        try {
+            return groups[idx]!!.value
+        } catch (e: Exception) {
+            throw ResourceFormatException("Could not extract $exceptionMessage from line [$line], cause: ${e.message}")
         }
-    } catch (e: Exception) {
-        throw ResourceFormatException("Could not extract column number from line [$line], cause: ${e.message}")
     }
 }
 
@@ -220,7 +159,7 @@ private fun plusLine(
 ): Int {
     var x = 1
     val fileSize = linesFile!!.size
-    while (lineNum!! - 1 + x < fileSize && (warningRegex.find(linesFile[lineNum - 1 + x]) != null || defaultLinePattern.find(linesFile[lineNum - 1 + x]) != null)) {
+    while (lineNum!! - 1 + x < fileSize && warningRegex.find(linesFile[lineNum - 1 + x]) != null) {
         x++
     }
     val newLine = lineNum + x

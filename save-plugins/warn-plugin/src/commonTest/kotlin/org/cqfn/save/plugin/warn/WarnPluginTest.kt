@@ -107,7 +107,7 @@ class WarnPluginTest {
                 actualWarningsPattern = Regex("(.+):(\\d+): (.+)"),
                 true, false, 1, ", ", 1, null, 2, 1, 2, null, 3,
             ),
-            GeneralConfig("", "", "", "", expectedWarningsPattern = Regex("// ;warn:(\\d+): (.*)"))
+            GeneralConfig("", "", "", "", expectedWarningsPattern = Regex("// ;warn:?(\\d+): (.*)"))
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -136,7 +136,7 @@ class WarnPluginTest {
                 // ;warn:1:1: Package name is incorrect
                 package org.cqfn.save.example
                 
-                // ;warn: Class name should be in PascalCase too
+                // ;warn:1 Class name should be in PascalCase too
                 // ;warn:${'$'}l+1:1: Class name shouldn't have a number
                 class example1 {
                 // ;warn:${'$'}l-1:1: Class name should be in PascalCase
@@ -149,7 +149,7 @@ class WarnPluginTest {
                 actualWarningsPattern = Regex("(.+):(\\d+):(\\d*): (.*)"),
                 linePlaceholder = "\$l",
             ),
-            GeneralConfig("", "", "", "", expectedWarningsPattern = Regex("// ;warn:(.+):(\\d+): (.*)"))
+            GeneralConfig("", "", "", "", expectedWarningsPattern = Regex("// ;warn:?(.+):(\\d+): (.*)"))
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
