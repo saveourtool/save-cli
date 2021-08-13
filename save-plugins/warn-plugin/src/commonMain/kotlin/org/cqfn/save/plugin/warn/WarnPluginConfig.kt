@@ -148,7 +148,7 @@ data class WarnPluginConfig(
             newMessageCaptureGroupOut,
             exactWarningsMatch ?: true,
             testName,
-            linePlaceholder ?: "line",
+            linePlaceholder ?: "\$line",
             wildCardInDirectoryMode,
         )
     }
