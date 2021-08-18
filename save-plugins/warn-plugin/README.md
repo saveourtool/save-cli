@@ -66,6 +66,8 @@ expectedWarningsPattern = "// ;warn:(\\d+):(\\d+): (.*)" # (default value)
 execFlags = "--build-upon-default-config -i"
 
 # e.g. `WARN - 10/14 - Class name is in incorrect case`
+# expected regex may allow an empty group for line number
+# regex group with lineCaptureGroupIdx may include a number or linePlaceholder and addition/subtraction of a number
 actualWarningsPattern = "\\w+ - (\\d+)/(\\d+) - (.*)$" # (default value)
 
 # index of regex capture group for line number, used when `warningTextHasLine == true`
@@ -90,7 +92,8 @@ When executed from project root (where `save.propertes` is located), SAVE will c
 matching `inputFilePattern`. It will then execute `$execCmd $testFile`. `batchSize` it controls how many files execCmd will process at a time. (since we specified
 `batchSize = 1`, it will provide inputs one by one) and compare warnings its stdout (as per `output` option) parsed using `warningsOutputPattern` with warnings
 parsed from the same `$testFile` using `warningsInputPattern`. `batchSeparator` is separator for filenames in `execCmd` if `batchSize > 1`.
-`defaultLineMode` when enabled, default value will be equal to the next line. `linePlaceholder` is an optional placeholder for the line number that is recognized as the current line and supports addition and subtraction.
+If line number is not present in the comment, it's assumed to be `current line + 1` in regex group with lineCaptureGroupIdx. 
+`linePlaceholder` is an optional placeholder for the line number that is recognized as the current line and supports addition and subtraction.
 
 
 `warningsInputPattern` and `warningsOutputPattern` must include some mandatory capture groups: for line number (if `warningTextHasLine` is true),
