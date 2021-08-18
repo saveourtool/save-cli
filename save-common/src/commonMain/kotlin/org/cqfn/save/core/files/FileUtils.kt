@@ -10,8 +10,8 @@
 package org.cqfn.save.core.files
 
 import org.cqfn.save.core.config.OutputStreamType
-import org.cqfn.save.core.logging.logError
 import org.cqfn.save.core.logging.logDebug
+import org.cqfn.save.core.logging.logError
 import org.cqfn.save.core.utils.writeToStream
 
 import okio.Buffer
