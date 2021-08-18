@@ -17,7 +17,7 @@ import org.cqfn.save.plugins.fixandwarn.FixAndWarnPlugin
  * @return [this] config with all descendants being evaluated (`pluginConfigs` are filled with data and merged with parents)
  */
 fun TestConfig.processInPlace() = processInPlace {
-    createPluginConfigListFromToml(it.location)
+    createPluginConfigListFromToml(it.location, fs)
 }
 
 /**

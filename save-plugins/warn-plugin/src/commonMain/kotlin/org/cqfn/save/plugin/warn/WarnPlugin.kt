@@ -51,7 +51,7 @@ class WarnPlugin(
         return warnPluginConfig.wildCardInDirectoryMode?.let {
             handleTestFile(files.map { it.single() }.toList(), warnPluginConfig, generalConfig).asSequence()
         } ?: run {
-            files.chunked(warnPluginConfig.batchSize!!).flatMap { chunk ->
+            files.chunked(warnPluginConfig.batchSize!!.toInt()).flatMap { chunk ->
                 handleTestFile(chunk.map { it.single() }, warnPluginConfig, generalConfig)
             }
         }

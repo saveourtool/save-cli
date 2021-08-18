@@ -51,15 +51,15 @@ data class WarnPluginConfig(
     val actualWarningsPattern: Regex? = null,
     val warningTextHasLine: Boolean? = null,
     val warningTextHasColumn: Boolean? = null,
-    val batchSize: Int? = null,
+    val batchSize: Long? = null,
     val batchSeparator: String? = null,
-    val lineCaptureGroup: Int? = null,
-    val columnCaptureGroup: Int? = null,
-    val messageCaptureGroup: Int? = null,
-    val fileNameCaptureGroupOut: Int? = null,
-    val lineCaptureGroupOut: Int? = null,
-    val columnCaptureGroupOut: Int? = null,
-    val messageCaptureGroupOut: Int? = null,
+    val lineCaptureGroup: Long? = null,
+    val columnCaptureGroup: Long? = null,
+    val messageCaptureGroup: Long? = null,
+    val fileNameCaptureGroupOut: Long? = null,
+    val lineCaptureGroupOut: Long? = null,
+    val columnCaptureGroupOut: Long? = null,
+    val messageCaptureGroupOut: Long? = null,
     val exactWarningsMatch: Boolean? = null,
     val testNameSuffix: String? = null,
     val linePlaceholder: String? = null,
@@ -153,7 +153,7 @@ data class WarnPluginConfig(
         )
     }
 
-    private fun requirePositiveIfNotNull(value: Int?) {
+    private fun requirePositiveIfNotNull(value: Long?) {
         value?.let {
             require(value >= 0) {
                 """

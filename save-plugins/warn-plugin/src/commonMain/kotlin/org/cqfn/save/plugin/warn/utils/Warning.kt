@@ -39,8 +39,8 @@ data class Warning(
 internal fun String.extractWarning(warningRegex: Regex,
                                    fileName: String,
                                    line: Int?,
-                                   columnGroupIdx: Int?,
-                                   messageGroupIdx: Int,
+                                   columnGroupIdx: Long?,
+                                   messageGroupIdx: Long,
 ): Warning? {
     val groups = warningRegex.find(this)?.groups ?: return null
 
@@ -69,10 +69,10 @@ internal fun String.extractWarning(warningRegex: Regex,
     "TooGenericExceptionCaught",
     "SwallowedException")
 internal fun String.extractWarning(warningRegex: Regex,
-                                   fileNameGroupIdx: Int,
+                                   fileNameGroupIdx: Long,
                                    line: Int?,
-                                   columnGroupIdx: Int?,
-                                   messageGroupIdx: Int,
+                                   columnGroupIdx: Long?,
+                                   messageGroupIdx: Long,
 ): Warning? {
     val groups = warningRegex.find(this)?.groups ?: return null
     val fileName = getRegexGroupSafe(fileNameGroupIdx, groups, this, "file name")!!
@@ -99,7 +99,7 @@ internal fun String.extractWarning(warningRegex: Regex,
     "TOO_MANY_PARAMETERS",
 )
 internal fun String.getLineNumber(warningRegex: Regex,
-                                  lineGroupIdx: Int?,
+                                  lineGroupIdx: Long?,
                                   placeholder: String,
                                   lineNum: Int?,
                                   file: Path?,
@@ -108,7 +108,7 @@ internal fun String.getLineNumber(warningRegex: Regex,
     val groups = warningRegex.find(this)?.groups ?: return null
 
     return lineGroupIdx?.let {
-        val lineValue = groups[lineGroupIdx]!!.value
+        val lineValue = groups[lineGroupIdx.toInt()]!!.value
         if (lineValue.isEmpty() && lineNum != null && linesFile != null) {
             return plusLine(file, warningRegex, linesFile, lineNum)
         } else {
@@ -133,7 +133,7 @@ internal fun String.getLineNumber(warningRegex: Regex,
  * @return line number
  */
 internal fun String.getLineNumber(warningRegex: Regex,
-                                  lineGroupIdx: Int?,
+                                  lineGroupIdx: Long?,
 ): Int? {
     val groups = warningRegex.find(this)?.groups ?: return null
     return getRegexGroupSafe(lineGroupIdx, groups, this, "file name")?.toInt()
@@ -144,14 +144,14 @@ internal fun String.getLineNumber(warningRegex: Regex,
     "TooGenericExceptionCaught",
     "SwallowedException",
 )
-private fun getRegexGroupSafe(idx: Int?,
+private fun getRegexGroupSafe(idx: Long?,
                               groups: MatchGroupCollection,
                               line: String,
                               exceptionMessage: String,
 ): String? {
     return idx?.let {
         try {
-            return groups[idx]!!.value
+            return groups[idx.toInt()]!!.value
         } catch (e: Exception) {
             throw ResourceFormatException("Could not extract $exceptionMessage from line [$line], cause: ${e.message}")
         }
