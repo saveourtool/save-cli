@@ -27,7 +27,7 @@ import kotlinx.serialization.UseSerializers
 @Serializable
 data class FixPluginConfig(
     val execFlags: String? = null,
-    val batchSize: Int? = null,
+    val batchSize: Long? = null,
     val batchSeparator: String? = null,
     val resourceNameTestSuffix: String? = null,
     val resourceNameExpectedSuffix: String? = null,
