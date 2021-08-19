@@ -93,6 +93,10 @@ internal fun String.extractWarning(warningRegex: Regex,
 @Suppress(
     "TooGenericExceptionCaught",
     "LongParameterList",
+    "NestedBlockDepth",
+    "ReturnCount",
+    // fixme: add `cause` parameter to `PluginException`
+    "SwallowedException",
     "TOO_MANY_PARAMETERS",
     "AVOID_NULL_CHECKS",
 )
