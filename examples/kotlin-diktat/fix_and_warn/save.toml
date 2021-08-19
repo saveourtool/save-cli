@@ -4,9 +4,9 @@ description = "Autofixing of issues discovered by diKTat and warn about issues, 
 suiteName = "autofix and warn"
 expectedWarningsPattern = ".*// ;warn:(\\d+):(\\d+) (.*)"
 
-[fix and warn]
-    [fix and warn.fix]
+["fix and warn"]
+    ["fix and warn".fix]
         execFlags = "-F"
-    [fix and warn.warn]
+    ["fix and warn".warn]
         actualWarningsPattern = "(\\w+\\..+):(\\d+):(\\d+): (.*)$"
         exactWarningsMatch = false

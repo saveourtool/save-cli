@@ -155,7 +155,7 @@ class MergeConfigsTest {
         createTomlFiles()
 
         val toml1 = "src/commonNonJsTest/resources/merge_configs/save.toml"
-        val configList1 = createPluginConfigListFromToml(toml1.toPath())
+        val configList1 = createPluginConfigListFromToml(toml1.toPath(), fs)
 
         val parentGeneralConfig = configList1.filterIsInstance<GeneralConfig>().first()
         val parentWarnConfig = configList1.filterIsInstance<WarnPluginConfig>().first()
@@ -164,7 +164,7 @@ class MergeConfigsTest {
         assertEquals(null, parentWarnConfig.execFlags)
 
         val toml2 = "src/commonNonJsTest/resources/merge_configs/inner/save.toml"
-        val configList2 = createPluginConfigListFromToml(toml2.toPath())
+        val configList2 = createPluginConfigListFromToml(toml2.toPath(), fs)
 
         val childGeneralConfig = configList2.filterIsInstance<GeneralConfig>().first()
         val childWarnConfig = configList2.filterIsInstance<WarnPluginConfig>().first()

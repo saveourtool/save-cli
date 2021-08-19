@@ -50,7 +50,7 @@ class FixPlugin(
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
 
-        return files.chunked(fixPluginConfig.batchSize!!).map { chunk ->
+        return files.chunked(fixPluginConfig.batchSize!!.toInt()).map { chunk ->
             val pathMap = chunk.map { it.first() to it.last() }
             val pathCopyMap = pathMap.map { (expected, test) -> expected to createTestFile(test, generalConfig) }
             val testCopyNames =
