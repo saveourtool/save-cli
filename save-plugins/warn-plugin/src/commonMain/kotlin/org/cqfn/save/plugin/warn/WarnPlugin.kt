@@ -19,7 +19,7 @@ import org.cqfn.save.plugin.warn.utils.getLineNumber
 import okio.FileSystem
 import okio.Path
 
-private typealias WarningMap = MutableMap<String, List<Warning>>
+private typealias WarningMap = Map<String, List<Warning>>
 
 /**
  * A plugin that runs an executable and verifies that it produces required warning messages.
@@ -86,10 +86,9 @@ class WarnPlugin(
         generalConfig: GeneralConfig
     ): Sequence<TestResult> {
         // extracting all warnings from test resource files
-        val expectedWarnings: WarningMap = mutableMapOf()
-        paths.forEach {
+        val expectedWarnings: WarningMap = paths.associate {
             val warningsForCurrentPath = it.collectWarningsWithLineNumbers(warnPluginConfig, generalConfig)
-            expectedWarnings.putAll(warningsForCurrentPath)
+            it.name to warningsForCurrentPath
         }
 
         if (expectedWarnings.isEmpty()) {
@@ -102,7 +101,7 @@ class WarnPlugin(
         }
 
         // joining test files to string with a batchSeparator if the tested tool supports processing of file batches
-        // NOTE: save will pass relative paths of Tests (calculated from tesRootConfig dir) into the executed tool
+        // NOTE: save will pass relative paths of Tests (calculated from testRootConfig dir) into the executed tool
         val fileNamesForExecCmd =
                 warnPluginConfig.wildCardInDirectoryMode?.let {
                     val directoryPrefix = testConfig
@@ -112,10 +111,8 @@ class WarnPlugin(
                     // a hack to put only the directory path to the execution command
                     // only in case a directory mode is enabled
                     "$directoryPrefix$it${warnPluginConfig.testNameSuffix}"
-                } ?: run {
-                    paths.joinToString(separator = warnPluginConfig.batchSeparator!!) {
-                        it.toString().makeThePathRelativeToTestRoot()
-                    }
+                } ?: paths.joinToString(separator = warnPluginConfig.batchSeparator!!) {
+                    it.toString().makeThePathRelativeToTestRoot()
                 }
 
         val execCmd = "${generalConfig.execCmd} ${warnPluginConfig.execFlags} $fileNamesForExecCmd"
@@ -181,7 +178,7 @@ class WarnPlugin(
     private fun Path.collectWarningsWithLineNumbers(
         warnPluginConfig: WarnPluginConfig,
         generalConfig: GeneralConfig
-    ): WarningMap {
+    ): List<Warning> {
         val linesFile = fs.readLines(this)
         return linesFile.mapIndexed { index, line ->
             val newLine = line.getLineNumber(
@@ -203,11 +200,7 @@ class WarnPlugin(
             }
         }
             .filterNotNull()
-            .groupBy {
-                it.fileName
-            }
-            .mapValues { it.value.sortedBy { warn -> warn.message } }
-            .toMutableMap()
+            .sortedBy { warn -> warn.message }
     }
 
     /**
