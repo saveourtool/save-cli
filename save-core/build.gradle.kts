@@ -97,19 +97,19 @@ tasks.register<Download>("downloadTestResources") {
         "https://github.com/pinterest/ktlint/releases/download/$ktlintVersion/ktlint",
         "https://github.com/cqfn/diKTat/releases/download/v$diktatVersion/diktat-$diktatVersion.jar"
     ))
-    dest("..examples/kotlin-diktat")
+    dest("../examples/kotlin-diktat")
     doLast {
         copy {
-            from("..examples/kotlin-diktat/diktat-$diktatVersion.jar")
-            into("..examples/kotlin-diktat/diktat.jar")
+            from("../examples/kotlin-diktat/diktat-$diktatVersion.jar")
+            into("../examples/kotlin-diktat/diktat.jar")
         }
     }
 }
 val cleanupTask = tasks.register("cleanupTestResources") {
     mustRunAfter(tasks.withType<Test>())
     doFirst {
-        file("..examples/kotlin-diktat/ktlint").delete()
-        file("..examples/kotlin-diktat/diktat.jar").delete()
+        file("../examples/kotlin-diktat/ktlint").delete()
+        file("../examples/kotlin-diktat/diktat.jar").delete()
     }
 }
 tasks.withType<Test>().configureEach {
