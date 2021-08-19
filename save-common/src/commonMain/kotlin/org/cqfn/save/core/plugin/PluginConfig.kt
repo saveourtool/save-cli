@@ -51,21 +51,21 @@ interface PluginConfig {
  * The logic of the default value processing will be provided in stage of validation
  *
  * @property execCmd a command that will be executed to check resources and emit warnings
- * @property tags FixMe: after ktoml will support lists we should change it
- * @property description
- * @property suiteName
- * @property excludedTests FixMe: after ktoml will support lists we should change it
- * @property includedTests FixMe: after ktoml will support lists we should change it
+ * @property tags special labels that can be used for splitting tests into groups
+ * @property description free text with a description
+ * @property suiteName name of test suite that can be visible from save-cloud
+ * @property excludedTests excluded tests from the run
+ * @property includedTests if specified - only these tests will be run
  * @property expectedWarningsPattern - pattern with warnings that are expected from the test file
  */
 @Serializable
 data class GeneralConfig(
     val execCmd: String? = null,
-    val tags: String? = null,
+    val tags: List<String>? = null,
     val description: String? = null,
     val suiteName: String? = null,
-    val excludedTests: String? = null,
-    val includedTests: String? = null,
+    val excludedTests: List<String>? = null,
+    val includedTests: List<String>? = null,
     val expectedWarningsPattern: Regex? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.GENERAL
@@ -77,11 +77,9 @@ data class GeneralConfig(
         val other = otherConfig as GeneralConfig
         val mergedTag = other.tags?.let {
             this.tags?.let {
-                val parentTags = other.tags.split(", ")
-                val childTags = this.tags.split(", ")
-                parentTags.union(childTags).joinToString(", ")
+                other.tags.union(this.tags)
             } ?: other.tags
-        } ?: this.tags
+        }?.toList() ?: this.tags
 
         return GeneralConfig(
             this.execCmd ?: other.execCmd,
@@ -112,17 +110,17 @@ data class GeneralConfig(
             tags,
             description,
             suiteName,
-            excludedTests ?: "",
-            includedTests ?: "",
+            excludedTests ?: emptyList(),
+            includedTests ?: emptyList(),
             expectedWarningsPattern ?: defaultInputPattern,
         )
     }
 
     private fun errorMsgForRequireCheck(field: String) =
             """
-                    Error: Couldn't find `$field` in [general] section of `$configLocation` config.
-                    Current configuration: ${this.toString().substringAfter("(").substringBefore(")")}
-                    Please provide it in this, or at least in one of the parent configs.
+                        Error: Couldn't find `$field` in [general] section of `$configLocation` config.
+                        Current configuration: ${this.toString().substringAfter("(").substringBefore(")")}
+                        Please provide it in this, or at least in one of the parent configs.
             """.trimIndent()
 
     companion object {
