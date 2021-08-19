@@ -99,10 +99,9 @@ tasks.register<Download>("downloadTestResources") {
     ))
     dest("../examples/kotlin-diktat")
     doLast {
-        copy {
-            from("../examples/kotlin-diktat/diktat-$diktatVersion.jar")
-            into("../examples/kotlin-diktat/diktat.jar")
-        }
+        file("../examples/kotlin-diktat/diktat-$diktatVersion.jar").renameTo(
+            file("../examples/kotlin-diktat/diktat.jar")
+        )
     }
 }
 val cleanupTask = tasks.register("cleanupTestResources") {
