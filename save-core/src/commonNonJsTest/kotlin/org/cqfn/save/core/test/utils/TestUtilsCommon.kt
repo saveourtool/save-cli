@@ -26,6 +26,7 @@ import okio.Path.Companion.toPath
 
 import kotlin.test.assertEquals
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.runBlocking
 
 const val KTLINT_VERSION = "0.39.0"
 const val DIKTAT_VERSION = "1.0.0-rc.2"
@@ -35,8 +36,9 @@ const val TIMEOUT = 100_000L
  * Workaround to use suspending functions in unit tests
  *
  * @param block
+ * @return the result of blocked suspend function
  */
-expect fun runTest(block: suspend (scope: CoroutineScope) -> Unit)
+fun runTest(block: suspend (scope: CoroutineScope) -> Unit) = runBlocking { block(this) }
 
 /**
  * Download file from [url] into [fileName]

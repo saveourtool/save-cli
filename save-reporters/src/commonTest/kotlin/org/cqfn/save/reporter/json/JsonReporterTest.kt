@@ -3,8 +3,8 @@ package org.cqfn.save.reporter.json
 import org.cqfn.save.core.files.readFile
 import org.cqfn.save.core.result.Crash
 import org.cqfn.save.core.result.TestResult
+import org.cqfn.save.plugin.MockPlugin
 import org.cqfn.save.reporter.Report
-import org.cqfn.save.reporter.utils.MockPlugin
 
 import okio.ExperimentalFileSystem
 import okio.FileSystem
