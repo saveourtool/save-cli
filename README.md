@@ -130,7 +130,7 @@ In this section we will give information only about the `[general]` table that c
 ```text
 [general]
 # your custom tags that will be used to detect groups of tests (required)
-tags = parsing, null-pointer, e.t.c
+tags = ["parsing", "null-pointer", e.t.c]
 
 # custom free text that describes the test suite (required)
 description = "My suite description"

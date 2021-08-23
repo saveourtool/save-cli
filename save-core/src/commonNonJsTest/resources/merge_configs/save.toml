@@ -1,6 +1,6 @@
 [general]
 execCmd = "echo hello world"
-tags = "Tag"
+tags = ["Tag"]
 description = "My description"
 suiteName = "DocsCheck"
 

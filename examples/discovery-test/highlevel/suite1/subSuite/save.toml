@@ -1,5 +1,5 @@
 [general]
-tags = "tag1"
+tags = ["tag1"]
 description = "My suite description"
 suiteName = "DocsCheck"
 expectedWarningsPattern = "// ;warn:(\\d+):(\\d+): (.*)"  # warning is set inside the comment in code, `//` marks comment start in Java

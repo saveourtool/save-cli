@@ -1,5 +1,5 @@
 [general]
-tags = "smoke"
+tags = ["smoke"]
 description = "Smoke tests for diktat"
 suiteName = "smoke tests"
 
