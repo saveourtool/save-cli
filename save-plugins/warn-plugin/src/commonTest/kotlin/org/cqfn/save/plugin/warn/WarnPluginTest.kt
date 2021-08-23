@@ -64,7 +64,7 @@ class WarnPluginTest {
             """.trimIndent()
             ),
             defaultWarnConfig,
-            GeneralConfig("", "", "", "")
+            GeneralConfig("", listOf(""), "", "")
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -107,7 +107,7 @@ class WarnPluginTest {
                 actualWarningsPattern = Regex("(.+):(\\d+): (.+)"),
                 true, false, 1, ", ", 1, null, 2, 1, 2, null, 3,
             ),
-            GeneralConfig("", "", "", "", expectedWarningsPattern = Regex("// ;warn:?(\\d+): (.*)"))
+            GeneralConfig("", listOf(""), "", "", expectedWarningsPattern = Regex("// ;warn:?(\\d+): (.*)"))
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -149,7 +149,7 @@ class WarnPluginTest {
                 actualWarningsPattern = Regex("(.+):(\\d+):(\\d*): (.*)"),
                 linePlaceholder = "\$l",
             ),
-            GeneralConfig("", "", "", "", expectedWarningsPattern = Regex("// ;warn:?(.+):(\\d+): (.*)"))
+            GeneralConfig("", listOf(""), "", "", expectedWarningsPattern = Regex("// ;warn:?(.+):(\\d+): (.*)"))
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -182,7 +182,7 @@ class WarnPluginTest {
             defaultWarnConfig.copy(
                 exactWarningsMatch = false,
             ),
-            GeneralConfig("", "", "", "")
+            GeneralConfig("", listOf(""), "", "")
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -213,7 +213,7 @@ class WarnPluginTest {
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
             ),
-            GeneralConfig("", "", "", "")
+            GeneralConfig("", listOf(""), "", "")
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -246,7 +246,7 @@ class WarnPluginTest {
             """.trimIndent()
             ),
             defaultWarnConfig.copy(),
-            GeneralConfig("", "", "", "")
+            GeneralConfig("", listOf(""), "", "")
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -286,7 +286,7 @@ class WarnPluginTest {
                 true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
             ),
             GeneralConfig(
-                "", "", "", "", expectedWarningsPattern = Regex("(.+):(\\d+):(\\d+): (.+)"),
+                "", listOf(""), "", "", expectedWarningsPattern = Regex("(.+):(\\d+):(\\d+): (.+)"),
             )
         ) { results ->
             assertEquals(1, results.size)
@@ -326,7 +326,7 @@ class WarnPluginTest {
                 Regex("// ;warn: (.*)"),
                 false, false, 1, ", ", null, null, 1, 1, null, null, 2
             ), GeneralConfig(
-                "", "", "", "", expectedWarningsPattern = Regex("(.+): (.+)"),
+                "", listOf(""), "", "", expectedWarningsPattern = Regex("(.+): (.+)"),
             )
         ) { results ->
             assertEquals(1, results.size)
@@ -371,7 +371,7 @@ class WarnPluginTest {
             defaultWarnConfig.copy(
                 batchSize = 2
             ),
-            GeneralConfig("", "", "", "")
+            GeneralConfig("", listOf(""), "", "")
         ) { results ->
             assertEquals(2, results.size)
             assertTrue(results.all { it.status is Pass })
@@ -400,7 +400,7 @@ class WarnPluginTest {
             defaultWarnConfig.copy(
                 batchSize = 2,
             ),
-            GeneralConfig("", "", "", "")
+            GeneralConfig("", listOf(""), "", "")
         ) { results ->
             assertEquals(4, results.size)
             assertTrue(results.all { it.status is Pass })

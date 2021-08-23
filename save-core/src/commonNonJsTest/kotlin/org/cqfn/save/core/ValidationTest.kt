@@ -17,7 +17,7 @@ class ValidationTest {
     @Test
     fun `set defaults to general section`() {
         createTomlFiles()
-        val generalConfig = GeneralConfig("exeCmd", tags = "Tag11, Tag12", description = "Description1", suiteName = "suiteName1")
+        val generalConfig = GeneralConfig("exeCmd", tags = listOf("Tag11", "Tag12"), description = "Description1", suiteName = "suiteName1")
         val config = TestConfig(toml1, null, mutableListOf(generalConfig), fs)
 
         config.validateAndSetDefaults()
@@ -25,8 +25,8 @@ class ValidationTest {
         assertEquals(1, config.pluginConfigs.size)
 
         val actualGeneralConfig1 = config.pluginConfigs.filterIsInstance<GeneralConfig>().first()
-        assertEquals("", actualGeneralConfig1.excludedTests)
-        assertEquals("", actualGeneralConfig1.includedTests)
+        assertEquals(emptyList(), actualGeneralConfig1.excludedTests)
+        assertEquals(emptyList(), actualGeneralConfig1.includedTests)
     }
 
     @Test

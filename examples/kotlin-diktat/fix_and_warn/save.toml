@@ -1,5 +1,5 @@
 [general]
-tags = "fix and warn"
+tags = ["fix and warn"]
 description = "Autofixing of issues discovered by diKTat and warn about issues, which couldn't be auto-corrected"
 suiteName = "autofix and warn"
 expectedWarningsPattern = ".*// ;warn:(\\d+):(\\d+) (.*)"
