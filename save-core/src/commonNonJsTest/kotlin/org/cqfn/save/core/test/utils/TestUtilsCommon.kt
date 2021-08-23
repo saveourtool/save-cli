@@ -72,10 +72,14 @@ suspend fun downloadFile(url: String, fileName: String): String {
 }
 
 /**
- * @param testDir
- * @param numberOfTests
+ * @param testDir `testFiles` as accepted by save-cli
+ * @param numberOfTests expected number of executed tests with this configuration
+ * @param addProperties lambda to add/override SaveProperties during test
  */
-suspend fun runTestsWithDiktat(testDir: List<String>, numberOfTests: Int) {
+suspend fun runTestsWithDiktat(
+    testDir: List<String>?,
+    numberOfTests: Int,
+    addProperties: SaveProperties.() -> Unit = {}) {
     downloadFile(
         "https://github.com/pinterest/ktlint/releases/download/$KTLINT_VERSION/ktlint",
         "../examples/kotlin-diktat/ktlint"
@@ -91,7 +95,7 @@ suspend fun runTestsWithDiktat(testDir: List<String>, numberOfTests: Int) {
         testRootPath = "../examples/kotlin-diktat/",
         reportType = ReportType.TEST,
         resultOutput = OutputStreamType.STDOUT,
-    )
+    ).apply { addProperties() }
     // In this test we need to merge with emulated empty save.properties file in aim to use default values,
     // since initially all fields are null
     // In this test we need to merge with emulated empty save.properties file in aim to use default values,

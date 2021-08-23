@@ -1,10 +1,10 @@
 [general]
-tags = "tag1"
+tags = ["tag1"]
 description = "chapter 2 tests: with default lines (no line numbers)"
 suiteName = "Chapter2"
-expectedWarningsPattern = "// ;warn:(\\d+) (.+)"
+expectedWarningsPattern = "// ;warn:?(.*):(\\d*): (.+)"
 
 [warn]
-defaultLineMode = true
-columnCaptureGroup = 1
-messageCaptureGroup = 2
+lineCaptureGroup = 1
+columnCaptureGroup = 2
+messageCaptureGroup = 3

@@ -68,7 +68,7 @@ class WarnPluginTest {
             """.trimIndent()
             ),
             defaultWarnConfig,
-            GeneralConfig("", "", "", "")
+            GeneralConfig("", listOf(""), "", "")
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -77,13 +77,14 @@ class WarnPluginTest {
 
     @Test
     @Suppress("TOO_LONG_FUNCTION")
-    fun `warn-plugin test for defaultLineMode`() {
+    fun `warn-plugin test with default warning without line`() {
         mockExecCmd(
                 """
                 |Test1Test.java:5: Class name should be in PascalCase
                 |Test1Test.java:5: Class name shouldn't have a number
                 |Test1Test.java:7: Variable name should be in LowerCase
                 |Test1Test.java:10: Class should have a Kdoc
+                |Test1Test.java:10: Class name should be in PascalCase
                 """.trimMargin()
             )
         performTest(
@@ -98,15 +99,21 @@ class WarnPluginTest {
                     int Foo = 42;
                 }
                 // ;warn: Class should have a Kdoc
+                // ;warn:10: Class name should be in PascalCase
             """.trimIndent()
             ),
             defaultWarnConfig.copy(
-                actualWarningsPattern = Regex("// ;warn: (.*)"),
+                actualWarningsPattern = Regex("(.+):(\\d+): (.+)"),
                 warningTextHasColumn = false,
-                lineCaptureGroup = null,
+                lineCaptureGroup = 1,
                 columnCaptureGroup = null,
+                messageCaptureGroup = 2,
+                fileNameCaptureGroupOut = 1,
+                lineCaptureGroupOut = 2,
+                columnCaptureGroupOut = null,
+                messageCaptureGroupOut = 3,
             ),
-            GeneralConfig("", "", "", "")
+            GeneralConfig("", listOf(""), "", "", expectedWarningsPattern = Regex("// ;warn:?(\\d+): (.*)"))
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -115,19 +122,23 @@ class WarnPluginTest {
 
     @Test
     @Suppress("TOO_LONG_FUNCTION")
-    fun `warn-plugin test for placeholder`() {
+    fun `warn-plugin test for all mods`() {
         mockExecCmd(
                 """
-                |Test1Test.java:4:1: Class name should be in PascalCase
-                |Test1Test.java:4:1: Class name shouldn't have a number
-                |Test1Test.java:7:1: Variable name should be in LowerCase
+                |Test1Test.java:1:1: Package name is incorrect
+                |Test1Test.java:6:1: Class name should be in PascalCase too
+                |Test1Test.java:6:1: Class name should be in PascalCase
+                |Test1Test.java:6:1: Class name shouldn't have a number
+                |Test1Test.java:9:1: Variable name should be in LowerCase
                 """.trimMargin()
             )
         performTest(
             listOf(
                 """
+                // ;warn:1:1: Package name is incorrect
                 package org.cqfn.save.example
                 
+                // ;warn:1 Class name should be in PascalCase too
                 // ;warn:${'$'}l+1:1: Class name shouldn't have a number
                 class example1 {
                 // ;warn:${'$'}l-1:1: Class name should be in PascalCase
@@ -137,10 +148,10 @@ class WarnPluginTest {
             """.trimIndent()
             ),
             defaultWarnConfig.copy(
-                defaultLineMode = false,
+                actualWarningsPattern = Regex("(.+):(\\d+):(\\d*): (.*)"),
                 linePlaceholder = "\$l",
             ),
-            GeneralConfig("", "", "", "")
+            GeneralConfig("", listOf(""), "", "", expectedWarningsPattern = Regex("// ;warn:?(.+):(\\d+): (.*)"))
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -169,7 +180,7 @@ class WarnPluginTest {
             defaultWarnConfig.copy(
                 exactWarningsMatch = false,
             ),
-            GeneralConfig("", "", "", "")
+            GeneralConfig("", listOf(""), "", "")
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -199,7 +210,7 @@ class WarnPluginTest {
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
             ),
-            GeneralConfig("", "", "", "")
+            GeneralConfig("", listOf(""), "", "")
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -229,7 +240,7 @@ class WarnPluginTest {
             """.trimIndent()
             ),
             defaultWarnConfig.copy(),
-            GeneralConfig("", "", "", "")
+            GeneralConfig("", listOf(""), "", "")
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -266,7 +277,7 @@ class WarnPluginTest {
                 true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
             ),
             GeneralConfig(
-                "", "", "", "", expectedWarningsPattern = Regex("(.+):(\\d+):(\\d+): (.+)"),
+                "", listOf(""), "", "", expectedWarningsPattern = Regex("(.+):(\\d+):(\\d+): (.+)"),
             )
         ) { results ->
             assertEquals(1, results.size)
@@ -302,7 +313,7 @@ class WarnPluginTest {
                 Regex("// ;warn: (.*)"),
                 false, false, 1, ", ", null, null, 1, 1, null, null, 2
             ), GeneralConfig(
-                "", "", "", "", expectedWarningsPattern = Regex("(.+): (.+)"),
+                "", listOf(""), "", "", expectedWarningsPattern = Regex("(.+): (.+)"),
             )
         ) { results ->
             assertEquals(1, results.size)
@@ -343,7 +354,7 @@ class WarnPluginTest {
             defaultWarnConfig.copy(
                 batchSize = 2
             ),
-            GeneralConfig("", "", "", "")
+            GeneralConfig("", listOf(""), "", "")
         ) { results ->
             assertEquals(2, results.size)
             assertTrue(results.all { it.status is Pass })
@@ -368,7 +379,7 @@ class WarnPluginTest {
             defaultWarnConfig.copy(
                 batchSize = 2,
             ),
-            GeneralConfig("", "", "", "")
+            GeneralConfig("", listOf(""), "", "")
         ) { results ->
             assertEquals(4, results.size)
             assertTrue(results.all { it.status is Pass })

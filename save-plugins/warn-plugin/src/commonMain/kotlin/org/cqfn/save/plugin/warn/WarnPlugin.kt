@@ -51,7 +51,7 @@ class WarnPlugin(
         return warnPluginConfig.wildCardInDirectoryMode?.let {
             handleTestFile(files.map { it.single() }.toList(), warnPluginConfig, generalConfig).asSequence()
         } ?: run {
-            files.chunked(warnPluginConfig.batchSize!!).flatMap { chunk ->
+            files.chunked(warnPluginConfig.batchSize!!.toInt()).flatMap { chunk ->
                 handleTestFile(chunk.map { it.single() }, warnPluginConfig, generalConfig)
             }
         }
@@ -73,25 +73,6 @@ class WarnPlugin(
         if (fs.exists(tmpDir)) {
             fs.deleteRecursively(tmpDir)
         }
-    }
-
-    private fun plusLine(
-        file: Path,
-        warningRegex: Regex,
-        linesFile: List<String>,
-        lineNum: Int
-    ): Int {
-        var x = 1
-        val fileSize = linesFile.size
-        while (lineNum - 1 + x < fileSize && warningRegex.find(linesFile[lineNum - 1 + x]) != null) {
-            x++
-        }
-        val newLine = lineNum + x
-        if (newLine > fileSize) {
-            logWarn("Some warnings are at the end of the file: <$file>. They will be assigned the following line: $newLine")
-            return fileSize
-        }
-        return newLine
     }
 
     @Suppress(
@@ -155,7 +136,7 @@ class WarnPlugin(
 
         val actualWarningsMap = executionResult.stdout.mapNotNull {
             with(warnPluginConfig) {
-                val line = it.getLineNumber(actualWarningsPattern!!, lineCaptureGroupOut, linePlaceholder!!, null)
+                val line = it.getLineNumber(actualWarningsPattern!!, lineCaptureGroupOut)
                 it.extractWarning(
                     actualWarningsPattern,
                     fileNameCaptureGroupOut!!,
@@ -205,16 +186,14 @@ class WarnPlugin(
     ): WarningMap {
         val linesFile = fs.readLines(this)
         return linesFile.mapIndexed { index, line ->
-            val newLine = if (warnPluginConfig.defaultLineMode!!) {
-                plusLine(this, generalConfig.expectedWarningsPattern!!, linesFile, index)
-            } else {
-                line.getLineNumber(
-                    generalConfig.expectedWarningsPattern!!,
-                    warnPluginConfig.lineCaptureGroup,
-                    warnPluginConfig.linePlaceholder!!,
-                    index
-                )
-            }
+            val newLine = line.getLineNumber(
+                generalConfig.expectedWarningsPattern!!,
+                warnPluginConfig.lineCaptureGroup,
+                warnPluginConfig.linePlaceholder!!,
+                index,
+                this,
+                linesFile,
+            )
             with(warnPluginConfig) {
                 line.extractWarning(
                     generalConfig.expectedWarningsPattern!!,

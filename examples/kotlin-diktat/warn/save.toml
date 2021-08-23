@@ -1,5 +1,5 @@
 [general]
-tags = "warn"
+tags = ["warn"]
 description = "Test warnings discovered by diKTat"
 suiteName = "warnings"
 

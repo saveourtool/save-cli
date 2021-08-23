@@ -81,7 +81,7 @@ class FixPluginTest {
             null,
             mutableListOf(
                 FixPluginConfig(executionCmd),
-                GeneralConfig("", "", "", "")
+                GeneralConfig("", listOf(""), "", "")
             ), fs),
             testFiles = emptyList(),
             fs,
@@ -134,7 +134,7 @@ class FixPluginTest {
             null,
             mutableListOf(
                 fixPluginConfig,
-                GeneralConfig("", "", "", "")
+                GeneralConfig("", listOf(""), "", "")
             ), fs),
             testFiles = emptyList(),
             fs,
