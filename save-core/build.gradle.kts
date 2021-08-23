@@ -90,16 +90,14 @@ tasks.withType<KotlinCompile<*>>().forEach {
     it.dependsOn(generateVersionFileTaskProvider)
 }
 
-val ktlintVersion = "0.39.0"
-val diktatVersion = "1.0.0-rc.2"
 tasks.register<Download>("downloadTestResources") {
     src(listOf(
-        "https://github.com/pinterest/ktlint/releases/download/$ktlintVersion/ktlint",
-        "https://github.com/cqfn/diKTat/releases/download/v$diktatVersion/diktat-$diktatVersion.jar"
+        Versions.IntegrationTest.ktlintLink,
+        Versions.IntegrationTest.diktatLink,
     ))
     dest("../examples/kotlin-diktat")
     doLast {
-        file("../examples/kotlin-diktat/diktat-$diktatVersion.jar").renameTo(
+        file("../examples/kotlin-diktat/diktat-${Versions.IntegrationTest.diktat}.jar").renameTo(
             file("../examples/kotlin-diktat/diktat.jar")
         )
     }

@@ -26,7 +26,7 @@ expect annotation class AfterClass
  * @param prefix will be prepended to directory name
  * @return a [Path] representing the created directory
  */
-fun FileSystem.createTempDir(prefix: String = "tmp"): Path {
+fun FileSystem.createTempDir(prefix: String = "save-tmp"): Path {
     val dirName = "$prefix-${Random.nextInt()}"
     return (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / dirName).also {
         createDirectory(it)

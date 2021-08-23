@@ -125,7 +125,8 @@ fun FileSystem.readFile(path: Path): String = this.read(path) {
  * @param target a destination directory
  */
 fun FileSystem.copyRecursively(source: Path, target: Path) {
-    require(metadata(source).isDirectory)
+    // fixme: workaround for special files, e.g. symlinks to dirs
+    require(!metadata(source).isRegularFile)
     if (!exists(target)) {
         createDirectory(target)
     } else {
