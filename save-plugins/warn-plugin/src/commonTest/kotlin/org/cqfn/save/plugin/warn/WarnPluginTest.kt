@@ -25,11 +25,26 @@ class WarnPluginTest {
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPluginTest::class.simpleName!!)
     private val catCmd = if (isCurrentOsWindows()) "type" else "cat"
     private val mockScriptFile = tmpDir / "resource"
+    private val defaultGeneralConfig = GeneralConfig(
+        execCmd = "",
+        tags = listOf(""),
+        description = "",
+        suiteName = "",
+        expectedWarningsPattern = Regex("// ;warn:(\\d+):(\\d+): (.*)"),
+    )
     private val defaultWarnConfig = WarnPluginConfig(
-        "$catCmd $mockScriptFile && set stub=",
-        Regex("// ;warn:(\\d+):(\\d+): (.*)"),
-        true, true, 1, ", ",
-        1, 2, 3, 1, 2, 3, 4
+        execFlags = "$catCmd $mockScriptFile && set stub=",
+        warningTextHasLine = true,
+        warningTextHasColumn = true,
+        batchSize = 1,
+        batchSeparator = ", ",
+        lineCaptureGroup = 1,
+        columnCaptureGroup = 2,
+        messageCaptureGroup = 3,
+        fileNameCaptureGroupOut = 1,
+        lineCaptureGroupOut = 2,
+        columnCaptureGroupOut = 3,
+        messageCaptureGroupOut = 4
     )
 
     private fun mockExecCmd(stdout: String) = fs.write(fs.createFile(mockScriptFile)) {
@@ -68,7 +83,7 @@ class WarnPluginTest {
             """.trimIndent()
             ),
             defaultWarnConfig,
-            GeneralConfig("", listOf(""), "", "")
+            defaultGeneralConfig
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -112,8 +127,9 @@ class WarnPluginTest {
                 lineCaptureGroupOut = 2,
                 columnCaptureGroupOut = null,
                 messageCaptureGroupOut = 3,
+                exactWarningsMatch = false,
             ),
-            GeneralConfig("", listOf(""), "", "", expectedWarningsPattern = Regex("// ;warn:?(\\d+): (.*)"))
+            defaultGeneralConfig.copy(expectedWarningsPattern = Regex("// ;warn:?(\\d+): (.*)"))
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -150,11 +166,12 @@ class WarnPluginTest {
             defaultWarnConfig.copy(
                 actualWarningsPattern = Regex("(.+):(\\d+):(\\d*): (.*)"),
                 linePlaceholder = "\$l",
+                exactWarningsMatch = false,
             ),
-            GeneralConfig("", listOf(""), "", "", expectedWarningsPattern = Regex("// ;warn:?(.+):(\\d+): (.*)"))
+            defaultGeneralConfig.copy(expectedWarningsPattern = Regex("// ;warn:?(.+):(\\d+): (.*)"))
         ) { results ->
             assertEquals(1, results.size)
-            assertTrue(results.single().status is Pass)
+            assertTrue(results.single().status is Pass, "Expected result to be a single pass, but got $results")
         }
     }
 
@@ -180,7 +197,7 @@ class WarnPluginTest {
             defaultWarnConfig.copy(
                 exactWarningsMatch = false,
             ),
-            GeneralConfig("", listOf(""), "", "")
+            defaultGeneralConfig
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -210,7 +227,7 @@ class WarnPluginTest {
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
             ),
-            GeneralConfig("", listOf(""), "", "")
+            defaultGeneralConfig
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -239,8 +256,8 @@ class WarnPluginTest {
                 // ;warn:7:1: File should end with trailing newline
             """.trimIndent()
             ),
-            defaultWarnConfig.copy(),
-            GeneralConfig("", listOf(""), "", "")
+            defaultWarnConfig,
+            defaultGeneralConfig
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -276,9 +293,7 @@ class WarnPluginTest {
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
             ),
-            GeneralConfig(
-                "", listOf(""), "", "", expectedWarningsPattern = Regex("(.+):(\\d+):(\\d+): (.+)"),
-            )
+            defaultGeneralConfig.copy(expectedWarningsPattern = Regex("(.+):(\\d+):(\\d+): (.+)")),
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
@@ -295,7 +310,6 @@ class WarnPluginTest {
                     |Test1Test.java: File should end with trailing newline
                     |""".trimMargin()
             )
-        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
             listOf(
                 """
@@ -308,13 +322,19 @@ class WarnPluginTest {
                 // ;warn: File should end with trailing newline
             """.trimIndent()
             ),
-            WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"} && set stub=",
-                Regex("// ;warn: (.*)"),
-                false, false, 1, ", ", null, null, 1, 1, null, null, 2
-            ), GeneralConfig(
-                "", listOf(""), "", "", expectedWarningsPattern = Regex("(.+): (.+)"),
-            )
+            defaultWarnConfig.copy(
+                actualWarningsPattern = Regex("(.+): (.+)"),
+                warningTextHasLine = false,
+                warningTextHasColumn = false,
+                lineCaptureGroup = null,
+                columnCaptureGroup = null,
+                messageCaptureGroup = 1,
+                fileNameCaptureGroupOut = 1,
+                lineCaptureGroupOut = null,
+                columnCaptureGroupOut = null,
+                messageCaptureGroupOut = 2,
+            ),
+            defaultGeneralConfig.copy(expectedWarningsPattern = Regex("// ;warn: (.*)")),
         ) { results ->
             assertEquals(1, results.size)
             results.single().status.let {
@@ -354,7 +374,7 @@ class WarnPluginTest {
             defaultWarnConfig.copy(
                 batchSize = 2
             ),
-            GeneralConfig("", listOf(""), "", "")
+            defaultGeneralConfig
         ) { results ->
             assertEquals(2, results.size)
             assertTrue(results.all { it.status is Pass })
@@ -379,7 +399,7 @@ class WarnPluginTest {
             defaultWarnConfig.copy(
                 batchSize = 2,
             ),
-            GeneralConfig("", listOf(""), "", "")
+            defaultGeneralConfig
         ) { results ->
             assertEquals(4, results.size)
             assertTrue(results.all { it.status is Pass })
@@ -412,7 +432,6 @@ class WarnPluginTest {
     }
 
     @Test
-    @Ignore
     fun `warn-plugin test exception`() {
         assertFailsWith<ResourceFormatException> {
             "// ;warn:4:6: Class name should be in PascalCase".extractWarning(
