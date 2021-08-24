@@ -121,7 +121,8 @@ class WarnPlugin(
         val execCmd = "${generalConfig.execCmd} ${warnPluginConfig.execFlags} $fileNamesForExecCmd"
 
         val executionResult = try {
-            pb.exec("cd /d ${testConfig.getRootConfig().location.parent} && $execCmd", null)
+            // todo: `cd /d` on Windows?
+            pb.exec("cd ${testConfig.getRootConfig().location.parent} && $execCmd", null)
         } catch (ex: ProcessExecutionException) {
             return sequenceOf(
                 TestResult(

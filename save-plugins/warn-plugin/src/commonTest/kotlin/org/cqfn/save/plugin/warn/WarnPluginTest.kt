@@ -91,6 +91,7 @@ class WarnPluginTest {
     }
 
     @Test
+    @Ignore  // requires https://github.com/cqfn/save/pull/218
     @Suppress("TOO_LONG_FUNCTION")
     fun `warn-plugin test with default warning without line`() {
         mockExecCmd(
@@ -127,7 +128,6 @@ class WarnPluginTest {
                 lineCaptureGroupOut = 2,
                 columnCaptureGroupOut = null,
                 messageCaptureGroupOut = 3,
-                exactWarningsMatch = false,
             ),
             defaultGeneralConfig.copy(expectedWarningsPattern = Regex("// ;warn:?(\\d+): (.*)"))
         ) { results ->
@@ -154,7 +154,7 @@ class WarnPluginTest {
                 // ;warn:1:1: Package name is incorrect
                 package org.cqfn.save.example
                 
-                // ;warn:1 Class name should be in PascalCase too
+                // ;warn:1: Class name should be in PascalCase too
                 // ;warn:${'$'}l+1:1: Class name shouldn't have a number
                 class example1 {
                 // ;warn:${'$'}l-1:1: Class name should be in PascalCase
@@ -166,9 +166,8 @@ class WarnPluginTest {
             defaultWarnConfig.copy(
                 actualWarningsPattern = Regex("(.+):(\\d+):(\\d*): (.*)"),
                 linePlaceholder = "\$l",
-                exactWarningsMatch = false,
             ),
-            defaultGeneralConfig.copy(expectedWarningsPattern = Regex("// ;warn:?(.+):(\\d+): (.*)"))
+            defaultGeneralConfig.copy(expectedWarningsPattern = Regex("// ;warn:?(.*):(\\d+): (.*)"))
         ) { results ->
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass, "Expected result to be a single pass, but got $results")
@@ -222,10 +221,8 @@ class WarnPluginTest {
                 // ;warn:7:1: File should end with trailing newline
             """.trimIndent()
             ),
-            WarnPluginConfig(
-                "echo Test1Test.java:4:6: Class name should be in PascalCase",
-                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
-                true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
+            defaultWarnConfig.copy(
+                execFlags = "echo Test1Test.java:4:6: Class name should be in PascalCase",
             ),
             defaultGeneralConfig
         ) { results ->
@@ -275,7 +272,6 @@ class WarnPluginTest {
                     |Test1Test.java:7:1: File should end with trailing newline
                     |""".trimMargin()
             )
-        val catCmd = if (isCurrentOsWindows()) "type" else "cat"
         performTest(
             listOf(
                 """
@@ -288,11 +284,7 @@ class WarnPluginTest {
                 // ;warn:3:1: File should end with trailing newline
             """.trimIndent()
             ),
-            WarnPluginConfig(
-                "$catCmd ${tmpDir / "resource"} && set stub=",
-                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
-                true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
-            ),
+            defaultWarnConfig,
             defaultGeneralConfig.copy(expectedWarningsPattern = Regex("(.+):(\\d+):(\\d+): (.+)")),
         ) { results ->
             assertEquals(1, results.size)
@@ -406,6 +398,19 @@ class WarnPluginTest {
         }
     }
 
+    @Test
+    fun `warn-plugin test exception`() {
+        assertFailsWith<ResourceFormatException> {
+            "// ;warn:4:6: Class name should be in PascalCase".extractWarning(
+                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
+                "fileName",
+                1,
+                5,
+                2,
+            )
+        }
+    }
+
     private fun performTest(
         texts: List<String>,
         warnPluginConfig: WarnPluginConfig,
@@ -429,18 +434,5 @@ class WarnPluginTest {
             .toList()
         println(results)
         assertion(results)
-    }
-
-    @Test
-    fun `warn-plugin test exception`() {
-        assertFailsWith<ResourceFormatException> {
-            "// ;warn:4:6: Class name should be in PascalCase".extractWarning(
-                Regex("// ;warn:(\\d+):(\\d+): (.*)"),
-                "fileName",
-                1,
-                5,
-                2,
-            )
-        }
     }
 }
