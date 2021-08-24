@@ -10,7 +10,6 @@ import org.cqfn.save.core.utils.isCurrentOsWindows
 import org.cqfn.save.plugin.warn.utils.extractWarning
 
 import okio.FileSystem
-import okio.Path.Companion.toPath
 
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -95,14 +94,14 @@ class WarnPluginTest {
     @Suppress("TOO_LONG_FUNCTION")
     fun `warn-plugin test with default warning without line`() {
         mockExecCmd(
-                """
+            """
                 |Test1Test.java:5: Class name should be in PascalCase
                 |Test1Test.java:5: Class name shouldn't have a number
                 |Test1Test.java:7: Variable name should be in LowerCase
                 |Test1Test.java:10: Class should have a Kdoc
                 |Test1Test.java:10: Class name should be in PascalCase
                 """.trimMargin()
-            )
+        )
         performTest(
             listOf(
                 """
@@ -140,14 +139,14 @@ class WarnPluginTest {
     @Suppress("TOO_LONG_FUNCTION")
     fun `warn-plugin test for all mods`() {
         mockExecCmd(
-                """
+            """
                 |Test1Test.java:1:1: Package name is incorrect
                 |Test1Test.java:6:1: Class name should be in PascalCase too
                 |Test1Test.java:6:1: Class name should be in PascalCase
                 |Test1Test.java:6:1: Class name shouldn't have a number
                 |Test1Test.java:9:1: Variable name should be in LowerCase
                 """.trimMargin()
-            )
+        )
         performTest(
             listOf(
                 """
@@ -177,11 +176,11 @@ class WarnPluginTest {
     @Test
     fun `basic warn-plugin test with exactWarningsMatch = false`() {
         mockExecCmd(
-                """
+            """
                 |Test1Test.java:4:6: Class name should be in PascalCase
                 |Test1Test.java:5:8: Variable name should be in lowerCamelCase
                 """.trimMargin()
-            )
+        )
         performTest(
             listOf(
                 """
@@ -235,12 +234,12 @@ class WarnPluginTest {
     @Suppress("TOO_LONG_FUNCTION")
     fun `warn-plugin test - multiple warnings`() {
         mockExecCmd(
-                """Test1Test.java:1:1: Avoid using default package
+            """Test1Test.java:1:1: Avoid using default package
                     |Test1Test.java:3:6: Class name should be in PascalCase
                     |Test1Test.java:5:5: Variable name should be in lowerCamelCase
                     |Test1Test.java:7:1: File should end with trailing newline
                     |""".trimMargin()
-            )
+        )
         performTest(
             listOf(
                 """
@@ -266,12 +265,12 @@ class WarnPluginTest {
     @Suppress("TOO_LONG_FUNCTION")
     fun `warn-plugin test - multiple warnings & ignore technical comments`() {
         mockExecCmd(
-                """Test1Test.java:1:1: Avoid using default package
+            """Test1Test.java:1:1: Avoid using default package
                     |Test1Test.java:3:6: Class name should be in PascalCase
                     |Test1Test.java:5:5: Variable name should be in lowerCamelCase
                     |Test1Test.java:7:1: File should end with trailing newline
                     |""".trimMargin()
-            )
+        )
         performTest(
             listOf(
                 """
@@ -296,12 +295,12 @@ class WarnPluginTest {
     @Suppress("TOO_LONG_FUNCTION")
     fun `warn-plugin test - multiple warnings, no line-col`() {
         mockExecCmd(
-                """Test1Test.java: Avoid using default package
+            """Test1Test.java: Avoid using default package
                     |Test1Test.java: Class name should be in PascalCase
                     |Test1Test.java: Variable name should be in lowerCamelCase
                     |Test1Test.java: File should end with trailing newline
                     |""".trimMargin()
-            )
+        )
         performTest(
             listOf(
                 """
@@ -339,11 +338,11 @@ class WarnPluginTest {
     @Suppress("TOO_LONG_FUNCTION")
     fun `warn-plugin test for batchSize`() {
         mockExecCmd(
-                """
+            """
                 |Test1Test.java:4:6: Class name should be in PascalCase
                 |Test2Test.java:2:3: Class name should be in PascalCase
                 """.trimMargin()
-            )
+        )
         performTest(
             listOf(
                 """
@@ -377,10 +376,10 @@ class WarnPluginTest {
     @Suppress("TOO_LONG_FUNCTION")
     fun `regression - test resources in multiple directories`() {
         mockExecCmd(
-                """
+            """
                 |
                 """.trimMargin()
-            )
+        )
         fs.createFile(tmpDir / "Test1Test.java")
         fs.createFile(tmpDir / "Test2Test.java")
         fs.createDirectory(tmpDir / "inner")
