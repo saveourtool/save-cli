@@ -1,10 +1,13 @@
 
 import org.cqfn.save.generation.configFilePath
 import org.cqfn.save.generation.generateConfigOptions
+
+import de.undercouch.gradle.tasks.download.Download
 import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
 
 plugins {
     id("org.cqfn.save.buildutils.kotlin-library")
+    id("de.undercouch.download")
 }
 
 kotlin {
@@ -25,6 +28,7 @@ kotlin {
         }
         val commonNonJsTest by getting {
             dependencies {
+                implementation(project(":save-common-test"))
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
@@ -84,4 +88,28 @@ kotlin.sourceSets.getByName("commonNonJsMain").dependsOn(generatedKotlinSrc)
 tasks.withType<KotlinCompile<*>>().forEach {
     it.dependsOn(generateConfigOptionsTaskProvider)
     it.dependsOn(generateVersionFileTaskProvider)
+}
+
+tasks.register<Download>("downloadTestResources") {
+    src(listOf(
+        Versions.IntegrationTest.ktlintLink,
+        Versions.IntegrationTest.diktatLink,
+    ))
+    dest("../examples/kotlin-diktat")
+    doLast {
+        file("../examples/kotlin-diktat/diktat-${Versions.IntegrationTest.diktat}.jar").renameTo(
+            file("../examples/kotlin-diktat/diktat.jar")
+        )
+    }
+}
+val cleanupTask = tasks.register("cleanupTestResources") {
+    mustRunAfter(tasks.withType<Test>())
+    doFirst {
+        file("../examples/kotlin-diktat/ktlint").delete()
+        file("../examples/kotlin-diktat/diktat.jar").delete()
+    }
+}
+tasks.withType<Test>().configureEach {
+    dependsOn("downloadTestResources")
+    finalizedBy("cleanupTestResources")
 }

@@ -1,4 +1,4 @@
-package org.cqfn.save.reporter.utils
+package org.cqfn.save.plugin
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile

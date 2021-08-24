@@ -11,5 +11,10 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.Kotlinx.serialization}")
             }
         }
+        val commonTest by getting {
+            dependencies {
+                implementation(project(":save-common-test"))
+            }
+        }
     }
 }

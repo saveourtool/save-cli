@@ -10,6 +10,7 @@
 package org.cqfn.save.core.files
 
 import org.cqfn.save.core.config.OutputStreamType
+import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
 import org.cqfn.save.core.utils.writeToStream
 
@@ -115,6 +116,31 @@ fun FileSystem.readLines(path: Path): List<String> = this.read(path) {
  */
 fun FileSystem.readFile(path: Path): String = this.read(path) {
     this.readUtf8()
+}
+
+/**
+ * Copies [source] with all files and subdirectories into [target]
+ *
+ * @param source a directory to copy
+ * @param target a destination directory
+ */
+fun FileSystem.copyRecursively(source: Path, target: Path) {
+    // fixme: workaround for special files, e.g. symlinks to dirs
+    require(!metadata(source).isRegularFile)
+    if (!exists(target)) {
+        createDirectory(target)
+    } else {
+        require(metadata(target).isDirectory)
+    }
+    list(source).forEach {
+        if (metadata(it).isDirectory) {
+            logDebug("Copying dir $it into ${target / it.name}")
+            copyRecursively(it, target / it.name)
+        } else {
+            logDebug("Copying $it into ${target / it.name}")
+            copy(it, target / it.name)
+        }
+    }
 }
 
 /**
