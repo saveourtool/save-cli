@@ -29,12 +29,14 @@ class FixPlugin(
     testConfig: TestConfig,
     testFiles: List<String>,
     fileSystem: FileSystem,
-    useInternalRedirections: Boolean = true
+    useInternalRedirections: Boolean = true,
+    redirectTo: Path? = null,
 ) : Plugin(
     testConfig,
     testFiles,
     fileSystem,
-    useInternalRedirections) {
+    useInternalRedirections,
+    redirectTo) {
     private val diffGenerator = DiffRowGenerator.create()
         .showInlineDiffs(true)
         .mergeOriginalRevised(false)

@@ -17,12 +17,14 @@ import okio.Path
  * @property testFiles a list of files (test resources or save.toml configs)
  * @property fs describes the current file system
  * @property useInternalRedirections whether to redirect stdout/stderr for internal purposes
+ * @property redirectTo a file where process output and errors should be redirected. If null, output will be returned as [ExecutionResult.stdout] and [ExecutionResult.stderr].
  */
 abstract class Plugin(
     open val testConfig: TestConfig,
     protected val testFiles: List<String>,
     protected val fs: FileSystem,
-    private val useInternalRedirections: Boolean) {
+    private val useInternalRedirections: Boolean,
+    open val redirectTo: Path?) {
     /**
      * Instance that is capable of executing processes
      */
