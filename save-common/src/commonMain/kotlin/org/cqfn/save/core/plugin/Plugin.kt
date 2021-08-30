@@ -24,7 +24,7 @@ abstract class Plugin(
     protected val testFiles: List<String>,
     protected val fs: FileSystem,
     private val useInternalRedirections: Boolean,
-    open val redirectTo: Path?) {
+    protected val redirectTo: Path?) {
     /**
      * Instance that is capable of executing processes
      */
