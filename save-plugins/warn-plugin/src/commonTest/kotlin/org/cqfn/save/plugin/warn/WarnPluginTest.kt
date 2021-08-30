@@ -90,7 +90,6 @@ class WarnPluginTest {
     }
 
     @Test
-    @Ignore  // requires https://github.com/cqfn/save/pull/218
     @Suppress("TOO_LONG_FUNCTION")
     fun `warn-plugin test with default warning without line`() {
         mockExecCmd(
