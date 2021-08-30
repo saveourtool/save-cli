@@ -174,11 +174,11 @@ private fun nextLineNotMatchingRegex(
 ): Int {
     val fileSize = linesFile.size
     // next line without warn comment
-    val newLine = lineNum + 1 + linesFile.drop(lineNum).takeWhile { regex.containsMatchIn(it) }.count()
-    return if (newLine > fileSize) {
-        logWarn("Some warnings are at the end of the file: <$file>. They will be assigned the following line: $newLine")
+    val nextLineNumber = lineNum + 1 + linesFile.drop(lineNum).takeWhile { regex.containsMatchIn(it) }.count()
+    return if (nextLineNumber > fileSize) {
+        logWarn("Some warnings are at the end of the file: <$file>. They will be assigned the following line: $nextLineNumber")
         fileSize
     } else {
-        newLine
+        nextLineNumber
     }
 }
