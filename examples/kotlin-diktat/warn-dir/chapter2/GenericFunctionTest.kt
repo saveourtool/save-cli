@@ -9,7 +9,7 @@ private class ClassName<T> {
             // ;warn:43: [NULLABLE_PROPERTY_TYPE] try to avoid use of nullable types: initialize explicitly (cannot be auto-corrected)
             val variableName: Template? = null
             // ;warn:17: [VARIABLE_NAME_INCORRECT_FORMAT] variable name should be in lowerCamelCase and should contain only latin (ASCII) letters or numbers and should start from lower letter: variableT
-            // ;warn:$line:33: [NULLABLE_PROPERTY_TYPE] try to avoid use of nullable types: initialize explicitly (cannot be auto-corrected)
+            // ;warn:$line+1:33: [NULLABLE_PROPERTY_TYPE] try to avoid use of nullable types: initialize explicitly (cannot be auto-corrected)
             val variableT: T? = null
             println(variableT)
             return body!!(variableName)
