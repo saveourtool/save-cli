@@ -29,12 +29,14 @@ class WarnPlugin(
     testConfig: TestConfig,
     testFiles: List<String>,
     fileSystem: FileSystem,
-    useInternalRedirections: Boolean = true
+    useInternalRedirections: Boolean = true,
+    redirectTo: Path? = null,
 ) : Plugin(
     testConfig,
     testFiles,
     fileSystem,
-    useInternalRedirections) {
+    useInternalRedirections,
+    redirectTo) {
     private val expectedAndNotReceived = "Some warnings were expected but not received"
     private val unexpected = "Some warnings were unexpected"
 
@@ -119,7 +121,7 @@ class WarnPlugin(
 
         val executionResult = try {
             // todo: `cd /d` on Windows?
-            pb.exec("cd ${testConfig.getRootConfig().location.parent} && $execCmd", null)
+            pb.exec("cd ${testConfig.getRootConfig().location.parent} && $execCmd", redirectTo)
         } catch (ex: ProcessExecutionException) {
             return sequenceOf(
                 TestResult(
