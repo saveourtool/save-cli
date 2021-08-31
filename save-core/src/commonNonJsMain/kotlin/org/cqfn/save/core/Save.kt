@@ -1,5 +1,3 @@
-@file:Suppress("FILE_WILDCARD_IMPORTS")
-
 package org.cqfn.save.core
 
 import org.cqfn.save.core.config.OutputStreamType
@@ -36,7 +34,6 @@ import okio.buffer
 /**
  * @property saveProperties an instance of [SaveProperties]
  */
-@Suppress("INLINE_CLASS_CAN_BE_USED")  // todo: remove when there are >1 constructor parameters
 class Save(
     private val saveProperties: SaveProperties,
     private val fs: FileSystem,
@@ -95,6 +92,7 @@ class Save(
             }
         reporter.afterAll()
         reporter.out.close()
+        logInfo("Finished")
 
         return reporter
     }
