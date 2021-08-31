@@ -26,11 +26,14 @@ class FixAndWarnPlugin(
     testConfig: TestConfig,
     testFiles: List<String>,
     fileSystem: FileSystem,
-    useInternalRedirections: Boolean = true) : Plugin(
+    useInternalRedirections: Boolean = true,
+    redirectTo: Path? = null,
+) : Plugin(
     testConfig,
     testFiles,
     fileSystem,
-    useInternalRedirections) {
+    useInternalRedirections,
+    redirectTo) {
     private val fixPluginConfig: FixPluginConfig =
             testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().fix
     private val warnPluginConfig: WarnPluginConfig =

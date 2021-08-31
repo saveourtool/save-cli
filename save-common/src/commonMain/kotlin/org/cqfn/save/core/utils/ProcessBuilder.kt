@@ -52,7 +52,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
      * Execute [command] and wait for its completion.
      *
      * @param command executable command with arguments
-     * @param redirectTo a file where process output should be redirected. If null, output will be returned as [ExecutionResult.stdout].
+     * @param redirectTo a file where process output and errors should be redirected. If null, output will be returned as [ExecutionResult.stdout] and [ExecutionResult.stderr].
      * @return [ExecutionResult] built from process output
      * @throws ProcessExecutionException in case of impossibility of command execution
      */
@@ -107,6 +107,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
         redirectTo?.let {
             fs.write(redirectTo) {
                 write(stdout.joinToString("\n").encodeToByteArray())
+                write(stderr.joinToString("\n").encodeToByteArray())
             }
         } ?: logDebug("Execution output:\n$stdout")
         return ExecutionResult(status, stdout, stderr)

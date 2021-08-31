@@ -17,7 +17,8 @@ class MockPlugin(baseDir: Path, testFiles: List<String> = emptyList()) : Plugin(
     TestConfig((baseDir / "save.toml").also { fs.createFile(it) }, null, fs = fs),
     testFiles,
     fs,
-    useInternalRedirections = true
+    useInternalRedirections = true,
+    redirectTo = null
 ) {
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> = emptySequence()
 
