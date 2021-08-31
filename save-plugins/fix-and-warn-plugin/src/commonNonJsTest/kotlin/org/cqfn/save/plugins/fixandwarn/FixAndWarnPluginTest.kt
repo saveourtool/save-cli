@@ -81,7 +81,8 @@ class FixAndWarnPluginTest {
                         WarnPluginConfig(warnExecutionCmd,
                             Regex("(.+):(\\d+):(\\d+): (.+)"),
                             true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
-                        )
+                        ),
+                        false,
                     ),
                     GeneralConfig("", listOf(""), "", "", expectedWarningsPattern = Regex("// ;warn:(\\d+):(\\d+): (.*)"))
                 ),

@@ -26,6 +26,57 @@ data class Warning(
 )
 
 /**
+ * @param warningRegex regular expression for warning
+ * @param lineGroupIdx index of capture group for line number
+ * @param placeholder placeholder for line
+ * @param lineNum number of line
+ * @param file path to test file
+ * @param linesFile lines of file
+ * @return a [Warning] or null if [this] string doesn't match [warningRegex]
+ * @throws ResourceFormatException when parsing a file
+ */
+@Suppress(
+    "TooGenericExceptionCaught",
+    "LongParameterList",
+    "NestedBlockDepth",
+    "ReturnCount",
+    // fixme: add `cause` parameter to `PluginException`
+    "SwallowedException",
+    "TOO_MANY_PARAMETERS",
+    "AVOID_NULL_CHECKS",
+)
+fun String.getLineNumber(warningRegex: Regex,
+                         lineGroupIdx: Long?,
+                         placeholder: String,
+                         lineNum: Int?,
+                         file: Path?,
+                         linesFile: List<String>?,
+): Int? {
+    if (lineGroupIdx == null) {
+        // line capture group is not configured in save.toml
+        return null
+    }
+
+    val groups = warningRegex.find(this)?.groups ?: return null
+    val lineValue = groups[lineGroupIdx.toInt()]!!.value
+    return if (lineValue.isEmpty() && lineNum != null && linesFile != null) {
+        nextLineNotMatchingRegex(file!!, warningRegex, linesFile, lineNum)
+    } else {
+        lineValue.toIntOrNull() ?: run {
+            if (lineValue[0] != placeholder[0]) {
+                throw ResourceFormatException("The group <$lineValue> is neither a number nor a placeholder.")
+            }
+            try {
+                val adjustment = lineValue.substringAfterLast(placeholder)
+                lineNum!! + adjustment.ifBlank { "0" }.toInt()
+            } catch (e: Exception) {
+                throw ResourceFormatException("Could not extract line number from line [$this], cause: ${e.describe()}")
+            }
+        }
+    }
+}
+
+/**
  * Extract warning from [this] string using provided parameters
  *
  * @param warningRegex regular expression for warning
@@ -78,57 +129,6 @@ internal fun String.extractWarning(warningRegex: Regex,
     val fileName = getRegexGroupSafe(fileNameGroupIdx, groups, this, "file name")!!
 
     return extractWarning(warningRegex, fileName, line, columnGroupIdx, messageGroupIdx)
-}
-
-/**
- * @param warningRegex regular expression for warning
- * @param lineGroupIdx index of capture group for line number
- * @param placeholder placeholder for line
- * @param lineNum number of line
- * @param file path to test file
- * @param linesFile lines of file
- * @return a [Warning] or null if [this] string doesn't match [warningRegex]
- * @throws ResourceFormatException when parsing a file
- */
-@Suppress(
-    "TooGenericExceptionCaught",
-    "LongParameterList",
-    "NestedBlockDepth",
-    "ReturnCount",
-    // fixme: add `cause` parameter to `PluginException`
-    "SwallowedException",
-    "TOO_MANY_PARAMETERS",
-    "AVOID_NULL_CHECKS",
-)
-internal fun String.getLineNumber(warningRegex: Regex,
-                                  lineGroupIdx: Long?,
-                                  placeholder: String,
-                                  lineNum: Int?,
-                                  file: Path?,
-                                  linesFile: List<String>?,
-): Int? {
-    if (lineGroupIdx == null) {
-        // line capture group is not configured in save.toml
-        return null
-    }
-
-    val groups = warningRegex.find(this)?.groups ?: return null
-    val lineValue = groups[lineGroupIdx.toInt()]!!.value
-    return if (lineValue.isEmpty() && lineNum != null && linesFile != null) {
-        nextLineNotMatchingRegex(file!!, warningRegex, linesFile, lineNum)
-    } else {
-        lineValue.toIntOrNull() ?: run {
-            if (lineValue[0] != placeholder[0]) {
-                throw ResourceFormatException("The group <$lineValue> is neither a number nor a placeholder.")
-            }
-            try {
-                val adjustment = lineValue.substringAfterLast(placeholder)
-                lineNum!! + adjustment.ifBlank { "0" }.toInt()
-            } catch (e: Exception) {
-                throw ResourceFormatException("Could not extract line number from line [$this], cause: ${e.describe()}")
-            }
-        }
-    }
 }
 
 /**

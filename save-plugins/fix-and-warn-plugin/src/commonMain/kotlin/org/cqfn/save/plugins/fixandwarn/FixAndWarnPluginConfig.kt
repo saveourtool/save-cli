@@ -2,6 +2,7 @@ package org.cqfn.save.plugins.fixandwarn
 
 import org.cqfn.save.core.config.TestConfigSections
 import org.cqfn.save.core.plugin.PluginConfig
+import org.cqfn.save.core.utils.RegexSerializer
 import org.cqfn.save.plugin.warn.WarnPluginConfig
 import org.cqfn.save.plugins.fix.FixPluginConfig
 
@@ -10,15 +11,20 @@ import okio.Path.Companion.toPath
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import kotlinx.serialization.UseSerializers
 
 /**
  * @property fix config for nested [fix] section
  * @property warn config for nested [warn] section
+ * @property inlineFixer
+ * @property checkFixesPattern
  */
 @Serializable
 data class FixAndWarnPluginConfig(
     val fix: FixPluginConfig,
-    val warn: WarnPluginConfig
+    val warn: WarnPluginConfig,
+    val inlineFixer: Boolean? = null,
+    val checkFixesPattern: Regex? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.`FIX AND WARN`
 
@@ -31,7 +37,9 @@ data class FixAndWarnPluginConfig(
         val mergedWarnPluginConfig = warn.mergeWith(other.warn)
         return FixAndWarnPluginConfig(
             mergedFixPluginConfig as FixPluginConfig,
-            mergedWarnPluginConfig as WarnPluginConfig
+            mergedWarnPluginConfig as WarnPluginConfig,
+            this.inlineFixer ?: otherConfig.inlineFixer,
+            this.checkFixesPattern ?: other.checkFixesPattern,
         )
     }
 
@@ -47,8 +55,21 @@ data class FixAndWarnPluginConfig(
                          [warn]: {${warnPluginConfig.testNameSuffix}, ${warnPluginConfig.batchSize}}
            """
         }
+        val newInlineFixer = inlineFixer ?: false
+        val newCheckFixerPattern = if (newInlineFixer) (checkFixesPattern ?: defaultCheckFixesPattern) else null
         return FixAndWarnPluginConfig(
-            fixPluginConfig, warnPluginConfig
+            fixPluginConfig,
+            warnPluginConfig,
+            newInlineFixer,
+            newCheckFixerPattern,
         )
+    }
+
+    companion object {
+        /**
+         * Default regex for check fixes
+         * ```CHECK-FIXES: val foo = 42```
+         */
+        internal val defaultCheckFixesPattern = Regex("(.+): (.+)")
     }
 }

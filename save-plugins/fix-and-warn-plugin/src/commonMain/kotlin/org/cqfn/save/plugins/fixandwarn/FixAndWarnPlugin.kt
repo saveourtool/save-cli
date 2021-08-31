@@ -9,6 +9,7 @@ import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.plugin.warn.WarnPlugin
 import org.cqfn.save.plugin.warn.WarnPluginConfig
+import org.cqfn.save.plugin.warn.utils.getLineNumber
 import org.cqfn.save.plugins.fix.FixPlugin
 import org.cqfn.save.plugins.fix.FixPluginConfig
 
@@ -34,12 +35,12 @@ class FixAndWarnPlugin(
     fileSystem,
     useInternalRedirections,
     redirectTo) {
-    private val fixPluginConfig: FixPluginConfig =
-            testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().fix
-    private val warnPluginConfig: WarnPluginConfig =
-            testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().warn
+    private val fixAndWarnPluginConfig: FixAndWarnPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single()
+    private val fixPluginConfig: FixPluginConfig = fixAndWarnPluginConfig.fix
+    private val warnPluginConfig: WarnPluginConfig = fixAndWarnPluginConfig.warn
     private val generalConfig: GeneralConfig =
             testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
+    private val inlineFixer = fixAndWarnPluginConfig.inlineFixer
     private lateinit var fixPlugin: FixPlugin
     private lateinit var warnPlugin: WarnPlugin
 
@@ -68,12 +69,19 @@ class FixAndWarnPlugin(
         // Need to update private fields after validation
         initOrUpdateConfigs()
         val testFilePattern = warnPluginConfig.resourceNamePattern
-        val expectedFiles = files.filterTestResources(testFilePattern, match = false)
+
+        val newFiles = if (inlineFixer == true) {
+            replaceFixLine(files)
+        } else {
+            files
+        }
+
+        val expectedFiles = newFiles.filterTestResources(testFilePattern, match = false)
 
         // Remove (in place) warnings from test files before fix plugin execution
         val filesAndTheirWarningsMap = removeWarningsFromExpectedFiles(expectedFiles)
 
-        val fixTestResults = fixPlugin.handleFiles(files).toList()
+        val fixTestResults = fixPlugin.handleFiles(newFiles).toList()
 
         val (fixTestResultsPassed, fixTestResultsFailed) = fixTestResults.partition { it.status is Pass }
 
@@ -165,6 +173,61 @@ class FixAndWarnPlugin(
                 }
             }
         }
+    }
+
+    @Suppress(
+        "TOO_LONG_FUNCTION",
+        "TOO_MANY_LINES_IN_LAMBDA"
+    )
+    private fun replaceFixLine(files: Sequence<List<Path>>): Sequence<List<Path>> {
+        val newFiles: MutableList<List<Path>> = mutableListOf()
+        files.map { file -> file.single() }.map {
+            val fileCopy = createTestFile(it)
+            val fileCopyWarning = createTestFile(it)
+            val linesFile = fs.readLines(it) as MutableList
+            linesFile.mapIndexed { index, line ->
+                if (generalConfig.expectedWarningsPattern!!.matches(line)) {
+                    val lineNumber = line.getLineNumber(
+                        generalConfig.expectedWarningsPattern!!,
+                        warnPluginConfig.lineCaptureGroup,
+                        warnPluginConfig.linePlaceholder!!,
+                        index + 1,
+                        it,
+                        linesFile,
+                    )
+                    val newLine = fixAndWarnPluginConfig.checkFixesPattern!!.find(linesFile[index + 1])?.groups?.get(1)
+                        ?.value
+                    newLine?.let {
+                        lineNumber?.let {
+                            linesFile.removeAt(lineNumber - 1)
+                            linesFile.add(lineNumber - 1, newLine)
+                        }
+                    }
+                }
+            }
+            linesFile.map {
+                if (!generalConfig.expectedWarningsPattern!!.matches(it) && !fixAndWarnPluginConfig.checkFixesPattern!!.matches(it)) {
+                    fs.write(fileCopy) {
+                        write((it + "\n").encodeToByteArray())
+                    }
+                }
+            }
+            linesFile.map {
+                if (!fixAndWarnPluginConfig.checkFixesPattern!!.matches(it)) {
+                    fs.write(fileCopyWarning) {
+                        write((it + "\n").encodeToByteArray())
+                    }
+                }
+            }
+            newFiles.add(listOf(fileCopy, fileCopyWarning))
+        }
+        return newFiles.asSequence()
+    }
+
+    private fun createTestFile(path: Path): Path {
+        val pathCopy: Path = constructPathForCopyOfTestFile(FixAndWarnPlugin::class.simpleName!!, path)
+        createTempDir(pathCopy.parent!!)
+        return pathCopy
     }
 
     override fun cleanupTempDir() {
