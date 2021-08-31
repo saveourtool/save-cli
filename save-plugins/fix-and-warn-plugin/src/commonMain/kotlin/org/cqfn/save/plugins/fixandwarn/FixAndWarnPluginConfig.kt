@@ -1,3 +1,6 @@
+@file:Suppress("HEADER_MISSING_IN_NON_SINGLE_CLASS_FILE")
+@file:UseSerializers(RegexSerializer::class)
+
 package org.cqfn.save.plugins.fixandwarn
 
 import org.cqfn.save.core.config.TestConfigSections
