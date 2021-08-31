@@ -187,7 +187,7 @@ class WarnPlugin(
                 generalConfig.expectedWarningsPattern!!,
                 warnPluginConfig.lineCaptureGroup,
                 warnPluginConfig.linePlaceholder!!,
-                index,
+                index + 1,
                 this,
                 linesFile,
             )
