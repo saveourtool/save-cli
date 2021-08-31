@@ -153,10 +153,10 @@ class WarnPluginTest {
                 package org.cqfn.save.example
                 
                 // ;warn:1: Class name should be in PascalCase too
-                // ;warn:${'$'}l:1: Class name shouldn't have a number
+                // ;warn:${'$'}l+1:1: Class name shouldn't have a number
                 class example1 {
-                // ;warn:${'$'}l-3:1: Class name should be in PascalCase
-                // ;warn:${'$'}l:1: Variable name should be in LowerCase
+                // ;warn:${'$'}l-1:1: Class name should be in PascalCase
+                // ;warn:${'$'}l+1:1: Variable name should be in LowerCase
                     int Foo = 42;
                 }
             """.trimIndent()
