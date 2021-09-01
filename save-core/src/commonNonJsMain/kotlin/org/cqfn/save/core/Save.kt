@@ -92,7 +92,7 @@ class Save(
             }
         reporter.afterAll()
         reporter.out.close()
-        logInfo("Finished")
+        logInfo("SAVE has finished execution. You can rerun with --debug for additional information.")
 
         return reporter
     }
