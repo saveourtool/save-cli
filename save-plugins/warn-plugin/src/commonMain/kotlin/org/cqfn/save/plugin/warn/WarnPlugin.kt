@@ -167,10 +167,13 @@ class WarnPlugin(
 
     private fun String.makeThePathRelativeToTestRoot(): String {
         val testRoot = testConfig.getRootConfig().directory.toString()
-        if (testRoot == ".") return this
+        if (testRoot == ".") {
+            return this
+        }
         return this.replace(testRoot, "")
             .trimStart('/', '\\')
     }
+
     /**
      * method for getting warnings from test files:
      * 1) reading the file

@@ -10,7 +10,6 @@ import org.cqfn.save.core.config.isSaveTomlConfig
 import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.files.StdStreamsSink
 import org.cqfn.save.core.files.createRelativePathToTheRoot
-import org.cqfn.save.core.logging.isDebugEnabled
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
 import org.cqfn.save.core.logging.logInfo
@@ -36,17 +35,12 @@ import okio.buffer
 /**
  * @property saveProperties an instance of [SaveProperties]
  */
-@Suppress("INLINE_CLASS_CAN_BE_USED")  // todo: remove when there are >1 constructor parameters
 class Save(
     private val saveProperties: SaveProperties,
     private val fs: FileSystem,
 ) {
     /** reporter that can be used  */
     internal val reporter = getReporter(saveProperties)
-
-    init {
-        isDebugEnabled = saveProperties.debug ?: false
-    }
 
     /**
      * Main entrypoint for SAVE framework. Discovers plugins and calls their execution.
