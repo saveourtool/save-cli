@@ -9,6 +9,7 @@ import org.cqfn.save.core.utils.isCurrentOsWindows
 import org.cqfn.save.plugin.warn.WarnPluginConfig
 import org.cqfn.save.plugins.fix.FixPlugin
 import org.cqfn.save.plugins.fix.FixPluginConfig
+import okio.Path.Companion.toPath
 
 import io.github.petertrr.diffutils.diff
 import okio.FileSystem
@@ -90,7 +91,7 @@ class FixAndWarnPluginTest {
             testFiles = emptyList(),
             fs,
             useInternalRedirections = false
-        ).execute().toList()
+        ).execute(tmpDir, emptyList<String>()).toList()
 
         println("Results ${results.toList()}")
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
