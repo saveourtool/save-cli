@@ -26,7 +26,6 @@ class ValidationTest {
 
         val actualGeneralConfig1 = config.pluginConfigs.filterIsInstance<GeneralConfig>().first()
         assertEquals(emptyList(), actualGeneralConfig1.excludedTests)
-        assertEquals(emptyList(), actualGeneralConfig1.includedTests)
     }
 
     @Test
@@ -41,7 +40,7 @@ class ValidationTest {
             assertEquals(
                 """
                     Error: Couldn't find `execCmd` in [general] section of `${generalConfig.configLocation}` config.
-                    Current configuration: execCmd=null, tags=null, description=null, suiteName=null, excludedTests=null, includedTests=null, expectedWarningsPattern=null
+                    Current configuration: execCmd=null, tags=null, description=null, suiteName=null, excludedTests=null, expectedWarningsPattern=null
                     Please provide it in this, or at least in one of the parent configs.
                 """.trimIndent(),
                 ex.message

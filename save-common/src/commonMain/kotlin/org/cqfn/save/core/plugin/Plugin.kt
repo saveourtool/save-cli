@@ -10,6 +10,7 @@ import org.cqfn.save.core.utils.ProcessBuilder
 
 import okio.FileSystem
 import okio.Path
+import okio.Path.Companion.toPath
 
 /**
  * Plugin that can be injected into SAVE during execution. Plugins accept contents of configuration file and then perform some work.
@@ -33,18 +34,42 @@ abstract class Plugin(
     /**
      * Perform plugin's work.
      *
+     * @param rootDir - test root directory (highest direstory with save.toml)
+     * @param excludedTests - list with excluded tests (relative paths)
      * @return a sequence of [TestResult]s for each group of test resources
      */
-    fun execute(): Sequence<TestResult> {
+    fun execute(rootDir: Path, excludedTests: List<String>?): Sequence<TestResult> {
         clean()
-        // todo: pass individual groups of files to handleFiles? Or it will play bad with batch mode?
+
         val testFilesSequence = discoverTestFiles(testConfig.directory)
+            // removing excluded test resources
+            .filterNot {
+                isExcludedTest(it, rootDir, excludedTests)
+            }
+
         return if (testFilesSequence.any()) {
             logDebug("Discovered the following test resources: ${testFilesSequence.toList()}")
             handleFiles(testFilesSequence)
         } else {
             emptySequence()
         }
+    }
+
+    private fun isExcludedTest(
+        testFile: List<Path>,
+        rootDir: Path,
+        excludedTests: List<String>?): Boolean {
+        // creating relative to root path from a test file
+        val testFileRelative =
+                (testFile[0].createRelativePathToTheRoot(rootDir).toPath() / testFile[0].name)
+                    .toString()
+                    .replace('\\', '/')
+
+        // excluding tests that are included in the excluded list
+        return excludedTests
+            ?.map { it.replace('\\', '/') }
+            ?.contains(testFileRelative)
+            ?: false
     }
 
     /**

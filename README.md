@@ -139,12 +139,8 @@ description = "My suite description"
 suiteName = DocsCheck, CaseCheck, NpeTests, e.t.c 
 
 # excluded tests in the suite (optional). Here you can provide names of excluded tests, separated by comma. By the default no tests are excluded. 
-# names can have 'Test' postifix or can be without a postfix - this does not matter. Save will detect tests for both cases
-excludedTests = NameWithTestPostfix, NameWithoutPostfix, e.t.c
-
-# tests included in the suite (optional). Here you can provide names of tests, that are included in this suite.
- By the default all tests in the same directory with 'save.toml' file are included in the suite. 
-includedTests = NameWithTestPostfix, NameWithoutPostfix, e.t.c
+# to exclude tests use relative path to the root of test project (to the root directory of `save.toml`)
+excludedTests = ["warn/chapter1/GarbageTest.kt", "warn/otherDir/NewTest.kt"], e.t.c
 ```
 
 ## <a name="plugins"></a> Using plugins for specific test-scenarios

@@ -15,6 +15,7 @@ import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
 import org.cqfn.save.core.logging.logInfo
 import org.cqfn.save.core.logging.logWarn
+import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.plugin.PluginException
 import org.cqfn.save.core.reporter.Reporter
@@ -113,7 +114,18 @@ class Save(
         reporter.onPluginExecutionStart(plugin)
         try {
             val rootDir = plugin.testConfig.getRootConfig().location
-            plugin.execute()
+            val excludedTests = plugin
+                .testConfig
+                .pluginConfigs
+                .filterIsInstance<GeneralConfig>()
+                .single()
+                .excludedTests
+
+            if (!excludedTests.isNullOrEmpty()) {
+                logDebug("Excluded tests in [${plugin.testConfig.location}] : $excludedTests")
+            }
+
+            plugin.execute(rootDir, excludedTests)
                 .onEach { event ->
                     // calculate relative paths, because reporters don't need paths higher than root dir
                     val resourcesRelative =
