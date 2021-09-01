@@ -12,6 +12,7 @@ import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.result.TestStatus
 import org.cqfn.save.core.utils.ProcessExecutionException
+import org.cqfn.save.plugin.warn.utils.ExtraFlagsExtractor
 import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
 import org.cqfn.save.plugin.warn.utils.getLineNumber
@@ -39,12 +40,14 @@ class WarnPlugin(
     redirectTo) {
     private val expectedAndNotReceived = "Some warnings were expected but not received"
     private val unexpected = "Some warnings were unexpected"
+    private lateinit var extraFlagsExtractor: ExtraFlagsExtractor
 
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
         testConfig.validateAndSetDefaults()
 
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
+        extraFlagsExtractor = ExtraFlagsExtractor(warnPluginConfig, fs)
 
         // Special trick to handle cases when tested tool is able to process directories.
         // In this case instead of executing the tool with file names, we execute the tool with directories.
@@ -93,6 +96,16 @@ class WarnPlugin(
             it.name to warningsForCurrentPath
         }
 
+        val extraFlagsList = paths.map { path ->
+            extraFlagsExtractor.extractExtraFlagsFrom(path)
+        }
+            .distinct()
+        require(extraFlagsList.size == 1) {
+            "Extra flags for all files in a batch should be same, but you have batchSize=${warnPluginConfig.batchSize}" +
+                    " and there are ${extraFlagsList.size} different sets of flags inside it"
+        }
+        val extraFlags = extraFlagsList.single()
+
         if (expectedWarnings.isEmpty()) {
             logWarn(
                 "No expected warnings were found using the following regex pattern:" +
@@ -117,7 +130,16 @@ class WarnPlugin(
                     it.toString().makeThePathRelativeToTestRoot()
                 }
 
-        val execCmd = "${generalConfig.execCmd} ${warnPluginConfig.execFlags} $fileNamesForExecCmd"
+        val execFlagsAdjusted = warnPluginConfig.execFlags!!
+            .replace("\$${ExtraFlags.keyBefore}", extraFlags.before)
+            .replace("\$${ExtraFlags.keyAfter}", extraFlags.after).run {
+                if (contains("\$fileName")) {
+                    replace("\$fileName", fileNamesForExecCmd)
+                } else {
+                    plus(" $fileNamesForExecCmd")
+                }
+            }
+        val execCmd = "${generalConfig.execCmd} $execFlagsAdjusted"
 
         val executionResult = try {
             pb.exec("cd ${testConfig.getRootConfig().location.parent} && $execCmd", redirectTo)

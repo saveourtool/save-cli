@@ -20,6 +20,7 @@ import kotlinx.serialization.UseSerializers
  * The logic of the default value processing will be provided in stage of validation
  *
  * @property execFlags a command that will be executed to check resources and emit warnings
+ * @property extraConfigPattern everything from the capture group will be split by comma and then by `=`
  * @property actualWarningsPattern a regular expression by which warnings will be discovered in the process output
  * @property warningTextHasLine whether line number is included in [actualWarningsPattern]
  * @property warningTextHasColumn whether column number is included in [actualWarningsPattern]
@@ -42,12 +43,13 @@ import kotlinx.serialization.UseSerializers
  * @property batchSize it controls how many files execCmd will process at a time.
  * @property batchSeparator separator for batch mode
  * @property linePlaceholder placeholder for line number, which resolved as current line and support addition and subtraction
- * @property wildCardInDirectoryMode mode that controls that we are targetting our tested tools on directories (not on files).
+ * @property wildCardInDirectoryMode mode that controls that we are targeting our tested tools on directories (not on files).
  * This prefix will be added to the name of the directory, if you would like to use directory mode without any prefix simply use ""
  */
 @Serializable
 data class WarnPluginConfig(
     val execFlags: String? = null,
+    val extraConfigPattern: Regex? = null,
     val actualWarningsPattern: Regex? = null,
     val warningTextHasLine: Boolean? = null,
     val warningTextHasColumn: Boolean? = null,
@@ -71,17 +73,12 @@ data class WarnPluginConfig(
     override var configLocation: Path = "undefined_toml_location".toPath()
 
     /**
-     * @property suffix name of the test file.
+     * regex for the name of the test files.
      */
-    val testName: String = testNameSuffix ?: "Test"
-
-    /**
-     *  @property resourceNamePattern regex for the name of the test files.
-     */
-    val resourceNamePattern: Regex = if (testName == "Test") {
-        Regex("""(.+)${(testName)}\.[\w\d]+""")
+    val resourceNamePattern: Regex = if (testNameSuffix == "Test") {
+        Regex("""(.+)${(testNameSuffix)}\.[\w\d]+""")
     } else {
-        Regex("""(.+)${(testName)}""")
+        Regex("""(.+)${(testNameSuffix)}""")
     }
 
     @Suppress("ComplexMethod")
@@ -89,6 +86,7 @@ data class WarnPluginConfig(
         val other = otherConfig as WarnPluginConfig
         return WarnPluginConfig(
             this.execFlags ?: other.execFlags,
+            this.extraConfigPattern ?: other.extraConfigPattern,
             this.actualWarningsPattern ?: other.actualWarningsPattern,
             this.warningTextHasLine ?: other.warningTextHasLine,
             this.warningTextHasColumn ?: other.warningTextHasColumn,
@@ -134,6 +132,7 @@ data class WarnPluginConfig(
         requirePositiveIfNotNull(messageCaptureGroup)
         return WarnPluginConfig(
             execFlags ?: "",
+            extraConfigPattern ?: defaultExtraConfigPattern,
             actualWarningsPattern ?: defaultOutputPattern,
             newWarningTextHasLine,
             newWarningTextHasColumn,
@@ -147,7 +146,7 @@ data class WarnPluginConfig(
             newColumnCaptureGroupOut,
             newMessageCaptureGroupOut,
             exactWarningsMatch ?: true,
-            testName,
+            testNameSuffix ?: "Test",
             linePlaceholder ?: "\$line",
             wildCardInDirectoryMode,
         )
@@ -170,5 +169,16 @@ data class WarnPluginConfig(
          * ```[WARN] /path/to/resources/ClassNameTest.java:2:4: Class name in incorrect case```
          */
         internal val defaultOutputPattern = Regex("(.+):(\\d*):(\\d*): (.+)")
+        internal val defaultExtraConfigPattern = Regex("// RUN: (.+)")
+    }
+}
+
+data class ExtraFlags(
+    val before: String,
+    val after: String,
+) {
+    companion object {
+        const val keyAfter = "afterFlags"
+        const val keyBefore = "beforeFlags"
     }
 }

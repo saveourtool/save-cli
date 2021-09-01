@@ -12,5 +12,10 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
             }
         }
+        val commonTest by getting {
+            dependencies {
+                implementation("com.squareup.okio:okio-fakefilesystem-multiplatform:${Versions.okio}")
+            }
+        }
     }
 }

@@ -1,0 +1,56 @@
+package org.cqfn.save.plugin.warn.utils
+
+import org.cqfn.save.core.files.readLines
+import org.cqfn.save.core.logging.logWarn
+import org.cqfn.save.plugin.warn.ExtraFlags
+import org.cqfn.save.plugin.warn.WarnPluginConfig
+
+import okio.FileSystem
+import okio.Path
+
+/**
+ * Class that is capable of extracting [ExtraFlags] from a text line
+ */
+class ExtraFlagsExtractor(private val warnPluginConfig: WarnPluginConfig,
+                          private val fs: FileSystem,
+) {
+    /**
+     * @param path file from which [ExtraFlags] should be extracted
+     * @return [ExtraFlags]
+     */
+    fun extractExtraFlagsFrom(path: Path): ExtraFlags {
+        val allExtraFlagsFromFile = fs.readLines(path).mapNotNull {
+            extractExtraFlagsFrom(it)
+        }
+        require(allExtraFlagsFromFile.size == 1) {
+            "Extra flags from multiple comments in a single file are not supported yet"
+        }
+        return allExtraFlagsFromFile.single()
+    }
+
+    /**
+     * @param line line from which [ExtraFlags] should be extracted
+     * @return [ExtraFlags]
+     */
+    fun extractExtraFlagsFrom(line: String): ExtraFlags? {
+        val matchResult = warnPluginConfig.extraConfigPattern!!.find(line) ?: return null
+        return matchResult.groupValues[1]
+            .run { split(",", ", ") }
+            .run {
+                associate {
+                    val pair = it.split("=", limit = 2).map {
+                        it.replace("\\=", "=")
+                    }
+                    pair.first() to pair.last()
+                }
+                    .run {
+                        ExtraFlags(getOrElse(ExtraFlags.keyBefore) { "" }, getOrElse(ExtraFlags.keyAfter) { "" })
+                    }
+                    .also {
+                        if (it == ExtraFlags("", "")) {
+                            logWarn("Line <$line> is matched by extraFlagsPattern <${warnPluginConfig.extraConfigPattern}>, but no flags have been extracted")
+                        }
+                    }
+            }
+    }
+}

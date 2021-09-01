@@ -28,8 +28,9 @@ class WarnPluginTest {
     private val fs = FileSystem.SYSTEM
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPluginTest::class.simpleName!!)
     private val catCmd = if (isCurrentOsWindows()) "type" else "cat"
-    private val defaultWarnConfig = WarnPluginConfig(
+    internal val defaultWarnConfig = WarnPluginConfig(
         "$catCmd ${tmpDir / "resource"} && set stub=",
+        WarnPluginConfig.defaultExtraConfigPattern,
         Regex("// ;warn:(\\d+):(\\d+): (.*)"),
         true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
     )
@@ -104,6 +105,7 @@ class WarnPluginTest {
             ),
             WarnPluginConfig(
                 "$catCmd ${tmpDir / "resource"} && set stub=",
+                WarnPluginConfig.defaultExtraConfigPattern,
                 actualWarningsPattern = Regex("(.+):(\\d+): (.+)"),
                 true, false, 1, ", ", 1, null, 2, 1, 2, null, 3,
             ),
@@ -210,6 +212,7 @@ class WarnPluginTest {
             ),
             WarnPluginConfig(
                 "echo Test1Test.java:4:6: Class name should be in PascalCase",
+                WarnPluginConfig.defaultExtraConfigPattern,
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
             ),
@@ -282,6 +285,7 @@ class WarnPluginTest {
             ),
             WarnPluginConfig(
                 "$catCmd ${tmpDir / "resource"} && set stub=",
+                WarnPluginConfig.defaultExtraConfigPattern,
                 Regex("// ;warn:(\\d+):(\\d+): (.*)"),
                 true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
             ),
@@ -323,6 +327,7 @@ class WarnPluginTest {
             ),
             WarnPluginConfig(
                 "$catCmd ${tmpDir / "resource"} && set stub=",
+                WarnPluginConfig.defaultExtraConfigPattern,
                 Regex("// ;warn: (.*)"),
                 false, false, 1, ", ", null, null, 1, 1, null, null, 2
             ), GeneralConfig(
