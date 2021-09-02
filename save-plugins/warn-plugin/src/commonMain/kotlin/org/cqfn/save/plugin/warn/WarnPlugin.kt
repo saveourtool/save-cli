@@ -116,7 +116,7 @@ class WarnPlugin(
         }
 
         // joining test files to string with a batchSeparator if the tested tool supports processing of file batches
-        // NOTE: save will pass relative paths of Tests (calculated from testRootConfig dir) into the executed tool
+        // NOTE: SAVE will pass relative paths of Tests (calculated from testRootConfig dir) into the executed tool
         val fileNamesForExecCmd =
                 warnPluginConfig.wildCardInDirectoryMode?.let {
                     val directoryPrefix = testConfig
@@ -187,9 +187,14 @@ class WarnPlugin(
         }.asSequence()
     }
 
-    private fun String.makeThePathRelativeToTestRoot() =
-            this.replace("${testConfig.getRootConfig().directory}", "")
-                .trimStart('/', '\\')
+    private fun String.makeThePathRelativeToTestRoot(): String {
+        val testRoot = testConfig.getRootConfig().directory.toString()
+        if (testRoot == ".") {
+            return this
+        }
+        return this.replace(testRoot, "")
+            .trimStart('/', '\\')
+    }
 
     /**
      * method for getting warnings from test files:

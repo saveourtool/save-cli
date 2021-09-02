@@ -32,18 +32,11 @@ class FixPluginTest {
 
     @Test
     fun `should detect two files`() {
+        fs.createFile(tmpDir / "save.toml")
         fs.createFile(tmpDir / "Test1Test.java")
         fs.createFile(tmpDir / "Test1Expected.java")
 
-        val pairs = FixPlugin(
-            TestConfig(tmpDir / "Test1Test.java", null, mutableListOf(FixPluginConfig("")), fs),
-            testFiles = emptyList(),
-            fs,
-            useInternalRedirections = false
-        )
-            .discoverTestFiles(tmpDir)
-            .map { it.first() to it.last() }
-            .toList()
+        val pairs = discoverFilePairs()
 
         assertEquals(1, pairs.size)
         assertEquals("Test1Expected.java", pairs.single().first.name)
@@ -52,6 +45,7 @@ class FixPluginTest {
 
     @Test
     fun `should detect two files - among other files`() {
+        fs.createFile(tmpDir / "save.toml")
         fs.createFile(tmpDir / "Test2Test.java")
         fs.createFile(tmpDir / "Test2Expected.java")
         fs.createFile(tmpDir / "Something.java")
@@ -62,15 +56,7 @@ class FixPluginTest {
         fs.createFile(tmpDir / "NowCompletelyDifferentExpected.java")
         fs.createFile(tmpDir / "AndNowCompletelyDifferent.java")
 
-        val pairs = FixPlugin(
-            TestConfig(tmpDir / "Something.java", null, mutableListOf(FixPluginConfig("")), fs),
-            testFiles = emptyList(),
-            fs,
-            useInternalRedirections = false
-        )
-            .discoverTestFiles(tmpDir)
-            .map { it.first() to it.last() }
-            .toList()
+        val pairs = discoverFilePairs()
 
         assertEquals(1, pairs.size)
         assertEquals("Test2Expected.java", pairs.single().first.name)
@@ -177,4 +163,14 @@ class FixPluginTest {
     fun tearDown() {
         fs.deleteRecursively(tmpDir)
     }
+
+    internal fun discoverFilePairs() = FixPlugin(
+        TestConfig(tmpDir / "save.toml", null, mutableListOf(FixPluginConfig("")), fs),
+        testFiles = emptyList(),
+        fs,
+        useInternalRedirections = false
+    )
+        .discoverTestFiles(tmpDir)
+        .map { it.first() to it.last() }
+        .toList()
 }
