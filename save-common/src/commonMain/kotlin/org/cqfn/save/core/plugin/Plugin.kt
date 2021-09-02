@@ -20,7 +20,7 @@ import okio.Path
  * @property redirectTo a file where process output and errors should be redirected. If null, output will be returned as [ExecutionResult.stdout] and [ExecutionResult.stderr].
  */
 abstract class Plugin(
-    open val testConfig: TestConfig,
+    val testConfig: TestConfig,
     protected val testFiles: List<String>,
     protected val fs: FileSystem,
     private val useInternalRedirections: Boolean,
@@ -29,6 +29,9 @@ abstract class Plugin(
      * Instance that is capable of executing processes
      */
     val pb = ProcessBuilder(useInternalRedirections, fs)
+    init {
+        testConfig.validateAndSetDefaults()
+    }
 
     /**
      * Perform plugin's work.

@@ -41,8 +41,6 @@ class WarnPlugin(
     private val unexpected = "Some warnings were unexpected"
 
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
-        testConfig.validateAndSetDefaults()
-
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
 

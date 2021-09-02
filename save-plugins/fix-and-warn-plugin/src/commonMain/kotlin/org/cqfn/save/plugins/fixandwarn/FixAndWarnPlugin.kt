@@ -65,7 +65,6 @@ class FixAndWarnPlugin(
     )
 
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
-        testConfig.validateAndSetDefaults()
         // Need to update private fields after validation
         initOrUpdateConfigs()
         val testFilePattern = warnPluginConfig.resourceNamePattern
