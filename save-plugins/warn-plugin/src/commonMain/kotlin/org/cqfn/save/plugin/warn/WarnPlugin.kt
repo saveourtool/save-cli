@@ -43,13 +43,15 @@ class WarnPlugin(
     private lateinit var extraFlagsExtractor: ExtraFlagsExtractor
 
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
+        testConfig.validateAndSetDefaults()
+
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
         extraFlagsExtractor = ExtraFlagsExtractor(warnPluginConfig, fs)
 
         // Special trick to handle cases when tested tool is able to process directories.
         // In this case instead of executing the tool with file names, we execute the tool with directories.
-        // 
+        //
         // In case, when user doesn't want to use directory mode, he needs simply not to pass [wildCardInDirectoryMode] and it will be null
         return warnPluginConfig.wildCardInDirectoryMode?.let {
             handleTestFile(files.map { it.single() }.toList(), warnPluginConfig, generalConfig).asSequence()

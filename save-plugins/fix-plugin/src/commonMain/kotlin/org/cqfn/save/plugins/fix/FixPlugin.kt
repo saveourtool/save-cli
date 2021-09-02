@@ -47,6 +47,8 @@ class FixPlugin(
 
     @Suppress("TOO_LONG_FUNCTION")
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
+        testConfig.validateAndSetDefaults()
+
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
 

@@ -75,10 +75,15 @@ data class WarnPluginConfig(
     /**
      * regex for the name of the test files.
      */
-    val resourceNamePattern: Regex = if (testNameSuffix == "Test") {
-        Regex("""(.+)${(testNameSuffix)}\.[\w\d]+""")
+    val testName: String = testNameSuffix ?: "Test"
+
+    /**
+     *  @property resourceNamePattern regex for the name of the test files.
+     */
+    val resourceNamePattern: Regex = if (testName == "Test") {
+        Regex("""(.+)${(testName)}\.[\w\d]+""")
     } else {
-        Regex("""(.+)${(testNameSuffix)}""")
+        Regex("""(.+)${(testName)}""")
     }
 
     @Suppress("ComplexMethod")
@@ -146,7 +151,7 @@ data class WarnPluginConfig(
             newColumnCaptureGroupOut,
             newMessageCaptureGroupOut,
             exactWarningsMatch ?: true,
-            testNameSuffix ?: "Test",
+            testName,
             linePlaceholder ?: "\$line",
             wildCardInDirectoryMode,
         )
