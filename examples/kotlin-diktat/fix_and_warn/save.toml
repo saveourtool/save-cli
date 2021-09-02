@@ -8,5 +8,5 @@ expectedWarningsPattern = ".*// ;warn:(\\d+):(\\d+) (.*)"
     ["fix and warn".fix]
         execFlags = "-F"
     ["fix and warn".warn]
-        actualWarningsPattern = "(\\w+\\..+):(\\d+):(\\d+): (.*)$"
+        actualWarningsPattern = "(\\w+\\..+):(\\d+):(\\d+): (\\[.*\\].*)$"
         exactWarningsMatch = false
