@@ -36,16 +36,19 @@ data class FixAndWarnPluginConfig(
     }
 
     override fun validateAndSetDefaults(): PluginConfig {
-        require(fix.resourceNameTest == warn.testName && fix.batchSize == warn.batchSize) {
+        val fixPluginConfig = fix.validateAndSetDefaults()
+        val warnPluginConfig = warn.validateAndSetDefaults()
+        require(fixPluginConfig.resourceNameTest == warnPluginConfig.testNameSuffix &&
+                fixPluginConfig.batchSize == warnPluginConfig.batchSize
+        ) {
             """
                Test files suffix names and batch sizes should be identical for [fix] and [warn] plugins.
-               But found [fix]: {${fix.resourceNameTest}, ${fix.batchSize}},
-                         [warn]: {${warn.testName}, ${warn.batchSize}}
+               But found [fix]: {${fixPluginConfig.resourceNameTest}, ${fixPluginConfig.batchSize}},
+                         [warn]: {${warnPluginConfig.testNameSuffix}, ${warnPluginConfig.batchSize}}
            """
         }
         return FixAndWarnPluginConfig(
-            fix.validateAndSetDefaults(),
-            warn.validateAndSetDefaults()
+            fixPluginConfig, warnPluginConfig
         )
     }
 }
