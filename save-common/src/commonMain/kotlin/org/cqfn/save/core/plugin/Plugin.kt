@@ -68,8 +68,8 @@ abstract class Plugin(
                 testConfig
                     .pluginConfigs
                     .filterIsInstance<GeneralConfig>()
-                    .single()
-                    .excludedTests
+                    .singleOrNull()
+                    ?.excludedTests
 
         if (!excludedTests.isNullOrEmpty()) {
             logDebug("Excluded tests for [${testConfig.location}] : $excludedTests")
