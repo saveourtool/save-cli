@@ -96,7 +96,7 @@ class Save(
                    |Please check the correctness of command and consider, that the last arguments treats as test file names for individual execution.
                 """.trimMargin()
             } else {
-                "No executions were provided, please check the correctness of configuration and test resources"
+                "SAVE wasn't able to run tests, please check the correctness of configuration and test resources"
             }
             logWarn(warnMsg)
         }
