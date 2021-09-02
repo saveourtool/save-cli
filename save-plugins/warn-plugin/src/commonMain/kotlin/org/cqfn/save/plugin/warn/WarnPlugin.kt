@@ -120,7 +120,6 @@ class WarnPlugin(
         val execCmd = "${generalConfig.execCmd} ${warnPluginConfig.execFlags} $fileNamesForExecCmd"
 
         val executionResult = try {
-            // todo: `cd /d` on Windows?
             pb.exec("cd ${testConfig.getRootConfig().location.parent} && $execCmd", redirectTo)
         } catch (ex: ProcessExecutionException) {
             return sequenceOf(
@@ -169,8 +168,6 @@ class WarnPlugin(
     private fun String.makeThePathRelativeToTestRoot() =
             this.replace("${testConfig.getRootConfig().directory}", "")
                 .trimStart('/', '\\')
-
-    // todo: create WarningsExtractor or WarningsExtraction.kt
 
     /**
      * method for getting warnings from test files:
