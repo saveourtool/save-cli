@@ -18,19 +18,19 @@ class ExtraFlagsExtractor(private val warnPluginConfig: WarnPluginConfig,
      * @param path file from which [ExtraFlags] should be extracted
      * @return [ExtraFlags]
      */
-    fun extractExtraFlagsFrom(path: Path): ExtraFlags {
+    fun extractExtraFlagsFrom(path: Path): ExtraFlags? {
         val allExtraFlagsFromFile = fs.readLines(path).mapNotNull {
             extractExtraFlagsFrom(it)
         }
-        require(allExtraFlagsFromFile.size == 1) {
+        require(allExtraFlagsFromFile.size <= 1) {
             "Extra flags from multiple comments in a single file are not supported yet"
         }
-        return allExtraFlagsFromFile.single()
+        return allExtraFlagsFromFile.singleOrNull()
     }
 
     /**
      * @param line line from which [ExtraFlags] should be extracted
-     * @return [ExtraFlags]
+     * @return [ExtraFlags] or null if no match occurred
      */
     fun extractExtraFlagsFrom(line: String): ExtraFlags? {
         val matchResult = warnPluginConfig.extraConfigPattern!!.find(line) ?: return null

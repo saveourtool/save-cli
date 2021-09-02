@@ -96,15 +96,15 @@ class WarnPlugin(
             it.name to warningsForCurrentPath
         }
 
-        val extraFlagsList = paths.map { path ->
+        val extraFlagsList = paths.mapNotNull { path ->
             extraFlagsExtractor.extractExtraFlagsFrom(path)
         }
             .distinct()
-        require(extraFlagsList.size == 1) {
+        require(extraFlagsList.size <= 1) {
             "Extra flags for all files in a batch should be same, but you have batchSize=${warnPluginConfig.batchSize}" +
                     " and there are ${extraFlagsList.size} different sets of flags inside it"
         }
-        val extraFlags = extraFlagsList.single()
+        val extraFlags = extraFlagsList.singleOrNull() ?: ExtraFlags("", "")
 
         if (expectedWarnings.isEmpty()) {
             logWarn(
