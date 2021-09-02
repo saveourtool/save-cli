@@ -7,6 +7,7 @@ package org.cqfn.save.cli
 import org.cqfn.save.cli.logging.logErrorAndExit
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.defaultConfig
+import org.cqfn.save.core.logging.isDebugEnabled
 import org.cqfn.save.core.logging.logDebug
 
 import okio.FileNotFoundException
@@ -53,12 +54,14 @@ fun SaveProperties.getFields() = this.toString().dropWhile { it != '(' }.drop(1)
 fun createConfigFromArgs(args: Array<String>): SaveProperties {
     // getting configuration from command-line arguments
     val configFromCli = SaveProperties(args)
+    tryToUpdateDebugLevel(configFromCli)
     logDebug("Properties after parsed command line args:\n${configFromCli.getFields()}")
     // reading configuration from the properties file
     val propertiesFile = (configFromCli.testRootPath ?: defaultConfig().testRootPath) + DIRECTORY_SEPARATOR + "save.properties"
     val configFromPropertiesFile = readPropertiesFile(propertiesFile)
     // merging two configurations into single [SaveProperties] class with a priority to command line arguments
     val mergedProperties = configFromCli.mergeConfigWithPriorityToThis(configFromPropertiesFile)
+    tryToUpdateDebugLevel(mergedProperties)
     logDebug("Using the following properties for SAVE execution:\n${mergedProperties.getFields()}")
     return mergedProperties.validate()
 }
@@ -97,4 +100,8 @@ fun readPropertiesFile(propertiesFileName: String?): SaveProperties {
 
     logDebug("Found properties: $properties")
     return Properties.decodeFromStringMap(serializer(), properties)
+}
+
+private fun tryToUpdateDebugLevel(properties: SaveProperties) {
+    isDebugEnabled = properties.debug ?: false
 }

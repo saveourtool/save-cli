@@ -9,7 +9,6 @@ import org.cqfn.save.core.utils.isCurrentOsWindows
 import org.cqfn.save.plugin.warn.WarnPluginConfig
 import org.cqfn.save.plugins.fix.FixPlugin
 import org.cqfn.save.plugins.fix.FixPluginConfig
-import okio.Path.Companion.toPath
 
 import io.github.petertrr.diffutils.diff
 import okio.FileSystem

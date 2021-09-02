@@ -1,5 +1,3 @@
-
-
 plugins {
     id("org.cqfn.save.buildutils.kotlin-library")
 }
