@@ -42,7 +42,7 @@ import kotlinx.serialization.UseSerializers
  * @property batchSize it controls how many files execCmd will process at a time.
  * @property batchSeparator separator for batch mode
  * @property linePlaceholder placeholder for line number, which resolved as current line and support addition and subtraction
- * @property wildCardInDirectoryMode mode that controls that we are targetting our tested tools on directories (not on files).
+ * @property wildCardInDirectoryMode mode that controls that we are targeting our tested tools on directories (not on files).
  * This prefix will be added to the name of the directory, if you would like to use directory mode without any prefix simply use ""
  */
 @Serializable
@@ -71,17 +71,12 @@ data class WarnPluginConfig(
     override var configLocation: Path = "undefined_toml_location".toPath()
 
     /**
-     * @property suffix name of the test file.
+     * regex for the name of the test files.
      */
-    val testName: String = testNameSuffix ?: "Test"
-
-    /**
-     *  @property resourceNamePattern regex for the name of the test files.
-     */
-    val resourceNamePattern: Regex = if (testName == "Test") {
-        Regex("""(.+)${(testName)}\.[\w\d]+""")
+    val resourceNamePattern: Regex = if (testNameSuffix == "Test") {
+        Regex("""(.+)${(testNameSuffix)}\.[\w\d]+""")
     } else {
-        Regex("""(.+)${(testName)}""")
+        Regex("""(.+)${(testNameSuffix)}""")
     }
 
     @Suppress("ComplexMethod")
@@ -147,7 +142,7 @@ data class WarnPluginConfig(
             newColumnCaptureGroupOut,
             newMessageCaptureGroupOut,
             exactWarningsMatch ?: true,
-            testName,
+            testNameSuffix ?: "Test",
             linePlaceholder ?: "\$line",
             wildCardInDirectoryMode,
         )
