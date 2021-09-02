@@ -1,5 +1,3 @@
-@file:Suppress("FILE_WILDCARD_IMPORTS")
-
 package org.cqfn.save.core
 
 import org.cqfn.save.core.config.OutputStreamType
@@ -103,6 +101,7 @@ class Save(
         }
         reporter.afterAll()
         reporter.out.close()
+        logInfo("SAVE has finished execution. You can rerun with --debug for additional information.")
 
         return reporter
     }
