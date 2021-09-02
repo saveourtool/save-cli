@@ -86,7 +86,7 @@ class FixPluginTest {
             testFiles = emptyList(),
             fs,
             useInternalRedirections = false
-        ).execute(tmpDir, emptyList<String>())
+        ).execute()
 
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
         assertEquals(TestResult(listOf(expectedFile, testFile), Pass(null),
@@ -139,7 +139,7 @@ class FixPluginTest {
             testFiles = emptyList(),
             fs,
             useInternalRedirections = false
-        ).execute(tmpDir, emptyList<String>())
+        ).execute()
 
         // We call ProcessBuilder ourselves, because the command ">" does not work for the list of files
         ProcessBuilder(false, fs).exec("echo Expected file > $testFile2", null)

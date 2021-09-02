@@ -34,18 +34,11 @@ abstract class Plugin(
     /**
      * Perform plugin's work.
      *
-     * @param rootDir - test root directory (highest direstory with save.toml)
-     * @param excludedTests - list with excluded tests (relative paths)
      * @return a sequence of [TestResult]s for each group of test resources
      */
-    fun execute(rootDir: Path, excludedTests: List<String>?): Sequence<TestResult> {
+    fun execute(): Sequence<TestResult> {
         clean()
-
         val testFilesSequence = discoverTestFiles(testConfig.directory)
-            // removing excluded test resources
-            .filterNot {
-                isExcludedTest(it, rootDir, excludedTests)
-            }
 
         return if (testFilesSequence.any()) {
             logDebug("Discovered the following test resources: ${testFilesSequence.toList()}")
@@ -53,23 +46,6 @@ abstract class Plugin(
         } else {
             emptySequence()
         }
-    }
-
-    private fun isExcludedTest(
-        testFile: List<Path>,
-        rootDir: Path,
-        excludedTests: List<String>?): Boolean {
-        // creating relative to root path from a test file
-        val testFileRelative =
-                (testFile[0].createRelativePathToTheRoot(rootDir).toPath() / testFile[0].name)
-                    .toString()
-                    .replace('\\', '/')
-
-        // excluding tests that are included in the excluded list
-        return excludedTests
-            ?.map { it.replace('\\', '/') }
-            ?.contains(testFileRelative)
-            ?: false
     }
 
     /**
@@ -88,7 +64,23 @@ abstract class Plugin(
      * @return a sequence of files, grouped by test
      */
     fun discoverTestFiles(root: Path): Sequence<List<Path>> {
+        val excludedTests =
+                testConfig
+                    .pluginConfigs
+                    .filterIsInstance<GeneralConfig>()
+                    .single()
+                    .excludedTests
+
+        if (!excludedTests.isNullOrEmpty()) {
+            logDebug("Excluded tests for [${testConfig.location}] : $excludedTests")
+        }
+
         val rawTestFiles = rawDiscoverTestFiles(root.resourceDirectories())
+            // removing excluded test resources
+            .filterNot {
+                isExcludedTest(it, excludedTests)
+            }
+
         return if (testFiles.isNotEmpty()) {
             rawTestFiles.filter { resourcesGroup ->
                 // test can be specified by the name of one of it's files
@@ -99,6 +91,24 @@ abstract class Plugin(
         } else {
             rawTestFiles
         }
+    }
+
+    private fun isExcludedTest(testFiles: List<Path>, excludedTests: List<String>?): Boolean {
+        // common root of the test repository (not a location of a current test)
+        val testRepositoryRoot = testConfig.getRootConfig().location
+        // creating relative to root path from a test file
+        // FixMe: https://github.com/cqfn/save/issues/241 here we are incorrectly using testFiles[0], as for example it is
+        // "Expected" file for Fix plugin
+        val testFileRelative =
+                (testFiles[0].createRelativePathToTheRoot(testRepositoryRoot).toPath() / testFiles[0].name)
+                    .toString()
+                    .replace('\\', '/')
+
+        // excluding tests that are included in the excluded list
+        return excludedTests
+            ?.map { it.replace('\\', '/') }
+            ?.contains(testFileRelative)
+            ?: false
     }
 
     /**

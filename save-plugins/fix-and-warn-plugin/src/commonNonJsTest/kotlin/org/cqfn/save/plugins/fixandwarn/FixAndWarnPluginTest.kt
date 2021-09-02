@@ -90,7 +90,7 @@ class FixAndWarnPluginTest {
             testFiles = emptyList(),
             fs,
             useInternalRedirections = false
-        ).execute(tmpDir, emptyList<String>()).toList()
+        ).execute().toList()
 
         println("Results ${results.toList()}")
         assertEquals(1, results.count(), "Size of results should equal number of pairs")

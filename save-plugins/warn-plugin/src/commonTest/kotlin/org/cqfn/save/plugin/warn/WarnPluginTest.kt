@@ -428,7 +428,7 @@ class WarnPluginTest {
             testFiles = emptyList(),
             fs
         )
-            .execute(tmpDir, emptyList<String>())
+            .execute()
             .toList()
         println(results)
         assertion(results)
