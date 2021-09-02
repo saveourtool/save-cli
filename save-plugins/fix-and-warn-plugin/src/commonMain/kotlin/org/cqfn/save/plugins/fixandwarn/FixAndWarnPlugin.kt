@@ -34,10 +34,10 @@ class FixAndWarnPlugin(
     fileSystem,
     useInternalRedirections,
     redirectTo) {
-    private val fixPluginConfig: FixPluginConfig =
-            testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().fix
-    private val warnPluginConfig: WarnPluginConfig =
-            testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().warn
+    private val fixPluginConfig: FixPluginConfig
+        get() = testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().fix
+    private val warnPluginConfig: WarnPluginConfig
+        get() = testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().warn
     private val generalConfig: GeneralConfig =
             testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
     private lateinit var fixPlugin: FixPlugin
