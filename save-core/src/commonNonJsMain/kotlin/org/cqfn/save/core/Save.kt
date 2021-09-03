@@ -118,12 +118,13 @@ class Save(
         logDebug("=> Executing plugin: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
         reporter.onPluginExecutionStart(plugin)
         try {
-            val rootDir = plugin.testConfig.getRootConfig().location
+            val testRepositoryRootPath = plugin.testConfig.getRootConfig().location
+
             plugin.execute()
                 .onEach { event ->
                     // calculate relative paths, because reporters don't need paths higher than root dir
                     val resourcesRelative =
-                            event.resources.map { it.createRelativePathToTheRoot(rootDir).toPath() / it.name }
+                            event.resources.map { it.createRelativePathToTheRoot(testRepositoryRootPath).toPath() / it.name }
                     reporter.onEvent(event.copy(resources = resourcesRelative))
                 }
                 .forEach(this::handleResult)

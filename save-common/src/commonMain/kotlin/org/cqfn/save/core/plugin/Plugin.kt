@@ -10,6 +10,7 @@ import org.cqfn.save.core.utils.ProcessBuilder
 
 import okio.FileSystem
 import okio.Path
+import okio.Path.Companion.toPath
 
 /**
  * Plugin that can be injected into SAVE during execution. Plugins accept contents of configuration file and then perform some work.
@@ -41,8 +42,8 @@ abstract class Plugin(
      */
     fun execute(): Sequence<TestResult> {
         clean()
-        // todo: pass individual groups of files to handleFiles? Or it will play bad with batch mode?
         val testFilesSequence = discoverTestFiles(testConfig.directory)
+
         return if (testFilesSequence.any()) {
             logDebug("Discovered the following test resources: ${testFilesSequence.toList()}")
             handleFiles(testFilesSequence)
@@ -67,7 +68,23 @@ abstract class Plugin(
      * @return a sequence of files, grouped by test
      */
     fun discoverTestFiles(root: Path): Sequence<List<Path>> {
+        val excludedTests =
+                testConfig
+                    .pluginConfigs
+                    .filterIsInstance<GeneralConfig>()
+                    .singleOrNull()
+                    ?.excludedTests
+
+        if (!excludedTests.isNullOrEmpty()) {
+            logDebug("Excluded tests for [${testConfig.location}] : $excludedTests")
+        }
+
         val rawTestFiles = rawDiscoverTestFiles(root.resourceDirectories())
+            // removing excluded test resources
+            .filterNot {
+                isExcludedTest(it, excludedTests)
+            }
+
         return if (testFiles.isNotEmpty()) {
             rawTestFiles.filter { resourcesGroup ->
                 // test can be specified by the name of one of it's files
@@ -78,6 +95,24 @@ abstract class Plugin(
         } else {
             rawTestFiles
         }
+    }
+
+    private fun isExcludedTest(testFiles: List<Path>, excludedTests: List<String>?): Boolean {
+        // common root of the test repository (not a location of a current test)
+        val testRepositoryRoot = testConfig.getRootConfig().location
+        // creating relative to root path from a test file
+        // FixMe: https://github.com/cqfn/save/issues/241 here we are incorrectly using testFiles[0], as for example it is
+        // "Expected" file for Fix plugin
+        val testFileRelative =
+                (testFiles[0].createRelativePathToTheRoot(testRepositoryRoot).toPath() / testFiles[0].name)
+                    .toString()
+                    .replace('\\', '/')
+
+        // excluding tests that are included in the excluded list
+        return excludedTests
+            ?.map { it.replace('\\', '/') }
+            ?.contains(testFileRelative)
+            ?: false
     }
 
     /**
