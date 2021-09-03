@@ -55,7 +55,6 @@ interface PluginConfig {
  * @property description free text with a description
  * @property suiteName name of test suite that can be visible from save-cloud
  * @property excludedTests excluded tests from the run
- * @property includedTests if specified - only these tests will be run
  * @property expectedWarningsPattern - pattern with warnings that are expected from the test file
  */
 @Serializable
@@ -65,7 +64,6 @@ data class GeneralConfig(
     val description: String? = null,
     val suiteName: String? = null,
     val excludedTests: List<String>? = null,
-    val includedTests: List<String>? = null,
     val expectedWarningsPattern: Regex? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.GENERAL
@@ -87,7 +85,6 @@ data class GeneralConfig(
             this.description ?: other.description,
             this.suiteName ?: other.suiteName,
             this.excludedTests ?: other.excludedTests,
-            this.includedTests ?: other.includedTests,
             this.expectedWarningsPattern ?: other.expectedWarningsPattern,
         )
     }
@@ -111,7 +108,6 @@ data class GeneralConfig(
             description,
             suiteName,
             excludedTests ?: emptyList(),
-            includedTests ?: emptyList(),
             expectedWarningsPattern ?: defaultInputPattern,
         )
     }
