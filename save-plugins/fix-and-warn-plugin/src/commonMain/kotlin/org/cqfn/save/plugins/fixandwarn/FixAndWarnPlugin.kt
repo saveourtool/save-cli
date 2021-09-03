@@ -67,7 +67,7 @@ class FixAndWarnPlugin(
     override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
         // Need to update private fields after validation
         initOrUpdateConfigs()
-        val expectedFiles = files.map { it as FixPlugin.FixTestFiles }.map { it.expected }
+        val expectedFiles = files.map { it as FixPlugin.Test }.map { it.expected }
 
         // Remove (in place) warnings from test files before fix plugin execution
         val filesAndTheirWarningsMap = removeWarningsFromExpectedFiles(expectedFiles)

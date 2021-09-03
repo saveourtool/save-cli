@@ -50,7 +50,7 @@ class FixPlugin(
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
 
-        return files.map { it as FixTestFiles }.chunked(fixPluginConfig.batchSize!!.toInt()).map { chunk ->
+        return files.map { it as Test }.chunked(fixPluginConfig.batchSize!!.toInt()).map { chunk ->
             val pathMap = chunk.map { it.expected to it.test }
             val pathCopyMap = pathMap.map { (expected, test) -> expected to createTestFile(test, generalConfig) }
             val testCopyNames =
@@ -173,18 +173,8 @@ class FixPlugin(
         .joinToString { (type, lines) -> "$type: $lines lines" }
 
     /**
-     * @property expected expected file
-     */
-    interface FixTestFiles : TestFiles {
-        /**
-         * path to expected file
-         */
-        val expected: Path
-    }
-
-    /**
      * @property test test file
      * @property expected expected file
      */
-    class Test(override val test: Path, override val expected: Path) : FixTestFiles
+    class Test(override val test: Path, val expected: Path) : TestFiles
 }
