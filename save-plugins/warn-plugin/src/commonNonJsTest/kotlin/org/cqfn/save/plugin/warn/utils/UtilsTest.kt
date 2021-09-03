@@ -24,7 +24,7 @@ class UtilsTest {
         assertExtracts(
             config,
             "// ;warn:1:2:  Foo bar baz",
-            Warning(" Foo bar baz", 1, 2, "Test.kt"),
+            Warning("Foo bar baz", 1, 2, "Test.kt"),
             defaultInputPattern
         )
         assertExtractionFails(config, "// warn:1:2 Foo bar baz", defaultInputPattern)
@@ -49,7 +49,7 @@ class UtilsTest {
         assertExtracts(
             config,
             ";warn:2:  Foo bar baz",
-            Warning(" Foo bar baz", null, 2, "Test.kt"),
+            Warning("Foo bar baz", null, 2, "Test.kt"),
             Regex(";warn:(\\d+): (.+)")
         )
         assertExtractionFails(config, "warn:1:2 Foo bar baz", Regex(";warn:(\\d+): (.+)"))
@@ -74,7 +74,7 @@ class UtilsTest {
         assertExtracts(
             config,
             ";warn:2:  Foo bar baz",
-            Warning(" Foo bar baz", 2, null, "Test.kt"),
+            Warning("Foo bar baz", 2, null, "Test.kt"),
             Regex(";warn:(\\d+): (.+)")
         )
         assertExtractionFails(config, "warn:1:2 Foo bar baz", Regex(";warn:(\\d+): (.+)"))

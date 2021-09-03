@@ -45,7 +45,7 @@ internal fun String.extractWarning(warningRegex: Regex,
     val groups = warningRegex.find(this)?.groups ?: return null
 
     val column = getRegexGroupSafe(columnGroupIdx, groups, this, "column number")?.toIntOrNull()
-    val message = getRegexGroupSafe(messageGroupIdx, groups, this, "warning message")!!
+    val message = getRegexGroupSafe(messageGroupIdx, groups, this, "warning message")!!.trim()
     return Warning(
         message,
         line,
