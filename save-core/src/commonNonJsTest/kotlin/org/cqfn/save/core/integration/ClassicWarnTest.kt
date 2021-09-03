@@ -1,6 +1,5 @@
 package org.cqfn.save.core.integration
 
-import org.cqfn.save.core.test.utils.runTest
 import org.cqfn.save.core.test.utils.runTestsWithDiktat
 
 import kotlin.test.Ignore
@@ -20,56 +19,50 @@ import kotlin.test.Test
 class ClassicWarnTest {
     @Test
     @Ignore  // fixme: change directory in fix-plugin too?
-    fun `execute warn plugin with default testFiles`() = runTest {
-        runTestsWithDiktat(
-            null, 9
-        )
-    }
+    fun `execute warn plugin with default testFiles`() =
+            runTestsWithDiktat(
+                null, 9
+            )
 
     @Test
-    fun `execute warn plugin on separate files`() = runTest {
-        runTestsWithDiktat(
-            listOf(
-                "warn/chapter1/EnumValueSnakeCaseTest.kt",
-                "warn/chapter1/GenericFunctionTest.kt"
-            ), 2
-        )
-    }
+    fun `execute warn plugin on separate files`() =
+            runTestsWithDiktat(
+                listOf(
+                    "warn/chapter1/EnumValueSnakeCaseTest.kt",
+                    "warn/chapter1/GenericFunctionTest.kt"
+                ), 2
+            )
 
     @Test
-    fun `executing warn plugin on directory`() = runTest {
-        runTestsWithDiktat(
-            listOf(
-                "warn/chapter1"
-            ), 2
-        )
-    }
+    fun `executing warn plugin on directory`() =
+            runTestsWithDiktat(
+                listOf(
+                    "warn/chapter1"
+                ), 2
+            )
 
     @Test
-    fun `executing warn plugin on save-toml file in directory`() = runTest {
-        runTestsWithDiktat(
-            listOf(
-                "warn/save.toml"
-            ), 2
-        )
-    }
+    fun `executing warn plugin on save-toml file in directory`() =
+            runTestsWithDiktat(
+                listOf(
+                    "warn/save.toml"
+                ), 2
+            )
 
     @Test
-    fun `executing warn plugin on parental save-toml file`() = runTest {
-        runTestsWithDiktat(
-            listOf(
-                "warn/chapter1/save.toml"
-            ), 2
-        )
-    }
+    fun `executing warn plugin on parental save-toml file`() =
+            runTestsWithDiktat(
+                listOf(
+                    "warn/chapter1/save.toml"
+                ), 2
+            )
 
     @Test
-    fun `execute warn plugin with included and excluded suites`() = runTest {
-        runTestsWithDiktat(
-            emptyList(), 2
-        ) {
-            includeSuites = "warnings,DocsCheck"
-            excludeSuites = "Chapter1,Chapter2,Chapter3"
-        }
-    }
+    fun `execute warn plugin with included and excluded suites`() =
+            runTestsWithDiktat(
+                emptyList(), 2
+            ) {
+                includeSuites = "warnings,DocsCheck"
+                excludeSuites = "Chapter1,Chapter2,Chapter3"
+            }
 }
