@@ -176,5 +176,5 @@ class FixPlugin(
      * @property test test file
      * @property expected expected file
      */
-    class FixTestFiles(override val test: Path, val expected: Path) : TestFiles
+    data class FixTestFiles(override val test: Path, val expected: Path) : TestFiles
 }
