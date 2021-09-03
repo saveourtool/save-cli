@@ -8,7 +8,7 @@ suiteName = "warnings"
 testNameSuffix = "Test.kt"
 wildCardInDirectoryMode = "**/*"
 # diktat warnings have the following format: filename.kt:1:15: [WARN_NAME] my waring
-actualWarningsPattern="(\\w+\\..+):(\\d+):(\\d+): (\\[.*\\].*)$"
+actualWarningsPattern="(\\w+\\..+):(\\d+):(\\d+): (\\[.*\\].*)"
 lineCaptureGroup = 1
 columnCaptureGroup = 2
 messageCaptureGroup = 3
