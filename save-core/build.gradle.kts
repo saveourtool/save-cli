@@ -32,19 +32,6 @@ kotlin {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
-                implementation("io.ktor:ktor-client-core:${Versions.ktorVersion}")
-            }
-        }
-
-        val jvmTest by getting {
-            dependencies {
-                implementation("io.ktor:ktor-client-apache:${Versions.ktorVersion}")
-            }
-        }
-
-        val nativeTest by getting {
-            dependencies {
-                implementation("io.ktor:ktor-client-curl:${Versions.ktorVersion}")
             }
         }
     }
