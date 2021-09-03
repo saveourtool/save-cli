@@ -23,7 +23,7 @@ class ExtraFlagsExtractor(private val warnPluginConfig: WarnPluginConfig,
             extractExtraFlagsFrom(it)
         }
         require(allExtraFlagsFromFile.size <= 1) {
-            "Extra flags from multiple comments in a single file are not supported yet"
+            "Extra flags from multiple comments in a single file are not supported yet, but there are ${allExtraFlagsFromFile.size} in $path"
         }
         return allExtraFlagsFromFile.singleOrNull()
     }
@@ -42,9 +42,7 @@ class ExtraFlagsExtractor(private val warnPluginConfig: WarnPluginConfig,
                 }
                 pair.first() to pair.last()
             }
-            .run {
-                ExtraFlags(getOrElse(ExtraFlags.keyArgs2) { "" }, getOrElse(ExtraFlags.keyArgs1) { "" })
-            }
+            .let(ExtraFlags::from)
             .also {
                 if (it == ExtraFlags("", "")) {
                     logWarn("Line <$line> is matched by extraFlagsPattern <${warnPluginConfig.extraConfigPattern}>, but no flags have been extracted")
@@ -55,8 +53,8 @@ class ExtraFlagsExtractor(private val warnPluginConfig: WarnPluginConfig,
 
 internal fun WarnPluginConfig.resolvePlaceholdersFrom(extraFlags: ExtraFlags, fileNames: String): String =
     execFlags!!
-        .replace("\$${ExtraFlags.keyArgs2}", extraFlags.args1)
-        .replace("\$${ExtraFlags.keyArgs1}", extraFlags.args2).run {
+        .replace("\$${ExtraFlags.keyArgs1}", extraFlags.args1)
+        .replace("\$${ExtraFlags.keyArgs2}", extraFlags.args2).run {
             if (contains("\$fileName")) {
                 replace("\$fileName", fileNames)
             } else {

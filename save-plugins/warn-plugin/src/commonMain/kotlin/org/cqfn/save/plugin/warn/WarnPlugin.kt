@@ -101,7 +101,7 @@ class WarnPlugin(
             .distinct()
         require(extraFlagsList.size <= 1) {
             "Extra flags for all files in a batch should be same, but you have batchSize=${warnPluginConfig.batchSize}" +
-                    " and there are ${extraFlagsList.size} different sets of flags inside it"
+                    " and there are ${extraFlagsList.size} different sets of flags inside it, namely $extraFlagsList"
         }
         val extraFlags = extraFlagsList.singleOrNull() ?: ExtraFlags("", "")
 

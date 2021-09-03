@@ -17,12 +17,12 @@ class ExtraFlagsExtractorTest {
         )
 
         listOf(
-            "// RUN: beforeFlags=stuff,afterFlags=extraStuff" to ExtraFlags("stuff", "extraStuff"),
-            "// RUN: beforeFlags=stuff" to ExtraFlags("stuff", ""),
-            "// RUN: afterFlags=extraStuff" to ExtraFlags("", "extraStuff"),
+            "// RUN: args1=stuff,args2=extraStuff" to ExtraFlags("stuff", "extraStuff"),
+            "// RUN: args1=stuff" to ExtraFlags("stuff", ""),
+            "// RUN: args2=extraStuff" to ExtraFlags("", "extraStuff"),
             "// RUN: Unparseable nonsense" to null,
-            "// RUN: beforeFlags=--flag --opt,afterFlags=-debug --flag2" to ExtraFlags("--flag --opt", "-debug --flag2"),
-            "// RUN: beforeFlags=--flag\\=value,afterFlags=--foo=bar" to ExtraFlags("--flag=value", "--foo=bar"),
+            "// RUN: args1=--flag --opt,args2=-debug --flag2" to ExtraFlags("--flag --opt", "-debug --flag2"),
+            "// RUN: args1=--flag\\=value,args2=--foo=bar" to ExtraFlags("--flag=value", "--foo=bar"),
         )
             .forEach { (line, extraFlags) ->
                 assertEquals(extraFlags, extraFlagsExtractor.extractExtraFlagsFrom(line))
@@ -34,21 +34,21 @@ class ExtraFlagsExtractorTest {
         // basic test
         checkPlaceholders(
             "--foo --bar testFile --baz",
-            "--foo \$beforeFlags \$fileName \$afterFlags",
+            "--foo \$args1 \$fileName \$args2",
             ExtraFlags("--bar", "--baz"),
             "testFile"
         )
         // only beforeFlags
         checkPlaceholders(
             "--foo --bar testFile",
-            "--foo \$beforeFlags \$fileName",
+            "--foo \$args1 \$fileName",
             ExtraFlags("--bar", ""),
             "testFile"
         )
         // only afterFlags
         checkPlaceholders(
             "--foo testFile --baz",
-            "--foo \$fileName \$afterFlags",
+            "--foo \$fileName \$args2",
             ExtraFlags("", "--baz"),
             "testFile"
         )

@@ -180,5 +180,8 @@ data class ExtraFlags(
     companion object {
         const val keyArgs1 = "args1"
         const val keyArgs2 = "args2"
+
+        fun from(map: Map<String, String>) =
+            ExtraFlags(map.getOrElse(keyArgs1) { "" }, map.getOrElse(keyArgs2) { "" })
     }
 }
