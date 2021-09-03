@@ -35,30 +35,28 @@ class ExtraFlagsExtractor(private val warnPluginConfig: WarnPluginConfig,
     fun extractExtraFlagsFrom(line: String): ExtraFlags? {
         val matchResult = warnPluginConfig.extraConfigPattern!!.find(line) ?: return null
         return matchResult.groupValues[1]
-            .run { split(",", ", ") }
-            .run {
-                associate {
-                    val pair = it.split("=", limit = 2).map {
-                        it.replace("\\=", "=")
-                    }
-                    pair.first() to pair.last()
+            .split(",", ", ")
+            .associate {
+                val pair = it.split("=", limit = 2).map {
+                    it.replace("\\=", "=")
                 }
-                    .run {
-                        ExtraFlags(getOrElse(ExtraFlags.keyBefore) { "" }, getOrElse(ExtraFlags.keyAfter) { "" })
-                    }
-                    .also {
-                        if (it == ExtraFlags("", "")) {
-                            logWarn("Line <$line> is matched by extraFlagsPattern <${warnPluginConfig.extraConfigPattern}>, but no flags have been extracted")
-                        }
-                    }
+                pair.first() to pair.last()
+            }
+            .run {
+                ExtraFlags(getOrElse(ExtraFlags.keyArgs2) { "" }, getOrElse(ExtraFlags.keyArgs1) { "" })
+            }
+            .also {
+                if (it == ExtraFlags("", "")) {
+                    logWarn("Line <$line> is matched by extraFlagsPattern <${warnPluginConfig.extraConfigPattern}>, but no flags have been extracted")
+                }
             }
     }
 }
 
 internal fun WarnPluginConfig.resolvePlaceholdersFrom(extraFlags: ExtraFlags, fileNames: String): String =
     execFlags!!
-        .replace("\$${ExtraFlags.keyBefore}", extraFlags.before)
-        .replace("\$${ExtraFlags.keyAfter}", extraFlags.after).run {
+        .replace("\$${ExtraFlags.keyArgs2}", extraFlags.args1)
+        .replace("\$${ExtraFlags.keyArgs1}", extraFlags.args2).run {
             if (contains("\$fileName")) {
                 replace("\$fileName", fileNames)
             } else {

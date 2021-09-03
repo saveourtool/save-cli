@@ -174,11 +174,11 @@ data class WarnPluginConfig(
 }
 
 data class ExtraFlags(
-    val before: String,
-    val after: String,
+    val args1: String,
+    val args2: String,
 ) {
     companion object {
-        const val keyAfter = "afterFlags"
-        const val keyBefore = "beforeFlags"
+        const val keyArgs1 = "args1"
+        const val keyArgs2 = "args2"
     }
 }

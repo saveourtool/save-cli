@@ -26,7 +26,6 @@ abstract class Plugin(
     protected val fs: FileSystem,
     private val useInternalRedirections: Boolean,
     protected val redirectTo: Path?) {
-
     /**
      * Instance that is capable of executing processes
      */
