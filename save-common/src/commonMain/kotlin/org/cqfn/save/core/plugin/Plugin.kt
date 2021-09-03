@@ -85,8 +85,8 @@ abstract class Plugin(
             }
 
         return if (testFiles.isNotEmpty()) {
-            rawTestFiles.filter { path ->
-                testFiles.any { it in path.test.toString() }
+            rawTestFiles.filter { rawTestFile ->
+                testFiles.any { it in rawTestFile.test.toString() }
             }
         } else {
             rawTestFiles
@@ -97,7 +97,6 @@ abstract class Plugin(
         // common root of the test repository (not a location of a current test)
         val testRepositoryRoot = testConfig.getRootConfig().location
         // creating relative to root path from a test file
-        // FixMe: https://github.com/cqfn/save/issues/241 here we are incorrectly using testFiles[0], as for example it is
         // "Expected" file for Fix plugin
         val testFileRelative =
                 (testFiles.test.createRelativePathToTheRoot(testRepositoryRoot).toPath() / testFiles.test.name)

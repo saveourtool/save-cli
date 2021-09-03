@@ -50,11 +50,11 @@ class FixPlugin(
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
 
-        return files.map { it as Test }.chunked(fixPluginConfig.batchSize!!.toInt()).map { chunk ->
-            val pathMap = chunk.map { it.expected to it.test }
-            val pathCopyMap = pathMap.map { (expected, test) -> expected to createTestFile(test, generalConfig) }
+        return files.map { it as FixTestFiles }.chunked(fixPluginConfig.batchSize!!.toInt()).map { chunk ->
+            val pathMap = chunk.map { it.test to it.expected }
+            val pathCopyMap = pathMap.map { (test, expected) -> createTestFile(test, generalConfig) to expected }
             val testCopyNames =
-                    pathCopyMap.joinToString(separator = fixPluginConfig.batchSeparator!!) { (_, testCopy) -> testCopy.toString() }
+                    pathCopyMap.joinToString(separator = fixPluginConfig.batchSeparator!!) { (testCopy, _) -> testCopy.toString() }
 
             val execCmd = "${(generalConfig.execCmd)} ${fixPluginConfig.execFlags} $testCopyNames"
             val executionResult = try {
@@ -62,7 +62,7 @@ class FixPlugin(
             } catch (ex: ProcessExecutionException) {
                 return@map chunk.map {
                     TestResult(
-                        pathMap.map { (expected, test) -> listOf(expected, test) }.flatten(),
+                        pathMap.map { (test, expected) -> listOf(test, expected) }.flatten(),
                         Fail(ex.describe(), ex.describe()),
                         DebugInfo(null, ex.message, null)
                     )
@@ -72,14 +72,14 @@ class FixPlugin(
             val stdout = executionResult.stdout
             val stderr = executionResult.stderr
 
-            pathCopyMap.map { (expected, testCopy) ->
+            pathCopyMap.map { (testCopy, expected) ->
                 val fixedLines = fs.readLines(testCopy)
                 val expectedLines = fs.readLines(expected)
 
-                val test = pathMap.first { (_, test) -> test.name == testCopy.name }.second
+                val test = pathMap.first { (test, _) -> test.name == testCopy.name }.first
 
                 TestResult(
-                    listOf(expected, test),
+                    listOf(test, expected),
                     checkStatus(expectedLines, fixedLines),
                     DebugInfo(
                         stdout.filter { it.contains(testCopy.name) }.joinToString("\n"),
@@ -134,7 +134,7 @@ class FixPlugin(
                     .filter { it.value.size > 1 && it.key != null }
                     .mapValues { (name, group) ->
                         require(group.size == 2) { "Files should be grouped in pairs, but for name $name these files have been discovered: $group" }
-                        Test(
+                        FixTestFiles(
                             group.first { it.name.contains("$resourceNameTest.") },
                             group.first { it.name.contains("$resourceNameExpected.") },
                         )
@@ -176,5 +176,5 @@ class FixPlugin(
      * @property test test file
      * @property expected expected file
      */
-    class Test(override val test: Path, val expected: Path) : TestFiles
+    class FixTestFiles(override val test: Path, val expected: Path) : TestFiles
 }
