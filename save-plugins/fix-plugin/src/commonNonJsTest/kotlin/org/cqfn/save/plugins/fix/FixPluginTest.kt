@@ -171,6 +171,7 @@ class FixPluginTest {
         useInternalRedirections = false
     )
         .discoverTestFiles(tmpDir)
-        .map { it.first() to it.last() }
+        .map { it as FixPlugin.FixTestFiles }
+        .map { it.expected to it.test }
         .toList()
 }

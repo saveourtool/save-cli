@@ -46,12 +46,12 @@ class FixPlugin(
         .build()
 
     @Suppress("TOO_LONG_FUNCTION")
-    override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
+    override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
 
-        return files.chunked(fixPluginConfig.batchSize!!.toInt()).map { chunk ->
-            val pathMap = chunk.map { it.first() to it.last() }
+        return files.map { it as FixTestFiles }.chunked(fixPluginConfig.batchSize!!.toInt()).map { chunk ->
+            val pathMap = chunk.map { it.expected to it.test }
             val pathCopyMap = pathMap.map { (expected, test) -> expected to createTestFile(test, generalConfig) }
             val testCopyNames =
                     pathCopyMap.joinToString(separator = fixPluginConfig.batchSeparator!!) { (_, testCopy) -> testCopy.toString() }
@@ -88,7 +88,8 @@ class FixPlugin(
                     )
                 )
             }
-        }.flatten()
+        }
+            .flatten()
     }
 
     private fun checkStatus(expectedLines: List<String>, fixedLines: List<String>) =
@@ -118,7 +119,7 @@ class FixPlugin(
         return pathCopy
     }
 
-    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {
+    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<TestFiles> {
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
         val regex = fixPluginConfig.resourceNamePattern
         val resourceNameTest = fixPluginConfig.resourceNameTest
@@ -133,14 +134,13 @@ class FixPlugin(
                     .filter { it.value.size > 1 && it.key != null }
                     .mapValues { (name, group) ->
                         require(group.size == 2) { "Files should be grouped in pairs, but for name $name these files have been discovered: $group" }
-                        listOf(
+                        Test(
+                            group.first { it.name.contains("$resourceNameTest.") },
                             group.first { it.name.contains("$resourceNameExpected.") },
-                            group.first { it.name.contains("$resourceNameTest.") }
                         )
                     }
                     .values
             }
-            .filter { it.isNotEmpty() }
     }
 
     override fun cleanupTempDir() {
@@ -171,4 +171,20 @@ class FixPlugin(
         }
         .toList()
         .joinToString { (type, lines) -> "$type: $lines lines" }
+
+    /**
+     * @property expected expected file
+     */
+    interface FixTestFiles : TestFiles {
+        /**
+         * path to expected file
+         */
+        val expected: Path
+    }
+
+    /**
+     * @property test test file
+     * @property expected expected file
+     */
+    class Test(override val test: Path, override val expected: Path) : FixTestFiles
 }

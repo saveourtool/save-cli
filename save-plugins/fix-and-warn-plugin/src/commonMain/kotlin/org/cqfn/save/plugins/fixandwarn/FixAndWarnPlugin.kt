@@ -64,11 +64,10 @@ class FixAndWarnPlugin(
         fs,
     )
 
-    override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
+    override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
         // Need to update private fields after validation
         initOrUpdateConfigs()
-        val testFilePattern = warnPluginConfig.resourceNamePattern
-        val expectedFiles = files.filterTestResources(testFilePattern, match = false)
+        val expectedFiles = files.map { it as FixPlugin.FixTestFiles }.map { it.expected }
 
         // Remove (in place) warnings from test files before fix plugin execution
         val filesAndTheirWarningsMap = removeWarningsFromExpectedFiles(expectedFiles)
@@ -99,31 +98,14 @@ class FixAndWarnPlugin(
         // TODO: then warn plugin should look at the fix plugin output for actual warnings, and not execute command one more time.
         // TODO: However it's required changes in warn plugin logic (it's should be able to compare expected and actual warnings from different places),
         // TODO: this probably could be obtained after https://github.com/cqfn/save/issues/164,
-        val warnTestResults = warnPlugin.handleFiles(expectedFilesWithPass.map { listOf(it) })
+        val warnTestResults = warnPlugin.handleFiles(expectedFilesWithPass.map { Test(it) })
         return fixTestResultsFailed.asSequence() + warnTestResults
     }
 
-    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {
+    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<TestFiles> {
         initOrUpdateConfigs()
         // Test files for fix and warn plugin should be the same, so this will be enough
         return fixPlugin.rawDiscoverTestFiles(resourceDirectories)
-    }
-
-    /**
-     * Filter test resources
-     *
-     * @param suffix regex pattern of test resource
-     * @param match whether to keep elements which matches current pattern or to keep elements, which is not
-     * @return filtered list of files
-     */
-    private fun Sequence<List<Path>>.filterTestResources(suffix: Regex, match: Boolean) = map { resources ->
-        resources.single { path ->
-            if (match) {
-                suffix.matchEntire(path.toString()) != null
-            } else {
-                suffix.matchEntire(path.toString()) == null
-            }
-        }
     }
 
     /**
