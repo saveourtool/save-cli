@@ -33,8 +33,8 @@ kotlin {
 
     sourceSets {
         all {
-            languageSettings.useExperimentalAnnotation("kotlin.RequiresOptIn")
-            languageSettings.useExperimentalAnnotation("okio.ExperimentalFileSystem")
+            languageSettings.optIn("kotlin.RequiresOptIn")
+            languageSettings.optIn("okio.ExperimentalFileSystem")
         }
         val jvmMain by getting
 
