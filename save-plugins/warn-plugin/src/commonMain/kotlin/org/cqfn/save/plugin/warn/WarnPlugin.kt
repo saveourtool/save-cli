@@ -44,8 +44,6 @@ class WarnPlugin(
     private lateinit var extraFlagsExtractor: ExtraFlagsExtractor
 
     override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
-        testConfig.validateAndSetDefaults()
-
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
         extraFlagsExtractor = ExtraFlagsExtractor(warnPluginConfig, fs)
