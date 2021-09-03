@@ -1,9 +1,9 @@
 package org.cqfn.save.plugin.warn
 
 import org.cqfn.save.plugin.warn.utils.ExtraFlagsExtractor
+import org.cqfn.save.plugin.warn.utils.resolvePlaceholdersFrom
 
 import okio.fakefilesystem.FakeFileSystem
-import org.cqfn.save.plugin.warn.utils.resolvePlaceholdersFrom
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

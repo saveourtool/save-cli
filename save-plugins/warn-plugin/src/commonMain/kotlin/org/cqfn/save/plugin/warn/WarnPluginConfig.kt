@@ -173,15 +173,25 @@ data class WarnPluginConfig(
     }
 }
 
+/**
+ * @property args1 arguments to be inserted *before* file name
+ * @property args2 arguments to be inserted *after* file name
+ */
 data class ExtraFlags(
     val args1: String,
     val args2: String,
 ) {
     companion object {
-        const val keyArgs1 = "args1"
-        const val keyArgs2 = "args2"
+        const val KEY_ARGS_1 = "args1"
+        const val KEY_ARGS_2 = "args2"
 
+        /**
+         * Construct [ExtraFlags] from provided map
+         *
+         * @param map a map possibly containing values for [args1] and [args2], denoted by keys [KEY_ARGS_1] and [KEY_ARGS_2]
+         * @return [ExtraFlags]
+         */
         fun from(map: Map<String, String>) =
-            ExtraFlags(map.getOrElse(keyArgs1) { "" }, map.getOrElse(keyArgs2) { "" })
+                ExtraFlags(map.getOrElse(KEY_ARGS_1) { "" }, map.getOrElse(KEY_ARGS_2) { "" })
     }
 }

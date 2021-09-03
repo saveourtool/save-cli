@@ -16,10 +16,10 @@ import org.cqfn.save.plugin.warn.utils.ExtraFlagsExtractor
 import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
 import org.cqfn.save.plugin.warn.utils.getLineNumber
+import org.cqfn.save.plugin.warn.utils.resolvePlaceholdersFrom
 
 import okio.FileSystem
 import okio.Path
-import org.cqfn.save.plugin.warn.utils.resolvePlaceholdersFrom
 
 private typealias WarningMap = Map<String, List<Warning>>
 
@@ -50,7 +50,7 @@ class WarnPlugin(
 
         // Special trick to handle cases when tested tool is able to process directories.
         // In this case instead of executing the tool with file names, we execute the tool with directories.
-        //
+        // 
         // In case, when user doesn't want to use directory mode, he needs simply not to pass [wildCardInDirectoryMode] and it will be null
         return warnPluginConfig.wildCardInDirectoryMode?.let {
             handleTestFile(files.map { it.single() }.toList(), warnPluginConfig, generalConfig).asSequence()

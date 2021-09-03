@@ -32,6 +32,7 @@ class ExtraFlagsExtractor(private val warnPluginConfig: WarnPluginConfig,
      * @param line line from which [ExtraFlags] should be extracted
      * @return [ExtraFlags] or null if no match occurred
      */
+    @Suppress("COMPACT_OBJECT_INITIALIZATION")  // https://github.com/cqfn/diKTat/issues/1043
     fun extractExtraFlagsFrom(line: String): ExtraFlags? {
         val matchResult = warnPluginConfig.extraConfigPattern!!.find(line) ?: return null
         return matchResult.groupValues[1]
@@ -51,13 +52,20 @@ class ExtraFlagsExtractor(private val warnPluginConfig: WarnPluginConfig,
     }
 }
 
+/**
+ * Substitute placeholders in `this.execFlags` with values from provided arguments
+ *
+ * @param extraFlags [ExtraFlags] to be inserted into `execFlags`
+ * @param fileNames file name or names, that need to be inserted into `execFlags`
+ * @return `this.execFlags` with resolved placeholders
+ */
 internal fun WarnPluginConfig.resolvePlaceholdersFrom(extraFlags: ExtraFlags, fileNames: String): String =
-    execFlags!!
-        .replace("\$${ExtraFlags.keyArgs1}", extraFlags.args1)
-        .replace("\$${ExtraFlags.keyArgs2}", extraFlags.args2).run {
-            if (contains("\$fileName")) {
-                replace("\$fileName", fileNames)
-            } else {
-                plus(" $fileNames")
+        execFlags!!
+            .replace("\$${ExtraFlags.KEY_ARGS_1}", extraFlags.args1)
+            .replace("\$${ExtraFlags.KEY_ARGS_2}", extraFlags.args2).run {
+                if (contains("\$fileName")) {
+                    replace("\$fileName", fileNames)
+                } else {
+                    plus(" $fileNames")
+                }
             }
-        }
