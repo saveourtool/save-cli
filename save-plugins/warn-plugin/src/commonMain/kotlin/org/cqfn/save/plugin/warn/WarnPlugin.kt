@@ -19,6 +19,7 @@ import org.cqfn.save.plugin.warn.utils.getLineNumber
 
 import okio.FileSystem
 import okio.Path
+import org.cqfn.save.plugin.warn.utils.resolvePlaceholdersFrom
 
 private typealias WarningMap = Map<String, List<Warning>>
 
@@ -130,15 +131,7 @@ class WarnPlugin(
                     it.toString().makeThePathRelativeToTestRoot()
                 }
 
-        val execFlagsAdjusted = warnPluginConfig.execFlags!!
-            .replace("\$${ExtraFlags.keyBefore}", extraFlags.before)
-            .replace("\$${ExtraFlags.keyAfter}", extraFlags.after).run {
-                if (contains("\$fileName")) {
-                    replace("\$fileName", fileNamesForExecCmd)
-                } else {
-                    plus(" $fileNamesForExecCmd")
-                }
-            }
+        val execFlagsAdjusted = warnPluginConfig.resolvePlaceholdersFrom(extraFlags, fileNamesForExecCmd)
         val execCmd = "${generalConfig.execCmd} $execFlagsAdjusted"
 
         val executionResult = try {

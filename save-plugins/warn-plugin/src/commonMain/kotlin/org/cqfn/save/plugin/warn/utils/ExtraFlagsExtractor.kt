@@ -54,3 +54,14 @@ class ExtraFlagsExtractor(private val warnPluginConfig: WarnPluginConfig,
             }
     }
 }
+
+internal fun WarnPluginConfig.resolvePlaceholdersFrom(extraFlags: ExtraFlags, fileNames: String): String =
+    execFlags!!
+        .replace("\$${ExtraFlags.keyBefore}", extraFlags.before)
+        .replace("\$${ExtraFlags.keyAfter}", extraFlags.after).run {
+            if (contains("\$fileName")) {
+                replace("\$fileName", fileNames)
+            } else {
+                plus(" $fileNames")
+            }
+        }
