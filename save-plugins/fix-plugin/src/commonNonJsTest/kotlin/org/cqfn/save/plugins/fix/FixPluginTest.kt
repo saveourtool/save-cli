@@ -39,8 +39,8 @@ class FixPluginTest {
         val pairs = discoverFilePairs()
 
         assertEquals(1, pairs.size)
-        assertEquals("Test1Expected.java", pairs.single().first.name)
-        assertEquals("Test1Test.java", pairs.single().second.name)
+        assertEquals("Test1Test.java", pairs.single().first.name)
+        assertEquals("Test1Expected.java", pairs.single().second.name)
     }
 
     @Test
@@ -59,8 +59,8 @@ class FixPluginTest {
         val pairs = discoverFilePairs()
 
         assertEquals(1, pairs.size)
-        assertEquals("Test2Expected.java", pairs.single().first.name)
-        assertEquals("Test2Test.java", pairs.single().second.name)
+        assertEquals("Test2Test.java", pairs.single().first.name)
+        assertEquals("Test2Expected.java", pairs.single().second.name)
     }
 
     @Test
@@ -89,7 +89,7 @@ class FixPluginTest {
         ).execute()
 
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
-        assertEquals(TestResult(listOf(expectedFile, testFile), Pass(null),
+        assertEquals(TestResult(listOf(testFile, expectedFile), Pass(null),
             DebugInfo(results.single().debugInfo?.stdout, results.single().debugInfo?.stderr, null)), results.single())
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
         assertTrue("Files should be identical") {
@@ -171,6 +171,7 @@ class FixPluginTest {
         useInternalRedirections = false
     )
         .discoverTestFiles(tmpDir)
-        .map { it.first() to it.last() }
+        .map { it as FixPlugin.FixTestFiles }
+        .map { it.test to it.expected }
         .toList()
 }

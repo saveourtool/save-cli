@@ -43,7 +43,7 @@ class WarnPlugin(
     private val unexpected = "Some warnings were unexpected"
     private lateinit var extraFlagsExtractor: ExtraFlagsExtractor
 
-    override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
+    override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
         extraFlagsExtractor = ExtraFlagsExtractor(warnPluginConfig, fs)
@@ -53,22 +53,22 @@ class WarnPlugin(
         // 
         // In case, when user doesn't want to use directory mode, he needs simply not to pass [wildCardInDirectoryMode] and it will be null
         return warnPluginConfig.wildCardInDirectoryMode?.let {
-            handleTestFile(files.map { it.single() }.toList(), warnPluginConfig, generalConfig).asSequence()
+            handleTestFile(files.map { it.test }.toList(), warnPluginConfig, generalConfig).asSequence()
         } ?: run {
             files.chunked(warnPluginConfig.batchSize!!.toInt()).flatMap { chunk ->
-                handleTestFile(chunk.map { it.single() }, warnPluginConfig, generalConfig)
+                handleTestFile(chunk.map { it.test }, warnPluginConfig, generalConfig)
             }
         }
     }
 
-    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {
+    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<TestFiles> {
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val regex = warnPluginConfig.resourceNamePattern
         // returned sequence is a sequence of groups of size 1
         return resourceDirectories.flatMap { directory ->
             fs.list(directory)
                 .filter { regex.matches(it.name) }
-                .map { listOf(it) }
+                .map { Test(it) }
         }
     }
 

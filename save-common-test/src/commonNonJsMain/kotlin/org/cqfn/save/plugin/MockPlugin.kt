@@ -20,9 +20,9 @@ class MockPlugin(baseDir: Path, testFiles: List<String> = emptyList()) : Plugin(
     useInternalRedirections = true,
     redirectTo = null
 ) {
-    override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> = emptySequence()
+    override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> = emptySequence()
 
-    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> = emptySequence()
+    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<TestFiles> = emptySequence()
 
     override fun cleanupTempDir() = Unit
 }

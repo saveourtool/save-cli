@@ -46,15 +46,15 @@ class FixPlugin(
         .build()
 
     @Suppress("TOO_LONG_FUNCTION")
-    override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
+    override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
 
-        return files.chunked(fixPluginConfig.batchSize!!.toInt()).map { chunk ->
-            val pathMap = chunk.map { it.first() to it.last() }
-            val pathCopyMap = pathMap.map { (expected, test) -> expected to createTestFile(test, generalConfig) }
+        return files.map { it as FixTestFiles }.chunked(fixPluginConfig.batchSize!!.toInt()).map { chunk ->
+            val pathMap = chunk.map { it.test to it.expected }
+            val pathCopyMap = pathMap.map { (test, expected) -> createTestFile(test, generalConfig) to expected }
             val testCopyNames =
-                    pathCopyMap.joinToString(separator = fixPluginConfig.batchSeparator!!) { (_, testCopy) -> testCopy.toString() }
+                    pathCopyMap.joinToString(separator = fixPluginConfig.batchSeparator!!) { (testCopy, _) -> testCopy.toString() }
 
             val execCmd = "${(generalConfig.execCmd)} ${fixPluginConfig.execFlags} $testCopyNames"
             val executionResult = try {
@@ -62,7 +62,7 @@ class FixPlugin(
             } catch (ex: ProcessExecutionException) {
                 return@map chunk.map {
                     TestResult(
-                        pathMap.map { (expected, test) -> listOf(expected, test) }.flatten(),
+                        pathMap.map { (test, expected) -> listOf(test, expected) }.flatten(),
                         Fail(ex.describe(), ex.describe()),
                         DebugInfo(null, ex.message, null)
                     )
@@ -72,14 +72,14 @@ class FixPlugin(
             val stdout = executionResult.stdout
             val stderr = executionResult.stderr
 
-            pathCopyMap.map { (expected, testCopy) ->
+            pathCopyMap.map { (testCopy, expected) ->
                 val fixedLines = fs.readLines(testCopy)
                 val expectedLines = fs.readLines(expected)
 
-                val test = pathMap.first { (_, test) -> test.name == testCopy.name }.second
+                val test = pathMap.first { (test, _) -> test.name == testCopy.name }.first
 
                 TestResult(
-                    listOf(expected, test),
+                    listOf(test, expected),
                     checkStatus(expectedLines, fixedLines),
                     DebugInfo(
                         stdout.filter { it.contains(testCopy.name) }.joinToString("\n"),
@@ -88,7 +88,8 @@ class FixPlugin(
                     )
                 )
             }
-        }.flatten()
+        }
+            .flatten()
     }
 
     private fun checkStatus(expectedLines: List<String>, fixedLines: List<String>) =
@@ -118,7 +119,7 @@ class FixPlugin(
         return pathCopy
     }
 
-    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {
+    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<TestFiles> {
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
         val regex = fixPluginConfig.resourceNamePattern
         val resourceNameTest = fixPluginConfig.resourceNameTest
@@ -133,14 +134,13 @@ class FixPlugin(
                     .filter { it.value.size > 1 && it.key != null }
                     .mapValues { (name, group) ->
                         require(group.size == 2) { "Files should be grouped in pairs, but for name $name these files have been discovered: $group" }
-                        listOf(
+                        FixTestFiles(
+                            group.first { it.name.contains("$resourceNameTest.") },
                             group.first { it.name.contains("$resourceNameExpected.") },
-                            group.first { it.name.contains("$resourceNameTest.") }
                         )
                     }
                     .values
             }
-            .filter { it.isNotEmpty() }
     }
 
     override fun cleanupTempDir() {
@@ -171,4 +171,10 @@ class FixPlugin(
         }
         .toList()
         .joinToString { (type, lines) -> "$type: $lines lines" }
+
+    /**
+     * @property test test file
+     * @property expected expected file
+     */
+    data class FixTestFiles(override val test: Path, val expected: Path) : TestFiles
 }
