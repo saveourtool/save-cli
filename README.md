@@ -1,6 +1,18 @@
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/cqfn/save)
+![Maven Central](https://img.shields.io/maven-central/v/org.cqfn.save/save-core)
+![Lines of code](https://img.shields.io/tokei/lines/github.com/cqfn/save)
+![Hits-of-Code](https://hitsofcode.com/github/cqfn/save?branch=main)
+![GitHub repo size](https://img.shields.io/github/repo-size/cqfn/save)
+![Run deteKT](https://github.com/cqfn/save/actions/workflows/detekt.yml/badge.svg)
+![Run diKTat](https://github.com/cqfn/save/actions/workflows/diktat.yml/badge.svg)
 ![Build and test](https://github.com/cqfn/save/workflows/Build%20and%20test/badge.svg)
 [![License](https://img.shields.io/github/license/cqfn/save)](https://github.com/cqfn/save/blob/master/LICENSE)
 [![codecov](https://codecov.io/gh/cqfn/save/branch/master/graph/badge.svg)](https://codecov.io/gh/cqfn/save)
+
+<!--
+# ![codebeat badge] TO DO
+# ![maintainability] TO DO
+-->
 
 ## Purpose of Static Analysis Verification and Evaluation (SAVE) project
 Usage of [static analyzers](https://en.wikipedia.org/wiki/Static_program_analysis) - is a very important part of development each and every software product.
