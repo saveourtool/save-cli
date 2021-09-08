@@ -58,7 +58,7 @@ Save can be used not only with static analyzers, but can be used as a test frame
 
 ## How to start
 1. Prepare and configure your test base in the proper format. See [test_detection](#test_detection) and [plugins](#plugins)
-2. Run the following: `save --testRootPath "/my/path/to/tests"`. Directory `tests` should contain `save.toml` configuration file.
+2. Run the following: `save "/my/path/to/tests"`. Directory `tests` should contain `save.toml` configuration file.
 
 ## How to configure 
 SAVE has a command line interface that runs the framework and your executable. What you need is simply to configure the output of your static analyzer so SAVE will be able to

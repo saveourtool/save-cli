@@ -51,9 +51,11 @@ class Save(
         logInfo("Welcome to SAVE version $SAVE_VERSION")
 
         // FixMe: now we work only with the save.toml config and it's hierarchy, but we should work properly here with directories as well
-        val rootTestConfigPath = saveProperties.testRootPath!!.toPath() / "save.toml"
+        val testRootPath = saveProperties.testFiles!!.get(0).toPath()
+        val rootTestConfigPath = testRootPath / "save.toml"
         val (requestedConfigs, requestedTests) = saveProperties.testFiles!!
-            .map { saveProperties.testRootPath!!.toPath() / it }
+            .filterIndexed { index, _ -> index > 0 }
+            .map { testRootPath / it }
             .map { it.toString() }
             .partition { it.toPath().isSaveTomlConfig() }
         val includeSuites = saveProperties.includeSuites?.split(",") ?: emptyList()
