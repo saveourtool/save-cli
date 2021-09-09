@@ -51,6 +51,7 @@ class Save(
         logInfo("Welcome to SAVE version $SAVE_VERSION")
 
         // FixMe: now we work only with the save.toml config and it's hierarchy, but we should work properly here with directories as well
+        // FixMe: get(0) to [0] after https://github.com/cqfn/diKTat/issues/1047
         val testRootPath = saveProperties.testFiles!!.get(0).toPath()
         val rootTestConfigPath = testRootPath / "save.toml"
         val (requestedConfigs, requestedTests) = saveProperties.testFiles!!

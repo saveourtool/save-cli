@@ -25,8 +25,9 @@ import kotlinx.serialization.serializer
  */
 fun SaveProperties.validate(): SaveProperties {
     this.testFiles ?: logErrorAndExit(ExitCodes.INVALID_CONFIGURATION,
-        "`test-files list in CLI is missing or null. " +
+        "`test files list in CLI is missing or null. " +
                 "Save is not able to start processing without an information about the tests that should be run.")
+    // FixMe: get(0) to [0] after https://github.com/cqfn/diKTat/issues/1047
     val testRootPath = testFiles!!.get(0).toPath()
     try {
         if (!FileSystem.SYSTEM.metadata(testRootPath).isDirectory) {
@@ -80,8 +81,10 @@ fun createConfigFromArgs(args: Array<String>): SaveProperties {
     // reading configuration from the properties file
     val testFiles = configFromCli.testFiles
     if (!testFiles.isNullOrEmpty() && !testFiles[0].toPath().exists()) {
+        // FixMe: get(0) to [0] after https://github.com/cqfn/diKTat/issues/1047
         errorAndExitNotValidDir(testFiles!!.get(0).toPath())
     }
+    // FixMe: get(0) to [0] after https://github.com/cqfn/diKTat/issues/1047
     val testRootPath = if (testFiles.isNullOrEmpty() || !FileSystem.SYSTEM.metadata(testFiles!!.get(0).toPath()).isDirectory) {
         null
     } else {
