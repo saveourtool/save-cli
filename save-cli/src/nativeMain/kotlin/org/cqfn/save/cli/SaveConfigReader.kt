@@ -20,6 +20,8 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.properties.Properties
 import kotlinx.serialization.serializer
 
+private val fs: FileSystem = FileSystem.SYSTEM
+
 /**
  * @return this config in case we have valid configuration
  */
@@ -56,16 +58,6 @@ fun SaveProperties.getFields() = this.toString().dropWhile { it != '(' }.drop(1)
     .dropLast(1)
 
 /**
- * @return true if path is exists
- */
-public fun Path.exists() = try {
-    FileSystem.SYSTEM.metadata(this)
-    true
-} catch (e: FileNotFoundException) {
-    false
-}
-
-/**
  * @param args CLI args
  * @return an instance of [SaveProperties]
  */
@@ -80,7 +72,7 @@ fun createConfigFromArgs(args: Array<String>): SaveProperties {
     logDebug("Properties after parsed command line args:\n${configFromCli.getFields()}")
     // reading configuration from the properties file
     val testFiles = configFromCli.testFiles
-    if (!testFiles.isNullOrEmpty() && !testFiles[0].toPath().exists()) {
+    if (!testFiles.isNullOrEmpty() && !fs.exists(testFiles[0].toPath())) {
         // FixMe: get(0) to [0] after https://github.com/cqfn/diKTat/issues/1047
         errorAndExitNotValidDir(testFiles!!.get(0).toPath())
     }
