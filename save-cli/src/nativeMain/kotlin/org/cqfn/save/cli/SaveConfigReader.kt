@@ -25,15 +25,15 @@ import kotlinx.serialization.serializer
  */
 fun SaveProperties.validate(): SaveProperties {
     this.testFiles ?: logErrorAndExit(ExitCodes.INVALID_CONFIGURATION,
-        "`test-files option is missing or null. " +
+        "`test-files list in CLI is missing or null. " +
                 "Save is not able to start processing without an information about the tests that should be run.")
     val testRootPath = testFiles!!.get(0).toPath()
     try {
         if (!FileSystem.SYSTEM.metadata(testRootPath).isDirectory) {
-            throwErrorAndExitNotFoundDir()
+            errorAndExitNotFoundDir()
         }
     } catch (e: FileNotFoundException) {
-        throwErrorAndExitNotValidDir(testRootPath)
+        errorAndExitNotValidDir(testRootPath)
     }
     val fullConfigPath = testRootPath / "save.toml"
     try {
@@ -55,6 +55,16 @@ fun SaveProperties.getFields() = this.toString().dropWhile { it != '(' }.drop(1)
     .dropLast(1)
 
 /**
+ * @return true if path is exists
+ */
+public fun Path.exists() = try {
+    FileSystem.SYSTEM.metadata(this)
+    true
+} catch (e: FileNotFoundException) {
+    false
+}
+
+/**
  * @param args CLI args
  * @return an instance of [SaveProperties]
  */
@@ -62,21 +72,17 @@ fun SaveProperties.getFields() = this.toString().dropWhile { it != '(' }.drop(1)
 fun createConfigFromArgs(args: Array<String>): SaveProperties {
     // getting configuration from command-line arguments
     if (args.isEmpty()) {
-        throwErrorAndExitNotFoundDir()
+        errorAndExitNotFoundDir()
     }
     val configFromCli = SaveProperties(args)
     tryToUpdateDebugLevel(configFromCli)
     logDebug("Properties after parsed command line args:\n${configFromCli.getFields()}")
     // reading configuration from the properties file
     val testFiles = configFromCli.testFiles
-    try {
-        if (testFiles != null && testFiles.isNotEmpty()) {
-            FileSystem.SYSTEM.metadata(testFiles[0].toPath())
-        }
-    } catch (e: FileNotFoundException) {
-        throwErrorAndExitNotValidDir(testFiles!!.get(0).toPath())
+    if (!testFiles.isNullOrEmpty() && !testFiles[0].toPath().exists()) {
+        errorAndExitNotValidDir(testFiles!!.get(0).toPath())
     }
-    val testRootPath = if (testFiles == null || testFiles.isEmpty() || !FileSystem.SYSTEM.metadata(testFiles!!.get(0).toPath()).isDirectory) {
+    val testRootPath = if (testFiles.isNullOrEmpty() || !FileSystem.SYSTEM.metadata(testFiles!!.get(0).toPath()).isDirectory) {
         null
     } else {
         testFiles[0]
@@ -130,13 +136,13 @@ private fun tryToUpdateDebugLevel(properties: SaveProperties) {
     isDebugEnabled = properties.debug ?: false
 }
 
-private fun throwErrorAndExitNotFoundDir() {
+private fun errorAndExitNotFoundDir() {
     logErrorAndExit(ExitCodes.INVALID_CONFIGURATION,
-        "Save expected to get the root directory for test files as the last CLI argument. " +
+        "Save expects to get the root directory for test files as the last CLI argument. " +
                 "Save is not able to start processing without an information about the tests that should be run.")
 }
 
-private fun throwErrorAndExitNotValidDir(testRootPath: Path) {
+private fun errorAndExitNotValidDir(testRootPath: Path) {
     logErrorAndExit(
         ExitCodes.INVALID_CONFIGURATION, "Not able to find directory '$testRootPath'." +
                 " Please provide a valid path to the root directory of test files.")
