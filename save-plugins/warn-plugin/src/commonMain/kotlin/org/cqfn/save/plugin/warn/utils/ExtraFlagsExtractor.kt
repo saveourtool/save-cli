@@ -34,7 +34,7 @@ class ExtraFlagsExtractor(private val warnPluginConfig: WarnPluginConfig,
      */
     @Suppress("COMPACT_OBJECT_INITIALIZATION")  // https://github.com/cqfn/diKTat/issues/1043
     fun extractExtraFlagsFrom(line: String): ExtraFlags? {
-        val matchResult = warnPluginConfig.extraConfigPattern!!.find(line) ?: return null
+        val matchResult = warnPluginConfig.runConfigPattern!!.find(line) ?: return null
         return matchResult.groupValues[1]
             .split(",", ", ")
             .associate {
@@ -46,7 +46,7 @@ class ExtraFlagsExtractor(private val warnPluginConfig: WarnPluginConfig,
             .let(ExtraFlags::from)
             .also {
                 if (it == ExtraFlags("", "")) {
-                    logWarn("Line <$line> is matched by extraFlagsPattern <${warnPluginConfig.extraConfigPattern}>, but no flags have been extracted")
+                    logWarn("Line <$line> is matched by extraFlagsPattern <${warnPluginConfig.runConfigPattern}>, but no flags have been extracted")
                 }
             }
     }

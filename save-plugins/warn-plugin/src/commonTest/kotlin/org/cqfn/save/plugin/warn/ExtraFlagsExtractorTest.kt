@@ -12,7 +12,7 @@ class ExtraFlagsExtractorTest {
     @Test
     fun `basic test`() {
         val extraFlagsExtractor = ExtraFlagsExtractor(
-            WarnPluginConfig(extraConfigPattern = Regex("""// RUN: (.*[^\\]=.*)""")),
+            WarnPluginConfig(runConfigPattern = Regex("""// RUN: (.*[^\\]=.*)""")),
             FakeFileSystem(),
         )
 

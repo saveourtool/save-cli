@@ -103,7 +103,7 @@ usually you'll want them to be consistent to make testing easier, i.e. if input 
 
 ## Customize `execCmd` per file
 As the next level of customization, execution command can be customized per individual test. To do so, one can use a special comment in that file.
-The pattern of the comment is taken from `WarnPluginConfig.extraConfigPattern`. It should contain a single capture group, which corresponds to
+The pattern of the comment is taken from `WarnPluginConfig.runConfigPattern`. It should contain a single capture group, which corresponds to
 execution command.
 
 Additionally, that execution command can define a number of placeholders, which can be used in `execFlags` in TOML config:

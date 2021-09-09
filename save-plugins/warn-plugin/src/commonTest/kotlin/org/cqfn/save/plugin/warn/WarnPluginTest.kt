@@ -33,7 +33,7 @@ class WarnPluginTest {
     )
     private val defaultWarnConfig = WarnPluginConfig(
         execFlags = "$catCmd $mockScriptFile && set stub=",
-        extraConfigPattern = WarnPluginConfig.defaultExtraConfigPattern,
+        runConfigPattern = WarnPluginConfig.defaultRunConfigPattern,
         warningTextHasLine = true,
         warningTextHasColumn = true,
         batchSize = 1,

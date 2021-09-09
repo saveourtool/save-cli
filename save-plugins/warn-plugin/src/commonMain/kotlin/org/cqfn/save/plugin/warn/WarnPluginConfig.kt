@@ -20,7 +20,7 @@ import kotlinx.serialization.UseSerializers
  * The logic of the default value processing will be provided in stage of validation
  *
  * @property execFlags a command that will be executed to check resources and emit warnings
- * @property extraConfigPattern everything from the capture group will be split by comma and then by `=`
+ * @property runConfigPattern everything from the capture group will be split by comma and then by `=`
  * @property actualWarningsPattern a regular expression by which warnings will be discovered in the process output
  * @property warningTextHasLine whether line number is included in [actualWarningsPattern]
  * @property warningTextHasColumn whether column number is included in [actualWarningsPattern]
@@ -49,7 +49,7 @@ import kotlinx.serialization.UseSerializers
 @Serializable
 data class WarnPluginConfig(
     val execFlags: String? = null,
-    val extraConfigPattern: Regex? = null,
+    val runConfigPattern: Regex? = null,
     val actualWarningsPattern: Regex? = null,
     val warningTextHasLine: Boolean? = null,
     val warningTextHasColumn: Boolean? = null,
@@ -86,7 +86,7 @@ data class WarnPluginConfig(
         val other = otherConfig as WarnPluginConfig
         return WarnPluginConfig(
             this.execFlags ?: other.execFlags,
-            this.extraConfigPattern ?: other.extraConfigPattern,
+            this.runConfigPattern ?: other.runConfigPattern,
             this.actualWarningsPattern ?: other.actualWarningsPattern,
             this.warningTextHasLine ?: other.warningTextHasLine,
             this.warningTextHasColumn ?: other.warningTextHasColumn,
@@ -132,7 +132,7 @@ data class WarnPluginConfig(
         requirePositiveIfNotNull(messageCaptureGroup)
         return WarnPluginConfig(
             execFlags ?: "",
-            extraConfigPattern ?: defaultExtraConfigPattern,
+            runConfigPattern ?: defaultRunConfigPattern,
             actualWarningsPattern ?: defaultOutputPattern,
             newWarningTextHasLine,
             newWarningTextHasColumn,
@@ -169,7 +169,7 @@ data class WarnPluginConfig(
          * ```[WARN] /path/to/resources/ClassNameTest.java:2:4: Class name in incorrect case```
          */
         internal val defaultOutputPattern = Regex("(.+):(\\d*):(\\d*): (.+)")
-        internal val defaultExtraConfigPattern = Regex("// RUN: (.+)")
+        internal val defaultRunConfigPattern = Regex("// RUN: (.+)")
     }
 }
 
