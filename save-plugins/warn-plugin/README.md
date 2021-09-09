@@ -95,9 +95,26 @@ parsed from the same `$testFile` using `warningsInputPattern`. `batchSeparator` 
 If line number is not present in the comment, it's assumed to be `current line + 1` in regex group with lineCaptureGroupIdx. 
 `linePlaceholder` is an optional placeholder for the line number that is recognized as the current line and supports addition and subtraction.
 
-
 `warningsInputPattern` and `warningsOutputPattern` must include some mandatory capture groups: for line number (if `warningTextHasLine` is true),
 for column number (if `warningTextHasColumn` is true) and for warning text. Their indices can be customized
 with `lineCaptureGroup`, `columnCaptureGroup` and `messageCaptureGroup` parameters. These parameters are shared between input and output pattern;
 usually you'll want them to be consistent to make testing easier, i.e. if input has line number, then so should output.
 `testNameSuffix` must include suffix name of the test file.
+
+## Customize `execCmd` per file
+As the next level of customization, execution command can be customized per individual test. To do so, one can use a special comment in that file.
+The pattern of the comment is taken from `WarnPluginConfig.runConfigPattern`. It should contain a single capture group, which corresponds to
+execution command.
+
+Additionally, that execution command can define a number of placeholders, which can be used in `execFlags` in TOML config:
+* `args1` a set of CLI parameters which will be inserted _between_ `execFlags` from TOML config and name of the test file
+* `args2` a set of CLI parameters which will be inserted _after_ the name of the test file
+These placeholders are optional; if present, they should be comma-separated. Equal sign can be escaped with `\`. They can be accessed
+from `warn.execFlags` with `$` sign. Additionally, `$fileName` in `execFlags` is substituted by the name of analyzed file
+(or a set of names in batch mode).
+
+For example, the comment `// RUN: args1=--foo\=bar,args2=--debug` in combination with `warn.execCmd = ./my-tool` will lead to execution
+of the following command when checking file `FileName`:
+```bash
+./my-tool --foo=bar FileName --debug
+```

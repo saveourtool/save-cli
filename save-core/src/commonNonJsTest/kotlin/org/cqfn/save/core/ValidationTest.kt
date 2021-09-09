@@ -10,6 +10,7 @@ import okio.FileSystem
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class ValidationTest {
     private val fs: FileSystem = FileSystem.SYSTEM
@@ -138,14 +139,12 @@ class ValidationTest {
         try {
             config.validateAndSetDefaults()
         } catch (ex: IllegalArgumentException) {
-            assertEquals(
-                "Error: All integer values in [warn] section of `${warnConfig.configLocation}` config should be positive!" +
-                        "\nCurrent configuration: execFlags=execFlags, actualWarningsPattern=null, " +
-                        "warningTextHasLine=null, warningTextHasColumn=null, batchSize=null, batchSeparator=null, lineCaptureGroup=-127, columnCaptureGroup=null, " +
-                        "messageCaptureGroup=null, fileNameCaptureGroupOut=null, lineCaptureGroupOut=null, columnCaptureGroupOut=null, messageCaptureGroupOut=null, " +
-                        "exactWarningsMatch=null, testNameSuffix=null, linePlaceholder=null, wildCardInDirectoryMode=null",
-                ex.message
-            )
+            assertTrue("Exception message content incorrect: ${ex.message}") {
+                ex.message!!.startsWith(
+                    "Error: All integer values in [warn] section of `${warnConfig.configLocation}` config should be positive!" +
+                            "\nCurrent configuration: "
+                )
+            }
         }
     }
 
