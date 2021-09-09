@@ -23,6 +23,7 @@ import kotlin.test.assertTrue
 class FixAndWarnPluginTest {
     private val fs = FileSystem.SYSTEM
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "${FixAndWarnPluginTest::class.simpleName!!}-${Random.nextInt()}")
+    private val defaultExtraConfigPattern = Regex("(.+):(\\d+):(\\d+): (.+)")
 
     @BeforeTest
     fun setUp() {
@@ -79,6 +80,7 @@ class FixAndWarnPluginTest {
                     FixAndWarnPluginConfig(
                         FixPluginConfig(fixExecutionCmd, batchSize = 1),
                         WarnPluginConfig(warnExecutionCmd,
+                            defaultExtraConfigPattern,
                             Regex("(.+):(\\d+):(\\d+): (.+)"),
                             true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
                         )
