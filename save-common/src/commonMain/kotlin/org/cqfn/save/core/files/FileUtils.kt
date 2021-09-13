@@ -217,7 +217,7 @@ private fun createRelativePathFromThisToTheRoot(currentPath: Path, rootPath: Pat
 
     // Files located at the same directory, no need additional operations
     if (rootDirectory == parentDirectory) {
-        return ""
+        return currentPath.name
     }
     // Goes through all intermediate dirs and construct relative path
     var relativePath = ""
@@ -225,5 +225,5 @@ private fun createRelativePathFromThisToTheRoot(currentPath: Path, rootPath: Pat
         relativePath = parentDirectory.name + Path.DIRECTORY_SEPARATOR + relativePath
         parentDirectory = parentDirectory.parent!!
     }
-    return relativePath
+    return relativePath + currentPath.name
 }
