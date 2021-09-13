@@ -1,6 +1,7 @@
 package org.cqfn.save.plugin.warn
 
 import org.cqfn.save.core.config.TestConfig
+import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.logging.logWarn
@@ -20,7 +21,6 @@ import org.cqfn.save.plugin.warn.utils.resolvePlaceholdersFrom
 
 import okio.FileSystem
 import okio.Path
-import org.cqfn.save.core.files.createRelativePathToTheRoot
 
 private typealias WarningMap = Map<String, List<Warning>>
 
@@ -122,13 +122,11 @@ class WarnPlugin(
                     val directoryPrefix = testConfig
                         .directory
                         .createRelativePathToTheRoot(testConfig.getRootConfig().location)
-                        //.toString()
-                        //.makeThePathRelativeToTestRoot()
                     // a hack to put only the directory path to the execution command
                     // only in case a directory mode is enabled
                     "$directoryPrefix$it${warnPluginConfig.testNameSuffix}"
                 } ?: paths.joinToString(separator = warnPluginConfig.batchSeparator!!) {
-                    it.createRelativePathToTheRoot(testConfig.getRootConfig().location)//.makeThePathRelativeToTestRoot()
+                    it.createRelativePathToTheRoot(testConfig.getRootConfig().location)
                 }
 
         val execFlagsAdjusted = warnPluginConfig.resolvePlaceholdersFrom(extraFlags, fileNamesForExecCmd)
@@ -178,15 +176,6 @@ class WarnPlugin(
                 )
             )
         }.asSequence()
-    }
-
-    private fun String.makeThePathRelativeToTestRoot(): String {
-        val testRoot = testConfig.getRootConfig().directory.toString()
-        if (testRoot == ".") {
-            return this
-        }
-        return this.replace(testRoot, "")
-            .trimStart('/', '\\')
     }
 
     /**

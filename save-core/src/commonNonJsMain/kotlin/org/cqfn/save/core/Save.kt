@@ -127,7 +127,7 @@ class Save(
                 .onEach { event ->
                     // calculate relative paths, because reporters don't need paths higher than root dir
                     val resourcesRelative =
-                            event.resources.map { it.createRelativePathToTheRoot(testRepositoryRootPath).toPath() }/// it.name }
+                            event.resources.map { it.createRelativePathToTheRoot(testRepositoryRootPath).toPath() }
                     reporter.onEvent(event.copy(resources = resourcesRelative))
                 }
                 .forEach(this::handleResult)
