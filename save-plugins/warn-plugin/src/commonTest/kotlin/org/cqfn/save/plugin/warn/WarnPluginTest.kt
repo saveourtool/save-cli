@@ -2,6 +2,7 @@ package org.cqfn.save.plugin.warn
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.plugin.ExtraFlags
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.ResourceFormatException
 import org.cqfn.save.core.result.Pass
@@ -30,10 +31,10 @@ class WarnPluginTest {
         description = "",
         suiteName = "",
         expectedWarningsPattern = Regex("// ;warn:(\\d+):(\\d+): (.*)"),
+        runConfigPattern = GeneralConfig.defaultRunConfigPattern,
     )
     private val defaultWarnConfig = WarnPluginConfig(
         execFlags = "$catCmd $mockScriptFile && set stub=",
-        runConfigPattern = WarnPluginConfig.defaultRunConfigPattern,
         warningTextHasLine = true,
         warningTextHasColumn = true,
         batchSize = 1,
@@ -408,6 +409,58 @@ class WarnPluginTest {
                 2,
             )
         }
+    }
+
+    @Test
+    fun `should resolve placeholders`() {
+        // basic test
+        checkPlaceholders(
+            "--foo --bar testFile --baz",
+            "--foo \$args1 \$fileName \$args2",
+            ExtraFlags("--bar", "--baz"),
+            "testFile"
+        )
+        // only beforeFlags
+        checkPlaceholders(
+            "--foo --bar testFile",
+            "--foo \$args1 \$fileName",
+            ExtraFlags("--bar", ""),
+            "testFile"
+        )
+        // only afterFlags
+        checkPlaceholders(
+            "--foo testFile --baz",
+            "--foo \$fileName \$args2",
+            ExtraFlags("", "--baz"),
+            "testFile"
+        )
+        // only fileName
+        checkPlaceholders(
+            "--foo testFile",
+            "--foo \$fileName",
+            ExtraFlags("", ""),
+            "testFile"
+        )
+        // no flags
+        checkPlaceholders(
+            "--foo testFile",
+            "--foo",
+            ExtraFlags("", ""),
+            "testFile"
+        )
+    }
+
+    private fun checkPlaceholders(
+        execFlagsExpected: String,
+        execFlagsFromConfig: String,
+        extraFlags: ExtraFlags,
+        fileName: String,
+    ) {
+        assertEquals(
+            execFlagsExpected,
+            WarnPluginConfig(execFlags = execFlagsFromConfig)
+                .resolvePlaceholdersFrom(extraFlags, fileName)
+        )
     }
 
     private fun performTest(

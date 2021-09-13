@@ -1,9 +1,7 @@
-package org.cqfn.save.plugin.warn.utils
+package org.cqfn.save.core.plugin
 
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.logWarn
-import org.cqfn.save.plugin.warn.ExtraFlags
-import org.cqfn.save.plugin.warn.WarnPluginConfig
 
 import okio.FileSystem
 import okio.Path
@@ -11,7 +9,7 @@ import okio.Path
 /**
  * Class that is capable of extracting [ExtraFlags] from a text line
  */
-class ExtraFlagsExtractor(private val warnPluginConfig: WarnPluginConfig,
+class ExtraFlagsExtractor(private val generalConfig: GeneralConfig,
                           private val fs: FileSystem,
 ) {
     /**
@@ -34,7 +32,7 @@ class ExtraFlagsExtractor(private val warnPluginConfig: WarnPluginConfig,
      */
     @Suppress("COMPACT_OBJECT_INITIALIZATION")  // https://github.com/cqfn/diKTat/issues/1043
     fun extractExtraFlagsFrom(line: String): ExtraFlags? {
-        val matchResult = warnPluginConfig.runConfigPattern!!.find(line) ?: return null
+        val matchResult = generalConfig.runConfigPattern!!.find(line) ?: return null
         return matchResult.groupValues[1]
             .split(",", ", ")
             .associate {
@@ -46,26 +44,8 @@ class ExtraFlagsExtractor(private val warnPluginConfig: WarnPluginConfig,
             .let(ExtraFlags::from)
             .also {
                 if (it == ExtraFlags("", "")) {
-                    logWarn("Line <$line> is matched by extraFlagsPattern <${warnPluginConfig.runConfigPattern}>, but no flags have been extracted")
+                    logWarn("Line <$line> is matched by extraFlagsPattern <${generalConfig.runConfigPattern}>, but no flags have been extracted")
                 }
             }
     }
 }
-
-/**
- * Substitute placeholders in `this.execFlags` with values from provided arguments
- *
- * @param extraFlags [ExtraFlags] to be inserted into `execFlags`
- * @param fileNames file name or names, that need to be inserted into `execFlags`
- * @return `this.execFlags` with resolved placeholders
- */
-internal fun WarnPluginConfig.resolvePlaceholdersFrom(extraFlags: ExtraFlags, fileNames: String): String =
-        execFlags!!
-            .replace("\$${ExtraFlags.KEY_ARGS_1}", extraFlags.args1)
-            .replace("\$${ExtraFlags.KEY_ARGS_2}", extraFlags.args2).run {
-                if (contains("\$fileName")) {
-                    replace("\$fileName", fileNames)
-                } else {
-                    plus(" $fileNames")
-                }
-            }
