@@ -55,7 +55,7 @@ class Save(
         val testRootPath = saveProperties.testFiles!!.get(0).toPath()
         val rootTestConfigPath = testRootPath / "save.toml"
         val (requestedConfigs, requestedTests) = saveProperties.testFiles!!
-            .drop(0)
+            .drop(1)
             .map { testRootPath / it }
             .map { it.toString() }
             .partition { it.toPath().isSaveTomlConfig() }
