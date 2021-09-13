@@ -53,6 +53,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
      *
      * @param command executable command with arguments
      * @param redirectTo a file where process output and errors should be redirected. If null, output will be returned as [ExecutionResult.stdout] and [ExecutionResult.stderr].
+     * @param directory where to execute provided command, i.e. `cd [directory]` will be performed before [command] execution
      * @return [ExecutionResult] built from process output
      * @throws ProcessExecutionException in case of impossibility of command execution
      */
@@ -62,7 +63,8 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
         "ReturnCount")
     fun exec(
         command: String,
-        redirectTo: Path?): ExecutionResult {
+        redirectTo: Path?,
+        directory: String? = null): ExecutionResult {
         if (command.isBlank()) {
             logErrorAndThrowProcessBuilderException("Command couldn't be empty!")
         }
@@ -84,12 +86,9 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
         fs.createFile(stdoutFile)
         fs.createFile(stderrFile)
         logDebug("Created temp directory $tmpDir for stderr and stdout of ProcessBuilder")
-        val commandWithEcho = if (isCurrentOsWindows()) {
-            processCommandWithEcho(command)
-        } else {
-            command
-        }
-        val cmd = processBuilderInternal.prepareCmd(commandWithEcho)
+
+        val cmd = modifyCmd(command, directory, processBuilderInternal)
+
         logDebug("Executing: $cmd")
         val status = try {
             processBuilderInternal.exec(cmd)
@@ -111,6 +110,28 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
             }
         } ?: logDebug("Execution output:\n$stdout")
         return ExecutionResult(status, stdout, stderr)
+    }
+
+    private fun modifyCmd(
+        command: String,
+        directory: String?,
+        processBuilderInternal: ProcessBuilderInternal): String {
+        // If we need to step out into some directory before execution
+        val cdCmd = directory?.let {
+            if (isCurrentOsWindows()) {
+                "cd /d $it && "
+            } else {
+                "cd $it && "
+            }
+        } ?: ""
+        // Additionally process command for Windows, it it contain `echo`
+        val commandWithEcho = cdCmd + if (isCurrentOsWindows()) {
+            processCommandWithEcho(command)
+        } else {
+            command
+        }
+        // Finally, make platform dependent adaptations
+        return processBuilderInternal.prepareCmd(commandWithEcho)
     }
 
     /**
