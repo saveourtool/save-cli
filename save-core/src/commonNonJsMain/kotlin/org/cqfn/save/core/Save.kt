@@ -63,37 +63,38 @@ class Save(
         val excludeSuites = saveProperties.excludeSuites?.split(",") ?: emptyList()
 
         reporter.beforeAll()
-        var atLeastOneExecutionProvided = false
+
         // get all toml configs in file system
         val testConfigs = ConfigDetector(fs)
             .configFromFile(rootTestConfigPath)
             .getAllTestConfigsForFiles(requestedConfigs)
+        var atLeastOneExecutionProvided = false
         testConfigs.forEach { testConfig ->
-                // iterating top-down
-                testConfig
-                    // fully process this config's configuration sections
-                    .processInPlace()
-                    // create plugins and choose only active (with test resources) ones
-                    .buildActivePlugins(requestedTests)
-                    .takeIf { plugins ->
-                        plugins.isNotEmpty() && plugins.first().isFromEnabledSuite(includeSuites, excludeSuites)
-                    }
-                    ?.also {
-                        // configuration has been already validated by this point, and if there are active plugins, then suiteName is not null
-                        reporter.onSuiteStart(testConfig.getGeneralConfig()?.suiteName!!)
-                    }
-                    ?.forEach {
-                        atLeastOneExecutionProvided = true
-                        // execute created plugins
-                        executePlugin(it, reporter)
-                    }
-                    ?.also {
-                        reporter.onSuiteEnd(testConfig.getGeneralConfig()?.suiteName!!)
-                    }
-            }
-        val saveToml = testConfigs.map { it.getGeneralConfig()?.configLocation}
+            // iterating top-down
+            testConfig
+                // fully process this config's configuration sections
+                .processInPlace()
+                // create plugins and choose only active (with test resources) ones
+                .buildActivePlugins(requestedTests)
+                .takeIf { plugins ->
+                    plugins.isNotEmpty() && plugins.first().isFromEnabledSuite(includeSuites, excludeSuites)
+                }
+                ?.also {
+                    // configuration has been already validated by this point, and if there are active plugins, then suiteName is not null
+                    reporter.onSuiteStart(testConfig.getGeneralConfig()?.suiteName!!)
+                }
+                ?.forEach {
+                    atLeastOneExecutionProvided = true
+                    // execute created plugins
+                    executePlugin(it, reporter)
+                }
+                ?.also {
+                    reporter.onSuiteEnd(testConfig.getGeneralConfig()?.suiteName!!)
+                }
+        }
+        val saveToml = testConfigs.map { it.getGeneralConfig()?.configLocation }
         val excluded = testConfigs.map { it.getGeneralConfig()?.excludedTests?.toMutableList() ?: emptyList() }
-        .reduceOrNull { acc, list -> acc + list }
+            .reduceOrNull { acc, list -> acc + list }
         if (!atLeastOneExecutionProvided) {
             val warnMsg = if (requestedTests.isNotEmpty()) {
                 """|Couldn't find any satisfied test resources for `$requestedTests`
