@@ -10,7 +10,6 @@ import org.cqfn.save.core.utils.ProcessBuilder
 
 import okio.FileSystem
 import okio.Path
-import okio.Path.Companion.toPath
 
 /**
  * Plugin that can be injected into SAVE during execution. Plugins accept contents of configuration file and then perform some work.
@@ -99,8 +98,7 @@ abstract class Plugin(
         // creating relative to root path from a test file
         // "Expected" file for Fix plugin
         val testFileRelative =
-                (testFiles.test.createRelativePathToTheRoot(testRepositoryRoot).toPath() / testFiles.test.name)
-                    .toString()
+                (testFiles.test.createRelativePathToTheRoot(testRepositoryRoot))
                     .replace('\\', '/')
 
         // excluding tests that are included in the excluded list
@@ -170,7 +168,7 @@ abstract class Plugin(
     protected fun constructPathForCopyOfTestFile(dirName: String, path: Path): Path {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / dirName)
         val relativePath = path.createRelativePathToTheRoot(testConfig.getRootConfig().location)
-        return tmpDir / relativePath / path.name
+        return tmpDir / relativePath
     }
 
     /**
