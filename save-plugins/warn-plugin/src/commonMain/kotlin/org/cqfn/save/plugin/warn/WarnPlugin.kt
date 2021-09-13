@@ -20,6 +20,7 @@ import org.cqfn.save.plugin.warn.utils.resolvePlaceholdersFrom
 
 import okio.FileSystem
 import okio.Path
+import org.cqfn.save.core.files.createRelativePathToTheRoot
 
 private typealias WarningMap = Map<String, List<Warning>>
 
@@ -120,13 +121,14 @@ class WarnPlugin(
                 warnPluginConfig.wildCardInDirectoryMode?.let {
                     val directoryPrefix = testConfig
                         .directory
-                        .toString()
-                        .makeThePathRelativeToTestRoot()
+                        .createRelativePathToTheRoot(testConfig.getRootConfig().location)
+                        //.toString()
+                        //.makeThePathRelativeToTestRoot()
                     // a hack to put only the directory path to the execution command
                     // only in case a directory mode is enabled
                     "$directoryPrefix$it${warnPluginConfig.testNameSuffix}"
                 } ?: paths.joinToString(separator = warnPluginConfig.batchSeparator!!) {
-                    it.toString().makeThePathRelativeToTestRoot()
+                    it.createRelativePathToTheRoot(testConfig.getRootConfig().location)//.makeThePathRelativeToTestRoot()
                 }
 
         val execFlagsAdjusted = warnPluginConfig.resolvePlaceholdersFrom(extraFlags, fileNamesForExecCmd)
