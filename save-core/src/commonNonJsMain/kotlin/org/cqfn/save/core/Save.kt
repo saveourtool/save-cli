@@ -55,7 +55,7 @@ class Save(
         val testRootPath = saveProperties.testFiles!!.get(0).toPath()
         val rootTestConfigPath = testRootPath / "save.toml"
         val (requestedConfigs, requestedTests) = saveProperties.testFiles!!
-            .filterIndexed { index, _ -> index > 0 }
+            .drop(0)
             .map { testRootPath / it }
             .map { it.toString() }
             .partition { it.toPath().isSaveTomlConfig() }
@@ -65,10 +65,10 @@ class Save(
         reporter.beforeAll()
         var atLeastOneExecutionProvided = false
         // get all toml configs in file system
-        ConfigDetector(fs)
+        val testConfigs = ConfigDetector(fs)
             .configFromFile(rootTestConfigPath)
             .getAllTestConfigsForFiles(requestedConfigs)
-            .forEach { testConfig ->
+        testConfigs.forEach { testConfig ->
                 // iterating top-down
                 testConfig
                     // fully process this config's configuration sections
@@ -91,10 +91,14 @@ class Save(
                         reporter.onSuiteEnd(testConfig.getGeneralConfig()?.suiteName!!)
                     }
             }
+        val saveToml = testConfigs.map { it.getGeneralConfig()?.configLocation}
+        val excluded = testConfigs.map { it.getGeneralConfig()?.excludedTests?.toMutableList() ?: emptyList() }
+        .reduceOrNull { acc, list -> acc + list }
         if (!atLeastOneExecutionProvided) {
             val warnMsg = if (requestedTests.isNotEmpty()) {
-                """|Couldn't found any satisfied test resources for `$requestedTests`
+                """|Couldn't find any satisfied test resources for `$requestedTests`
                    |Please check the correctness of command and consider, that the last arguments treats as test file names for individual execution.
+                   |Note: please check excludedTests: $excluded in following save.toml files: $saveToml
                 """.trimMargin()
             } else {
                 "SAVE wasn't able to run tests, please check the correctness of configuration and test resources"
