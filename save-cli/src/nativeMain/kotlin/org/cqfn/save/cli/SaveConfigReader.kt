@@ -137,7 +137,7 @@ private fun tryToUpdateDebugLevel(properties: SaveProperties) {
 
 private fun errorAndExitNotFoundDir() {
     logErrorAndExit(ExitCodes.INVALID_CONFIGURATION,
-        "Save expects to get the root directory for test files as the last CLI argument. " +
+        "Save expects to get the root directory for test files as the last CLI argument: save [cli-options] <test-root> [particular tests (optional)]" +
                 "Save is not able to start processing without an information about the tests that should be run.")
 }
 
