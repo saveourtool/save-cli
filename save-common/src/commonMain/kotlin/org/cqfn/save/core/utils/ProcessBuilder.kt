@@ -52,8 +52,8 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
      * Execute [command] and wait for its completion.
      *
      * @param command executable command with arguments
-     * @param redirectTo a file where process output and errors should be redirected. If null, output will be returned as [ExecutionResult.stdout] and [ExecutionResult.stderr].
      * @param directory where to execute provided command, i.e. `cd [directory]` will be performed before [command] execution
+     * @param redirectTo a file where process output and errors should be redirected. If null, output will be returned as [ExecutionResult.stdout] and [ExecutionResult.stderr].
      * @return [ExecutionResult] built from process output
      * @throws ProcessExecutionException in case of impossibility of command execution
      */
@@ -63,8 +63,8 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
         "ReturnCount")
     fun exec(
         command: String,
-        redirectTo: Path?,
-        directory: String? = null): ExecutionResult {
+        directory: String,
+        redirectTo: Path?): ExecutionResult {
         if (command.isBlank()) {
             logErrorAndThrowProcessBuilderException("Command couldn't be empty!")
         }
@@ -114,16 +114,18 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
 
     private fun modifyCmd(
         command: String,
-        directory: String?,
+        directory: String,
         processBuilderInternal: ProcessBuilderInternal): String {
         // If we need to step out into some directory before execution
-        val cdCmd = directory?.let {
+        val cdCmd = if (directory.isNotBlank()) {
             if (isCurrentOsWindows()) {
-                "cd /d $it && "
+                "cd /d $directory && "
             } else {
-                "cd $it && "
+                "cd $directory && "
             }
-        } ?: ""
+        } else {
+            ""
+        }
         // Additionally process command for Windows, it it contain `echo`
         val commandWithEcho = cdCmd + if (isCurrentOsWindows()) {
             processCommandWithEcho(command)

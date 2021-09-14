@@ -21,7 +21,7 @@ class ProcessBuilderTest {
     @Test
     fun `empty command`() {
         try {
-            processBuilder.exec(" ", null)
+            processBuilder.exec(" ", "", null)
         } catch (ex: ProcessExecutionException) {
             assertEquals("Command couldn't be empty!", ex.message)
         }
@@ -29,7 +29,7 @@ class ProcessBuilderTest {
 
     @Test
     fun `check stdout`() {
-        val actualResult = processBuilder.exec("echo something", null)
+        val actualResult = processBuilder.exec("echo something", "", null)
         val expectedCode = 0
         val expectedStdout = listOf("something")
         assertEquals(expectedCode, actualResult.code)
@@ -40,7 +40,7 @@ class ProcessBuilderTest {
     @Test
     @Suppress("SAY_NO_TO_VAR")
     fun `check stdout with redirection`() {
-        val actualResult = processBuilder.exec("echo something >/dev/null", null)
+        val actualResult = processBuilder.exec("echo something >/dev/null", "", null)
         val expectedCode: Int
         lateinit var expectedStderr: List<String>
         when {

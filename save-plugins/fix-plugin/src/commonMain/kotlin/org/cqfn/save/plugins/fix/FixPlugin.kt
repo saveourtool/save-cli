@@ -58,7 +58,7 @@ class FixPlugin(
 
             val execCmd = "${(generalConfig.execCmd)} ${fixPluginConfig.execFlags} $testCopyNames"
             val executionResult = try {
-                pb.exec(execCmd, redirectTo, testConfig.getRootConfig().directory.toString())
+                pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo)
             } catch (ex: ProcessExecutionException) {
                 return@map chunk.map {
                     TestResult(
