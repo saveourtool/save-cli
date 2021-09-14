@@ -95,11 +95,14 @@ class Save(
         val saveToml = testConfigs.map { it.getGeneralConfig()?.configLocation }
         val excluded = testConfigs.map { it.getGeneralConfig()?.excludedTests?.toMutableList() ?: emptyList() }
             .reduceOrNull { acc, list -> acc + list }
+        val excludedNote = excluded?.let {
+            "Note: please check excludedTests: $excluded in following save.toml files: $saveToml"
+        } ?: ""
         if (!atLeastOneExecutionProvided) {
             val warnMsg = if (requestedTests.isNotEmpty()) {
                 """|Couldn't find any satisfied test resources for `$requestedTests`
                    |Please check the correctness of command and consider, that the last arguments treats as test file names for individual execution.
-                   |Note: please check excludedTests: $excluded in following save.toml files: $saveToml
+                   |$excludedNote
                 """.trimMargin()
             } else {
                 "SAVE wasn't able to run tests, please check the correctness of configuration and test resources"

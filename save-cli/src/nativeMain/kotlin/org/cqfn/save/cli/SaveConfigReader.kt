@@ -29,8 +29,8 @@ fun SaveProperties.validate(): SaveProperties {
     if (this.testFiles.isNullOrEmpty()) {
         logErrorAndExit(
             ExitCodes.INVALID_CONFIGURATION,
-            "test files list in CLI is missing or null. " +
-                    "Save is not able to start processing without an information about the tests or test root path that should be run."
+            "List with test files passed in CLI to save is missing or null. " +
+                    "Save is not able to start processing without an information about the tests or test root path that should be used for execution."
         )
     }
     // FixMe: get(0) to [0] after https://github.com/cqfn/diKTat/issues/1047
@@ -146,5 +146,5 @@ private fun errorAndExitNotValidDir(testRootPath: Path) {
         ExitCodes.INVALID_CONFIGURATION,
         "Save parsed the argument '$testRootPath' that you have provided to cli as a root for test directory and is not able to find it. " +
                 "Please provide a valid path to the root directory of test files. " +
-                "If you wanted to pass a configuration option instead, please check the list of available options using '—help'.")
+                "If you wanted to pass a configuration option instead, please check the list of available options using '--help'.")
 }
