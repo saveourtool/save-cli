@@ -133,7 +133,7 @@ class WarnPlugin(
         val execCmd = "${generalConfig.execCmd} $execFlagsAdjusted"
 
         val executionResult = try {
-            pb.exec("cd ${testConfig.getRootConfig().location.parent} && $execCmd", redirectTo)
+            pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo)
         } catch (ex: ProcessExecutionException) {
             return sequenceOf(
                 TestResult(
