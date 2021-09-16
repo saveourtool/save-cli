@@ -53,7 +53,7 @@ jobs:
             build
             -x detekt
           properties: |
-            org.gradle.caching=true
+            org.gradle.caching=false
             detekt.multiplatform.disabled=true
             disableRedundantTargets=true
             enabledExecutables=debug
@@ -106,7 +106,7 @@ jobs:
             build
             -x detekt
           properties: |
-            org.gradle.caching=true
+            org.gradle.caching=false
             detekt.multiplatform.disabled=true
             disableRedundantTargets=true
             enabledExecutables=debug
