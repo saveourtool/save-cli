@@ -32,26 +32,20 @@ class FixPluginTest {
 
     @Test
     fun `should detect two files`() {
+        fs.createFile(tmpDir / "save.toml")
         fs.createFile(tmpDir / "Test1Test.java")
         fs.createFile(tmpDir / "Test1Expected.java")
 
-        val pairs = FixPlugin(
-            TestConfig(tmpDir / "Test1Test.java", null, mutableListOf(FixPluginConfig("")), fs),
-            testFiles = emptyList(),
-            fs,
-            useInternalRedirections = false
-        )
-            .discoverTestFiles(tmpDir)
-            .map { it.first() to it.last() }
-            .toList()
+        val pairs = discoverFilePairs()
 
         assertEquals(1, pairs.size)
-        assertEquals("Test1Expected.java", pairs.single().first.name)
-        assertEquals("Test1Test.java", pairs.single().second.name)
+        assertEquals("Test1Test.java", pairs.single().first.name)
+        assertEquals("Test1Expected.java", pairs.single().second.name)
     }
 
     @Test
     fun `should detect two files - among other files`() {
+        fs.createFile(tmpDir / "save.toml")
         fs.createFile(tmpDir / "Test2Test.java")
         fs.createFile(tmpDir / "Test2Expected.java")
         fs.createFile(tmpDir / "Something.java")
@@ -62,19 +56,11 @@ class FixPluginTest {
         fs.createFile(tmpDir / "NowCompletelyDifferentExpected.java")
         fs.createFile(tmpDir / "AndNowCompletelyDifferent.java")
 
-        val pairs = FixPlugin(
-            TestConfig(tmpDir / "Something.java", null, mutableListOf(FixPluginConfig("")), fs),
-            testFiles = emptyList(),
-            fs,
-            useInternalRedirections = false
-        )
-            .discoverTestFiles(tmpDir)
-            .map { it.first() to it.last() }
-            .toList()
+        val pairs = discoverFilePairs()
 
         assertEquals(1, pairs.size)
-        assertEquals("Test2Expected.java", pairs.single().first.name)
-        assertEquals("Test2Test.java", pairs.single().second.name)
+        assertEquals("Test2Test.java", pairs.single().first.name)
+        assertEquals("Test2Expected.java", pairs.single().second.name)
     }
 
     @Test
@@ -95,7 +81,7 @@ class FixPluginTest {
             null,
             mutableListOf(
                 FixPluginConfig(executionCmd),
-                GeneralConfig("", "", "", "")
+                GeneralConfig("", listOf(""), "", "")
             ), fs),
             testFiles = emptyList(),
             fs,
@@ -103,7 +89,7 @@ class FixPluginTest {
         ).execute()
 
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
-        assertEquals(TestResult(listOf(expectedFile, testFile), Pass(null),
+        assertEquals(TestResult(listOf(testFile, expectedFile), Pass(null),
             DebugInfo(results.single().debugInfo?.stdout, results.single().debugInfo?.stderr, null)), results.single())
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
         assertTrue("Files should be identical") {
@@ -136,7 +122,7 @@ class FixPluginTest {
         // FixMe: after https://github.com/cqfn/save/issues/158
         val executionCmd = if (isCurrentOsWindows()) {
             // We call ProcessBuilder ourselves, because the command ">" does not work for the list of files
-            ProcessBuilder(false, fs).exec("echo Expected file > $testFile2", null)
+            ProcessBuilder(false, fs).exec("echo Expected file > $testFile2", "", null)
             "${diskWithTmpDir}cd $tmpDir && echo Expected file >"
         } else {
             "${diskWithTmpDir}cd $tmpDir && echo Expected file | tee"
@@ -148,7 +134,7 @@ class FixPluginTest {
             null,
             mutableListOf(
                 fixPluginConfig,
-                GeneralConfig("", "", "", "")
+                GeneralConfig("", listOf(""), "", "")
             ), fs),
             testFiles = emptyList(),
             fs,
@@ -156,7 +142,7 @@ class FixPluginTest {
         ).execute()
 
         // We call ProcessBuilder ourselves, because the command ">" does not work for the list of files
-        ProcessBuilder(false, fs).exec("echo Expected file > $testFile2", null)
+        ProcessBuilder(false, fs).exec("echo Expected file > $testFile2", "", null)
 
         assertEquals(2, results.count(), "Size of results should equal number of pairs")
         assertTrue(results.all {
@@ -177,4 +163,15 @@ class FixPluginTest {
     fun tearDown() {
         fs.deleteRecursively(tmpDir)
     }
+
+    internal fun discoverFilePairs() = FixPlugin(
+        TestConfig(tmpDir / "save.toml", null, mutableListOf(FixPluginConfig("")), fs),
+        testFiles = emptyList(),
+        fs,
+        useInternalRedirections = false
+    )
+        .discoverTestFiles(tmpDir)
+        .map { it as FixPlugin.FixTestFiles }
+        .map { it.test to it.expected }
+        .toList()
 }

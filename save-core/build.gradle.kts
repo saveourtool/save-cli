@@ -1,31 +1,18 @@
 
-import org.cqfn.save.buildutils.configurePublishing
 import org.cqfn.save.generation.configFilePath
 import org.cqfn.save.generation.generateConfigOptions
+
+import de.undercouch.gradle.tasks.download.Download
 import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
-import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 
 plugins {
-    kotlin("multiplatform")
-    kotlin("plugin.serialization")
+    id("org.cqfn.save.buildutils.kotlin-library")
+    id("de.undercouch.download")
 }
 
 kotlin {
-    jvm {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = "11"
-            }
-        }
-    }
-    val hostTarget = listOf(linuxX64(), mingwX64(), macosX64())
-
     sourceSets {
-        all {
-            languageSettings.useExperimentalAnnotation("kotlin.RequiresOptIn")
-            languageSettings.useExperimentalAnnotation("okio.ExperimentalFileSystem")
-        }
-        val commonNonJsMain by creating {
+        val commonNonJsMain by getting {
             dependencies {
                 implementation(project(":save-common"))
                 implementation(project(":save-reporters"))
@@ -33,48 +20,21 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
                 implementation("org.jetbrains.kotlinx:kotlinx-cli:${Versions.Kotlinx.cli}")
                 implementation("com.akuleshov7:ktoml-core:${Versions.ktoml}")
+                implementation("com.akuleshov7:ktoml-file:${Versions.ktoml}")
                 implementation(project(":save-plugins:fix-plugin"))
                 implementation(project(":save-plugins:fix-and-warn-plugin"))
                 implementation(project(":save-plugins:warn-plugin"))
             }
         }
-        val commonNonJsTest by creating {
+        val commonNonJsTest by getting {
             dependencies {
+                implementation(project(":save-common-test"))
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
-            }
-        }
-        val nativeMain by creating {
-            dependsOn(commonNonJsMain)
-        }
-        hostTarget.forEach {
-            getByName("${it.name}Main").dependsOn(nativeMain)
-        }
-
-        val nativeTest by creating {
-            dependsOn(commonNonJsTest)
-        }
-        hostTarget.forEach {
-            getByName("${it.name}Test").dependsOn(nativeTest)
-        }
-
-        val jvmMain by getting {
-            dependsOn(commonNonJsMain)
-        }
-        val jvmTest by getting {
-            dependsOn(commonNonJsTest)
-            dependencies {
-                implementation(kotlin("test-junit5"))
-                implementation("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
             }
         }
     }
-}
-
-configurePublishing()
-
-tasks.withType<KotlinJvmTest> {
-    useJUnitPlatform()
 }
 
 val generateConfigOptionsTaskProvider = tasks.register("generateConfigOptions") {
@@ -111,8 +71,32 @@ val generatedKotlinSrc = kotlin.sourceSets.create("generated") {
         implementation("org.jetbrains.kotlinx:kotlinx-cli:${Versions.Kotlinx.cli}")
     }
 }
-kotlin.sourceSets.getByName("commonMain").dependsOn(generatedKotlinSrc)
+kotlin.sourceSets.getByName("commonNonJsMain").dependsOn(generatedKotlinSrc)
 tasks.withType<KotlinCompile<*>>().forEach {
     it.dependsOn(generateConfigOptionsTaskProvider)
     it.dependsOn(generateVersionFileTaskProvider)
+}
+
+tasks.register<Download>("downloadTestResources") {
+    src(listOf(
+        Versions.IntegrationTest.ktlintLink,
+        Versions.IntegrationTest.diktatLink,
+    ))
+    dest("../examples/kotlin-diktat")
+    doLast {
+        file("../examples/kotlin-diktat/diktat-${Versions.IntegrationTest.diktat}.jar").renameTo(
+            file("../examples/kotlin-diktat/diktat.jar")
+        )
+    }
+}
+val cleanupTask = tasks.register("cleanupTestResources") {
+    mustRunAfter(tasks.withType<Test>())
+    doFirst {
+        file("../examples/kotlin-diktat/ktlint").delete()
+        file("../examples/kotlin-diktat/diktat.jar").delete()
+    }
+}
+tasks.withType<Test>().configureEach {
+    dependsOn("downloadTestResources")
+    finalizedBy("cleanupTestResources")
 }

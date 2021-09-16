@@ -2,7 +2,6 @@ package org.cqfn.save.plugins.fix
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
-import org.cqfn.save.core.files.readFile
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.plugin.GeneralConfig
@@ -30,11 +29,14 @@ class FixPlugin(
     testConfig: TestConfig,
     testFiles: List<String>,
     fileSystem: FileSystem,
-    useInternalRedirections: Boolean = true) : Plugin(
+    useInternalRedirections: Boolean = true,
+    redirectTo: Path? = null,
+) : Plugin(
     testConfig,
     testFiles,
     fileSystem,
-    useInternalRedirections) {
+    useInternalRedirections,
+    redirectTo) {
     private val diffGenerator = DiffRowGenerator.create()
         .showInlineDiffs(true)
         .mergeOriginalRevised(false)
@@ -44,24 +46,23 @@ class FixPlugin(
         .build()
 
     @Suppress("TOO_LONG_FUNCTION")
-    override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
-        testConfig.validateAndSetDefaults()
-
+    override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
-        val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
+        val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
 
-        return files.chunked(fixPluginConfig.batchSize!!).map { chunk ->
-            val pathMap = chunk.map { it.first() to it.last() }
-            val pathCopyMap = pathMap.map { (expected, test) -> expected to createTestFile(test) }
-            val testCopyNames = pathCopyMap.joinToString(separator = fixPluginConfig.batchSeparator!!) { (_, testCopy) -> testCopy.toString() }
+        return files.map { it as FixTestFiles }.chunked(fixPluginConfig.batchSize!!.toInt()).map { chunk ->
+            val pathMap = chunk.map { it.test to it.expected }
+            val pathCopyMap = pathMap.map { (test, expected) -> createTestFile(test, generalConfig) to expected }
+            val testCopyNames =
+                    pathCopyMap.joinToString(separator = fixPluginConfig.batchSeparator!!) { (testCopy, _) -> testCopy.toString() }
 
-            val execCmd = "${(generalConfig!!.execCmd)} ${fixPluginConfig.execFlags} $testCopyNames"
+            val execCmd = "${(generalConfig.execCmd)} ${fixPluginConfig.execFlags} $testCopyNames"
             val executionResult = try {
-                pb.exec(execCmd, null)
+                pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo)
             } catch (ex: ProcessExecutionException) {
                 return@map chunk.map {
                     TestResult(
-                        pathMap.map { (expected, test) -> listOf(expected, test) }.flatten(),
+                        pathMap.map { (test, expected) -> listOf(test, expected) }.flatten(),
                         Fail(ex.describe(), ex.describe()),
                         DebugInfo(null, ex.message, null)
                     )
@@ -71,45 +72,54 @@ class FixPlugin(
             val stdout = executionResult.stdout
             val stderr = executionResult.stderr
 
-            pathCopyMap.map { (expected, testCopy) ->
+            pathCopyMap.map { (testCopy, expected) ->
                 val fixedLines = fs.readLines(testCopy)
                 val expectedLines = fs.readLines(expected)
 
-                val test = pathMap.first { (_, test) -> test.name == testCopy.name }.second
+                val test = pathMap.first { (test, _) -> test.name == testCopy.name }.first
 
                 TestResult(
-                    listOf(expected, test),
+                    listOf(test, expected),
                     checkStatus(expectedLines, fixedLines),
                     DebugInfo(
                         stdout.filter { it.contains(testCopy.name) }.joinToString("\n"),
                         stderr.filter { it.contains(testCopy.name) }.joinToString("\n"),
-                        null)
+                        null
+                    )
                 )
             }
-        }.flatten()
-    }
-
-    private fun checkStatus(expectedLines: List<String>, fixedLines: List<String>) = diff(expectedLines, fixedLines).let { patch ->
-        if (patch.deltas.isEmpty()) {
-            Pass(null)
-        } else {
-            Fail(patch.formatToString(), patch.formatToShortString())
         }
+            .flatten()
     }
 
-    private fun createTestFile(path: Path): Path {
+    private fun checkStatus(expectedLines: List<String>, fixedLines: List<String>) =
+            diff(expectedLines, fixedLines).let { patch ->
+                if (patch.deltas.isEmpty()) {
+                    Pass(null)
+                } else {
+                    Fail(patch.formatToString(), patch.formatToShortString())
+                }
+            }
+
+    private fun createTestFile(path: Path, generalConfig: GeneralConfig): Path {
         val pathCopy: Path = constructPathForCopyOfTestFile(FixPlugin::class.simpleName!!, path)
         createTempDir(pathCopy.parent!!)
 
+        val expectedWarningPattern = generalConfig.expectedWarningsPattern
+
         fs.write(fs.createFile(pathCopy)) {
-            write(
-                (fs.readFile(path)).encodeToByteArray()
-            )
+            fs.readLines(path).forEach {
+                if (expectedWarningPattern == null || !generalConfig.expectedWarningsPattern!!.matches(it)) {
+                    write(
+                        (it + "\n").encodeToByteArray()
+                    )
+                }
+            }
         }
         return pathCopy
     }
 
-    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {
+    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<TestFiles> {
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
         val regex = fixPluginConfig.resourceNamePattern
         val resourceNameTest = fixPluginConfig.resourceNameTest
@@ -124,14 +134,13 @@ class FixPlugin(
                     .filter { it.value.size > 1 && it.key != null }
                     .mapValues { (name, group) ->
                         require(group.size == 2) { "Files should be grouped in pairs, but for name $name these files have been discovered: $group" }
-                        listOf(
+                        FixTestFiles(
+                            group.first { it.name.contains("$resourceNameTest.") },
                             group.first { it.name.contains("$resourceNameExpected.") },
-                            group.first { it.name.contains("$resourceNameTest.") }
                         )
                     }
                     .values
             }
-            .filter { it.isNotEmpty() }
     }
 
     override fun cleanupTempDir() {
@@ -162,4 +171,10 @@ class FixPlugin(
         }
         .toList()
         .joinToString { (type, lines) -> "$type: $lines lines" }
+
+    /**
+     * @property test test file
+     * @property expected expected file
+     */
+    data class FixTestFiles(override val test: Path, val expected: Path) : TestFiles
 }

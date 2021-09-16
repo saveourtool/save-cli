@@ -52,7 +52,8 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
      * Execute [command] and wait for its completion.
      *
      * @param command executable command with arguments
-     * @param redirectTo a file where process output should be redirected. If null, output will be returned as [ExecutionResult.stdout].
+     * @param directory where to execute provided command, i.e. `cd [directory]` will be performed before [command] execution
+     * @param redirectTo a file where process output and errors should be redirected. If null, output will be returned as [ExecutionResult.stdout] and [ExecutionResult.stderr].
      * @return [ExecutionResult] built from process output
      * @throws ProcessExecutionException in case of impossibility of command execution
      */
@@ -62,6 +63,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
         "ReturnCount")
     fun exec(
         command: String,
+        directory: String,
         redirectTo: Path?): ExecutionResult {
         if (command.isBlank()) {
             logErrorAndThrowProcessBuilderException("Command couldn't be empty!")
@@ -84,12 +86,9 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
         fs.createFile(stdoutFile)
         fs.createFile(stderrFile)
         logDebug("Created temp directory $tmpDir for stderr and stdout of ProcessBuilder")
-        val commandWithEcho = if (isCurrentOsWindows()) {
-            processCommandWithEcho(command)
-        } else {
-            command
-        }
-        val cmd = processBuilderInternal.prepareCmd(commandWithEcho)
+
+        val cmd = modifyCmd(command, directory, processBuilderInternal)
+
         logDebug("Executing: $cmd")
         val status = try {
             processBuilderInternal.exec(cmd)
@@ -102,14 +101,39 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
         fs.deleteRecursively(tmpDir)
         logDebug("Removed temp directory $tmpDir")
         if (stderr.isNotEmpty()) {
-            logWarn(stderr.joinToString("\n"))
+            logDebug("The following errors occurred after executing of `$command`:\n${stderr.joinToString("\n")}")
         }
         redirectTo?.let {
             fs.write(redirectTo) {
                 write(stdout.joinToString("\n").encodeToByteArray())
+                write(stderr.joinToString("\n").encodeToByteArray())
             }
         } ?: logDebug("Execution output:\n$stdout")
         return ExecutionResult(status, stdout, stderr)
+    }
+
+    private fun modifyCmd(
+        command: String,
+        directory: String,
+        processBuilderInternal: ProcessBuilderInternal): String {
+        // If we need to step out into some directory before execution
+        val cdCmd = if (directory.isNotBlank()) {
+            if (isCurrentOsWindows()) {
+                "cd /d $directory && "
+            } else {
+                "cd $directory && "
+            }
+        } else {
+            ""
+        }
+        // Additionally process command for Windows, it it contain `echo`
+        val commandWithEcho = cdCmd + if (isCurrentOsWindows()) {
+            processCommandWithEcho(command)
+        } else {
+            command
+        }
+        // Finally, make platform dependent adaptations
+        return processBuilderInternal.prepareCmd(commandWithEcho)
     }
 
     /**

@@ -20,10 +20,10 @@ import kotlinx.serialization.UseSerializers
  * The logic of the default value processing will be provided in stage of validation
  *
  * @property execFlags a command that will be executed to check resources and emit warnings
- * @property warningsInputPattern a regular expression by which expected warnings will be discovered in test resources
- * @property warningsOutputPattern a regular expression by which warnings will be discovered in the process output
- * @property warningTextHasLine whether line number is included in [warningsOutputPattern]
- * @property warningTextHasColumn whether column number is included in [warningsOutputPattern]
+ * @property runConfigPattern everything from the capture group will be split by comma and then by `=`
+ * @property actualWarningsPattern a regular expression by which warnings will be discovered in the process output
+ * @property warningTextHasLine whether line number is included in [actualWarningsPattern]
+ * @property warningTextHasColumn whether column number is included in [actualWarningsPattern]
  * @property lineCaptureGroup an index of capture group in regular expressions, corresponding to line number. Indices start at 0 with 0
  * corresponding to the whole string.
  * @property columnCaptureGroup an index of capture group in regular expressions, corresponding to column number. Indices start at 0 with 0
@@ -42,29 +42,30 @@ import kotlinx.serialization.UseSerializers
  * @property testNameSuffix suffix name of the test file.
  * @property batchSize it controls how many files execCmd will process at a time.
  * @property batchSeparator separator for batch mode
- * @property defaultLineMode whether to use default value for line number; when enabled, default value will be equal to the next line
  * @property linePlaceholder placeholder for line number, which resolved as current line and support addition and subtraction
+ * @property wildCardInDirectoryMode mode that controls that we are targeting our tested tools on directories (not on files).
+ * This prefix will be added to the name of the directory, if you would like to use directory mode without any prefix simply use ""
  */
 @Serializable
 data class WarnPluginConfig(
     val execFlags: String? = null,
-    val warningsInputPattern: Regex? = null,
-    val warningsOutputPattern: Regex? = null,
+    val runConfigPattern: Regex? = null,
+    val actualWarningsPattern: Regex? = null,
     val warningTextHasLine: Boolean? = null,
     val warningTextHasColumn: Boolean? = null,
-    val batchSize: Int? = null,
+    val batchSize: Long? = null,
     val batchSeparator: String? = null,
-    val lineCaptureGroup: Int? = null,
-    val columnCaptureGroup: Int? = null,
-    val messageCaptureGroup: Int? = null,
-    val fileNameCaptureGroupOut: Int? = null,
-    val lineCaptureGroupOut: Int? = null,
-    val columnCaptureGroupOut: Int? = null,
-    val messageCaptureGroupOut: Int? = null,
+    val lineCaptureGroup: Long? = null,
+    val columnCaptureGroup: Long? = null,
+    val messageCaptureGroup: Long? = null,
+    val fileNameCaptureGroupOut: Long? = null,
+    val lineCaptureGroupOut: Long? = null,
+    val columnCaptureGroupOut: Long? = null,
+    val messageCaptureGroupOut: Long? = null,
     val exactWarningsMatch: Boolean? = null,
     val testNameSuffix: String? = null,
-    val defaultLineMode: Boolean? = null,
     val linePlaceholder: String? = null,
+    val wildCardInDirectoryMode: String? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.WARN
 
@@ -72,22 +73,21 @@ data class WarnPluginConfig(
     override var configLocation: Path = "undefined_toml_location".toPath()
 
     /**
-     * @property suffix name of the test file.
+     * regex for the name of the test files.
      */
-    val testName: String = testNameSuffix ?: "Test"
-
-    /**
-     *  @property resourceNamePattern regex for the name of the test files.
-     */
-    val resourceNamePattern: Regex = Regex("""(.+)${(testName)}\.[\w\d]+""")
+    val resourceNamePattern: Regex = if (testNameSuffix == "Test") {
+        Regex("""(.+)${(testNameSuffix)}\.[\w\d]+""")
+    } else {
+        Regex("""(.+)${(testNameSuffix)}""")
+    }
 
     @Suppress("ComplexMethod")
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as WarnPluginConfig
         return WarnPluginConfig(
             this.execFlags ?: other.execFlags,
-            this.warningsInputPattern ?: other.warningsInputPattern,
-            this.warningsOutputPattern ?: other.warningsOutputPattern,
+            this.runConfigPattern ?: other.runConfigPattern,
+            this.actualWarningsPattern ?: other.actualWarningsPattern,
             this.warningTextHasLine ?: other.warningTextHasLine,
             this.warningTextHasColumn ?: other.warningTextHasColumn,
             this.batchSize ?: other.batchSize,
@@ -101,8 +101,8 @@ data class WarnPluginConfig(
             this.messageCaptureGroupOut ?: other.messageCaptureGroupOut,
             this.exactWarningsMatch ?: other.exactWarningsMatch,
             this.testNameSuffix ?: other.testNameSuffix,
-            this.defaultLineMode ?: other.defaultLineMode,
             this.linePlaceholder ?: other.linePlaceholder,
+            this.wildCardInDirectoryMode ?: other.wildCardInDirectoryMode,
         )
     }
 
@@ -110,14 +110,13 @@ data class WarnPluginConfig(
         "MAGIC_NUMBER",
         "MagicNumber",
         "ComplexMethod",
-        "TOO_LONG_FUNCTION")
+        "TOO_LONG_FUNCTION"
+    )
     override fun validateAndSetDefaults(): WarnPluginConfig {
         val newWarningTextHasLine = warningTextHasLine ?: true
         val newWarningTextHasColumn = warningTextHasColumn ?: true
-        val newDefaultLineMode = defaultLineMode ?: false
-        val newLineCaptureGroup = if (newDefaultLineMode) {
-            null
-        } else if (newWarningTextHasLine) {
+
+        val newLineCaptureGroup = if (newWarningTextHasLine) {
             (lineCaptureGroup ?: 1)
         } else {
             null
@@ -133,8 +132,8 @@ data class WarnPluginConfig(
         requirePositiveIfNotNull(messageCaptureGroup)
         return WarnPluginConfig(
             execFlags ?: "",
-            warningsInputPattern ?: defaultInputPattern,
-            warningsOutputPattern ?: defaultOutputPattern,
+            runConfigPattern ?: defaultRunConfigPattern,
+            actualWarningsPattern ?: defaultOutputPattern,
             newWarningTextHasLine,
             newWarningTextHasColumn,
             batchSize ?: 1,
@@ -147,13 +146,13 @@ data class WarnPluginConfig(
             newColumnCaptureGroupOut,
             newMessageCaptureGroupOut,
             exactWarningsMatch ?: true,
-            testName,
-            newDefaultLineMode,
-            linePlaceholder ?: "line",
+            testNameSuffix ?: "Test",
+            linePlaceholder ?: "\$line",
+            wildCardInDirectoryMode,
         )
     }
 
-    private fun requirePositiveIfNotNull(value: Int?) {
+    private fun requirePositiveIfNotNull(value: Long?) {
         value?.let {
             require(value >= 0) {
                 """
@@ -166,15 +165,33 @@ data class WarnPluginConfig(
 
     companion object {
         /**
-         * Default regex for expected warnings in test resources, e.g.
-         * `// ;warn:2:4: Class name in incorrect case`
-         */
-        internal val defaultInputPattern = Regex(";warn:(.+):(\\d+): (.+)")
-
-        /**
          * Default regex for actual warnings in the tool output, e.g.
          * ```[WARN] /path/to/resources/ClassNameTest.java:2:4: Class name in incorrect case```
          */
-        internal val defaultOutputPattern = Regex("(.+):(\\d+):(\\d+): (.+)")
+        internal val defaultOutputPattern = Regex("(.+):(\\d*):(\\d*): (.+)")
+        internal val defaultRunConfigPattern = Regex("// RUN: (.+)")
+    }
+}
+
+/**
+ * @property args1 arguments to be inserted *before* file name
+ * @property args2 arguments to be inserted *after* file name
+ */
+data class ExtraFlags(
+    val args1: String,
+    val args2: String,
+) {
+    companion object {
+        const val KEY_ARGS_1 = "args1"
+        const val KEY_ARGS_2 = "args2"
+
+        /**
+         * Construct [ExtraFlags] from provided map
+         *
+         * @param map a map possibly containing values for [args1] and [args2], denoted by keys [KEY_ARGS_1] and [KEY_ARGS_2]
+         * @return [ExtraFlags]
+         */
+        fun from(map: Map<String, String>) =
+                ExtraFlags(map.getOrElse(KEY_ARGS_1) { "" }, map.getOrElse(KEY_ARGS_2) { "" })
     }
 }

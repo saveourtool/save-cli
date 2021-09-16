@@ -59,7 +59,7 @@
 - name: LONG_LINE
   enabled: true
   configuration:
-    lineLength: 180
+    lineLength: 180000
 - name: WRONG_NEWLINES
   enabled: true
   configuration:

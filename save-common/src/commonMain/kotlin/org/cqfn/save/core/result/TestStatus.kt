@@ -15,9 +15,10 @@ sealed class TestStatus
 
 /**
  * @property message Optional message about test passing
+ * @property shortMessage Optional message formatted as a short string
  */
 @Serializable
-data class Pass(val message: String?) : TestStatus()
+data class Pass(val message: String?, val shortMessage: String? = message) : TestStatus()
 
 /**
  * @property reason reason of failure

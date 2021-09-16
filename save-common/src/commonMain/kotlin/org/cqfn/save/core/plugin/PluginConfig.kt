@@ -2,15 +2,19 @@
  * Configuration classes for SAVE plugins.
  */
 
+@file:UseSerializers(RegexSerializer::class)
+
 package org.cqfn.save.core.plugin
 
 import org.cqfn.save.core.config.TestConfigSections
+import org.cqfn.save.core.utils.RegexSerializer
 
 import okio.Path
 import okio.Path.Companion.toPath
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import kotlinx.serialization.UseSerializers
 
 /**
  * Core interface for plugin configuration (like warnPlugin/fixPluin/e.t.c)
@@ -47,22 +51,20 @@ interface PluginConfig {
  * The logic of the default value processing will be provided in stage of validation
  *
  * @property execCmd a command that will be executed to check resources and emit warnings
- * @property tags FixMe: after ktoml will support lists we should change it
- * @property description
- * @property suiteName
- * @property excludedTests FixMe: after ktoml will support lists we should change it
- * @property includedTests FixMe: after ktoml will support lists we should change it
- * @property ignoreSaveComments if true then ignore warning comments
+ * @property tags special labels that can be used for splitting tests into groups
+ * @property description free text with a description
+ * @property suiteName name of test suite that can be visible from save-cloud
+ * @property excludedTests excluded tests from the run
+ * @property expectedWarningsPattern - pattern with warnings that are expected from the test file
  */
 @Serializable
 data class GeneralConfig(
     val execCmd: String? = null,
-    val tags: String? = null,
+    val tags: List<String>? = null,
     val description: String? = null,
     val suiteName: String? = null,
-    val excludedTests: String? = null,
-    val includedTests: String? = null,
-    val ignoreSaveComments: Boolean? = null
+    val excludedTests: List<String>? = null,
+    val expectedWarningsPattern: Regex? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.GENERAL
 
@@ -73,11 +75,9 @@ data class GeneralConfig(
         val other = otherConfig as GeneralConfig
         val mergedTag = other.tags?.let {
             this.tags?.let {
-                val parentTags = other.tags.split(", ")
-                val childTags = this.tags.split(", ")
-                parentTags.union(childTags).joinToString(", ")
+                other.tags.union(this.tags)
             } ?: other.tags
-        } ?: this.tags
+        }?.toList() ?: this.tags
 
         return GeneralConfig(
             this.execCmd ?: other.execCmd,
@@ -85,8 +85,7 @@ data class GeneralConfig(
             this.description ?: other.description,
             this.suiteName ?: other.suiteName,
             this.excludedTests ?: other.excludedTests,
-            this.includedTests ?: other.includedTests,
-            this.ignoreSaveComments ?: other.ignoreSaveComments
+            this.expectedWarningsPattern ?: other.expectedWarningsPattern,
         )
     }
 
@@ -108,16 +107,23 @@ data class GeneralConfig(
             tags,
             description,
             suiteName,
-            excludedTests ?: "",
-            includedTests ?: "",
-            ignoreSaveComments ?: false
+            excludedTests ?: emptyList(),
+            expectedWarningsPattern ?: defaultInputPattern,
         )
     }
 
     private fun errorMsgForRequireCheck(field: String) =
             """
-                Error: Couldn't find `$field` in [general] section of `$configLocation` config.
-                Current configuration: ${this.toString().substringAfter("(").substringBefore(")")}
-                Please provide it in this, or at least in one of the parent configs.
+                        Error: Couldn't find `$field` in [general] section of `$configLocation` config.
+                        Current configuration: ${this.toString().substringAfter("(").substringBefore(")")}
+                        Please provide it in this, or at least in one of the parent configs.
             """.trimIndent()
+
+    companion object {
+        /**
+         * Default regex for expected warnings in test resources, e.g.
+         * `// ;warn:2:4: Class name in incorrect case`
+         */
+        val defaultInputPattern = Regex("// ;warn:(.+):(\\d+): (.+)")
+    }
 }

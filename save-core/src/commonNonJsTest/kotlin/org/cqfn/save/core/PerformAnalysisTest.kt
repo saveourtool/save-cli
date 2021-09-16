@@ -14,8 +14,8 @@ class PerformAnalysisTest {
     @Test
     fun `detect plugins`() {
         val saveProperties = SaveProperties(
-            testRootPath = "../examples/discovery-test",
             reportType = ReportType.PLAIN,
+            testFiles = listOf("../examples/discovery-test"),
         )
         // In this test we need to merge with emulated empty save.properties file in aim to use default values,
         // since initially all fields are null
@@ -25,9 +25,8 @@ class PerformAnalysisTest {
     @Test
     fun `should execute single test`() {
         val saveProperties = SaveProperties(
-            testRootPath = "../examples/discovery-test",
             reportType = ReportType.PLAIN,
-            testFiles = listOf("MyTest.java")  // fixme: should support full path
+            testFiles = listOf("../examples/discovery-test", "MyTest.java")  // fixme: should support full path
         )
         Save(saveProperties.mergeConfigWithPriorityToThis(defaultConfig()), fs).performAnalysis()
         // fixme: check that only a single test has been executed

@@ -21,26 +21,33 @@ import okio.BufferedSink
  */
 class PlainTextReporter(override val out: BufferedSink) : Reporter {
     override val type: ReportType = ReportType.PLAIN
+    private var currentTestSuite: String? = null
+    private var currentPlugin: String? = null
 
     override fun beforeAll() {
         logDebug("Initializing reporter ${this::class.qualifiedName} of type $type\n")
+        val headers = listOf("Test suite", "Plugin", "Test", "result", "comment")
+        out.write("--------------------------------\n".encodeToByteArray())
+        out.write(headers.joinToString(prefix = "| ", separator = " | ", postfix = " |\n").encodeToByteArray())
+        out.write(headers.joinToString(prefix = "| ", separator = " | ", postfix = " |\n") { "------" }.encodeToByteArray())
     }
 
     override fun afterAll() {
+        out.write("--------------------------------\n".encodeToByteArray())
         logDebug("Finished reporter ${this::class.qualifiedName} of type $type\n")
     }
 
     override fun onSuiteStart(suiteName: String) {
-        out.write("Test suite [$suiteName]\n".encodeToByteArray())
+        currentTestSuite = suiteName
     }
 
     override fun onSuiteEnd(suiteName: String) {
-        out.write("Completed test suite [$suiteName]\n".encodeToByteArray())
+        currentTestSuite = null
     }
 
     override fun onEvent(event: TestResult) {
         val comment: String = when (val status = event.status) {
-            is Pass -> status.message ?: ""
+            is Pass -> status.shortMessage ?: ""
             is Fail -> status.shortReason
             is Ignored -> status.reason
             is Crash -> status.description
@@ -54,27 +61,22 @@ class PlainTextReporter(override val out: BufferedSink) : Reporter {
         }
             ?: ""
         out.write(
-            "| ${event.resources.first()} | ${event.status::class.simpleName} | $shortComment |\n"
+            "| $currentTestSuite | $currentPlugin | ${event.resources.first()} | ${event.status::class.simpleName} | $shortComment |\n"
                 .encodeToByteArray()
         )
     }
 
     override fun onPluginInitialization(plugin: Plugin) {
-        out.write("Initializing plugin ${plugin::class.simpleName}\n".encodeToByteArray())
+        currentPlugin = plugin::class.simpleName
     }
 
-    override fun onPluginExecutionStart(plugin: Plugin) {
-        out.write("Executing plugin ${plugin::class.simpleName}\n".encodeToByteArray())
-        out.write("--------------------------------\n".encodeToByteArray())
-        out.write("| Test name | result | comment |\n".encodeToByteArray())
-    }
+    override fun onPluginExecutionStart(plugin: Plugin) = Unit
 
     override fun onPluginExecutionEnd(plugin: Plugin) {
-        out.write("--------------------------------\n".encodeToByteArray())
-        out.write("Plugin ${plugin::class.simpleName} has completed execution\n".encodeToByteArray())
+        currentPlugin = null
     }
 
     override fun onPluginExecutionError(ex: PluginException) {
-        out.write("Error during plugin execution: ${ex.describe()}\n".encodeToByteArray())
+        out.write("| $currentTestSuite | $currentPlugin | | Error | Error during plugin execution: ${ex.describe()}\n".encodeToByteArray())
     }
 }

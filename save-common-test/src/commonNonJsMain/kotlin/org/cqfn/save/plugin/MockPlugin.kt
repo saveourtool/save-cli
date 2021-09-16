@@ -1,4 +1,4 @@
-package org.cqfn.save.reporter.utils
+package org.cqfn.save.plugin
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
@@ -17,11 +17,12 @@ class MockPlugin(baseDir: Path, testFiles: List<String> = emptyList()) : Plugin(
     TestConfig((baseDir / "save.toml").also { fs.createFile(it) }, null, fs = fs),
     testFiles,
     fs,
-    useInternalRedirections = true
+    useInternalRedirections = true,
+    redirectTo = null
 ) {
-    override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> = emptySequence()
+    override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> = emptySequence()
 
-    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> = emptySequence()
+    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<TestFiles> = emptySequence()
 
     override fun cleanupTempDir() = Unit
 }

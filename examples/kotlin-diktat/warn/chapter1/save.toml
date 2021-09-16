@@ -1,6 +1,7 @@
 [general]
-tags = "tag1"
+tags = ["tag1"]
 description = "My suite description"
 suiteName = "DocsCheck"
+excludedTests = ["warn/chapter1/GarbageTest.kt"]
 
 [warn]

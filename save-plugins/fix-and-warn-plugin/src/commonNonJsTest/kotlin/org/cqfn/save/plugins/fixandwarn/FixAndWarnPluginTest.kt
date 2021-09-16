@@ -4,9 +4,7 @@ import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.plugin.GeneralConfig
-import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Pass
-import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.isCurrentOsWindows
 import org.cqfn.save.plugin.warn.WarnPluginConfig
 import org.cqfn.save.plugins.fix.FixPlugin
@@ -25,6 +23,7 @@ import kotlin.test.assertTrue
 class FixAndWarnPluginTest {
     private val fs = FileSystem.SYSTEM
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "${FixAndWarnPluginTest::class.simpleName!!}-${Random.nextInt()}")
+    private val defaultExtraConfigPattern = Regex("(.+):(\\d+):(\\d+): (.+)")
 
     @BeforeTest
     fun setUp() {
@@ -81,12 +80,12 @@ class FixAndWarnPluginTest {
                     FixAndWarnPluginConfig(
                         FixPluginConfig(fixExecutionCmd, batchSize = 1),
                         WarnPluginConfig(warnExecutionCmd,
-                            Regex("// ;warn:(\\d+):(\\d+): (.*)"),
+                            defaultExtraConfigPattern,
                             Regex("(.+):(\\d+):(\\d+): (.+)"),
                             true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
                         )
                     ),
-                    GeneralConfig("", "", "", "")
+                    GeneralConfig("", listOf(""), "", "", expectedWarningsPattern = Regex("// ;warn:(\\d+):(\\d+): (.*)"))
                 ),
                 fs,
             ),
@@ -96,12 +95,8 @@ class FixAndWarnPluginTest {
         ).execute().toList()
 
         println("Results ${results.toList()}")
-        assertEquals(2, results.count(), "Size of results should equal number of pairs")
+        assertEquals(1, results.count(), "Size of results should equal number of pairs")
         // Check FixPlugin results
-        assertEquals(
-            TestResult(listOf(expectedFile, testFile), Pass(null),
-                DebugInfo(results.first().debugInfo?.stdout, results.first().debugInfo?.stderr, null)
-            ), results.first())
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
         assertTrue("Files should be identical") {
             // Additionally ignore warnings in expected file
@@ -109,7 +104,7 @@ class FixAndWarnPluginTest {
                 .deltas.isEmpty()
         }
         // Check WarnPlugin results
-        assertTrue(results.last().status is Pass)
+        assertTrue(results.single().status is Pass)
     }
 
     @AfterTest

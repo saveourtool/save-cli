@@ -1,5 +1,5 @@
 [general]
-tags = ""
+tags = [""]
 
 [warn]
 lineCaptureGroup = 1

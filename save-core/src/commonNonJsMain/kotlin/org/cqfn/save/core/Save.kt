@@ -8,7 +8,6 @@ import org.cqfn.save.core.config.isSaveTomlConfig
 import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.files.StdStreamsSink
 import org.cqfn.save.core.files.createRelativePathToTheRoot
-import org.cqfn.save.core.logging.isDebugEnabled
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
 import org.cqfn.save.core.logging.logInfo
@@ -25,6 +24,7 @@ import org.cqfn.save.core.utils.buildActivePlugins
 import org.cqfn.save.core.utils.processInPlace
 import org.cqfn.save.reporter.json.JsonReporter
 import org.cqfn.save.reporter.plain.PlainTextReporter
+import org.cqfn.save.reporter.test.TestReporter
 
 import okio.FileSystem
 import okio.Path.Companion.toPath
@@ -33,31 +33,37 @@ import okio.buffer
 /**
  * @property saveProperties an instance of [SaveProperties]
  */
-@Suppress("INLINE_CLASS_CAN_BE_USED")  // todo: remove when there are >1 constructor parameters
 class Save(
     private val saveProperties: SaveProperties,
     private val fs: FileSystem,
 ) {
-    init {
-        isDebugEnabled = saveProperties.debug ?: false
-    }
+    /** reporter that can be used  */
+    internal val reporter = getReporter(saveProperties)
 
     /**
      * Main entrypoint for SAVE framework. Discovers plugins and calls their execution.
      *
+     * @return Reporter
      * @throws PluginException when we receive invalid type of PluginConfig
      */
-    fun performAnalysis() {
+    @Suppress("TOO_LONG_FUNCTION")
+    fun performAnalysis(): Reporter {
         logInfo("Welcome to SAVE version $SAVE_VERSION")
 
         // FixMe: now we work only with the save.toml config and it's hierarchy, but we should work properly here with directories as well
-        val rootTestConfigPath = saveProperties.testRootPath!!.toPath() / "save.toml"
-        val reporter = getReporter(saveProperties)
-        val (requestedConfigs, requestedTests) = saveProperties.testFiles!!.partition {
-            it.toPath().isSaveTomlConfig()
-        }
+        // FixMe: get(0) to [0] after https://github.com/cqfn/diKTat/issues/1047
+        val testRootPath = saveProperties.testFiles!!.get(0).toPath()
+        val rootTestConfigPath = testRootPath / "save.toml"
+        val (requestedConfigs, requestedTests) = saveProperties.testFiles!!
+            .filterIndexed { index, _ -> index > 0 }
+            .map { testRootPath / it }
+            .map { it.toString() }
+            .partition { it.toPath().isSaveTomlConfig() }
+        val includeSuites = saveProperties.includeSuites?.split(",") ?: emptyList()
+        val excludeSuites = saveProperties.excludeSuites?.split(",") ?: emptyList()
 
         reporter.beforeAll()
+        var atLeastOneExecutionProvided = false
         // get all toml configs in file system
         ConfigDetector(fs)
             .configFromFile(rootTestConfigPath)
@@ -69,12 +75,15 @@ class Save(
                     .processInPlace()
                     // create plugins and choose only active (with test resources) ones
                     .buildActivePlugins(requestedTests)
-                    .takeIf { it.isNotEmpty() }
+                    .takeIf { plugins ->
+                        plugins.isNotEmpty() && plugins.first().isFromEnabledSuite(includeSuites, excludeSuites)
+                    }
                     ?.also {
                         // configuration has been already validated by this point, and if there are active plugins, then suiteName is not null
                         reporter.onSuiteStart(testConfig.getGeneralConfig()?.suiteName!!)
                     }
                     ?.forEach {
+                        atLeastOneExecutionProvided = true
                         // execute created plugins
                         executePlugin(it, reporter)
                     }
@@ -82,8 +91,29 @@ class Save(
                         reporter.onSuiteEnd(testConfig.getGeneralConfig()?.suiteName!!)
                     }
             }
+        if (!atLeastOneExecutionProvided) {
+            val warnMsg = if (requestedTests.isNotEmpty()) {
+                """|Couldn't found any satisfied test resources for `$requestedTests`
+                   |Please check the correctness of command and consider, that the last arguments treats as test file names for individual execution.
+                """.trimMargin()
+            } else {
+                "SAVE wasn't able to run tests, please check the correctness of configuration and test resources"
+            }
+            logWarn(warnMsg)
+        }
         reporter.afterAll()
         reporter.out.close()
+        logInfo("SAVE has finished execution. You can rerun with --debug for additional information.")
+
+        return reporter
+    }
+
+    private fun Plugin.isFromEnabledSuite(includeSuites: List<String>, excludeSuites: List<String>): Boolean {
+        val suiteName = testConfig.getGeneralConfig()?.suiteName
+        // either no specific includes, or current suite is included
+        return (includeSuites.isEmpty() || includeSuites.contains(suiteName)) &&
+                // either no specific excludes, or current suite is not excluded
+                (excludeSuites.isEmpty() || !excludeSuites.contains(suiteName))
     }
 
     private fun executePlugin(plugin: Plugin, reporter: Reporter) {
@@ -91,17 +121,19 @@ class Save(
         logDebug("=> Executing plugin: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
         reporter.onPluginExecutionStart(plugin)
         try {
-            val rootDir = plugin.testConfig.getRootConfig().location
+            val testRepositoryRootPath = plugin.testConfig.getRootConfig().location
+
             plugin.execute()
                 .onEach { event ->
                     // calculate relative paths, because reporters don't need paths higher than root dir
-                    val resourcesRelative = event.resources.map { it.createRelativePathToTheRoot(rootDir).toPath() / it.name }
+                    val resourcesRelative =
+                            event.resources.map { it.createRelativePathToTheRoot(testRepositoryRootPath).toPath() }
                     reporter.onEvent(event.copy(resources = resourcesRelative))
                 }
                 .forEach(this::handleResult)
         } catch (ex: PluginException) {
-            reporter.onPluginExecutionError(ex)
             logError("${plugin::class.simpleName} has crashed: ${ex.message}")
+            reporter.onPluginExecutionError(ex)
         }
         logDebug("<= Finished execution of: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
         reporter.onPluginExecutionEnd(plugin)
@@ -110,7 +142,7 @@ class Save(
     private fun getReporter(saveProperties: SaveProperties): Reporter {
         val outFileBaseName = "save.out"  // todo: make configurable
         val outFileName = when (saveProperties.reportType!!) {
-            ReportType.PLAIN -> outFileBaseName
+            ReportType.PLAIN, ReportType.TEST -> outFileBaseName
             ReportType.JSON -> "$outFileBaseName.json"
             ReportType.XML -> "$outFileBaseName.xml"
             ReportType.TOML -> "$outFileBaseName.toml"
@@ -123,6 +155,7 @@ class Save(
         return when (saveProperties.reportType) {
             ReportType.PLAIN -> PlainTextReporter(out)
             ReportType.JSON -> JsonReporter(out)
+            ReportType.TEST -> TestReporter(out)
             else -> TODO("Reporter for type ${saveProperties.reportType} is not yet supported")
         }
     }
