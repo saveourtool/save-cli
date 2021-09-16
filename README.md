@@ -131,15 +131,21 @@ excludedTests = ["warn/chapter1/GarbageTest.kt", "warn/otherDir/NewTest.kt"], e.
 
 ## Executing specific tests
 It can be useful to execute only a number of tests instead of all tests under a particular `save.toml` config.
-To do so, you want to pass a test file name after all configuration options:
+To do so, you want to pass a relative path to test file after all configuration options:
 ```bash
 $ save [options] /path/to/tests/Test1
 ```
-or a list of file names (separated with spaces)
+or a list of relative paths to test files (separated with spaces)
 ```bash
 $ save [options] /path/to/tests/Test1 /path/to/tests/Test2
 ```
 SAVE will detect the closest `save.toml` file and use configuration from there.
+
+`Note:` On Windows, for execution we need to use double `\\`.
+Command should look like:
+```bash
+$ save [options] path\\to\\tests\\Test3
+```
 
 
 ## <a name="plugins"></a> Using plugins for specific test-scenarios
