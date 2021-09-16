@@ -91,6 +91,11 @@ kotlin {
             else -> throw GradleException("Unknown operating system $os")
         }
     ))
+
+    tasks.withType<Test>().configureEach {
+        dependsOn(":save-core:downloadTestResources")
+        finalizedBy(":save-core:cleanupTestResources")
+    }
 }
 
 configurePublishing()

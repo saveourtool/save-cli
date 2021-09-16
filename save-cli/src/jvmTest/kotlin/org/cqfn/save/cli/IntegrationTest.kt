@@ -13,14 +13,16 @@ import okio.Path.Companion.toPath
 
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.cqfn.save.core.files.readLines
 
 @Suppress(
+    "TOO_LONG_FUNCTION",
     "INLINE_CLASS_CAN_BE_USED",
     "MISSING_KDOC_TOP_LEVEL",
     "MISSING_KDOC_CLASS_ELEMENTS")
+@OptIn(ExperimentalSerializationApi::class)
 class IntegrationTest {
     private val fs = FileSystem.SYSTEM
 
@@ -42,10 +44,16 @@ class IntegrationTest {
         val examplesDir = "../examples/kotlin-diktat/"
 
         val actualSaveBinary = saveExecutableFiles.last()
-        val destination = (examplesDir + "save").toPath()
+        val saveBinName = if (isCurrentOsWindows()) "save.exe" else "save"
+        val destination = (examplesDir + saveBinName).toPath()
 
         // Copy latest version of save into examples
         fs.copy(actualSaveBinary, destination)
+        assertTrue(fs.exists(destination))
+
+        // Check for existence of diktat and ktlint
+        assertTrue(fs.exists((examplesDir + "diktat.jar").toPath()))
+        assertTrue(fs.exists((examplesDir + "ktlint").toPath()))
 
         // Make sure, that we will check report, which will be obtained after current execution; remove old report if exist
         val reportFile = examplesDir.toPath() / "save.out.json".toPath()
@@ -53,12 +61,11 @@ class IntegrationTest {
             fs.delete(reportFile)
         }
 
-        val runCmd = if (isCurrentOsWindows()) "start " else "./"
-        val saveFlags = " --result-output FILE --report-type JSON --test-root-path ."
-
+        val runCmd = if (isCurrentOsWindows()) "" else "./"
+        val saveFlags = " . --result-output FILE --report-type JSON"
         // Execute the script from examples
-        val execCmd = "cd $examplesDir && ${runCmd}run.sh $saveFlags"
-        ProcessBuilder(true, fs).exec(execCmd, null)
+        val execCmd = "$runCmd$saveBinName $saveFlags"
+        ProcessBuilder(true, fs).exec(execCmd, examplesDir, null)
 
         Thread.sleep(15_000)
         // Report should be created after successful completion
@@ -75,5 +82,7 @@ class IntegrationTest {
                 }
             }
         }
+        fs.delete(destination)
+        fs.delete(reportFile)
     }
 }
