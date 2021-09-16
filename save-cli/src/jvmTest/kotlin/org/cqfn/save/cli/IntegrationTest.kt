@@ -61,13 +61,14 @@ class IntegrationTest {
             fs.delete(reportFile)
         }
 
-        val runCmd = if (isCurrentOsWindows()) "" else "./"
+        val runCmd = if (isCurrentOsWindows()) "" else "sudo chmod +x $saveBinName && sudo ./"
         val saveFlags = " . --result-output FILE --report-type JSON"
         // Execute the script from examples
         val execCmd = "$runCmd$saveBinName $saveFlags"
         ProcessBuilder(true, fs).exec(execCmd, examplesDir, null)
 
         Thread.sleep(15_000)
+
         // Report should be created after successful completion
         assertTrue(fs.exists(reportFile))
 

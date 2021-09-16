@@ -94,7 +94,7 @@ kotlin {
 
     tasks.withType<Test>().configureEach {
         dependsOn(":save-core:downloadTestResources")
-        finalizedBy(":save-core:cleanupTestResources")
+        //finalizedBy(":save-core:cleanupTestResources")
     }
 }
 
