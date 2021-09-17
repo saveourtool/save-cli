@@ -15,7 +15,7 @@ class WarnDirTest {
 
     @Test
     fun `execute warn plugin on the directory chapter2`() =
-            runTestsWithDiktat(listOf("warn-dir/chapter2/GenericFunctionTest.kt"), 1)
+            runTestsWithDiktat(listOf("warn-dir/chapter2"), 1)
 
     @Test
     fun `execute warn plugin on the directory chapter3`() =

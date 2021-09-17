@@ -141,11 +141,7 @@ $ save [options] /path/to/tests/Test1 /path/to/tests/Test2
 ```
 SAVE will detect the closest `save.toml` file and use configuration from there.
 
-`Note:` On Windows, for execution we need to use double `\\`.
-Command should look like:
-```bash
-$ save [options] path\\to\\tests\\Test3
-```
+`Note:` On Windows, you may need to use double backslash `\\` as path separator
 
 
 ## <a name="plugins"></a> Using plugins for specific test-scenarios
