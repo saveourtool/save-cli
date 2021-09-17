@@ -1,4 +1,4 @@
-package org.cqfn.save.core.integration
+package org.cqfn.save.cli
 
 import org.cqfn.save.core.files.readFile
 import org.cqfn.save.core.result.Pass
