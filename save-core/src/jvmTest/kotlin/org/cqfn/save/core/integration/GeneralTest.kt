@@ -1,4 +1,4 @@
-package org.cqfn.save.cli
+package org.cqfn.save.core.integration
 
 import org.cqfn.save.core.files.readFile
 import org.cqfn.save.core.result.Pass
@@ -23,7 +23,7 @@ import kotlinx.serialization.json.Json
     "MISSING_KDOC_TOP_LEVEL",
     "MISSING_KDOC_CLASS_ELEMENTS")
 @OptIn(ExperimentalSerializationApi::class)
-class IntegrationTest {
+class GeneralTest {
     private val fs = FileSystem.SYSTEM
 
     @Test
@@ -50,6 +50,7 @@ class IntegrationTest {
         // Copy latest version of save into examples
         fs.copy(actualSaveBinary, destination)
         assertTrue(fs.exists(destination))
+        fs.delete(actualSaveBinary)
 
         // Check for existence of diktat and ktlint
         assertTrue(fs.exists((examplesDir + "diktat.jar").toPath()))
@@ -66,8 +67,6 @@ class IntegrationTest {
         // Execute the script from examples
         val execCmd = "$runCmd$saveBinName $saveFlags"
         ProcessBuilder(true, fs).exec(execCmd, examplesDir, null)
-
-        Thread.sleep(15_000)
 
         // Report should be created after successful completion
         assertTrue(fs.exists(reportFile))

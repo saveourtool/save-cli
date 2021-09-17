@@ -49,18 +49,12 @@ kotlin {
         saveTarget.forEach {
             getByName("${it.name}Main").dependsOn(nativeMain)
         }
-
         val commonTest by getting
 
         val jvmTest by getting {
             dependencies {
                 implementation(kotlin("test-junit5"))
                 implementation("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
-                implementation(kotlin("test-common"))
-                implementation(kotlin("test-annotations-common"))
-                implementation(project(":save-common"))
-                implementation(project(":save-reporters"))
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.Kotlinx.serialization}")
             }
         }
     }
@@ -80,21 +74,6 @@ kotlin {
     val enabledExecutables = if (hasProperty("enabledExecutables")) property("enabledExecutables") as String else null
     if (enabledExecutables != null && enabledExecutables != "all" || enabledExecutables == "debug") {
         linkReleaseExecutableTaskProvider.enabled = false
-    }
-
-    // Integration tests should be able to have access to binary during the execution
-    tasks.getByName("jvmTest").dependsOn(tasks.getByName(
-        when {
-            os.isLinux -> "linkDebugExecutableLinuxX64"
-            os.isWindows -> "linkDebugExecutableMingwX64"
-            os.isMacOsX -> "linkDebugExecutableMacosX64"
-            else -> throw GradleException("Unknown operating system $os")
-        }
-    ))
-
-    tasks.withType<Test>().configureEach {
-        dependsOn(":save-core:downloadTestResources")
-        //finalizedBy(":save-core:cleanupTestResources")
     }
 }
 

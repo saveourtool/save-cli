@@ -3,6 +3,7 @@ import org.cqfn.save.generation.configFilePath
 import org.cqfn.save.generation.generateConfigOptions
 
 import de.undercouch.gradle.tasks.download.Download
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem
 import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
 
 plugins {
@@ -18,6 +19,7 @@ kotlin {
                 implementation(project(":save-reporters"))
                 api("com.squareup.okio:okio-multiplatform:${Versions.okio}")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.Kotlinx.serialization}")
                 implementation("org.jetbrains.kotlinx:kotlinx-cli:${Versions.Kotlinx.cli}")
                 implementation("com.akuleshov7:ktoml-core:${Versions.ktoml}")
                 implementation("com.akuleshov7:ktoml-file:${Versions.ktoml}")
@@ -76,6 +78,17 @@ tasks.withType<KotlinCompile<*>>().forEach {
     it.dependsOn(generateConfigOptionsTaskProvider)
     it.dependsOn(generateVersionFileTaskProvider)
 }
+
+// Integration test should be able to have access to binary during the execution
+val os = getCurrentOperatingSystem()
+tasks.getByName("jvmTest").dependsOn(
+    when {
+        os.isLinux -> ":save-cli:linkDebugExecutableLinuxX64"
+        os.isWindows -> ":save-cli:linkDebugExecutableMingwX64"
+        os.isMacOsX -> ":save-cli:linkDebugExecutableMacosX64"
+        else -> throw GradleException("Unknown operating system $os")
+    }
+)
 
 tasks.register<Download>("downloadTestResources") {
     src(listOf(
