@@ -66,8 +66,11 @@ class GeneralTest {
         val saveFlags = " . --result-output FILE --report-type JSON"
         // Execute the script from examples
         val execCmd = "$runCmd$saveBinName $saveFlags"
-        ProcessBuilder(true, fs).exec(execCmd, examplesDir, null)
-
+        val pb = ProcessBuilder(true, fs).exec(execCmd, examplesDir, null)
+        println("SAVE execution output:\n${pb.stdout.joinToString("\n")}")
+        if (pb.stderr.isNotEmpty()) {
+            println("Warning and errors during SAVE execution:\n${pb.stderr.joinToString("\n")}")
+        }
         // Report should be created after successful completion
         assertTrue(fs.exists(reportFile))
 
