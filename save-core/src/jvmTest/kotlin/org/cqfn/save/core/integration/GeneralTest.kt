@@ -55,6 +55,8 @@ class GeneralTest {
         assertTrue(fs.exists((examplesDir.toPath() / "diktat.jar")))
         assertTrue(fs.exists((examplesDir.toPath() / "ktlint")))
 
+        Thread.sleep(10_000)
+
         // Make sure, that we will check report, which will be obtained after current execution; remove old report if exist
         val reportFile = examplesDir.toPath() / "save.out.json".toPath()
         if (fs.exists(reportFile)) {
