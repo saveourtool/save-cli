@@ -146,7 +146,6 @@ class FixPlugin(
     override fun cleanupTempDir() {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
         if (fs.exists(tmpDir)) {
-            println("\n${fs.list(tmpDir)}\n")
             fs.deleteRecursively(tmpDir)
         }
     }

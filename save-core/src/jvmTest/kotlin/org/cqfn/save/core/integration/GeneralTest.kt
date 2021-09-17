@@ -62,7 +62,7 @@ class GeneralTest {
             fs.delete(reportFile)
         }
 
-        val runCmd = if (isCurrentOsWindows()) "" else "sudo chmod +x $saveBinName && sudo ./"
+        val runCmd = if (isCurrentOsWindows()) "" else "sudo chmod +x $saveBinName && ./"
         val saveFlags = " . --result-output FILE --report-type JSON"
         // Execute the script from examples
         val execCmd = "$runCmd$saveBinName $saveFlags"
