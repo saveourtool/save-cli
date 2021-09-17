@@ -49,7 +49,6 @@ class GeneralTest {
         // Copy latest version of save into examples
         fs.copy(actualSaveBinary, destination)
         assertTrue(fs.exists(destination))
-        fs.delete(actualSaveBinary)
 
         // Check for existence of diktat and ktlint
         assertTrue(fs.exists((examplesDir.toPath() / "diktat.jar")))
