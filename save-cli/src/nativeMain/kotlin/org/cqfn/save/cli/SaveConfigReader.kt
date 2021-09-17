@@ -74,10 +74,10 @@ fun createConfigFromArgs(args: Array<String>): SaveProperties {
     val testFiles = configFromCli.testFiles
     if (!testFiles.isNullOrEmpty() && !fs.exists(testFiles[0].toPath())) {
         // FixMe: get(0) to [0] after https://github.com/cqfn/diKTat/issues/1047
-        errorAndExitNotValidDir(testFiles!!.get(0).toPath())
+        errorAndExitNotValidDir(testFiles.get(0).toPath())
     }
     // FixMe: get(0) to [0] after https://github.com/cqfn/diKTat/issues/1047
-    val testRootPath = if (testFiles.isNullOrEmpty() || !FileSystem.SYSTEM.metadata(testFiles!!.get(0).toPath()).isDirectory) {
+    val testRootPath = if (testFiles.isNullOrEmpty() || !FileSystem.SYSTEM.metadata(testFiles.get(0).toPath()).isDirectory) {
         null
     } else {
         testFiles[0]
