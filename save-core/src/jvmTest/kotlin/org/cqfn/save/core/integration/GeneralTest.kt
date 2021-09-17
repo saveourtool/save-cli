@@ -45,16 +45,15 @@ class GeneralTest {
 
         val actualSaveBinary = saveExecutableFiles.last()
         val saveBinName = if (isCurrentOsWindows()) "save.exe" else "save"
-        val destination = (examplesDir + saveBinName).toPath()
-
+        val destination = examplesDir.toPath() / saveBinName
         // Copy latest version of save into examples
         fs.copy(actualSaveBinary, destination)
         assertTrue(fs.exists(destination))
         fs.delete(actualSaveBinary)
 
         // Check for existence of diktat and ktlint
-        assertTrue(fs.exists((examplesDir + "diktat.jar").toPath()))
-        assertTrue(fs.exists((examplesDir + "ktlint").toPath()))
+        assertTrue(fs.exists((examplesDir.toPath() / "diktat.jar")))
+        assertTrue(fs.exists((examplesDir.toPath() / "ktlint")))
 
         // Make sure, that we will check report, which will be obtained after current execution; remove old report if exist
         val reportFile = examplesDir.toPath() / "save.out.json".toPath()
