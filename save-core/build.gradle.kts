@@ -97,6 +97,6 @@ val cleanupTask = tasks.register("cleanupTestResources") {
     }
 }
 tasks.withType<Test>().configureEach {
-    dependsOn("downloadTestResources")
-    finalizedBy("cleanupTestResources")
+    // dependsOn("downloadTestResources")
+    // finalizedBy("cleanupTestResources")
 }

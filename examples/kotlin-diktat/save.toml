@@ -1,4 +1,7 @@
 [general]
 execCmd = "java -jar ktlint -R diktat.jar"
 description = "Test for diktat - linter and formatter for Kotlin"
+# this is the default value, you don't need to add it explicitly:
+expectedWarningsPattern = "// ;warn:?(.*):(\\d*): (.+)"
+
 

@@ -2,7 +2,6 @@
 tags = ["tag1"]
 description = "chapter 2 tests: with default lines (no line numbers)"
 suiteName = "Chapter2"
-expectedWarningsPattern = "// ;warn:?(.*):(\\d*): (.+)"
 
 [warn]
 lineCaptureGroup = 1

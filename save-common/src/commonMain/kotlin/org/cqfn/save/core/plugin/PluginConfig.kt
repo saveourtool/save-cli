@@ -108,7 +108,7 @@ data class GeneralConfig(
             description,
             suiteName,
             excludedTests ?: emptyList(),
-            expectedWarningsPattern ?: defaultInputPattern,
+            expectedWarningsPattern ?: defaultExpectedWarningPattern,
         )
     }
 
@@ -124,6 +124,6 @@ data class GeneralConfig(
          * Default regex for expected warnings in test resources, e.g.
          * `// ;warn:2:4: Class name in incorrect case`
          */
-        val defaultInputPattern = Regex("// ;warn:(.+):(\\d+): (.+)")
+        val defaultExpectedWarningPattern = Regex("// ;warn:?(.*):(\\\\d*): (.+)")
     }
 }
