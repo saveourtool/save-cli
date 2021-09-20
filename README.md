@@ -171,7 +171,9 @@ In case you would like to have several plugins to work in your directory with sa
 ```
 
 ## SAVE output
-Save now support different formats of test result output: `PLAIN` and `JSON`. The format could be selected with `--report-type` option.
+Save supports several formats of test result output: `PLAIN` (markdown-like table with all test results), `PLAIN_FAILED`
+(same as `PLAIN`, but doesn't show passed tests) and `JSON` (structured representation of execution result).
+The format could be selected with `--report-type` option.
 
 ## Purpose of Static Analysis Verification and Evaluation (SAVE) project
 Usage of [static analyzers](https://en.wikipedia.org/wiki/Static_program_analysis) - is a very important part of development each and every software product.
