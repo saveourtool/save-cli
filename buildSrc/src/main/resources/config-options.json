@@ -71,14 +71,6 @@
       "description" : "Language that you are developing analyzer for",
       "default" : "LanguageType.UNDEFINED"
     },
-    "testRootPath" : {
-      "argType" : "ArgType.String",
-      "kotlinType": "kotlin.String",
-      "fullName" : "test-root-path",
-      "shortName" : "",
-      "description" : "Path to directory with root save.toml and save.properties",
-      "default" : "null"
-    },
     "resultOutput" : {
       "argType" : "ArgType.Choice<OutputStreamType>()",
       "kotlinType": "org.cqfn.save.core.config.OutputStreamType",

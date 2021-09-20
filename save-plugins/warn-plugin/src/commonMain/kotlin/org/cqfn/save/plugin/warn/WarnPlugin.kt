@@ -1,6 +1,7 @@
 package org.cqfn.save.plugin.warn
 
 import org.cqfn.save.core.config.TestConfig
+import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.logging.logWarn
@@ -12,9 +13,11 @@ import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.result.TestStatus
 import org.cqfn.save.core.utils.ProcessExecutionException
+import org.cqfn.save.plugin.warn.utils.ExtraFlagsExtractor
 import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
 import org.cqfn.save.plugin.warn.utils.getLineNumber
+import org.cqfn.save.plugin.warn.utils.resolvePlaceholdersFrom
 
 import okio.FileSystem
 import okio.Path
@@ -39,32 +42,34 @@ class WarnPlugin(
     redirectTo) {
     private val expectedAndNotReceived = "Some warnings were expected but not received"
     private val unexpected = "Some warnings were unexpected"
+    private lateinit var extraFlagsExtractor: ExtraFlagsExtractor
 
-    override fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult> {
+    override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
+        extraFlagsExtractor = ExtraFlagsExtractor(warnPluginConfig, fs)
 
         // Special trick to handle cases when tested tool is able to process directories.
         // In this case instead of executing the tool with file names, we execute the tool with directories.
         // 
         // In case, when user doesn't want to use directory mode, he needs simply not to pass [wildCardInDirectoryMode] and it will be null
         return warnPluginConfig.wildCardInDirectoryMode?.let {
-            handleTestFile(files.map { it.single() }.toList(), warnPluginConfig, generalConfig).asSequence()
+            handleTestFile(files.map { it.test }.toList(), warnPluginConfig, generalConfig).asSequence()
         } ?: run {
             files.chunked(warnPluginConfig.batchSize!!.toInt()).flatMap { chunk ->
-                handleTestFile(chunk.map { it.single() }, warnPluginConfig, generalConfig)
+                handleTestFile(chunk.map { it.test }, warnPluginConfig, generalConfig)
             }
         }
     }
 
-    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>> {
+    override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<TestFiles> {
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val regex = warnPluginConfig.resourceNamePattern
         // returned sequence is a sequence of groups of size 1
         return resourceDirectories.flatMap { directory ->
             fs.list(directory)
                 .filter { regex.matches(it.name) }
-                .map { listOf(it) }
+                .map { Test(it) }
         }
     }
 
@@ -91,6 +96,16 @@ class WarnPlugin(
             it.name to warningsForCurrentPath
         }
 
+        val extraFlagsList = paths.mapNotNull { path ->
+            extraFlagsExtractor.extractExtraFlagsFrom(path)
+        }
+            .distinct()
+        require(extraFlagsList.size <= 1) {
+            "Extra flags for all files in a batch should be same, but you have batchSize=${warnPluginConfig.batchSize}" +
+                    " and there are ${extraFlagsList.size} different sets of flags inside it, namely $extraFlagsList"
+        }
+        val extraFlags = extraFlagsList.singleOrNull() ?: ExtraFlags("", "")
+
         if (expectedWarnings.isEmpty()) {
             logWarn(
                 "No expected warnings were found using the following regex pattern:" +
@@ -106,19 +121,19 @@ class WarnPlugin(
                 warnPluginConfig.wildCardInDirectoryMode?.let {
                     val directoryPrefix = testConfig
                         .directory
-                        .toString()
-                        .makeThePathRelativeToTestRoot()
+                        .createRelativePathToTheRoot(testConfig.getRootConfig().location)
                     // a hack to put only the directory path to the execution command
                     // only in case a directory mode is enabled
                     "$directoryPrefix$it${warnPluginConfig.testNameSuffix}"
                 } ?: paths.joinToString(separator = warnPluginConfig.batchSeparator!!) {
-                    it.toString().makeThePathRelativeToTestRoot()
+                    it.createRelativePathToTheRoot(testConfig.getRootConfig().location)
                 }
 
-        val execCmd = "${generalConfig.execCmd} ${warnPluginConfig.execFlags} $fileNamesForExecCmd"
+        val execFlagsAdjusted = warnPluginConfig.resolvePlaceholdersFrom(extraFlags, fileNamesForExecCmd)
+        val execCmd = "${generalConfig.execCmd} $execFlagsAdjusted"
 
         val executionResult = try {
-            pb.exec("cd ${testConfig.getRootConfig().location.parent} && $execCmd", redirectTo)
+            pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo)
         } catch (ex: ProcessExecutionException) {
             return sequenceOf(
                 TestResult(
@@ -161,15 +176,6 @@ class WarnPlugin(
                 )
             )
         }.asSequence()
-    }
-
-    private fun String.makeThePathRelativeToTestRoot(): String {
-        val testRoot = testConfig.getRootConfig().directory.toString()
-        if (testRoot == ".") {
-            return this
-        }
-        return this.replace(testRoot, "")
-            .trimStart('/', '\\')
     }
 
     /**

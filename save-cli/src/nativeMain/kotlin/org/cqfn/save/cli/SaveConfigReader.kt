@@ -6,13 +6,13 @@ package org.cqfn.save.cli
 
 import org.cqfn.save.cli.logging.logErrorAndExit
 import org.cqfn.save.core.config.SaveProperties
-import org.cqfn.save.core.config.defaultConfig
 import org.cqfn.save.core.logging.isDebugEnabled
 import org.cqfn.save.core.logging.logDebug
 
 import okio.FileNotFoundException
 import okio.FileSystem
 import okio.IOException
+import okio.Path
 import okio.Path.Companion.DIRECTORY_SEPARATOR
 import okio.Path.Companion.toPath
 
@@ -20,14 +20,25 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.properties.Properties
 import kotlinx.serialization.serializer
 
+private val fs: FileSystem = FileSystem.SYSTEM
+
 /**
  * @return this config in case we have valid configuration
  */
 fun SaveProperties.validate(): SaveProperties {
-    this.testRootPath ?: logErrorAndExit(ExitCodes.INVALID_CONFIGURATION,
-        "`test-root-path` option is missing or null. " +
+    this.testFiles ?: logErrorAndExit(ExitCodes.INVALID_CONFIGURATION,
+        "`test files list in CLI is missing or null. " +
                 "Save is not able to start processing without an information about the tests that should be run.")
-    val fullConfigPath = testRootPath!!.toPath() / "save.toml"
+    // FixMe: get(0) to [0] after https://github.com/cqfn/diKTat/issues/1047
+    val testRootPath = testFiles!!.get(0).toPath()
+    try {
+        if (!FileSystem.SYSTEM.metadata(testRootPath).isDirectory) {
+            errorAndExitNotFoundDir()
+        }
+    } catch (e: FileNotFoundException) {
+        errorAndExitNotValidDir(testRootPath)
+    }
+    val fullConfigPath = testRootPath / "save.toml"
     try {
         FileSystem.SYSTEM.metadata(fullConfigPath)
     } catch (e: FileNotFoundException) {
@@ -53,11 +64,24 @@ fun SaveProperties.getFields() = this.toString().dropWhile { it != '(' }.drop(1)
 @Suppress("TOO_LONG_FUNCTION")
 fun createConfigFromArgs(args: Array<String>): SaveProperties {
     // getting configuration from command-line arguments
+    if (args.isEmpty()) {
+        errorAndExitNotFoundDir()
+    }
     val configFromCli = SaveProperties(args)
     tryToUpdateDebugLevel(configFromCli)
     logDebug("Properties after parsed command line args:\n${configFromCli.getFields()}")
     // reading configuration from the properties file
-    val propertiesFile = (configFromCli.testRootPath ?: defaultConfig().testRootPath) + DIRECTORY_SEPARATOR + "save.properties"
+    val testFiles = configFromCli.testFiles
+    if (!testFiles.isNullOrEmpty() && !fs.exists(testFiles.first().toPath())) {
+        errorAndExitNotValidDir(testFiles.first().toPath())
+    }
+
+    val testRootPath = if (testFiles.isNullOrEmpty() || !FileSystem.SYSTEM.metadata(testFiles.first().toPath()).isDirectory) {
+        null
+    } else {
+        testFiles.first()
+    }
+    val propertiesFile = testRootPath + DIRECTORY_SEPARATOR + "save.properties"
     val configFromPropertiesFile = readPropertiesFile(propertiesFile)
     // merging two configurations into single [SaveProperties] class with a priority to command line arguments
     val mergedProperties = configFromCli.mergeConfigWithPriorityToThis(configFromPropertiesFile)
@@ -104,4 +128,16 @@ fun readPropertiesFile(propertiesFileName: String?): SaveProperties {
 
 private fun tryToUpdateDebugLevel(properties: SaveProperties) {
     isDebugEnabled = properties.debug ?: false
+}
+
+private fun errorAndExitNotFoundDir() {
+    logErrorAndExit(ExitCodes.INVALID_CONFIGURATION,
+        "Save expects to get the root directory for test files as the last CLI argument. " +
+                "Save is not able to start processing without an information about the tests that should be run.")
+}
+
+private fun errorAndExitNotValidDir(testRootPath: Path) {
+    logErrorAndExit(
+        ExitCodes.INVALID_CONFIGURATION, "Not able to find directory '$testRootPath'." +
+                " Please provide a valid path to the root directory of test files.")
 }

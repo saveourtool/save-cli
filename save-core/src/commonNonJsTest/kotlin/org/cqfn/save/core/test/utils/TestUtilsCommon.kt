@@ -26,14 +26,14 @@ fun runTestsWithDiktat(
     testDir: List<String>?,
     numberOfTests: Int,
     addProperties: SaveProperties.() -> Unit = {}) {
+    val mutableTestDir: MutableList<String> = mutableListOf()
+    testDir?.let { mutableTestDir.addAll(testDir) }
+    mutableTestDir.add(0, "../examples/kotlin-diktat/")
     val saveProperties = SaveProperties(
-        testFiles = testDir,
-        testRootPath = "../examples/kotlin-diktat/",
+        testFiles = mutableTestDir,
         reportType = ReportType.TEST,
         resultOutput = OutputStreamType.STDOUT,
     ).apply { addProperties() }
-    // In this test we need to merge with emulated empty save.properties file in aim to use default values,
-    // since initially all fields are null
     // In this test we need to merge with emulated empty save.properties file in aim to use default values,
     // since initially all fields are null
     val testReporter = Save(saveProperties.mergeConfigWithPriorityToThis(SaveProperties()), FileSystem.SYSTEM)

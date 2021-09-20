@@ -10,7 +10,6 @@ import org.cqfn.save.core.utils.ProcessBuilder
 
 import okio.FileSystem
 import okio.Path
-import okio.Path.Companion.toPath
 
 /**
  * Plugin that can be injected into SAVE during execution. Plugins accept contents of configuration file and then perform some work.
@@ -57,7 +56,7 @@ abstract class Plugin(
      * @param files a sequence of file groups, corresponding to tests.
      * @return a sequence of [TestResult]s for each group of test resources
      */
-    abstract fun handleFiles(files: Sequence<List<Path>>): Sequence<TestResult>
+    abstract fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult>
 
     /**
      * Discover groups of resource files which will be used to run tests, applying additional filtering
@@ -66,7 +65,7 @@ abstract class Plugin(
      * @param root root [Path], from where discovering should be started
      * @return a sequence of files, grouped by test
      */
-    fun discoverTestFiles(root: Path): Sequence<List<Path>> {
+    fun discoverTestFiles(root: Path): Sequence<TestFiles> {
         val excludedTests =
                 testConfig
                     .pluginConfigs
@@ -85,26 +84,21 @@ abstract class Plugin(
             }
 
         return if (testFiles.isNotEmpty()) {
-            rawTestFiles.filter { resourcesGroup ->
-                // test can be specified by the name of one of it's files
-                resourcesGroup.any { path ->
-                    testFiles.any { it in path.toString() }
-                }
+            rawTestFiles.filter { rawTestFile ->
+                testFiles.any { it in rawTestFile.test.toString() }
             }
         } else {
             rawTestFiles
         }
     }
 
-    private fun isExcludedTest(testFiles: List<Path>, excludedTests: List<String>?): Boolean {
+    private fun isExcludedTest(testFiles: TestFiles, excludedTests: List<String>?): Boolean {
         // common root of the test repository (not a location of a current test)
         val testRepositoryRoot = testConfig.getRootConfig().location
         // creating relative to root path from a test file
-        // FixMe: https://github.com/cqfn/save/issues/241 here we are incorrectly using testFiles[0], as for example it is
         // "Expected" file for Fix plugin
         val testFileRelative =
-                (testFiles[0].createRelativePathToTheRoot(testRepositoryRoot).toPath() / testFiles[0].name)
-                    .toString()
+                (testFiles.test.createRelativePathToTheRoot(testRepositoryRoot))
                     .replace('\\', '/')
 
         // excluding tests that are included in the excluded list
@@ -120,7 +114,7 @@ abstract class Plugin(
      * @param resourceDirectories a sequence of [Path]s, which contain this plugin's resources
      * @return a sequence of files, grouped by test
      */
-    abstract fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<List<Path>>
+    abstract fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<TestFiles>
 
     /**
      * Method for cleaning up a directory.
@@ -174,7 +168,7 @@ abstract class Plugin(
     protected fun constructPathForCopyOfTestFile(dirName: String, path: Path): Path {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / dirName)
         val relativePath = path.createRelativePathToTheRoot(testConfig.getRootConfig().location)
-        return tmpDir / relativePath / path.name
+        return tmpDir / relativePath
     }
 
     /**
@@ -188,4 +182,20 @@ abstract class Plugin(
         // this matches directories which contain their own SAVE config
         fs.metadata(file).isRegularFile || fs.list(file).none { it.isSaveTomlConfig() }
     }
+
+    /**
+     * @property test test file
+     */
+    @Suppress("USE_DATA_CLASS")
+    interface TestFiles {
+        /**
+         * path to test file
+         */
+        val test: Path
+    }
+
+    /**
+     * @property test test file
+     */
+    data class Test(override val test: Path) : TestFiles
 }
