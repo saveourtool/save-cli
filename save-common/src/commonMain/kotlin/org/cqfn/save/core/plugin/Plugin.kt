@@ -8,7 +8,6 @@ import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.ProcessBuilder
 
-import okio.FileNotFoundException
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
@@ -93,13 +92,9 @@ abstract class Plugin(
         return if (testFiles.isNotEmpty()) {
             val (foundTest, notFoundTest) = rawTestFiles.partition { rawTestFile ->
                 testFiles.any {
-                    try {
-                        if (fs.metadata(it.toPath()).isDirectory) {
-                            it in rawTestFile.test.toString()
-                        } else {
-                            it == rawTestFile.test.toString()
-                        }
-                    } catch (e: FileNotFoundException) {
+                    if (fs.exists(it.toPath())) {
+                        it in rawTestFile.test.toString()
+                    } else {
                         logDebug("Could not find the next test directory: $it, check the path is correct.")
                         false
                     }
