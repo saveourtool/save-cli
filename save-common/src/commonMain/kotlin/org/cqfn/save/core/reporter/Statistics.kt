@@ -42,12 +42,12 @@ class Statistics {
      */
     @Suppress("WHEN_WITHOUT_ELSE")
     fun updateFrom(event: TestResult) {
-        total.inc()
+        total += 1
         when (event.status) {
-            is Pass -> passed.inc()
-            is Fail -> failed.inc()
-            is Ignored -> skipped.inc()
-            is Crash -> crashed.inc()
+            is Pass -> passed += 1
+            is Fail -> failed += 1
+            is Ignored -> skipped += 1
+            is Crash -> crashed += 1
         }
     }
 }

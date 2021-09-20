@@ -24,7 +24,7 @@ class PlainTextReporter(override val out: BufferedSink) : Reporter {
     override val type: ReportType = ReportType.PLAIN
     private var currentTestSuite: String? = null
     private var currentPlugin: String? = null
-    private var statistics = Statistics()
+    private val statistics = Statistics()
 
     override fun beforeAll() {
         logDebug("Initializing reporter ${this::class.qualifiedName} of type $type\n")
@@ -37,8 +37,11 @@ class PlainTextReporter(override val out: BufferedSink) : Reporter {
     override fun afterAll() {
         out.write("--------------------------------\n".encodeToByteArray())
         with(statistics) {
+            val passRate = passed / total * 100
+            val status = if (passed == total) "SUCCESS" else "FAILED"
+            // `%` should be escaped as `%%` for correct printing
             out.write(
-                "Tests run: $total (passed: $passed, failed: $failed, skipped: $skipped)"
+                "$status: $total tests, ${passRate}%% successful, failed: $failed, skipped: $skipped"
                     .encodeToByteArray()
             )
         }
