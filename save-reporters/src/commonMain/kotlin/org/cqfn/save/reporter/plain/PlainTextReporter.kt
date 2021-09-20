@@ -34,14 +34,15 @@ class PlainTextReporter(override val out: BufferedSink) : Reporter {
         out.write(headers.joinToString(prefix = "| ", separator = " | ", postfix = " |\n") { "------" }.encodeToByteArray())
     }
 
+    @Suppress("MAGIC_NUMBER", "MagicNumber")
     override fun afterAll() {
         out.write("--------------------------------\n".encodeToByteArray())
         with(statistics) {
-            val passRate = passed / total * 100
+            val passRate = if (total > 0) passed / total * 100 else 0
             val status = if (passed == total) "SUCCESS" else "FAILED"
             // `%` should be escaped as `%%` for correct printing
             out.write(
-                "$status: $total tests, ${passRate}%% successful, failed: $failed, skipped: $skipped"
+                "$status: $total tests, $passRate%% successful, failed: $failed, skipped: $skipped"
                     .encodeToByteArray()
             )
         }
