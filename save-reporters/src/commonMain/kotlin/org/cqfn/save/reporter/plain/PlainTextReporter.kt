@@ -19,7 +19,7 @@ import okio.BufferedSink
  *
  * @property out a sink for output
  */
-class PlainTextReporter(override val out: BufferedSink) : Reporter {
+open class PlainTextReporter(override val out: BufferedSink) : Reporter {
     override val type: ReportType = ReportType.PLAIN
     private var currentTestSuite: String? = null
     private var currentPlugin: String? = null
