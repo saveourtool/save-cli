@@ -71,7 +71,7 @@ class FixPlugin(
             val testCopyNames =
                     pathCopyMap.joinToString(separator = fixPluginConfig.batchSeparator!!) { (testCopy, _) -> testCopy.toString() }
 
-            val execFlagsAdjusted = fixPluginConfig.resolvePlaceholdersFrom(extraFlags, testCopyNames)
+            val execFlagsAdjusted = resolvePlaceholdersFrom(fixPluginConfig.execFlags, extraFlags, testCopyNames)
             val execCmd = "${generalConfig.execCmd} $execFlagsAdjusted"
 
             // val execCmd = "${(generalConfig.execCmd)} ${fixPluginConfig.execFlags} $testCopyNames"

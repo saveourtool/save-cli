@@ -3,7 +3,6 @@
 package org.cqfn.save.plugins.fix
 
 import org.cqfn.save.core.config.TestConfigSections
-import org.cqfn.save.core.plugin.ExtraFlags
 import org.cqfn.save.core.plugin.PluginConfig
 import org.cqfn.save.core.utils.RegexSerializer
 
@@ -71,22 +70,4 @@ data class FixPluginConfig(
         resourceNameTest,
         resourceNameExpected
     )
-
-    /**
-     * Substitute placeholders in `this.execFlags` with values from provided arguments
-     *
-     * @param extraFlags [ExtraFlags] to be inserted into `execFlags`
-     * @param fileNames file name or names, that need to be inserted into `execFlags`
-     * @return `this.execFlags` with resolved placeholders
-     */
-    fun resolvePlaceholdersFrom(extraFlags: ExtraFlags, fileNames: String): String =
-            execFlags!!
-                .replace("\$${ExtraFlags.KEY_ARGS_1}", extraFlags.args1)
-                .replace("\$${ExtraFlags.KEY_ARGS_2}", extraFlags.args2).run {
-                    if (contains("\$fileName")) {
-                        replace("\$fileName", fileNames)
-                    } else {
-                        plus(" $fileNames")
-                    }
-                }
 }

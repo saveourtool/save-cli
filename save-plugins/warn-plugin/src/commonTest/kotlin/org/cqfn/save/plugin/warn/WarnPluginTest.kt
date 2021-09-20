@@ -458,8 +458,12 @@ class WarnPluginTest {
     ) {
         assertEquals(
             execFlagsExpected,
-            WarnPluginConfig(execFlags = execFlagsFromConfig)
-                .resolvePlaceholdersFrom(extraFlags, fileName)
+            WarnPlugin(
+                TestConfig(fs.createFile(tmpDir / "save.toml"), null, mutableListOf(defaultWarnConfig, defaultGeneralConfig), fs),
+                testFiles = emptyList(),
+                fs
+            )
+                .resolvePlaceholdersFrom(execFlagsFromConfig, extraFlags, fileName)
         )
     }
 

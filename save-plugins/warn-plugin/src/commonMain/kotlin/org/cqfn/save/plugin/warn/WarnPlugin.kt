@@ -129,7 +129,7 @@ class WarnPlugin(
                     it.createRelativePathToTheRoot(testConfig.getRootConfig().location)
                 }
 
-        val execFlagsAdjusted = warnPluginConfig.resolvePlaceholdersFrom(extraFlags, fileNamesForExecCmd)
+        val execFlagsAdjusted = resolvePlaceholdersFrom(warnPluginConfig.execFlags, extraFlags, fileNamesForExecCmd)
         val execCmd = "${generalConfig.execCmd} $execFlagsAdjusted"
 
         val executionResult = try {

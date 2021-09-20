@@ -207,8 +207,12 @@ class FixPluginTest {
     ) {
         assertEquals(
             execFlagsExpected,
-            FixPluginConfig(execFlags = execFlagsFromConfig)
-                .resolvePlaceholdersFrom(extraFlags, fileName)
+            FixPlugin(
+                TestConfig(fs.createFile(tmpDir / "save.toml"), null, mutableListOf(FixPluginConfig("")), fs),
+                testFiles = emptyList(),
+                fs,
+                useInternalRedirections = false
+            ).resolvePlaceholdersFrom(execFlagsFromConfig, extraFlags, fileName)
         )
     }
 
