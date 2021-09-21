@@ -65,4 +65,13 @@ class ClassicWarnTest {
                 includeSuites = "warnings,DocsCheck"
                 excludeSuites = "Chapter1,Chapter2,Chapter3"
             }
+
+    @Test
+    fun `tests should have a relative path`() =
+            runTestsWithDiktat(
+                listOf(
+                    "EnumValueSnakeCaseTest.kt",
+                    "GenericFunctionTest.kt"
+                ), 0
+            )
 }

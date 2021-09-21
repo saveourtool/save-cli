@@ -23,6 +23,7 @@ import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.buildActivePlugins
 import org.cqfn.save.core.utils.processInPlace
 import org.cqfn.save.reporter.json.JsonReporter
+import org.cqfn.save.reporter.plain.PlainOnlyFailedReporter
 import org.cqfn.save.reporter.plain.PlainTextReporter
 import org.cqfn.save.reporter.test.TestReporter
 
@@ -127,7 +128,7 @@ class Save(
                 .onEach { event ->
                     // calculate relative paths, because reporters don't need paths higher than root dir
                     val resourcesRelative =
-                            event.resources.map { it.createRelativePathToTheRoot(testRepositoryRootPath).toPath() / it.name }
+                            event.resources.map { it.createRelativePathToTheRoot(testRepositoryRootPath).toPath() }
                     reporter.onEvent(event.copy(resources = resourcesRelative))
                 }
                 .forEach(this::handleResult)
@@ -142,7 +143,7 @@ class Save(
     private fun getReporter(saveProperties: SaveProperties): Reporter {
         val outFileBaseName = "save.out"  // todo: make configurable
         val outFileName = when (saveProperties.reportType!!) {
-            ReportType.PLAIN, ReportType.TEST -> outFileBaseName
+            ReportType.PLAIN, ReportType.PLAIN_FAILED, ReportType.TEST -> outFileBaseName
             ReportType.JSON -> "$outFileBaseName.json"
             ReportType.XML -> "$outFileBaseName.xml"
             ReportType.TOML -> "$outFileBaseName.toml"
@@ -154,6 +155,7 @@ class Save(
         // todo: make `saveProperties.reportType` a collection
         return when (saveProperties.reportType) {
             ReportType.PLAIN -> PlainTextReporter(out)
+            ReportType.PLAIN_FAILED -> PlainOnlyFailedReporter(out)
             ReportType.JSON -> JsonReporter(out)
             ReportType.TEST -> TestReporter(out)
             else -> TODO("Reporter for type ${saveProperties.reportType} is not yet supported")

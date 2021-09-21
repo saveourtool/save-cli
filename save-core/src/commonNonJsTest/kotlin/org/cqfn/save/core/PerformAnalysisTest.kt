@@ -26,7 +26,7 @@ class PerformAnalysisTest {
     fun `should execute single test`() {
         val saveProperties = SaveProperties(
             reportType = ReportType.PLAIN,
-            testFiles = listOf("../examples/discovery-test", "MyTest.java")  // fixme: should support full path
+            testFiles = listOf("../examples/discovery-test", "../discovery-test/highlevel/suite1/MyTest.java")
         )
         Save(saveProperties.mergeConfigWithPriorityToThis(defaultConfig()), fs).performAnalysis()
         // fixme: check that only a single test has been executed

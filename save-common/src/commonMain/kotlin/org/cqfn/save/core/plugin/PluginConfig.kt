@@ -56,6 +56,7 @@ interface PluginConfig {
  * @property suiteName name of test suite that can be visible from save-cloud
  * @property excludedTests excluded tests from the run
  * @property expectedWarningsPattern - pattern with warnings that are expected from the test file
+ * @property runConfigPattern everything from the capture group will be split by comma and then by `=`
  */
 @Serializable
 data class GeneralConfig(
@@ -65,6 +66,7 @@ data class GeneralConfig(
     val suiteName: String? = null,
     val excludedTests: List<String>? = null,
     val expectedWarningsPattern: Regex? = null,
+    val runConfigPattern: Regex? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.GENERAL
 
@@ -86,6 +88,7 @@ data class GeneralConfig(
             this.suiteName ?: other.suiteName,
             this.excludedTests ?: other.excludedTests,
             this.expectedWarningsPattern ?: other.expectedWarningsPattern,
+            this.runConfigPattern ?: other.runConfigPattern,
         )
     }
 
@@ -109,6 +112,7 @@ data class GeneralConfig(
             suiteName,
             excludedTests ?: emptyList(),
             expectedWarningsPattern ?: defaultExpectedWarningPattern,
+            runConfigPattern ?: defaultRunConfigPattern,
         )
     }
 
@@ -125,5 +129,29 @@ data class GeneralConfig(
          * `// ;warn:2:4: Class name in incorrect case`
          */
         val defaultExpectedWarningPattern = Regex("// ;warn:?(.*):(\\\\d*): (.+)")
+        val defaultRunConfigPattern = Regex("// RUN: (.+)")
+    }
+}
+
+/**
+ * @property args1 arguments to be inserted *before* file name
+ * @property args2 arguments to be inserted *after* file name
+ */
+data class ExtraFlags(
+    val args1: String,
+    val args2: String,
+) {
+    companion object {
+        const val KEY_ARGS_1 = "args1"
+        const val KEY_ARGS_2 = "args2"
+
+        /**
+         * Construct [ExtraFlags] from provided map
+         *
+         * @param map a map possibly containing values for [args1] and [args2], denoted by keys [KEY_ARGS_1] and [KEY_ARGS_2]
+         * @return [ExtraFlags]
+         */
+        fun from(map: Map<String, String>) =
+                ExtraFlags(map.getOrElse(KEY_ARGS_1) { "" }, map.getOrElse(KEY_ARGS_2) { "" })
     }
 }

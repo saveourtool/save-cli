@@ -12,8 +12,8 @@ import org.cqfn.save.core.utils.isCurrentOsWindows
 
 import io.github.petertrr.diffutils.diff
 import okio.FileSystem
-import kotlin.random.Random
 
+import kotlin.random.Random
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -42,7 +42,6 @@ class FixPluginTest {
         assertEquals("Test1Test.java", pairs.single().first.name)
         assertEquals("Test1Expected.java", pairs.single().second.name)
     }
-
     @Test
     fun `should detect two files - among other files`() {
         fs.createFile(tmpDir / "save.toml")
@@ -122,7 +121,7 @@ class FixPluginTest {
         // FixMe: after https://github.com/cqfn/save/issues/158
         val executionCmd = if (isCurrentOsWindows()) {
             // We call ProcessBuilder ourselves, because the command ">" does not work for the list of files
-            ProcessBuilder(false, fs).exec("echo Expected file > $testFile2", null)
+            ProcessBuilder(false, fs).exec("echo Expected file > $testFile2", "", null)
             "${diskWithTmpDir}cd $tmpDir && echo Expected file >"
         } else {
             "${diskWithTmpDir}cd $tmpDir && echo Expected file | tee"
@@ -142,7 +141,7 @@ class FixPluginTest {
         ).execute()
 
         // We call ProcessBuilder ourselves, because the command ">" does not work for the list of files
-        ProcessBuilder(false, fs).exec("echo Expected file > $testFile2", null)
+        ProcessBuilder(false, fs).exec("echo Expected file > $testFile2", "", null)
 
         assertEquals(2, results.count(), "Size of results should equal number of pairs")
         assertTrue(results.all {

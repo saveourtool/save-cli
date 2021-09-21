@@ -47,8 +47,6 @@ fun runTestsWithDiktat(
     ).apply { addProperties() }
     // In this test we need to merge with emulated empty save.properties file in aim to use default values,
     // since initially all fields are null
-    // In this test we need to merge with emulated empty save.properties file in aim to use default values,
-    // since initially all fields are null
     val testReporter = Save(saveProperties.mergeConfigWithPriorityToThis(SaveProperties()), FileSystem.SYSTEM)
         .performAnalysis() as TestReporter
 

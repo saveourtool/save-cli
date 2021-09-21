@@ -11,5 +11,10 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:${Versions.Kotlinx.datetime}")
             }
         }
+        val commonTest by getting {
+            dependencies {
+                implementation("com.squareup.okio:okio-fakefilesystem-multiplatform:${Versions.okio}")
+            }
+        }
     }
 }

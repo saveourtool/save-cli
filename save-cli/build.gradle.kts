@@ -33,8 +33,8 @@ kotlin {
 
     sourceSets {
         all {
-            languageSettings.useExperimentalAnnotation("kotlin.RequiresOptIn")
-            languageSettings.useExperimentalAnnotation("okio.ExperimentalFileSystem")
+            languageSettings.optIn("kotlin.RequiresOptIn")
+            languageSettings.optIn("okio.ExperimentalFileSystem")
         }
         val jvmMain by getting
 
@@ -49,12 +49,18 @@ kotlin {
         saveTarget.forEach {
             getByName("${it.name}Main").dependsOn(nativeMain)
         }
+
         val commonTest by getting
 
         val jvmTest by getting {
             dependencies {
                 implementation(kotlin("test-junit5"))
                 implementation("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
+                implementation(kotlin("test-common"))
+                implementation(kotlin("test-annotations-common"))
+                implementation(project(":save-common"))
+                implementation(project(":save-reporters"))
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.Kotlinx.serialization}")
             }
         }
     }
@@ -67,6 +73,21 @@ kotlin {
     }
     project.tasks.register("linkReleaseExecutableMultiplatform") {
         dependsOn(linkReleaseExecutableTaskProvider)
+    }
+
+    // Integration test should be able to have access to binary during the execution. Also we use here the debug version,
+    // in aim to have ability to run it in CI, which operates only with debug versions
+    tasks.getByName("jvmTest").dependsOn(tasks.getByName(
+        when {
+            os.isLinux -> "linkDebugExecutableLinuxX64"
+            os.isWindows -> "linkDebugExecutableMingwX64"
+            os.isMacOsX -> "linkDebugExecutableMacosX64"
+            else -> throw GradleException("Unknown operating system $os")
+        }
+    ))
+
+    tasks.withType<Test>().configureEach {
+        dependsOn(":save-core:downloadTestResources")
     }
 
     // disable building of some binaries to speed up build

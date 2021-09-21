@@ -20,7 +20,6 @@ import kotlinx.serialization.UseSerializers
  * The logic of the default value processing will be provided in stage of validation
  *
  * @property execFlags a command that will be executed to check resources and emit warnings
- * @property runConfigPattern everything from the capture group will be split by comma and then by `=`
  * @property actualWarningsPattern a regular expression by which warnings will be discovered in the process output
  * @property warningTextHasLine whether line number is included in [actualWarningsPattern]
  * @property warningTextHasColumn whether column number is included in [actualWarningsPattern]
@@ -51,7 +50,6 @@ import kotlinx.serialization.UseSerializers
 @Serializable
 data class WarnPluginConfig(
     val execFlags: String? = null,
-    val runConfigPattern: Regex? = null,
     val actualWarningsPattern: Regex? = null,
     val warningTextHasLine: Boolean? = null,
     val warningTextHasColumn: Boolean? = null,
@@ -90,7 +88,6 @@ data class WarnPluginConfig(
         val other = otherConfig as WarnPluginConfig
         return WarnPluginConfig(
             this.execFlags ?: other.execFlags,
-            this.runConfigPattern ?: other.runConfigPattern,
             this.actualWarningsPattern ?: other.actualWarningsPattern,
             this.warningTextHasLine ?: other.warningTextHasLine,
             this.warningTextHasColumn ?: other.warningTextHasColumn,
@@ -142,7 +139,6 @@ data class WarnPluginConfig(
 
         return WarnPluginConfig(
             execFlags ?: "",
-            runConfigPattern ?: defaultRunConfigPattern,
             actualWarningsPattern ?: defaultOutputPattern,
             newWarningTextHasLine,
             newWarningTextHasColumn,
@@ -192,30 +188,6 @@ data class WarnPluginConfig(
          * ```[WARN] /path/to/resources/ClassNameTest.java:2:4: Class name in incorrect case```
          */
         internal val defaultOutputPattern = Regex("(.+):(\\d*):(\\d*): (.+)")
-        internal val defaultRunConfigPattern = Regex("// RUN: (.+)")
         internal val defaultPatternForRegexInWarning = listOf("{{", "}}")
-    }
-}
-
-/**
- * @property args1 arguments to be inserted *before* file name
- * @property args2 arguments to be inserted *after* file name
- */
-data class ExtraFlags(
-    val args1: String,
-    val args2: String,
-) {
-    companion object {
-        const val KEY_ARGS_1 = "args1"
-        const val KEY_ARGS_2 = "args2"
-
-        /**
-         * Construct [ExtraFlags] from provided map
-         *
-         * @param map a map possibly containing values for [args1] and [args2], denoted by keys [KEY_ARGS_1] and [KEY_ARGS_2]
-         * @return [ExtraFlags]
-         */
-        fun from(map: Map<String, String>) =
-                ExtraFlags(map.getOrElse(KEY_ARGS_1) { "" }, map.getOrElse(KEY_ARGS_2) { "" })
     }
 }

@@ -80,12 +80,11 @@ class FixAndWarnPluginTest {
                     FixAndWarnPluginConfig(
                         FixPluginConfig(fixExecutionCmd, batchSize = 1),
                         WarnPluginConfig(warnExecutionCmd,
-                            defaultExtraConfigPattern,
                             Regex("(.+):(\\d+):(\\d+): (.+)"),
                             true, true, 1, ", ", 1, 2, 3, 1, 2, 3, 4
                         )
                     ),
-                    GeneralConfig("", listOf(""), "", "", expectedWarningsPattern = Regex("// ;warn:(\\d+):(\\d+): (.*)"))
+                    GeneralConfig("", listOf(""), "", "", expectedWarningsPattern = Regex("// ;warn:(\\d+):(\\d+): (.*)"), runConfigPattern = defaultExtraConfigPattern)
                 ),
                 fs,
             ),

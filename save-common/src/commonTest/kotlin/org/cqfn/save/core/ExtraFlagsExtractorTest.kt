@@ -1,7 +1,9 @@
-package org.cqfn.save.plugin.warn
+package org.cqfn.save.core
 
-import org.cqfn.save.plugin.warn.utils.ExtraFlagsExtractor
-import org.cqfn.save.plugin.warn.utils.resolvePlaceholdersFrom
+import org.cqfn.save.core.plugin.ExtraFlags
+import org.cqfn.save.core.plugin.ExtraFlagsExtractor
+import org.cqfn.save.core.plugin.GeneralConfig
+import org.cqfn.save.core.plugin.resolvePlaceholdersFrom
 
 import okio.fakefilesystem.FakeFileSystem
 
@@ -12,7 +14,7 @@ class ExtraFlagsExtractorTest {
     @Test
     fun `basic test`() {
         val extraFlagsExtractor = ExtraFlagsExtractor(
-            WarnPluginConfig(runConfigPattern = Regex("""// RUN: (.*[^\\]=.*)""")),
+            GeneralConfig(runConfigPattern = Regex("""// RUN: (.*[^\\]=.*)""")),
             FakeFileSystem(),
         )
 
@@ -76,8 +78,7 @@ class ExtraFlagsExtractorTest {
     ) {
         assertEquals(
             execFlagsExpected,
-            WarnPluginConfig(execFlags = execFlagsFromConfig)
-                .resolvePlaceholdersFrom(extraFlags, fileName)
+            resolvePlaceholdersFrom(execFlagsFromConfig, extraFlags, fileName)
         )
     }
 }

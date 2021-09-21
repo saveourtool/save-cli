@@ -10,6 +10,7 @@ import kotlinx.serialization.Serializable
 enum class ReportType {
     @SerialName("json") JSON,
     @SerialName("plain") PLAIN,
+    @SerialName("plain-failed") PLAIN_FAILED,
     @SerialName("test") TEST,
     @SerialName("toml") TOML,
     @SerialName("xml") XML,

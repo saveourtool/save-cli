@@ -20,6 +20,7 @@ import okio.Path.Companion.toPath
  * @property useInternalRedirections whether to redirect stdout/stderr for internal purposes
  * @property redirectTo a file where process output and errors should be redirected. If null, output will be returned as [ExecutionResult.stdout] and [ExecutionResult.stderr].
  */
+@Suppress("TooManyFunctions")
 abstract class Plugin(
     val testConfig: TestConfig,
     protected val testFiles: List<String>,
@@ -66,6 +67,11 @@ abstract class Plugin(
      * @param root root [Path], from where discovering should be started
      * @return a sequence of files, grouped by test
      */
+    @Suppress(
+        "TOO_LONG_FUNCTION",
+        "TOO_MANY_LINES_IN_LAMBDA",
+        "SwallowedException",
+    )
     fun discoverTestFiles(root: Path): Sequence<TestFiles> {
         val excludedTests =
                 testConfig
@@ -85,9 +91,20 @@ abstract class Plugin(
             }
 
         return if (testFiles.isNotEmpty()) {
-            rawTestFiles.filter { rawTestFile ->
-                testFiles.any { it in rawTestFile.test.toString() }
+            val (foundTest, notFoundTest) = rawTestFiles.partition { rawTestFile ->
+                testFiles.any {
+                    if (fs.exists(it.toPath())) {
+                        it in rawTestFile.test.toString()
+                    } else {
+                        logDebug("Could not find the next test directory: $it, check the path is correct.")
+                        false
+                    }
+                }
             }
+            if (notFoundTest.isNotEmpty()) {
+                logDebug("The following tests were not found: $notFoundTest. Try to make sure you have specified the correct relative path to the files.")
+            }
+            return foundTest.asSequence()
         } else {
             rawTestFiles
         }
@@ -99,8 +116,7 @@ abstract class Plugin(
         // creating relative to root path from a test file
         // "Expected" file for Fix plugin
         val testFileRelative =
-                (testFiles.test.createRelativePathToTheRoot(testRepositoryRoot).toPath() / testFiles.test.name)
-                    .toString()
+                (testFiles.test.createRelativePathToTheRoot(testRepositoryRoot))
                     .replace('\\', '/')
 
         // excluding tests that are included in the excluded list
@@ -170,7 +186,7 @@ abstract class Plugin(
     protected fun constructPathForCopyOfTestFile(dirName: String, path: Path): Path {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / dirName)
         val relativePath = path.createRelativePathToTheRoot(testConfig.getRootConfig().location)
-        return tmpDir / relativePath / path.name
+        return tmpDir / relativePath
     }
 
     /**
@@ -186,7 +202,7 @@ abstract class Plugin(
     }
 
     /**
-     * @property test test file
+     * Represents resources for a particular test handled by a plugin
      */
     @Suppress("USE_DATA_CLASS")
     interface TestFiles {

@@ -72,15 +72,14 @@ fun createConfigFromArgs(args: Array<String>): SaveProperties {
     logDebug("Properties after parsed command line args:\n${configFromCli.getFields()}")
     // reading configuration from the properties file
     val testFiles = configFromCli.testFiles
-    if (!testFiles.isNullOrEmpty() && !fs.exists(testFiles[0].toPath())) {
-        // FixMe: get(0) to [0] after https://github.com/cqfn/diKTat/issues/1047
-        errorAndExitNotValidDir(testFiles!!.get(0).toPath())
+    if (!testFiles.isNullOrEmpty() && !fs.exists(testFiles.first().toPath())) {
+        errorAndExitNotValidDir(testFiles.first().toPath())
     }
-    // FixMe: get(0) to [0] after https://github.com/cqfn/diKTat/issues/1047
-    val testRootPath = if (testFiles.isNullOrEmpty() || !FileSystem.SYSTEM.metadata(testFiles!!.get(0).toPath()).isDirectory) {
+
+    val testRootPath = if (testFiles.isNullOrEmpty() || !FileSystem.SYSTEM.metadata(testFiles.first().toPath()).isDirectory) {
         null
     } else {
-        testFiles[0]
+        testFiles.first()
     }
     val propertiesFile = testRootPath + DIRECTORY_SEPARATOR + "save.properties"
     val configFromPropertiesFile = readPropertiesFile(propertiesFile)
