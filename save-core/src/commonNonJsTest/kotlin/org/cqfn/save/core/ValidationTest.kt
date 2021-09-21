@@ -41,7 +41,7 @@ class ValidationTest {
             assertEquals(
                 """
                     Error: Couldn't find `execCmd` in [general] section of `${generalConfig.configLocation}` config.
-                    Current configuration: execCmd=null, tags=null, description=null, suiteName=null, excludedTests=null, expectedWarningsPattern=null
+                    Current configuration: execCmd=null, tags=null, description=null, suiteName=null, excludedTests=null, expectedWarningsPattern=null, runConfigPattern=null
                     Please provide it in this, or at least in one of the parent configs.
                 """.trimIndent(),
                 ex.message

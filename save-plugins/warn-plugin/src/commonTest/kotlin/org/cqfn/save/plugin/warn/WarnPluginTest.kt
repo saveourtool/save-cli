@@ -30,10 +30,10 @@ class WarnPluginTest {
         description = "",
         suiteName = "",
         expectedWarningsPattern = Regex("// ;warn:(\\d+):(\\d+): (.*)"),
+        runConfigPattern = GeneralConfig.defaultRunConfigPattern,
     )
     private val defaultWarnConfig = WarnPluginConfig(
         execFlags = "$catCmd $mockScriptFile && set stub=",
-        runConfigPattern = WarnPluginConfig.defaultRunConfigPattern,
         warningTextHasLine = true,
         warningTextHasColumn = true,
         batchSize = 1,
