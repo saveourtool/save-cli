@@ -12,8 +12,8 @@ import org.cqfn.save.core.utils.isCurrentOsWindows
 
 import io.github.petertrr.diffutils.diff
 import okio.FileSystem
-import kotlin.random.Random
 
+import kotlin.random.Random
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -24,24 +24,27 @@ internal val nestedDir2 = tmpDir / "nestedDir1" / "nestedDir2"
 internal val toml3 = nestedDir2 / "save.toml"
 internal val toml4 = nestedDir2 / "nestedDir3" / "nestedDir4" / "save.toml"
 
-@Suppress("TOO_LONG_FUNCTION", "LOCAL_VARIABLE_EARLY_DECLARATION")
+@Suppress(
+    "TOO_LONG_FUNCTION",
+    "LOCAL_VARIABLE_EARLY_DECLARATION",
+    "LONG_LINE")
 class MergeConfigsTest {
-    private val generalConfig1 = GeneralConfig("", listOf("Tag11", "Tag12"), "Description1", "suiteName1", listOf("excludedTests: test1"))
-    private val generalConfig2 = GeneralConfig("", listOf("Tag21"), "Description2", "suiteName2", listOf("excludedTests: test3"))
-    private val generalConfig3 = GeneralConfig("", listOf("Tag21", "Tag31", "Tag32"), "Description2", "suiteName3", listOf("excludedTests: test5", "includedTests: test6"))
-    private val generalConfig4 = GeneralConfig("", listOf("Tag11", "Tag21"), "Description2", "suiteName4", listOf("excludedTests: test7"))
-    private val warningsOutputPattern1 = Regex(".*")
-    private val warningsOutputPattern2 = Regex("\\w+ - (\\d+)/(\\d+) - (.*)$")
     private val extraFlagsPattern1 = Regex("// RUN: (.*)")
     private val extraFlagsPattern2 = Regex("## RUN: (.*)")
-    private val warnConfig1 = WarnPluginConfig("execCmd1", warningsOutputPattern2, extraFlagsPattern2,
+    private val generalConfig1 = GeneralConfig("", listOf("Tag11", "Tag12"), "Description1", "suiteName1", listOf("excludedTests: test1"), runConfigPattern = extraFlagsPattern2)
+    private val generalConfig2 = GeneralConfig("", listOf("Tag21"), "Description2", "suiteName2", listOf("excludedTests: test3"), runConfigPattern = extraFlagsPattern1)
+    private val generalConfig3 = GeneralConfig("", listOf("Tag21", "Tag31", "Tag32"), "Description2", "suiteName3", listOf("excludedTests: test5", "includedTests: test6"), runConfigPattern = extraFlagsPattern2)
+    private val generalConfig4 = GeneralConfig("", listOf("Tag11", "Tag21"), "Description2", "suiteName4", listOf("excludedTests: test7"), runConfigPattern = extraFlagsPattern2)
+    private val warningsOutputPattern1 = Regex(".*")
+    private val warningsOutputPattern2 = Regex("\\w+ - (\\d+)/(\\d+) - (.*)$")
+    private val warnConfig1 = WarnPluginConfig("execCmd1", warningsOutputPattern2,
         false, false, 1, ", ", 1, 1, 1, 1, 1, 1, 1, false)
-    private val warnConfig2 = WarnPluginConfig("execCmd2", warningsOutputPattern1, extraFlagsPattern1,
+    private val warnConfig2 = WarnPluginConfig("execCmd2", warningsOutputPattern1,
         true, true, 1, ", ", 2, 2, 2, 2, 2, 2, 2, true)
-    private val warnConfig3 = WarnPluginConfig("execCmd3", warningsOutputPattern2, extraFlagsPattern2,
+    private val warnConfig3 = WarnPluginConfig("execCmd3", warningsOutputPattern2,
         warningTextHasColumn = false, batchSize = 1, lineCaptureGroup = 3, columnCaptureGroup = 3, messageCaptureGroup = 3,
         fileNameCaptureGroupOut = 3, lineCaptureGroupOut = 3, columnCaptureGroupOut = 3, messageCaptureGroupOut = 3)
-    private val warnConfig4 = WarnPluginConfig("execCmd4", warningsOutputPattern2, extraFlagsPattern2,
+    private val warnConfig4 = WarnPluginConfig("execCmd4", warningsOutputPattern2,
         batchSize = 1, lineCaptureGroup = 4, columnCaptureGroup = 4, messageCaptureGroup = 4,
         fileNameCaptureGroupOut = 4, lineCaptureGroupOut = 4, columnCaptureGroupOut = 4, messageCaptureGroupOut = 4)
     private val fixConfig1 = FixPluginConfig("fixCmd1", 1, "Suffix")
@@ -60,7 +63,7 @@ class MergeConfigsTest {
         assertEquals(1, config2.pluginConfigs.size)
 
         val expectedGeneralConfig =
-                GeneralConfig("", listOf("Tag11", "Tag12", "Tag21"), "Description2", "suiteName2", listOf("excludedTests: test3"))
+                GeneralConfig("", listOf("Tag11", "Tag12", "Tag21"), "Description2", "suiteName2", listOf("excludedTests: test3"), runConfigPattern = extraFlagsPattern1)
 
         val actualGeneralConfig = config2.pluginConfigs.filterIsInstance<GeneralConfig>().first()
 
@@ -78,7 +81,7 @@ class MergeConfigsTest {
         assertEquals(2, config2.pluginConfigs.size)
 
         val expectedGeneralConfig =
-                GeneralConfig("", listOf("Tag11", "Tag12", "Tag21"), "Description2", "suiteName2", listOf("excludedTests: test3"))
+                GeneralConfig("", listOf("Tag11", "Tag12", "Tag21"), "Description2", "suiteName2", listOf("excludedTests: test3"), runConfigPattern = extraFlagsPattern1)
 
         val actualGeneralConfig = config2.pluginConfigs.filterIsInstance<GeneralConfig>().first()
         val actualWarnConfig = config2.pluginConfigs.filterIsInstance<WarnPluginConfig>().first()
@@ -115,8 +118,8 @@ class MergeConfigsTest {
         assertEquals(3, config2.pluginConfigs.size)
 
         val expectedGeneralConfig =
-                GeneralConfig("", listOf("Tag11", "Tag12", "Tag21"), "Description2", "suiteName2", listOf("excludedTests: test3"))
-        val expectedWarnConfig = WarnPluginConfig("execCmd3", warningsOutputPattern2, extraFlagsPattern2,
+                GeneralConfig("", listOf("Tag11", "Tag12", "Tag21"), "Description2", "suiteName2", listOf("excludedTests: test3"), runConfigPattern = extraFlagsPattern1)
+        val expectedWarnConfig = WarnPluginConfig("execCmd3", warningsOutputPattern2,
             true, false, 1, ", ", 3, 3, 3, 3, 3, 3, 3, true)
         val expectedFixConfig = FixPluginConfig("fixCmd2", 1, "Suffix")
 
@@ -141,8 +144,8 @@ class MergeConfigsTest {
 
         assertEquals(3, config4.pluginConfigs.size)
         val expectedGeneralConfig =
-                GeneralConfig("", listOf("Tag11", "Tag12", "Tag21", "Tag31", "Tag32"), "Description2", "suiteName4", listOf("excludedTests: test7"))
-        val expectedWarnConfig = WarnPluginConfig("execCmd4", warningsOutputPattern2, extraFlagsPattern2,
+                GeneralConfig("", listOf("Tag11", "Tag12", "Tag21", "Tag31", "Tag32"), "Description2", "suiteName4", listOf("excludedTests: test7"), runConfigPattern = extraFlagsPattern2)
+        val expectedWarnConfig = WarnPluginConfig("execCmd4", warningsOutputPattern2,
             true, false, 1, ", ", 4, 4, 4, 4, 4, 4, 4, true)
         val expectedFixConfig = FixPluginConfig("fixCmd4", 1, "Suffix")
 

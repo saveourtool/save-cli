@@ -20,6 +20,7 @@ import okio.Path.Companion.toPath
  * @property useInternalRedirections whether to redirect stdout/stderr for internal purposes
  * @property redirectTo a file where process output and errors should be redirected. If null, output will be returned as [ExecutionResult.stdout] and [ExecutionResult.stderr].
  */
+@Suppress("TooManyFunctions")
 abstract class Plugin(
     val testConfig: TestConfig,
     protected val testFiles: List<String>,

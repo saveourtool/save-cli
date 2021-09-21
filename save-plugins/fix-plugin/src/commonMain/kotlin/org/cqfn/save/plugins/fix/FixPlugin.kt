@@ -4,8 +4,11 @@ import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
+import org.cqfn.save.core.plugin.ExtraFlags
+import org.cqfn.save.core.plugin.ExtraFlagsExtractor
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
+import org.cqfn.save.core.plugin.resolvePlaceholdersFrom
 import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.Pass
@@ -44,19 +47,34 @@ class FixPlugin(
         .oldTag { start -> if (start) "[" else "]" }
         .newTag { start -> if (start) "<" else ">" }
         .build()
+    private lateinit var extraFlagsExtractor: ExtraFlagsExtractor
 
     @Suppress("TOO_LONG_FUNCTION")
     override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
+        extraFlagsExtractor = ExtraFlagsExtractor(generalConfig, fs)
 
         return files.map { it as FixTestFiles }.chunked(fixPluginConfig.batchSize!!.toInt()).map { chunk ->
+
+            val extraFlagsList = chunk.map { it.test }.mapNotNull { path ->
+                extraFlagsExtractor.extractExtraFlagsFrom(path)
+            }
+                .distinct()
+            require(extraFlagsList.size <= 1) {
+                "Extra flags for all files in a batch should be same, but you have batchSize=${fixPluginConfig.batchSize}" +
+                        " and there are ${extraFlagsList.size} different sets of flags inside it, namely $extraFlagsList"
+            }
+            val extraFlags = extraFlagsList.singleOrNull() ?: ExtraFlags("", "")
+
             val pathMap = chunk.map { it.test to it.expected }
             val pathCopyMap = pathMap.map { (test, expected) -> createTestFile(test, generalConfig) to expected }
             val testCopyNames =
                     pathCopyMap.joinToString(separator = fixPluginConfig.batchSeparator!!) { (testCopy, _) -> testCopy.toString() }
 
-            val execCmd = "${(generalConfig.execCmd)} ${fixPluginConfig.execFlags} $testCopyNames"
+            val execFlagsAdjusted = resolvePlaceholdersFrom(fixPluginConfig.execFlags, extraFlags, testCopyNames)
+            val execCmd = "${generalConfig.execCmd} $execFlagsAdjusted"
+
             val executionResult = try {
                 pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo)
             } catch (ex: ProcessExecutionException) {
