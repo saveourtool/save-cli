@@ -13,8 +13,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class ConfigDetectorTest {
-    // windowsLimitations = true, because SAVE should be cross-platform
-    // private val fs = FakeFileSystem(windowsLimitations = true)  // todo: maybe use FakeFileSystem in more complicated tests?
     private val fs = FileSystem.SYSTEM
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / ConfigDetectorTest::class.simpleName!!).also {
         fs.createDirectory(it)

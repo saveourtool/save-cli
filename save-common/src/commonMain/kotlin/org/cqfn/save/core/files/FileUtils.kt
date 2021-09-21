@@ -80,6 +80,7 @@ fun Path.parents(): Sequence<Path> = generateSequence(parent) { it.parent }
 
 /**
  * @param condition a condition to match
+ * @return all parent directories matching [condition]
  */
 fun Path.findAllParentsMatching(condition: (Path) -> Boolean) = parents().filter(condition)
 
@@ -185,6 +186,7 @@ fun Path.findDescendantDirectoriesBy(withSelf: Boolean = false, directoryPredica
  *
  * @param rootPath root of the file tree, relates to which path will be created
  * @return string representation of relative path
+ * @throws NullPointerException if invalid arguments have been provided
  */
 @Suppress("TooGenericExceptionCaught")
 fun Path.createRelativePathToTheRoot(rootPath: Path) = try {

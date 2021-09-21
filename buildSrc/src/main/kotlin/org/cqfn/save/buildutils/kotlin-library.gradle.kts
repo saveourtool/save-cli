@@ -56,8 +56,8 @@ kotlin {
     @Suppress("WRONG_NEWLINES_AROUND_KDOC")
     sourceSets {
         all {
-            languageSettings.useExperimentalAnnotation("kotlin.RequiresOptIn")
-            languageSettings.useExperimentalAnnotation("okio.ExperimentalFileSystem")
+            languageSettings.optIn("kotlin.RequiresOptIn")
+            languageSettings.optIn("okio.ExperimentalFileSystem")
         }
         val commonMain by getting
         val commonTest by getting
