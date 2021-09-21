@@ -126,7 +126,7 @@ class ResultsChecker(
                     if (i == foundSubStringsWithRegex.size - 1) result + endOfTheWarning else result
                 }
             }
-        }.joinToString()
+        }.joinToString("")
 
         // if no regex were found in the string we should simply escape all symbols
         val res = if (foundSubStringsWithRegex.isEmpty()) this.escapeSpecialRegexSymbols() else resultWithRegex
