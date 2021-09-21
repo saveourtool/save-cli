@@ -14,21 +14,28 @@ import org.cqfn.save.core.result.Pass
 import org.cqfn.save.reporter.test.TestReporter
 
 import okio.FileSystem
+import org.cqfn.save.core.result.Fail
 
 import kotlin.test.assertEquals
+
+data class ExpectedFail(val testName: String, val reason: String)
 
 /**
  * @param testDir `testFiles` as accepted by save-cli
  * @param numberOfTests expected number of executed tests with this configuration
+ * @param expectedFail list of expected failed tests
  * @param addProperties lambda to add/override SaveProperties during test
  */
 fun runTestsWithDiktat(
     testDir: List<String>?,
     numberOfTests: Int,
-    addProperties: SaveProperties.() -> Unit = {}) {
+    expectedFail: List<ExpectedFail> = listOf(),
+    addProperties: SaveProperties.() -> Unit = {},
+) {
     val mutableTestDir: MutableList<String> = mutableListOf()
     testDir?.let { mutableTestDir.addAll(testDir) }
     mutableTestDir.add(0, "../examples/kotlin-diktat/")
+
     val saveProperties = SaveProperties(
         testFiles = mutableTestDir,
         reportType = ReportType.TEST,
@@ -43,6 +50,18 @@ fun runTestsWithDiktat(
 
     assertEquals(numberOfTests, testReporter.results.size)
     testReporter.results.forEach {
-        assertEquals(Pass(null), it.status)
+        // FixMe: if we will have other failing tests - we will make the logic less hardcoded
+        if (it.resources.find { it.name == "ThisShouldAlwaysFailTest.kt" } != null) {
+            assertEquals(
+                Fail(
+                    "Some warnings were expected but not received:" +
+                            " [Warning(message=[DUMMY_ERROR] this error should not match, line=8, column=1," +
+                            " fileName=ThisShouldAlwaysFailTest.kt)]",
+                    "Some warnings were expected but not received (1)"
+                ), it.status
+            )
+        } else {
+            assertEquals(Pass(null), it.status)
+        }
     }
 }

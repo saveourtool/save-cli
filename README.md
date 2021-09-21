@@ -19,9 +19,9 @@ especially which work with the code. Fully native and multiplatform application.
 
 ## Quick start
 
-|  |  |  |  |  |  
-| --- | --- | --- | --- | --- |
-|[CLI properties](/OptionsTable.md)|[save.toml config](#save_toml_configuration_file)|[Warn plugin](save-plugins/warn-plugin/README.md) | [Fix plugin](save-plugins/fix-plugin/README.md) | [Save presentation](/readme/save.pdf)|
+|  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- |
+|[CLI properties](/OptionsTable.md)|[examples](/examples/kotlin-diktat)|[save.toml config](#save_toml_configuration_file)|[Warn plugin](save-plugins/warn-plugin/README.md) | [Fix plugin](save-plugins/fix-plugin/README.md) | [Save presentation](/readme/save.pdf)|
 
 
 ## What is SAVE?
