@@ -72,7 +72,9 @@ data class TestConfig(
     }
 
     /**
-     * Find [GeneralConfig] among this config's sections and return it, or `null` if not found
+     * Find [GeneralConfig] among this config's sections
+     *
+     * @return [GeneralConfig] or `null` if not found
      */
     fun getGeneralConfig() = pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
 
@@ -85,6 +87,8 @@ data class TestConfig(
 
     /**
      * recursively (till leaves) return all configs from the configuration Tree
+     *
+     * @return all configs from the configuration Tree
      */
     fun getAllTestConfigs(): List<TestConfig> =
             listOf(this) + this.childConfigs.flatMap { it.getAllTestConfigs() }
@@ -148,6 +152,8 @@ data class TestConfig(
 
     /**
      * filtering out general configs
+     *
+     * @return all plugin configs without general config
      */
     fun pluginConfigsWithoutGeneralConfig() = pluginConfigs.filterNot { it is GeneralConfig }
 

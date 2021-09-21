@@ -207,7 +207,7 @@ abstract class Plugin(
     }
 
     /**
-     * @property test test file
+     * Represents resources for a particular test handled by a plugin
      */
     @Suppress("USE_DATA_CLASS")
     interface TestFiles {
