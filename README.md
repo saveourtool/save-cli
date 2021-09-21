@@ -131,15 +131,17 @@ excludedTests = ["warn/chapter1/GarbageTest.kt", "warn/otherDir/NewTest.kt"], e.
 
 ## Executing specific tests
 It can be useful to execute only a number of tests instead of all tests under a particular `save.toml` config.
-To do so, you want to pass a test file name after all configuration options:
+To do so, you want to pass a relative path to test file after all configuration options:
 ```bash
 $ save [options] /path/to/tests/Test1
 ```
-or a list of file names (separated with spaces)
+or a list of relative paths to test files (separated with spaces)
 ```bash
 $ save [options] /path/to/tests/Test1 /path/to/tests/Test2
 ```
 SAVE will detect the closest `save.toml` file and use configuration from there.
+
+`Note:` On Windows, you may need to use double backslash `\\` as path separator
 
 
 ## <a name="plugins"></a> Using plugins for specific test-scenarios
@@ -171,7 +173,9 @@ In case you would like to have several plugins to work in your directory with sa
 ```
 
 ## SAVE output
-Save now support different formats of test result output: `PLAIN` and `JSON`. The format could be selected with `--report-type` option.
+Save supports several formats of test result output: `PLAIN` (markdown-like table with all test results), `PLAIN_FAILED`
+(same as `PLAIN`, but doesn't show passed tests) and `JSON` (structured representation of execution result).
+The format could be selected with `--report-type` option.
 
 ## Purpose of Static Analysis Verification and Evaluation (SAVE) project
 Usage of [static analyzers](https://en.wikipedia.org/wiki/Static_program_analysis) - is a very important part of development each and every software product.
