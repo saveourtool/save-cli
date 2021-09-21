@@ -38,7 +38,7 @@ open class PlainTextReporter(override val out: BufferedSink) : Reporter {
     override fun afterAll() {
         out.write("--------------------------------\n".encodeToByteArray())
         with(statistics) {
-            val passRate = if (total > 0) passed / total * 100 else 0
+            val passRate = if (total > 0) (passed.toFloat() / total * 100).toInt() else 0
             val status = if (passed == total) "SUCCESS" else "FAILED"
             // `%` should be escaped as `%%` for correct printing
             out.write(
