@@ -10,6 +10,7 @@ import org.cqfn.save.core.utils.ProcessBuilder
 
 import okio.FileSystem
 import okio.Path
+import okio.Path.Companion.toPath
 
 /**
  * Plugin that can be injected into SAVE during execution. Plugins accept contents of configuration file and then perform some work.
@@ -65,6 +66,11 @@ abstract class Plugin(
      * @param root root [Path], from where discovering should be started
      * @return a sequence of files, grouped by test
      */
+    @Suppress(
+        "TOO_LONG_FUNCTION",
+        "TOO_MANY_LINES_IN_LAMBDA",
+        "SwallowedException",
+    )
     fun discoverTestFiles(root: Path): Sequence<TestFiles> {
         val excludedTests =
                 testConfig
@@ -84,9 +90,20 @@ abstract class Plugin(
             }
 
         return if (testFiles.isNotEmpty()) {
-            rawTestFiles.filter { rawTestFile ->
-                testFiles.any { it in rawTestFile.test.toString() }
+            val (foundTest, notFoundTest) = rawTestFiles.partition { rawTestFile ->
+                testFiles.any {
+                    if (fs.exists(it.toPath())) {
+                        it in rawTestFile.test.toString()
+                    } else {
+                        logDebug("Could not find the next test directory: $it, check the path is correct.")
+                        false
+                    }
+                }
             }
+            if (notFoundTest.isNotEmpty()) {
+                logDebug("The following tests were not found: $notFoundTest. Try to make sure you have specified the correct relative path to the files.")
+            }
+            return foundTest.asSequence()
         } else {
             rawTestFiles
         }

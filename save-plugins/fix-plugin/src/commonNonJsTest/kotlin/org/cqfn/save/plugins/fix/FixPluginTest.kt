@@ -42,7 +42,6 @@ class FixPluginTest {
         assertEquals("Test1Test.java", pairs.single().first.name)
         assertEquals("Test1Expected.java", pairs.single().second.name)
     }
-
     @Test
     fun `should detect two files - among other files`() {
         fs.createFile(tmpDir / "save.toml")
