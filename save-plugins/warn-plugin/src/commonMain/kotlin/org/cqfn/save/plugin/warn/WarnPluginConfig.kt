@@ -193,7 +193,6 @@ data class WarnPluginConfig(
          */
         internal val defaultOutputPattern = Regex("(.+):(\\d*):(\\d*): (.+)")
         internal val defaultRunConfigPattern = Regex("// RUN: (.+)")
-        val defaultSeparatorInPatternForRegexInWarning = ".*"
         internal val defaultPatternForRegexInWarning = listOf("{{", "}}")
     }
 }
