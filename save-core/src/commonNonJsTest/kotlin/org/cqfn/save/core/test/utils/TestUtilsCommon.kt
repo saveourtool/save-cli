@@ -22,7 +22,7 @@ import kotlin.test.assertEquals
  * @property testName
  * @property reason
  */
-private data class ExpectedFail(val testName: String, val reason: String)
+data class ExpectedFail(val testName: String, val reason: String)
 
 /**
  * @param testDir `testFiles` as accepted by save-cli
