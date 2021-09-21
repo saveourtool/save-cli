@@ -3,7 +3,6 @@ package org.cqfn.save.plugins.fix
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
-import org.cqfn.save.core.plugin.ExtraFlags
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Pass
@@ -158,62 +157,6 @@ class FixPluginTest {
             diff(fs.readLines(tmpDir / "Test4Test.java"), fs.readLines(expectedFile2))
                 .deltas.isEmpty()
         }
-    }
-
-    @Test
-    fun `should resolve placeholders`() {
-        // basic test
-        checkPlaceholders(
-            "--foo --bar testFile --baz",
-            "--foo \$args1 \$fileName \$args2",
-            ExtraFlags("--bar", "--baz"),
-            "testFile"
-        )
-        // only beforeFlags
-        checkPlaceholders(
-            "--foo --bar testFile",
-            "--foo \$args1 \$fileName",
-            ExtraFlags("--bar", ""),
-            "testFile"
-        )
-        // only afterFlags
-        checkPlaceholders(
-            "--foo testFile --baz",
-            "--foo \$fileName \$args2",
-            ExtraFlags("", "--baz"),
-            "testFile"
-        )
-        // only fileName
-        checkPlaceholders(
-            "--foo testFile",
-            "--foo \$fileName",
-            ExtraFlags("", ""),
-            "testFile"
-        )
-        // no flags
-        checkPlaceholders(
-            "--foo testFile",
-            "--foo",
-            ExtraFlags("", ""),
-            "testFile"
-        )
-    }
-
-    private fun checkPlaceholders(
-        execFlagsExpected: String,
-        execFlagsFromConfig: String,
-        extraFlags: ExtraFlags,
-        fileName: String,
-    ) {
-        assertEquals(
-            execFlagsExpected,
-            FixPlugin(
-                TestConfig(fs.createFile(tmpDir / "save.toml"), null, mutableListOf(FixPluginConfig("")), fs),
-                testFiles = emptyList(),
-                fs,
-                useInternalRedirections = false
-            ).resolvePlaceholdersFrom(execFlagsFromConfig, extraFlags, fileName)
-        )
     }
 
     @AfterTest

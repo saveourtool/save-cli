@@ -160,28 +160,6 @@ abstract class Plugin(
     }
 
     /**
-     * Substitute placeholders in `this.execFlags` with values from provided arguments
-     *
-     * @param execFlags a command that will be executed to check resources and emit warnings
-     * @param extraFlags [ExtraFlags] to be inserted into `execFlags`
-     * @param fileNames file name or names, that need to be inserted into `execFlags`
-     * @return `this.execFlags` with resolved placeholders
-     */
-    fun resolvePlaceholdersFrom(
-        execFlags: String?,
-        extraFlags: ExtraFlags,
-        fileNames: String): String =
-            execFlags!!
-                .replace("\$${ExtraFlags.KEY_ARGS_1}", extraFlags.args1)
-                .replace("\$${ExtraFlags.KEY_ARGS_2}", extraFlags.args2).run {
-                    if (contains("\$fileName")) {
-                        replace("\$fileName", fileNames)
-                    } else {
-                        plus(" $fileNames")
-                    }
-                }
-
-    /**
      *  Construct path for copy of test file, over which the plugins will be working on
      *
      *  @param dirName name of the tmp subdirectory

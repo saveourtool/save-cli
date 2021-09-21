@@ -3,6 +3,7 @@ package org.cqfn.save.core
 import org.cqfn.save.core.plugin.ExtraFlags
 import org.cqfn.save.core.plugin.ExtraFlagsExtractor
 import org.cqfn.save.core.plugin.GeneralConfig
+import org.cqfn.save.core.plugin.resolvePlaceholdersFrom
 
 import okio.fakefilesystem.FakeFileSystem
 
@@ -28,5 +29,56 @@ class ExtraFlagsExtractorTest {
             .forEach { (line, extraFlags) ->
                 assertEquals(extraFlags, extraFlagsExtractor.extractExtraFlagsFrom(line))
             }
+    }
+
+    @Test
+    fun `should resolve placeholders`() {
+        // basic test
+        checkPlaceholders(
+            "--foo --bar testFile --baz",
+            "--foo \$args1 \$fileName \$args2",
+            ExtraFlags("--bar", "--baz"),
+            "testFile"
+        )
+        // only beforeFlags
+        checkPlaceholders(
+            "--foo --bar testFile",
+            "--foo \$args1 \$fileName",
+            ExtraFlags("--bar", ""),
+            "testFile"
+        )
+        // only afterFlags
+        checkPlaceholders(
+            "--foo testFile --baz",
+            "--foo \$fileName \$args2",
+            ExtraFlags("", "--baz"),
+            "testFile"
+        )
+        // only fileName
+        checkPlaceholders(
+            "--foo testFile",
+            "--foo \$fileName",
+            ExtraFlags("", ""),
+            "testFile"
+        )
+        // no flags
+        checkPlaceholders(
+            "--foo testFile",
+            "--foo",
+            ExtraFlags("", ""),
+            "testFile"
+        )
+    }
+
+    private fun checkPlaceholders(
+        execFlagsExpected: String,
+        execFlagsFromConfig: String,
+        extraFlags: ExtraFlags,
+        fileName: String,
+    ) {
+        assertEquals(
+            execFlagsExpected,
+            resolvePlaceholdersFrom(execFlagsFromConfig, extraFlags, fileName)
+        )
     }
 }
