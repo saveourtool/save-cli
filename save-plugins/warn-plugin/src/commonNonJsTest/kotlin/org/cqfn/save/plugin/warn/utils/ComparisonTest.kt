@@ -1,9 +1,6 @@
 package org.cqfn.save.plugin.warn.utils
 
-import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
-import org.cqfn.save.core.result.Pass
-import org.cqfn.save.plugin.warn.WarnPlugin
 import org.cqfn.save.plugin.warn.WarnPluginConfig
 
 import okio.FileSystem
@@ -11,8 +8,6 @@ import okio.FileSystem
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class ComparisonTest {
     private val fs = FileSystem.SYSTEM
@@ -50,7 +45,7 @@ class ComparisonTest {
         val warnPluginConfig = WarnPluginConfig(exactWarningsMatch = false)
         val config = fs.createFile(tmpDir / "save.toml")
 
-   /*     val testStatus = WarnPlugin(
+        val testStatus = WarnPlugin(
             TestConfig(config, null, mutableListOf(warnPluginConfig), fs),
             testFiles = emptyList(),
             fs,
@@ -60,6 +55,6 @@ class ComparisonTest {
         assertTrue(testStatus is Pass, "Actual type of status is ${testStatus::class}")
         assertEquals(
             "Some warnings were unexpected: ${actualWarningsMap.values.single().dropLast(1)}",
-            testStatus.message)*/
+            testStatus.message)
     }
 }

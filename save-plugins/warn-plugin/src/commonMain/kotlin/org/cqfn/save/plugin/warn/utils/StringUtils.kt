@@ -1,6 +1,10 @@
+/**
+ * Very specific string utility extensions for getting specific substrings
+ */
+
 package org.cqfn.save.plugin.warn.utils
 
-private val DELIMITER_NOT_FOUND = Pair(-1, -1)
+private val delimiterNotFound = Pair(-1, -1)
 
 /**
  * Finding indexes of all delimited groups.
@@ -9,12 +13,13 @@ private val DELIMITER_NOT_FOUND = Pair(-1, -1)
  *
  * @param openingDelimiter opening group of symbols that is used to separate pattern
  * @param closingDelimiter closing group of symbols that is used to separate pattern
+ * @return map with indexes of the delimited string
  */
 fun String.findDelimitedSubStringsWith(openingDelimiter: String, closingDelimiter: String): MutableMap<Int, Int> {
     // finding first delimited group in the initial string
     var delimitedGroup = this.findFirstDelimitedSubStringBy(openingDelimiter, closingDelimiter)
     var nextPartOfString = this
-    val result = if (delimitedGroup != DELIMITER_NOT_FOUND) mutableMapOf(delimitedGroup) else mutableMapOf()
+    val result = if (delimitedGroup != delimiterNotFound) mutableMapOf(delimitedGroup) else mutableMapOf()
     while (true) {
         // offset that is used to restore indexes in the initial string (as the logic below is applied to substring)
         val offset = delimitedGroup.second + closingDelimiter.length
@@ -22,7 +27,7 @@ fun String.findDelimitedSubStringsWith(openingDelimiter: String, closingDelimite
         nextPartOfString = nextPartOfString.substring(offset, nextPartOfString.length)
         delimitedGroup = nextPartOfString.findFirstDelimitedSubStringBy(openingDelimiter, closingDelimiter)
         // no need to process if there are no delimiters in the substring
-        if (delimitedGroup == DELIMITER_NOT_FOUND) {
+        if (delimitedGroup == delimiterNotFound) {
             break
         }
         result[offset + delimitedGroup.first] = offset + delimitedGroup.second
@@ -40,6 +45,7 @@ fun String.findDelimitedSubStringsWith(openingDelimiter: String, closingDelimite
  *
  * @param openingDelimiter opening group of symbols that is used to separate pattern
  * @param closingDelimiter closing group of symbols that is used to separate pattern
+ * @return map with indexes of the delimited string
  * @throws IllegalArgumentException in case of invalid string and invalid delimiters
  */
 fun String.findFirstDelimitedSubStringBy(openingDelimiter: String, closingDelimiter: String): Pair<Int, Int> {
@@ -48,21 +54,24 @@ fun String.findFirstDelimitedSubStringBy(openingDelimiter: String, closingDelimi
 
     when {
         // not found any regular expressions in the warning
-        foundOpenSymbols == -1 && foundClosingSymbols == -1 -> return DELIMITER_NOT_FOUND
+        foundOpenSymbols == -1 && foundClosingSymbols == -1 -> return delimiterNotFound
         // closing symbols stay before opening symbols OR no opening symbols found for closing symbols
         foundClosingSymbols < foundOpenSymbols -> throw IllegalArgumentException(
             "Not able to find delimited substrings in \" $this \" that are surrounded by '$openingDelimiter'" +
                     " and '$closingDelimiter' because closing delimiter '$closingDelimiter' (index =" +
                     " $foundClosingSymbols) is placed before the opening delimiter" +
                     " '$openingDelimiter' (index = $foundOpenSymbols)."
-            )
+        )
         // opening symbols found without closing symbols
         foundClosingSymbols != -1 && foundOpenSymbols == -1 -> throw IllegalArgumentException(
             " Not able to find delimited substrings in \" $this \" that are surrounded by '$openingDelimiter'" +
                     " and '$closingDelimiter' because '$closingDelimiter' is missing while the" +
                     " '$openingDelimiter' (index = '$foundOpenSymbols') is present."
         )
+        else -> {
+            // this is a generated else block
+        }
     }
 
-    return foundOpenSymbols + openingDelimiter.length  to foundClosingSymbols
+    return foundOpenSymbols + openingDelimiter.length to foundClosingSymbols
 }

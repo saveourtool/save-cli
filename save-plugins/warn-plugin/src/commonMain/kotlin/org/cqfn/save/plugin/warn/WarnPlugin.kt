@@ -10,13 +10,15 @@ import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.ProcessExecutionException
-
-import okio.FileSystem
-import okio.Path
-import org.cqfn.save.plugin.warn.utils.*
+import org.cqfn.save.plugin.warn.utils.ExtraFlagsExtractor
+import org.cqfn.save.plugin.warn.utils.ResultsChecker
+import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
 import org.cqfn.save.plugin.warn.utils.getLineNumber
 import org.cqfn.save.plugin.warn.utils.resolvePlaceholdersFrom
+
+import okio.FileSystem
+import okio.Path
 
 private typealias WarningMap = Map<String, List<Warning>>
 
@@ -35,8 +37,8 @@ class WarnPlugin(
     testFiles,
     fileSystem,
     useInternalRedirections,
-    redirectTo) {
-
+    redirectTo
+) {
     private lateinit var extraFlagsExtractor: ExtraFlagsExtractor
 
     override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {

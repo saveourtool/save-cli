@@ -2,7 +2,7 @@
  * MPP test Utils for integration tests, especially for downloading of tested tools, like diktat and ktlint
  */
 
-@file:Suppress("FILE_WILDCARD_IMPORTS")
+@file:Suppress("FILE_NAME_MATCH_CLASS")
 
 package org.cqfn.save.core.test.utils
 
@@ -10,15 +10,19 @@ import org.cqfn.save.core.Save
 import org.cqfn.save.core.config.OutputStreamType
 import org.cqfn.save.core.config.ReportType
 import org.cqfn.save.core.config.SaveProperties
+import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.reporter.test.TestReporter
 
 import okio.FileSystem
-import org.cqfn.save.core.result.Fail
 
 import kotlin.test.assertEquals
 
-data class ExpectedFail(val testName: String, val reason: String)
+/**
+ * @property testName
+ * @property reason
+ */
+private data class ExpectedFail(val testName: String, val reason: String)
 
 /**
  * @param testDir `testFiles` as accepted by save-cli
@@ -49,19 +53,20 @@ fun runTestsWithDiktat(
         .performAnalysis() as TestReporter
 
     assertEquals(numberOfTests, testReporter.results.size)
-    testReporter.results.forEach {
+    testReporter.results.forEach { test ->
         // FixMe: if we will have other failing tests - we will make the logic less hardcoded
-        if (it.resources.find { it.name == "ThisShouldAlwaysFailTest.kt" } != null) {
+        test.resources.find { it.name == "ThisShouldAlwaysFailTest.kt" }?.let {
             assertEquals(
                 Fail(
                     "Some warnings were expected but not received:" +
                             " [Warning(message=[DUMMY_ERROR] this error should not match, line=8, column=1," +
                             " fileName=ThisShouldAlwaysFailTest.kt)]",
                     "Some warnings were expected but not received (1)"
-                ), it.status
+                ), test.status
             )
-        } else {
-            assertEquals(Pass(null), it.status)
         }
+            ?: run {
+                assertEquals(Pass(null), test.status)
+            }
     }
 }

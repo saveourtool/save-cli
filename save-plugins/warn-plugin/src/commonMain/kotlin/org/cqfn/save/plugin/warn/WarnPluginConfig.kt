@@ -135,7 +135,7 @@ data class WarnPluginConfig(
         val newColumnCaptureGroupOut = if (newWarningTextHasColumn) (columnCaptureGroupOut ?: 3) else null
         val newMessageCaptureGroupOut = messageCaptureGroupOut ?: 4
 
-        // FixMe: why there requires are at the end of logic? Should be moved to the beginning of the method?
+        // FixMe: why these requires are at the end of logic? Should be moved to the beginning of the method? kgevorkyan
         requirePositiveIfNotNull(lineCaptureGroup)
         requirePositiveIfNotNull(columnCaptureGroup)
         requirePositiveIfNotNull(messageCaptureGroup)
@@ -159,7 +159,7 @@ data class WarnPluginConfig(
             testNameSuffix ?: "Test",
             linePlaceholder ?: "\$line",
             wildCardInDirectoryMode,
-            patternForRegexInWarning?: defaultPatternForRegexInWarning
+            patternForRegexInWarning ?: defaultPatternForRegexInWarning
         )
     }
 

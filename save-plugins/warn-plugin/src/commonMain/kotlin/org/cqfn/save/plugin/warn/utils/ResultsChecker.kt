@@ -2,31 +2,36 @@ package org.cqfn.save.plugin.warn.utils
 
 import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.Pass
-import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.result.TestStatus
 import org.cqfn.save.plugin.warn.WarnPluginConfig
 
+typealias FileToWarningsMap = Map<String, List<Warning>?>
+
+/**
+ * Class that supports checking of the test results
+ *
+ * @param expectedWarningsMap expected warnings, grouped by LineCol
+ * @param actualWarningsMap actual warnings, grouped by LineCol
+ * @param warnPluginConfig configuration of warn plugin
+ **/
 class ResultsChecker(
-    private val expectedWarningsMap: Map<String, List<Warning>?>,
-    private val actualWarningsMap: Map<String, List<Warning>?>,
+    private val expectedWarningsMap: FileToWarningsMap,
+    private val actualWarningsMap: FileToWarningsMap,
     private val warnPluginConfig: WarnPluginConfig,
 ) {
     /**
      * Compares actual and expected warnings and returns TestResult
      *
-     * @param expectedWarningsMap expected warnings, grouped by LineCol
-     * @param actualWarningsMap actual warnings, grouped by LineCol
-     * @param warnPluginConfig configuration of warn plugin
-     * @return [TestResult]
+     * @param testFileName
+     * @return [TestStatus]
      */
     @Suppress("TYPE_ALIAS")
     internal fun checkResults(testFileName: String): TestStatus {
-
         val actualWarnings = actualWarningsMap[testFileName] ?: listOf()
         val expectedWarnings = expectedWarningsMap[testFileName] ?: listOf()
 
         // Actual warnings that were found among of Expected warnings (will be filled in matchWithActualWarnings())
-        val actualMatchedWithExpectedWarnings = mutableListOf<Warning>()
+        val actualMatchedWithExpectedWarnings: MutableList<Warning> = mutableListOf()
         // Expected warnings that were found among of Actual warnings
         val expectedWarningsMatchedWithActual = expectedWarnings
             .matchWithActualWarnings(actualWarnings, actualMatchedWithExpectedWarnings)
@@ -61,19 +66,20 @@ class ResultsChecker(
                     expected.message.createRegexFromMessage().matches(actual.message)
         }
 
-        if (matchedWarning != null) actualMatchedWithExpectedWarnings.add(matchedWarning)
+        matchedWarning?.let {
+            actualMatchedWithExpectedWarnings.add(matchedWarning)
+        }
         matchedWarning != null
     }
 
-
     private fun createFailFromSingleMiss(baseText: String, warnings: List<Warning>) =
-        Fail("$baseText: $warnings", "$baseText (${warnings.size})")
+            Fail("$baseText: $warnings", "$baseText (${warnings.size})")
 
     private fun createFailFromDoubleMiss(missingWarnings: List<Warning>, unexpectedWarnings: List<Warning>) =
-        Fail(
-            "$EXPECTED_BUT_NOT_RECEIVED: $missingWarnings, and ${UNEXPECTED.lowercase()}: $unexpectedWarnings",
-            "$EXPECTED_BUT_NOT_RECEIVED (${missingWarnings.size}), and ${UNEXPECTED.lowercase()} (${unexpectedWarnings.size})"
-        )
+            Fail(
+                "$EXPECTED_BUT_NOT_RECEIVED: $missingWarnings, and ${UNEXPECTED.lowercase()}: $unexpectedWarnings",
+                "$EXPECTED_BUT_NOT_RECEIVED (${missingWarnings.size}), and ${UNEXPECTED.lowercase()} (${unexpectedWarnings.size})"
+            )
 
     private fun String.createRegexFromMessage(): Regex {
         // patternForRegexInWarning cannot be null, as it has a default value
@@ -81,12 +87,12 @@ class ResultsChecker(
         val closingDelimiter = warnPluginConfig.patternForRegexInWarning[1]
 
         // searching all delimited regex in the warning
-        val foundDelimitedSubStringsWithRegex = this
+        val foundSubStringsWithRegex = this
             .findDelimitedSubStringsWith(openingDelimiter, closingDelimiter)
             .entries
             .sortedBy { it.key }
 
-        val resultWithRegex = foundDelimitedSubStringsWithRegex.mapIndexed { i, entry ->
+        val resultWithRegex = foundSubStringsWithRegex.mapIndexed { i, entry ->
             val regexInWarning = this.substring(entry.key, entry.value)
             val endOfTheWarning = this
                 .substring(entry.value + closingDelimiter.length, this.length)
@@ -103,39 +109,37 @@ class ResultsChecker(
                     // Example: -> aaa.*
                     val result = beginningOfTheWarning + regexInWarning
                     // if this regex is the only one in the string, we can simply add the remaining end to it
-                    if (foundDelimitedSubStringsWithRegex.size == 1) result + endOfTheWarning else result
+                    if (foundSubStringsWithRegex.size == 1) result + endOfTheWarning else result
                 }
                 else -> {
                     // last regex in the list or some value from the middle of the list
                     val result =
-                    // Getting part of the string from the end of the previous entry till the current one,
-                    // and concatenating it with the regex part
-                        // Example: -> bbb + .*
-                        this.substring(
-                            foundDelimitedSubStringsWithRegex[i - 1].value + closingDelimiter.length,
-                            entry.key - openingDelimiter.length
-                        ).escapeSpecialRegexSymbols() + regexInWarning
+                            // Getting part of the string from the end of the previous entry till the current one,
+                            // and concatenating it with the regex part
+                            // Example: -> bbb + .*
+                            this.substring(
+                                foundSubStringsWithRegex[i - 1].value + closingDelimiter.length,
+                                entry.key - openingDelimiter.length
+                            ).escapeSpecialRegexSymbols() + regexInWarning
 
                     // if the entry is last one in the warning, then adding the tail of the warning and finish
-                    if (i == foundDelimitedSubStringsWithRegex.size - 1) result + endOfTheWarning else result
+                    if (i == foundSubStringsWithRegex.size - 1) result + endOfTheWarning else result
                 }
             }
-        }
+        }.joinToString()
 
         // if no regex were found in the string we should simply escape all symbols
-        val result =
-            if (foundDelimitedSubStringsWithRegex.isEmpty()) this.escapeSpecialRegexSymbols() else resultWithRegex.joinToString(
-                ""
-            )
-        return Regex(result)
+        val res = if (foundSubStringsWithRegex.isEmpty()) this.escapeSpecialRegexSymbols() else resultWithRegex
+
+        return Regex(res)
     }
 
     private fun String.escapeSpecialRegexSymbols() =
-        this.replace(REGEX_SYMBOLS) { "\\${it.groupValues[0]}" }
+            this.replace(regexSymbols) { "\\${it.groupValues[0]}" }
 
     companion object {
         private const val EXPECTED_BUT_NOT_RECEIVED = "Some warnings were expected but not received"
         private const val UNEXPECTED = "Some warnings were unexpected"
-        private val REGEX_SYMBOLS = Regex("[{}()\\[\\].+*?^$\\\\|]")
+        private val regexSymbols = Regex("[{}()\\[\\].+*?^$\\\\|]")
     }
 }
