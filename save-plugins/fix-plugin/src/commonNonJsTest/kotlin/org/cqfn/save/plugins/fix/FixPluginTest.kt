@@ -42,23 +42,6 @@ class FixPluginTest {
         assertEquals("Test1Test.java", pairs.single().first.name)
         assertEquals("Test1Expected.java", pairs.single().second.name)
     }
-
-    @Test
-    fun `tests should have a relative path`() {
-        fs.createFile(tmpDir / "save.toml")
-        fs.createFile(tmpDir / "Test0Test.java")
-        fs.createFile(tmpDir / "Test0Expected.java")
-
-        val results = FixPlugin(
-            TestConfig(tmpDir / "save.toml", null, mutableListOf(FixPluginConfig("")), fs),
-            testFiles = listOf("Test0Test.java", "Test0Expected.java"),
-            fs,
-            useInternalRedirections = false
-        ).discoverTestFiles(tmpDir).toList()
-
-        assertEquals(0, results.size)
-    }
-
     @Test
     fun `should detect two files - among other files`() {
         fs.createFile(tmpDir / "save.toml")
