@@ -1,6 +1,6 @@
 [general]
 tags = ["tag1"]
-description = "chapter 1 tests: with line numbers"
-suiteName = "Chapter1"
+description = "Chapter 1 tests: with line numbers"
+suiteName = "Directory: Chapter 1"
 
 [warn]

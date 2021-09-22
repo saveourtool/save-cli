@@ -128,7 +128,7 @@ data class GeneralConfig(
          * Default regex for expected warnings in test resources, e.g.
          * `// ;warn:2:4: Class name in incorrect case`
          */
-        val defaultExpectedWarningPattern = Regex("// ;warn:?(.*):(\\\\d*): (.+)")
+        val defaultExpectedWarningPattern = Regex("// ;warn:(.+):(\\d+): (.+)")
         val defaultRunConfigPattern = Regex("// RUN: (.+)")
     }
 }
