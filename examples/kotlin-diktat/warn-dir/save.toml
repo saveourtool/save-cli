@@ -1,7 +1,6 @@
 [general]
 tags = ["warn"]
 description = "Test for directory mode"
-suiteName = "warnings"
 execCmd = "java -jar ktlint -R diktat.jar"
 expectedWarningsPattern = "// ;warn:(.+):(\\d+): (.+)"
 
