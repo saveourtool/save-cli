@@ -1,11 +1,8 @@
 package org.cqfn.save.plugin.warn.utils
 
-import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.result.Pass
-import org.cqfn.save.plugin.warn.WarnPlugin
 import org.cqfn.save.plugin.warn.WarnPluginConfig
-import org.cqfn.save.plugin.warn.utils.ResultsChecker
 
 import okio.FileSystem
 

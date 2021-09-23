@@ -141,7 +141,7 @@ class ValidationTest {
         } catch (ex: IllegalArgumentException) {
             assertTrue("Exception message content incorrect: ${ex.message}") {
                 ex.message!!.startsWith(
-                    "Error: All integer values in [warn] section of `${warnConfig.configLocation}` config should be positive!" +
+                    "[Configuration Error]: All integer values in [warn] section of `${warnConfig.configLocation}` config should be positive!" +
                             "\nCurrent configuration: "
                 )
             }

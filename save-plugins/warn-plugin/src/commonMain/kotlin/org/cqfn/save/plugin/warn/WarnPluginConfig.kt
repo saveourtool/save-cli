@@ -45,7 +45,7 @@ import kotlinx.serialization.UseSerializers
  * @property wildCardInDirectoryMode mode that controls that we are targeting our tested tools on directories (not on files)
  * This prefix will be added to the name of the directory, if you would like to use directory mode without any prefix simply use ""
  * @property patternForRegexInWarning symbols that will be used to detect regular expressions in the text of expected warnings in test resource file.
- * For example: for [warn] my {{[hello|world]}} warn patternForRegexInWarning = {{.*}}. Opening and closing symbols should be split with '.*' symbol.
+ * For example: for `[warn] my {{[hello|world]}} warn` patternForRegexInWarning = {{.*}}. Opening and closing symbols should be split with '.*' symbol.
  */
 @Serializable
 data class WarnPluginConfig(
@@ -163,7 +163,7 @@ data class WarnPluginConfig(
         value?.let {
             require(value >= 0) {
                 """
-                    [Critical Error]: All integer values in [warn] section of `$configLocation` config should be positive!
+                    [Configuration Error]: All integer values in [warn] section of `$configLocation` config should be positive!
                     Current configuration: ${this.toString().substringAfter("(").substringBefore(")")}
                 """.trimIndent()
             }
@@ -174,9 +174,9 @@ data class WarnPluginConfig(
         patternForRegexInWarning?.let {
             require(it.size == 2) {
                 """
-                    [Critical Error]: Invalid pattern was provided for the configuration 'patternForRegexInWarning' in [warn] section of `$configLocation` config.
+                    [Configuration Error]: Invalid pattern was provided for the configuration 'patternForRegexInWarning' in [warn] section of `$configLocation` config.
                     Opening and closing symbols that you expect to use as delimiters of regex should be placed in array and split with a comma.
-                    For example: for: "[warn] my {{[hello|world]}} warn" patternForRegexInWarning is ["{{", "}}"].
+                    For example, for: "[warn] my {{[hello|world]}} warn" patternForRegexInWarning is ["{{", "}}"].
                 """.trimIndent()
             }
         }

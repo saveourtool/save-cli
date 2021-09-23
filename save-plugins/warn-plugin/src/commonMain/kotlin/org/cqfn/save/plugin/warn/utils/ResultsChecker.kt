@@ -60,10 +60,13 @@ class ResultsChecker(
         actualMatchedWithExpectedWarnings: MutableList<Warning>
     ) = this.filter { expected ->
         val matchedWarning = actualWarnings.find { actual ->
+            // patternForRegexInWarning cannot be null, as it has a default value
+            val openingDelimiter = warnPluginConfig.patternForRegexInWarning!![0]
+            val closingDelimiter = warnPluginConfig.patternForRegexInWarning[1]
             // matched line and column
             (expected.line == actual.line && expected.column == actual.column) &&
                     // matched text of the message
-                    expected.message.createRegexFromMessage().matches(actual.message)
+                    expected.message.createRegexFromString(openingDelimiter, closingDelimiter).matches(actual.message)
         }
 
         matchedWarning?.let {
@@ -81,65 +84,8 @@ class ResultsChecker(
                 "$EXPECTED_BUT_NOT_RECEIVED (${missingWarnings.size}), and ${UNEXPECTED.lowercase()} (${unexpectedWarnings.size})"
             )
 
-    private fun String.createRegexFromMessage(): Regex {
-        // patternForRegexInWarning cannot be null, as it has a default value
-        val openingDelimiter = warnPluginConfig.patternForRegexInWarning!![0]
-        val closingDelimiter = warnPluginConfig.patternForRegexInWarning[1]
-
-        // searching all delimited regex in the warning
-        val foundSubStringsWithRegex = this
-            .findDelimitedSubStringsWith(openingDelimiter, closingDelimiter)
-            .entries
-            .sortedBy { it.key }
-
-        val resultWithRegex = foundSubStringsWithRegex.mapIndexed { i, entry ->
-            val regexInWarning = this.substring(entry.key, entry.value)
-            val endOfTheWarning = this
-                .substring(entry.value + closingDelimiter.length, this.length)
-                .escapeSpecialRegexSymbols()
-
-            // Example: -> aaa{{.*}}bbb{{.*}}
-            when (i) {
-                // first regex in the list
-                0 -> {
-                    // Example: -> aaa
-                    val beginningOfTheWarning = this
-                        .substring(0, entry.key - openingDelimiter.length)
-                        .escapeSpecialRegexSymbols()
-                    // Example: -> aaa.*
-                    val result = beginningOfTheWarning + regexInWarning
-                    // if this regex is the only one in the string, we can simply add the remaining end to it
-                    if (foundSubStringsWithRegex.size == 1) result + endOfTheWarning else result
-                }
-                else -> {
-                    // last regex in the list or some value from the middle of the list
-                    val result =
-                            // Getting part of the string from the end of the previous entry till the current one,
-                            // and concatenating it with the regex part
-                            // Example: -> bbb + .*
-                            this.substring(
-                                foundSubStringsWithRegex[i - 1].value + closingDelimiter.length,
-                                entry.key - openingDelimiter.length
-                            ).escapeSpecialRegexSymbols() + regexInWarning
-
-                    // if the entry is last one in the warning, then adding the tail of the warning and finish
-                    if (i == foundSubStringsWithRegex.size - 1) result + endOfTheWarning else result
-                }
-            }
-        }.joinToString("")
-
-        // if no regex were found in the string we should simply escape all symbols
-        val res = if (foundSubStringsWithRegex.isEmpty()) this.escapeSpecialRegexSymbols() else resultWithRegex
-
-        return Regex(res)
-    }
-
-    private fun String.escapeSpecialRegexSymbols() =
-            this.replace(regexSymbols) { "\\${it.groupValues[0]}" }
-
     companion object {
         private const val EXPECTED_BUT_NOT_RECEIVED = "Some warnings were expected but not received"
         private const val UNEXPECTED = "Some warnings were unexpected"
-        private val regexSymbols = Regex("[{}()\\[\\].+*?^$\\\\|]")
     }
 }

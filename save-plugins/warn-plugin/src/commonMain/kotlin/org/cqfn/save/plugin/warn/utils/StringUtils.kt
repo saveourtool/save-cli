@@ -9,7 +9,7 @@ private val delimiterNotFound = Pair(-1, -1)
 /**
  * Finding indexes of all delimited groups.
  * For example, if openingDelimiter = ( , closingDelimiter = ) , this = aaa(bbb)ccc(eee) =>
- * method will return indexes of the delimited string (start inclusive, end - exclusive) - bbb - map(4 = 6, 12 = 14), counted from 0.
+ * method will return indexes of the delimited string (start inclusive, end exclusive) - bbb - map(4 = 6, 12 = 14), counted from 0.
  *
  * @param openingDelimiter opening group of symbols that is used to separate pattern
  * @param closingDelimiter closing group of symbols that is used to separate pattern
@@ -39,7 +39,7 @@ fun String.findDelimitedSubStringsWith(openingDelimiter: String, closingDelimite
 /**
  * Finding the first group of strings that is delimited by openingDelimiter and closingDelimiter.
  * For example, if openingDelimiter = ( , closingDelimiter = ) , this = aaa(bbb)ccc(eee) =>
- * method will return indexes delimited string (start inclusive, end - exclusive) - bbb - Pair(4, 6), counted from 0.
+ * method will return indexes delimited string (start inclusive, end exclusive) - bbb - Pair(4, 6), counted from 0.
  *
  * Returns DELIMITER_NOT_FOUND - Pair(-1, -1) if no opening/closing group found
  *
@@ -75,3 +75,66 @@ fun String.findFirstDelimitedSubStringBy(openingDelimiter: String, closingDelimi
 
     return foundOpenSymbols + openingDelimiter.length to foundClosingSymbols
 }
+
+/**
+ * Translating the string to the regular expression. For example:
+ * "my [special] string{{.*}}should be escaped" -> Regex("my \[special\] string.*should be escaped")
+ *
+ * @param openingDelimiter opening group of symbols that is used to separate pattern
+ * @param closingDelimiter closing group of symbols that is used to separate pattern
+ * @return Regex with an escaped string
+ */
+fun String.createRegexFromString(openingDelimiter: String, closingDelimiter: String): Regex {
+    // searching all delimited regex in the warning
+    val foundSubStringsWithRegex = this
+        .findDelimitedSubStringsWith(openingDelimiter, closingDelimiter)
+        .entries
+        .sortedBy { it.key }
+
+    val resultWithRegex = foundSubStringsWithRegex.mapIndexed { i, entry ->
+        val regexInWarning = this.substring(entry.key, entry.value)
+        val endOfTheWarning = this
+            .substring(entry.value + closingDelimiter.length, this.length)
+            .escapeSpecialRegexSymbols()
+
+        // Example: -> aaa{{.*}}bbb{{.*}}
+        when (i) {
+            // first regex in the list
+            0 -> {
+                // Example: -> aaa
+                val beginningOfTheWarning = this
+                    .substring(0, entry.key - openingDelimiter.length)
+                    .escapeSpecialRegexSymbols()
+                // Example: -> aaa.*
+                val result = beginningOfTheWarning + regexInWarning
+                // if this regex is the only one in the string, we can simply add the remaining end to it
+                if (foundSubStringsWithRegex.size == 1) result + endOfTheWarning else result
+            }
+            else -> {
+                // last regex in the list or some value from the middle of the list
+                val result =
+                        // Getting part of the string from the end of the previous entry till the current one,
+                        // and concatenating it with the regex part
+                        // Example: -> bbb + .*
+                        this.substring(
+                            foundSubStringsWithRegex[i - 1].value + closingDelimiter.length,
+                            entry.key - openingDelimiter.length
+                        ).escapeSpecialRegexSymbols() + regexInWarning
+
+                // if the entry is last one in the warning, then adding the tail of the warning and finish
+                if (i == foundSubStringsWithRegex.size - 1) result + endOfTheWarning else result
+            }
+        }
+    }.joinToString("")
+
+    // if no regex were found in the string we should simply escape all symbols
+    val res = if (foundSubStringsWithRegex.isEmpty()) this.escapeSpecialRegexSymbols() else resultWithRegex
+
+    return Regex(res)
+}
+
+/**
+ * replacing special symbols in the string with the escaped symbol
+ */
+private fun String.escapeSpecialRegexSymbols() =
+        this.replace(Regex("[{}()\\[\\].+*?^$\\\\|]")) { "\\${it.groupValues[0]}" }

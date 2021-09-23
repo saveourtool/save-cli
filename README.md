@@ -65,7 +65,7 @@ language=c++
 
 OR you can pass these arguments directly in command line: 
 ```bash
-save --report-type=json --language=java
+save --report-type json --language java
 ```
 
 SAVE framework is able to automatically detect your tests, run your analyzer on these tests, calculate the pass-rate and return test results in the expected format.
