@@ -56,7 +56,7 @@ class Save(
         val testRootPath = saveProperties.testFiles!!.get(0).toPath()
         val rootTestConfigPath = testRootPath / "save.toml"
         val (requestedConfigs, requestedTests) = saveProperties.testFiles!!
-            .filterIndexed { index, _ -> index > 0 }
+            .drop(1)
             .map { testRootPath / it }
             .map { it.toString() }
             .partition { it.toPath().isSaveTomlConfig() }
@@ -64,38 +64,46 @@ class Save(
         val excludeSuites = saveProperties.excludeSuites?.split(",") ?: emptyList()
 
         reporter.beforeAll()
-        var atLeastOneExecutionProvided = false
+
         // get all toml configs in file system
-        ConfigDetector(fs)
+        val testConfigs = ConfigDetector(fs)
             .configFromFile(rootTestConfigPath)
             .getAllTestConfigsForFiles(requestedConfigs)
-            .forEach { testConfig ->
-                // iterating top-down
-                testConfig
-                    // fully process this config's configuration sections
-                    .processInPlace()
-                    // create plugins and choose only active (with test resources) ones
-                    .buildActivePlugins(requestedTests)
-                    .takeIf { plugins ->
-                        plugins.isNotEmpty() && plugins.first().isFromEnabledSuite(includeSuites, excludeSuites)
-                    }
-                    ?.also {
-                        // configuration has been already validated by this point, and if there are active plugins, then suiteName is not null
-                        reporter.onSuiteStart(testConfig.getGeneralConfig()?.suiteName!!)
-                    }
-                    ?.forEach {
-                        atLeastOneExecutionProvided = true
-                        // execute created plugins
-                        executePlugin(it, reporter)
-                    }
-                    ?.also {
-                        reporter.onSuiteEnd(testConfig.getGeneralConfig()?.suiteName!!)
-                    }
-            }
+        var atLeastOneExecutionProvided = false
+        testConfigs.forEach { testConfig ->
+            // iterating top-down
+            testConfig
+                // fully process this config's configuration sections
+                .processInPlace()
+                // create plugins and choose only active (with test resources) ones
+                .buildActivePlugins(requestedTests)
+                .takeIf { plugins ->
+                    plugins.isNotEmpty() && plugins.first().isFromEnabledSuite(includeSuites, excludeSuites)
+                }
+                ?.also {
+                    // configuration has been already validated by this point, and if there are active plugins, then suiteName is not null
+                    reporter.onSuiteStart(testConfig.getGeneralConfig()?.suiteName!!)
+                }
+                ?.forEach {
+                    atLeastOneExecutionProvided = true
+                    // execute created plugins
+                    executePlugin(it, reporter)
+                }
+                ?.also {
+                    reporter.onSuiteEnd(testConfig.getGeneralConfig()?.suiteName!!)
+                }
+        }
+        val saveToml = testConfigs.map { it.getGeneralConfig()?.configLocation }
+        val excluded = testConfigs.map { it.getGeneralConfig()?.excludedTests?.toMutableList() ?: emptyList() }
+            .reduceOrNull { acc, list -> acc + list }
+        val excludedNote = excluded?.let {
+            "Note: please check excludedTests: $excluded in following save.toml files: $saveToml"
+        } ?: ""
         if (!atLeastOneExecutionProvided) {
             val warnMsg = if (requestedTests.isNotEmpty()) {
-                """|Couldn't found any satisfied test resources for `$requestedTests`
+                """|Couldn't find any satisfied test resources for `$requestedTests`
                    |Please check the correctness of command and consider, that the last arguments treats as test file names for individual execution.
+                   |$excludedNote
                 """.trimMargin()
             } else {
                 "SAVE wasn't able to run tests, please check the correctness of configuration and test resources"

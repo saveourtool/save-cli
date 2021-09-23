@@ -58,12 +58,13 @@ class ClassicWarnTest {
             )
 
     @Test
+    @Ignore
     fun `execute warn plugin with included and excluded suites`() =
             runTestsWithDiktat(
                 emptyList(), 1
             ) {
-                includeSuites = "Autofix and Warn,Unknown name"
-                excludeSuites = "Directory: Chapter1,Directory: Chapter2,Unknown name"
+                includeSuites = "Autofix and Warn"
+                excludeSuites = "Directory: Chapter1"
             }
 
     @Test
