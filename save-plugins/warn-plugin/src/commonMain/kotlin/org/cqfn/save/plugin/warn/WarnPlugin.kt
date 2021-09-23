@@ -12,10 +12,9 @@ import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.plugin.resolvePlaceholdersFrom
 import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Fail
-import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
-import org.cqfn.save.core.result.TestStatus
 import org.cqfn.save.core.utils.ProcessExecutionException
+import org.cqfn.save.plugin.warn.utils.ResultsChecker
 import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
 import org.cqfn.save.plugin.warn.utils.getLineNumber
@@ -40,9 +39,8 @@ class WarnPlugin(
     testFiles,
     fileSystem,
     useInternalRedirections,
-    redirectTo) {
-    private val expectedAndNotReceived = "Some warnings were expected but not received"
-    private val unexpected = "Some warnings were unexpected"
+    redirectTo
+) {
     private lateinit var extraFlagsExtractor: ExtraFlagsExtractor
 
     override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
@@ -92,7 +90,7 @@ class WarnPlugin(
         generalConfig: GeneralConfig
     ): Sequence<TestResult> {
         // extracting all warnings from test resource files
-        val expectedWarnings: WarningMap = paths.associate {
+        val expectedWarningsMap: WarningMap = paths.associate {
             val warningsForCurrentPath = it.collectWarningsWithLineNumbers(warnPluginConfig, generalConfig)
             it.name to warningsForCurrentPath
         }
@@ -107,7 +105,7 @@ class WarnPlugin(
         }
         val extraFlags = extraFlagsList.singleOrNull() ?: ExtraFlags("", "")
 
-        if (expectedWarnings.isEmpty()) {
+        if (expectedWarningsMap.isEmpty()) {
             logWarn(
                 "No expected warnings were found using the following regex pattern:" +
                         " [${generalConfig.expectedWarningsPattern}] in the test files: $paths." +
@@ -162,14 +160,16 @@ class WarnPlugin(
             .groupBy { it.fileName }
             .mapValues { (_, warning) -> warning.sortedBy { it.message } }
 
+        val resultsChecker = ResultsChecker(
+            expectedWarningsMap,
+            actualWarningsMap,
+            warnPluginConfig
+        )
+
         return paths.map { path ->
             TestResult(
                 listOf(path),
-                checkResults(
-                    expectedWarnings[path.name] ?: listOf(),
-                    actualWarningsMap[path.name] ?: listOf(),
-                    warnPluginConfig
-                ),
+                resultsChecker.checkResults(path.name),
                 DebugInfo(
                     stdout.filter { it.contains(path.name) }.joinToString("\n"),
                     stderr.filter { it.contains(path.name) }.joinToString("\n"),
@@ -214,40 +214,4 @@ class WarnPlugin(
             .filterNotNull()
             .sortedBy { warn -> warn.message }
     }
-
-    /**
-     * Compares actual and expected warnings and returns TestResult
-     *
-     * @param expectedWarningsMap expected warnings, grouped by LineCol
-     * @param actualWarningsMap actual warnings, grouped by LineCol
-     * @param warnPluginConfig configuration of warn plugin
-     * @return [TestResult]
-     */
-    @Suppress("TYPE_ALIAS")
-    internal fun checkResults(
-        expectedWarningsMap: List<Warning>,
-        actualWarningsMap: List<Warning>,
-        warnPluginConfig: WarnPluginConfig
-    ): TestStatus {
-        val missingWarnings = expectedWarningsMap - actualWarningsMap
-        val unexpectedWarnings = actualWarningsMap - expectedWarningsMap
-
-        return when (missingWarnings.isEmpty() to unexpectedWarnings.isEmpty()) {
-            false to true -> createFail(expectedAndNotReceived, missingWarnings)
-            false to false -> Fail(
-                "$expectedAndNotReceived: $missingWarnings, and ${unexpected.lowercase()}: $unexpectedWarnings",
-                "$expectedAndNotReceived (${missingWarnings.size}), and ${unexpected.lowercase()} (${unexpectedWarnings.size})"
-            )
-            true to false -> if (warnPluginConfig.exactWarningsMatch == false) {
-                Pass("$unexpected: $unexpectedWarnings", "$unexpected: ${unexpectedWarnings.size} warnings")
-            } else {
-                createFail(unexpected, unexpectedWarnings)
-            }
-            true to true -> Pass(null)
-            else -> Fail("", "")
-        }
-    }
-
-    private fun createFail(baseText: String, warnings: List<Warning>) =
-            Fail("$baseText: $warnings", "$baseText (${warnings.size})")
 }

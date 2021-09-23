@@ -1,6 +1,6 @@
 package org.cqfn.save.plugin.warn.utils
 
-import org.cqfn.save.core.plugin.GeneralConfig.Companion.defaultInputPattern
+import org.cqfn.save.core.plugin.GeneralConfig.Companion.defaultExpectedWarningPattern
 import org.cqfn.save.plugin.warn.WarnPluginConfig
 
 import kotlin.test.Test
@@ -19,19 +19,19 @@ class UtilsTest {
             config,
             "// ;warn:1:2: Foo bar baz",
             Warning("Foo bar baz", 1, 2, "Test.kt"),
-            defaultInputPattern
+            defaultExpectedWarningPattern
         )
         assertExtracts(
             config,
             "// ;warn:1:2:  Foo bar baz",
             Warning("Foo bar baz", 1, 2, "Test.kt"),
-            defaultInputPattern
+            defaultExpectedWarningPattern
         )
-        assertExtractionFails(config, "// warn:1:2 Foo bar baz", defaultInputPattern)
-        assertExtractionFails(config, "// ;warn:1: Foo bar baz", defaultInputPattern)
-        assertExtractionFails(config, "// ;warn:1:: Foo bar baz", defaultInputPattern)
-        assertExtractionFails(config, "// ;warn:1:2:", defaultInputPattern)
-        assertExtractionFails(config, "// ;warn:1:2: ", defaultInputPattern)
+        assertExtractionFails(config, "// warn:1:2 Foo bar baz", defaultExpectedWarningPattern)
+        assertExtractionFails(config, "// ;warn:1: Foo bar baz", defaultExpectedWarningPattern)
+        assertExtractionFails(config, "// ;warn:1:: Foo bar baz", defaultExpectedWarningPattern)
+        assertExtractionFails(config, "// ;warn:1:2:", defaultExpectedWarningPattern)
+        assertExtractionFails(config, "// ;warn:1:2: ", defaultExpectedWarningPattern)
     }
 
     @Test
@@ -98,6 +98,7 @@ class UtilsTest {
             null,
             null,
         )
+
         val warning = text.extractWarning(
             expectedWarningsPattern,
             fileName = "Test.kt",
@@ -105,6 +106,7 @@ class UtilsTest {
             columnGroupIdx = warnPluginConfig.columnCaptureGroup,
             messageGroupIdx = warnPluginConfig.messageCaptureGroup!!
         )
+
         requireNotNull(warning)
         assertEquals(expectedWarning, warning)
     }

@@ -2,7 +2,10 @@
 Plugin that runs the provided executable and compares emitted warnings with expected; expected warnings are set in the same input files.
 Please note, that it is important for test resources to have specific postfixes. For test file it should be `Test`.
 
-## Source files
+### Examples
+If you don't like to read long readme file, you can simply check [examples](/examples/kotlin-diktat/warn).
+
+### Source files
 Test source files (input for SAVE) should have a comment line (use single-line commenting syntax of the target programming language for it)
 with a warning in the following format: `;warn:$line:$column: Warning text`. Note, that this warning can be put into any place of the code.
 Also note, that if your warning text does not contain line or column - you can disable it by the following code in `save.toml`:
@@ -11,16 +14,29 @@ warningTextHasColumn = false
 warningTextHasLine = false
 ```
 
-If `ignore-save-comments` is set to `true` in `save.properties`, than line numbers are determined skipping the lines with warning markers, i.e.
-```java
-// this is line 1
-// ;warn:2:1: This will trigger on line 3
-// this is line 3, but will be treated as line 2
-```
-
 If `exactWarningsMatch` is set to `true` in `save.toml`, then an exact match of expected and actual warnings is required.
 
-## Configuration
+### Warning messages
+Warning messages are very flexible and can be described in very different ways:
+```
+// ;warn:$line+1:5: Warning with a placeholder $line (configurable with `linePlaceholder` option in save.toml)
+```
+```
+// ;warn:35: Warning that points to the NEXT line of the code (no need to set line number explicily)
+```
+```
+// ;warn:3:1: Warning with an explicit set of a line number and column number
+```
+
+### Regular expressions in warnings
+Regular expressions can be used in warning messages.
+To configure delimiters, use `patternForRegexInWarning` option (default: `"{{", "}}"`):
+```
+// ;warn:35: Warning [that] points{{ my regex.* }}to the NEXT line of the code{{.*}}
+```
+No need to escape special symbols outside of delimiters. It will be done automatically.
+
+### Configuration
 Assuming you want to run your tool on input file `path/to/example/ExampleTest1.kt`,
 and you have directory structure like this
 ```bash
@@ -86,6 +102,7 @@ batchSize = 1 # (default value)
 batchSeparator  = ", " # (default value)
 defaultLineMode = false
 linePlaceholder = "$line"
+patternForRegexInWarning = ["{{", "}}"]
 ```
 
 When executed from project root (where `save.propertes` is located), SAVE will cd to `rootDir` and discover all files
@@ -101,7 +118,7 @@ with `lineCaptureGroup`, `columnCaptureGroup` and `messageCaptureGroup` paramete
 usually you'll want them to be consistent to make testing easier, i.e. if input has line number, then so should output.
 `testNameSuffix` must include suffix name of the test file.
 
-## Customize `execCmd` per file
+### Customize `execCmd` per file
 As the next level of customization, execution command can be customized per individual test. To do so, one can use a special comment in that file.
 The pattern of the comment is taken from `WarnPluginConfig.runConfigPattern`. It should contain a single capture group, which corresponds to
 execution command.

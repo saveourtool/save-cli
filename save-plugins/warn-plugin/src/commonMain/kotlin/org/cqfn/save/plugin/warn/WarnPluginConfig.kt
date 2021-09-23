@@ -42,8 +42,10 @@ import kotlinx.serialization.UseSerializers
  * @property batchSize it controls how many files execCmd will process at a time.
  * @property batchSeparator separator for batch mode
  * @property linePlaceholder placeholder for line number, which resolved as current line and support addition and subtraction
- * @property wildCardInDirectoryMode mode that controls that we are targeting our tested tools on directories (not on files).
+ * @property wildCardInDirectoryMode mode that controls that we are targeting our tested tools on directories (not on files)
  * This prefix will be added to the name of the directory, if you would like to use directory mode without any prefix simply use ""
+ * @property patternForRegexInWarning symbols that will be used to detect regular expressions in the text of expected warnings in test resource file.
+ * For example: for `[warn] my {{[hello|world]}} warn` patternForRegexInWarning = {{.*}}. Opening and closing symbols should be split with '.*' symbol.
  */
 @Serializable
 data class WarnPluginConfig(
@@ -64,7 +66,9 @@ data class WarnPluginConfig(
     val testNameSuffix: String? = null,
     val linePlaceholder: String? = null,
     val wildCardInDirectoryMode: String? = null,
+    val patternForRegexInWarning: List<String>? = null,
 ) : PluginConfig {
+    @Transient
     override val type = TestConfigSections.WARN
 
     @Transient
@@ -100,6 +104,7 @@ data class WarnPluginConfig(
             this.testNameSuffix ?: other.testNameSuffix,
             this.linePlaceholder ?: other.linePlaceholder,
             this.wildCardInDirectoryMode ?: other.wildCardInDirectoryMode,
+            this.patternForRegexInWarning ?: other.patternForRegexInWarning
         )
     }
 
@@ -110,6 +115,8 @@ data class WarnPluginConfig(
         "TOO_LONG_FUNCTION"
     )
     override fun validateAndSetDefaults(): WarnPluginConfig {
+        requireValidPatternForRegexInWarning()
+
         val newWarningTextHasLine = warningTextHasLine ?: true
         val newWarningTextHasColumn = warningTextHasColumn ?: true
 
@@ -124,9 +131,12 @@ data class WarnPluginConfig(
         val newLineCaptureGroupOut = if (newWarningTextHasLine) (lineCaptureGroupOut ?: 2) else null
         val newColumnCaptureGroupOut = if (newWarningTextHasColumn) (columnCaptureGroupOut ?: 3) else null
         val newMessageCaptureGroupOut = messageCaptureGroupOut ?: 4
+
+        // FixMe: why these requires are at the end of logic? Should be moved to the beginning of the method? kgevorkyan
         requirePositiveIfNotNull(lineCaptureGroup)
         requirePositiveIfNotNull(columnCaptureGroup)
         requirePositiveIfNotNull(messageCaptureGroup)
+
         return WarnPluginConfig(
             execFlags ?: "",
             actualWarningsPattern ?: defaultOutputPattern,
@@ -145,6 +155,7 @@ data class WarnPluginConfig(
             testNameSuffix ?: "Test",
             linePlaceholder ?: "\$line",
             wildCardInDirectoryMode,
+            patternForRegexInWarning ?: defaultPatternForRegexInWarning
         )
     }
 
@@ -152,8 +163,20 @@ data class WarnPluginConfig(
         value?.let {
             require(value >= 0) {
                 """
-                    Error: All integer values in [warn] section of `$configLocation` config should be positive!
+                    [Configuration Error]: All integer values in [warn] section of `$configLocation` config should be positive!
                     Current configuration: ${this.toString().substringAfter("(").substringBefore(")")}
+                """.trimIndent()
+            }
+        }
+    }
+
+    private fun requireValidPatternForRegexInWarning() {
+        patternForRegexInWarning?.let {
+            require(it.size == 2) {
+                """
+                    [Configuration Error]: Invalid pattern was provided for the configuration 'patternForRegexInWarning' in [warn] section of `$configLocation` config.
+                    Opening and closing symbols that you expect to use as delimiters of regex should be placed in array and split with a comma.
+                    For example, for: "[warn] my {{[hello|world]}} warn" patternForRegexInWarning is ["{{", "}}"].
                 """.trimIndent()
             }
         }
@@ -165,5 +188,6 @@ data class WarnPluginConfig(
          * ```[WARN] /path/to/resources/ClassNameTest.java:2:4: Class name in incorrect case```
          */
         internal val defaultOutputPattern = Regex("(.+):(\\d*):(\\d*): (.+)")
+        internal val defaultPatternForRegexInWarning = listOf("{{", "}}")
     }
 }

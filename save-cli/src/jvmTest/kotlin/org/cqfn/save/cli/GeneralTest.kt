@@ -21,7 +21,8 @@ import kotlinx.serialization.json.Json
     "TOO_LONG_FUNCTION",
     "INLINE_CLASS_CAN_BE_USED",
     "MISSING_KDOC_TOP_LEVEL",
-    "MISSING_KDOC_CLASS_ELEMENTS")
+    "MISSING_KDOC_CLASS_ELEMENTS"
+)
 @OptIn(ExperimentalSerializationApi::class)
 class GeneralTest {
     private val fs = FileSystem.SYSTEM
@@ -81,7 +82,8 @@ class GeneralTest {
             report.pluginExecutions.forEach { pluginExecution ->
                 pluginExecution.testResults.forEach { result ->
                     println(result.status)
-                    assertTrue(result.status is Pass)
+                    result.resources.find { it.name == "ThisShouldAlwaysFailTest.kt" }
+                        ?: assertTrue(result.status is Pass)
                 }
             }
         }
