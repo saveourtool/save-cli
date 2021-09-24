@@ -115,6 +115,14 @@ data class WarnPluginConfig(
         "TOO_LONG_FUNCTION"
     )
     override fun validateAndSetDefaults(): WarnPluginConfig {
+        requirePositiveIfNotNull(lineCaptureGroup)
+        requirePositiveIfNotNull(columnCaptureGroup)
+        requirePositiveIfNotNull(messageCaptureGroup)
+        requirePositiveIfNotNull(fileNameCaptureGroupOut)
+        requirePositiveIfNotNull(lineCaptureGroupOut)
+        requirePositiveIfNotNull(columnCaptureGroupOut)
+        requirePositiveIfNotNull(messageCaptureGroupOut)
+        requirePositiveIfNotNull(batchSize)
         requireValidPatternForRegexInWarning()
 
         val newWarningTextHasLine = warningTextHasLine ?: true
@@ -131,11 +139,6 @@ data class WarnPluginConfig(
         val newLineCaptureGroupOut = if (newWarningTextHasLine) (lineCaptureGroupOut ?: 2) else null
         val newColumnCaptureGroupOut = if (newWarningTextHasColumn) (columnCaptureGroupOut ?: 3) else null
         val newMessageCaptureGroupOut = messageCaptureGroupOut ?: 4
-
-        // FixMe: why these requires are at the end of logic? Should be moved to the beginning of the method? kgevorkyan
-        requirePositiveIfNotNull(lineCaptureGroup)
-        requirePositiveIfNotNull(columnCaptureGroup)
-        requirePositiveIfNotNull(messageCaptureGroup)
 
         return WarnPluginConfig(
             execFlags ?: "",

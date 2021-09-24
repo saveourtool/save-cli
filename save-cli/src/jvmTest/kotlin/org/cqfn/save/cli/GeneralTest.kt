@@ -55,8 +55,6 @@ class GeneralTest {
         assertTrue(fs.exists((examplesDir.toPath() / "diktat.jar")))
         assertTrue(fs.exists((examplesDir.toPath() / "ktlint")))
 
-        Thread.sleep(10_000)
-
         // Make sure, that we will check report, which will be obtained after current execution; remove old report if exist
         val reportFile = examplesDir.toPath() / "save.out.json".toPath()
         if (fs.exists(reportFile)) {
@@ -72,6 +70,10 @@ class GeneralTest {
         if (pb.stderr.isNotEmpty()) {
             println("Warning and errors during SAVE execution:\n${pb.stderr.joinToString("\n")}")
         }
+
+        // We need some time, before the report will be completely filled
+        Thread.sleep(10_000)
+
         // Report should be created after successful completion
         assertTrue(fs.exists(reportFile))
 
