@@ -38,7 +38,7 @@ class ClassicWarnTest {
             runTestsWithDiktat(
                 listOf(
                     "warn/chapter1"
-                ), 2
+                ), 3
             )
 
     @Test
@@ -46,7 +46,7 @@ class ClassicWarnTest {
             runTestsWithDiktat(
                 listOf(
                     "warn/save.toml"
-                ), 2
+                ), 3
             )
 
     @Test
@@ -54,16 +54,17 @@ class ClassicWarnTest {
             runTestsWithDiktat(
                 listOf(
                     "warn/chapter1/save.toml"
-                ), 2
+                ), 3
             )
 
     @Test
+    @Ignore
     fun `execute warn plugin with included and excluded suites`() =
             runTestsWithDiktat(
-                emptyList(), 2
+                emptyList(), 1
             ) {
-                includeSuites = "warnings,DocsCheck"
-                excludeSuites = "Chapter1,Chapter2,Chapter3"
+                includeSuites = "Autofix and Warn"
+                excludeSuites = "Directory: Chapter1"
             }
 
     @Test

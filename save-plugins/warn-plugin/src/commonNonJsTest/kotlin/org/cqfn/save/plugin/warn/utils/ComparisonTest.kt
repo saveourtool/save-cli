@@ -1,9 +1,7 @@
 package org.cqfn.save.plugin.warn.utils
 
-import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.result.Pass
-import org.cqfn.save.plugin.warn.WarnPlugin
 import org.cqfn.save.plugin.warn.WarnPluginConfig
 
 import okio.FileSystem
@@ -35,31 +33,28 @@ class ComparisonTest {
     @Suppress("TYPE_ALIAS")
     fun `should compare warnings`() {
         val resourceFileName = "resource"
-        val expectedWarningsMap: Map<String?, List<Warning>> = mapOf(
+        val expectedWarningsMap: Map<String, List<Warning>> = mapOf(
             ("filename") to listOf(
                 Warning("foo", 8, 5, resourceFileName)
             )
         )
-        val actualWarningsMap: Map<String?, List<Warning>> = mapOf(
+        val actualWarningsMap: Map<String, List<Warning>> = mapOf(
             ("filename") to listOf(
                 Warning("bar", 8, 5, resourceFileName),
                 Warning("baz", 8, 5, resourceFileName),
                 Warning("foo", 8, 5, resourceFileName)
             )
         )
-        val warnPluginConfig = WarnPluginConfig(exactWarningsMatch = false)
+        val warnPluginConfig = WarnPluginConfig(exactWarningsMatch = false, patternForRegexInWarning = listOf("{{", "}}"))
         val config = fs.createFile(tmpDir / "save.toml")
 
-        val testStatus = WarnPlugin(
-            TestConfig(config, null, mutableListOf(warnPluginConfig), fs),
-            testFiles = emptyList(),
-            fs,
-        )
-            .checkResults(expectedWarningsMap["filename"]!!, actualWarningsMap["filename"]!!, warnPluginConfig)
+        val results = ResultsChecker(
+            expectedWarningsMap, actualWarningsMap, warnPluginConfig
+        ).checkResults("filename")
 
-        assertTrue(testStatus is Pass, "Actual type of status is ${testStatus::class}")
+        assertTrue(results is Pass, "Actual type of status is ${results::class}")
         assertEquals(
             "Some warnings were unexpected: ${actualWarningsMap.values.single().dropLast(1)}",
-            testStatus.message)
+            results.message)
     }
 }

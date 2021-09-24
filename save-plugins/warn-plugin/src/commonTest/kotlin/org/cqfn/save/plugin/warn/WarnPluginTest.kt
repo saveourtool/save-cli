@@ -431,7 +431,6 @@ class WarnPluginTest {
         )
             .execute()
             .toList()
-        println(results)
         assertion(results)
     }
 }

@@ -114,6 +114,7 @@ internal fun String.getLineNumber(warningRegex: Regex,
 
     val groups = warningRegex.find(this)?.groups ?: return null
     val lineValue = groups[lineGroupIdx.toInt()]!!.value
+
     return if (lineValue.isEmpty() && lineNum != null && linesFile != null) {
         nextLineNotMatchingRegex(file!!, warningRegex, linesFile, lineNum)
     } else {
