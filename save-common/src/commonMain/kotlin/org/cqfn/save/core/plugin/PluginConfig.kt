@@ -89,7 +89,7 @@ data class GeneralConfig(
             this.excludedTests ?: other.excludedTests,
             this.expectedWarningsPattern ?: other.expectedWarningsPattern,
             this.runConfigPattern ?: other.runConfigPattern,
-        )
+        ).also { it.configLocation = this.configLocation }
     }
 
     override fun validateAndSetDefaults(): GeneralConfig {
@@ -113,7 +113,7 @@ data class GeneralConfig(
             excludedTests ?: emptyList(),
             expectedWarningsPattern ?: defaultExpectedWarningPattern,
             runConfigPattern ?: defaultRunConfigPattern,
-        )
+        ).also { it.configLocation = this.configLocation }
     }
 
     private fun errorMsgForRequireCheck(field: String) =

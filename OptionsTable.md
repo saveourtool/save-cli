@@ -7,7 +7,7 @@ Most (except for `-h` and `-prop`) of the options below can be passed to a SAVE 
 | t | threads | Number of threads | 1 |
 | d | debug | Turn on debug logging | false |
 | q | quiet | Do not log anything | false |
-| - | report-type | Type of generated report with execution results | JSON |
+| - | report-type | Type of generated report with execution results | PLAIN |
 | b | baseline | Path to the file with baseline data | - |
 | e | exclude-suites | Test suites, which won't be checked | - |
 | i | include-suites | Test suites, only which ones will be checked | - |

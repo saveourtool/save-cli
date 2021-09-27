@@ -1,7 +1,6 @@
 [general]
     tags = ["warn"]
     description = "Test for directory mode"
-    suiteName = "Null Pointer"
 
 [warn]
     # suffix to detect tests
