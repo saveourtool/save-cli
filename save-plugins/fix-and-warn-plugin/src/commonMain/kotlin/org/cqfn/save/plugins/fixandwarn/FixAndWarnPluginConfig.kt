@@ -32,7 +32,7 @@ data class FixAndWarnPluginConfig(
         return FixAndWarnPluginConfig(
             mergedFixPluginConfig as FixPluginConfig,
             mergedWarnPluginConfig as WarnPluginConfig
-        )
+        ).also { it.configLocation = this.configLocation }
     }
 
     override fun validateAndSetDefaults(): PluginConfig {
@@ -48,6 +48,6 @@ data class FixAndWarnPluginConfig(
         return FixAndWarnPluginConfig(
             fix.validateAndSetDefaults(),
             warn.validateAndSetDefaults()
-        )
+        ).also { it.configLocation = this.configLocation }
     }
 }

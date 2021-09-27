@@ -110,7 +110,7 @@ data class WarnPluginConfig(
             this.linePlaceholder ?: other.linePlaceholder,
             this.wildCardInDirectoryMode ?: other.wildCardInDirectoryMode,
             this.patternForRegexInWarning ?: other.patternForRegexInWarning
-        )
+        ).also { it.configLocation = this.configLocation }
     }
 
     @Suppress(
@@ -164,7 +164,7 @@ data class WarnPluginConfig(
             linePlaceholder ?: "\$line",
             wildCardInDirectoryMode,
             patternForRegexInWarning ?: defaultPatternForRegexInWarning
-        )
+        ).also { it.configLocation = this.configLocation }
     }
 
     private fun requirePositiveIfNotNull(value: Long?) {
