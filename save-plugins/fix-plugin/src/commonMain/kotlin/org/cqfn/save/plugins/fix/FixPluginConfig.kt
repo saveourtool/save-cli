@@ -60,7 +60,7 @@ data class FixPluginConfig(
             this.batchSeparator ?: other.batchSeparator,
             this.resourceNameTestSuffix ?: other.resourceNameTestSuffix,
             this.resourceNameExpectedSuffix ?: other.resourceNameExpectedSuffix,
-        )
+        ).also { it.configLocation = this.configLocation }
     }
 
     override fun validateAndSetDefaults() = FixPluginConfig(
@@ -69,5 +69,5 @@ data class FixPluginConfig(
         batchSeparator ?: ", ",
         resourceNameTest,
         resourceNameExpected
-    )
+    ).also { it.configLocation = this.configLocation }
 }

@@ -1,7 +1,6 @@
 [general]
     tags = ["fix"]
     description = "Test autofixing of issues discovered by diKTat"
-    suiteName = "autofix"
 
 [fix]
     execFlags = "-F"

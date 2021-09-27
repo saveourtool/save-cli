@@ -37,7 +37,7 @@
       "fullName" : "report-type",
       "shortName" : "",
       "description" : "Type of generated report with execution results",
-      "default" : "ReportType.JSON"
+      "default" : "ReportType.PLAIN"
     },
     "baseline" : {
       "argType" : "ArgType.String",

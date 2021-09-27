@@ -31,9 +31,6 @@ abstract class Plugin(
      * Instance that is capable of executing processes
      */
     val pb = ProcessBuilder(useInternalRedirections, fs)
-    init {
-        testConfig.validateAndSetDefaults()
-    }
 
     /**
      * Perform plugin's work.
