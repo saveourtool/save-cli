@@ -36,7 +36,7 @@ data class FixAndWarnPluginConfig(
     }
 
     override fun validateAndSetDefaults(): PluginConfig {
-        require(fix.resourceNameTest == warn.testNameSuffix &&
+        require(fix.resourceNameTest == warn.testName &&
                 fix.batchSize == warn.batchSize
         ) {
             """

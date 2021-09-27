@@ -71,12 +71,17 @@ data class WarnPluginConfig(
     override var configLocation: Path = "undefined_toml_location".toPath()
 
     /**
+     * suffix name of the test file.
+     */
+    val testName: String = testNameSuffix ?: "Test"
+
+    /**
      * regex for the name of the test files.
      */
-    val resourceNamePattern: Regex = if (testNameSuffix == "Test") {
-        Regex("""(.+)${(testNameSuffix)}\.[\w\d]+""")
+    val resourceNamePattern: Regex = if (testName == "Test") {
+        Regex("""(.+)${(testName)}\.[\w\d]+""")
     } else {
-        Regex("""(.+)${(testNameSuffix)}""")
+        Regex("""(.+)${(testName)}""")
     }
 
     @Suppress("ComplexMethod")
@@ -142,7 +147,7 @@ data class WarnPluginConfig(
             newColumnCaptureGroupOut,
             newMessageCaptureGroupOut,
             exactWarningsMatch ?: true,
-            testNameSuffix ?: "Test",
+            testName,
             linePlaceholder ?: "\$line",
             wildCardInDirectoryMode,
         )
