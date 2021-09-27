@@ -16,6 +16,7 @@ import kotlin.test.assertTrue
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import kotlin.test.Ignore
 
 @Suppress(
     "TOO_LONG_FUNCTION",
@@ -28,6 +29,7 @@ class GeneralTest {
     private val fs = FileSystem.SYSTEM
 
     @Test
+    @Ignore
     fun `examples test`() {
         val binDir = "../save-cli/build/bin/" + when (getCurrentOs()) {
             CurrentOs.LINUX -> "linuxX64"
@@ -72,7 +74,7 @@ class GeneralTest {
         }
 
         // We need some time, before the report will be completely filled
-        Thread.sleep(10_000)
+        Thread.sleep(100_000)
 
         // Report should be created after successful completion
         assertTrue(fs.exists(reportFile))

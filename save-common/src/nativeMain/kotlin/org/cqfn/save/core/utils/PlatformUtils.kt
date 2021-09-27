@@ -1,7 +1,9 @@
-@file:Suppress("HEADER_MISSING_IN_NON_SINGLE_CLASS_FILE",
+@file:Suppress(
+    "HEADER_MISSING_IN_NON_SINGLE_CLASS_FILE",
     "MISSING_KDOC_TOP_LEVEL",
     "MISSING_KDOC_ON_FUNCTION",
-    "FILE_NAME_MATCH_CLASS")
+    "FILE_NAME_MATCH_CLASS"
+)
 
 package org.cqfn.save.core.utils
 
@@ -55,6 +57,22 @@ fun processStandardStreams(msg: String, output: OutputStreamType) {
         OutputStreamType.STDERR -> fdopen(2, "w")
         else -> fdopen(1, "w")
     }
-    fprintf(stream, msg + "\n")
+    fprintf(stream, msg.escapePercent() + "\n")
     fflush(stream)
 }
+
+private fun String.escapePercent(): String {
+    val stringBuilder = StringBuilder("")
+    this.forEachIndexed { index, char ->
+        // last index in the string: aaa% -> aaa%
+        // next character is not a '%': %aaa -> %%aaa
+        if (char == '%' && index != this.length - 1 && this[index + 1] != '%') {
+            stringBuilder.append("%$char")
+        } else {
+            // last char or next char is '%' %%aaa -> %%aaa
+            stringBuilder.append(char)
+        }
+    }
+    return stringBuilder.toString()
+}
+
