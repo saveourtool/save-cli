@@ -21,7 +21,8 @@ import kotlinx.serialization.json.Json
     "TOO_LONG_FUNCTION",
     "INLINE_CLASS_CAN_BE_USED",
     "MISSING_KDOC_TOP_LEVEL",
-    "MISSING_KDOC_CLASS_ELEMENTS")
+    "MISSING_KDOC_CLASS_ELEMENTS"
+)
 @OptIn(ExperimentalSerializationApi::class)
 class GeneralTest {
     private val fs = FileSystem.SYSTEM
@@ -54,8 +55,6 @@ class GeneralTest {
         assertTrue(fs.exists((examplesDir.toPath() / "diktat.jar")))
         assertTrue(fs.exists((examplesDir.toPath() / "ktlint")))
 
-        Thread.sleep(10_000)
-
         // Make sure, that we will check report, which will be obtained after current execution; remove old report if exist
         val reportFile = examplesDir.toPath() / "save.out.json".toPath()
         if (fs.exists(reportFile)) {
@@ -71,6 +70,10 @@ class GeneralTest {
         if (pb.stderr.isNotEmpty()) {
             println("Warning and errors during SAVE execution:\n${pb.stderr.joinToString("\n")}")
         }
+
+        // We need some time, before the report will be completely filled
+        Thread.sleep(10_000)
+
         // Report should be created after successful completion
         assertTrue(fs.exists(reportFile))
 
@@ -81,7 +84,8 @@ class GeneralTest {
             report.pluginExecutions.forEach { pluginExecution ->
                 pluginExecution.testResults.forEach { result ->
                     println(result.status)
-                    assertTrue(result.status is Pass)
+                    result.resources.find { it.name == "ThisShouldAlwaysFailTest.kt" }
+                        ?: assertTrue(result.status is Pass)
                 }
             }
         }

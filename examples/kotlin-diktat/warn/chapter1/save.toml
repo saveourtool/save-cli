@@ -1,7 +1,7 @@
 [general]
-tags = ["tag1"]
-description = "My suite description"
-suiteName = "DocsCheck"
-excludedTests = ["warn/chapter1/GarbageTest.kt"]
+    tags = ["tag1"]
+    description = "Test suite that check only raised warnings related to general coding practices."
+    suiteName = "Only Warnings: General"
+    excludedTests = ["warn/chapter1/GarbageTest.kt"]
 
 [warn]

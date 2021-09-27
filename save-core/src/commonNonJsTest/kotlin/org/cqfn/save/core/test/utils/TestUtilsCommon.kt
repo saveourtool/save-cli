@@ -2,7 +2,7 @@
  * MPP test Utils for integration tests, especially for downloading of tested tools, like diktat and ktlint
  */
 
-@file:Suppress("FILE_WILDCARD_IMPORTS")
+@file:Suppress("FILE_NAME_MATCH_CLASS")
 
 package org.cqfn.save.core.test.utils
 
@@ -10,6 +10,7 @@ import org.cqfn.save.core.Save
 import org.cqfn.save.core.config.OutputStreamType
 import org.cqfn.save.core.config.ReportType
 import org.cqfn.save.core.config.SaveProperties
+import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.reporter.test.TestReporter
 
@@ -18,17 +19,27 @@ import okio.FileSystem
 import kotlin.test.assertEquals
 
 /**
+ * @property testName
+ * @property reason
+ */
+data class ExpectedFail(val testName: String, val reason: String)
+
+/**
  * @param testDir `testFiles` as accepted by save-cli
  * @param numberOfTests expected number of executed tests with this configuration
+ * @param expectedFail list of expected failed tests
  * @param addProperties lambda to add/override SaveProperties during test
  */
 fun runTestsWithDiktat(
     testDir: List<String>?,
     numberOfTests: Int,
-    addProperties: SaveProperties.() -> Unit = {}) {
+    expectedFail: List<ExpectedFail> = listOf(),
+    addProperties: SaveProperties.() -> Unit = {},
+) {
     val mutableTestDir: MutableList<String> = mutableListOf()
     testDir?.let { mutableTestDir.addAll(testDir) }
     mutableTestDir.add(0, "../examples/kotlin-diktat/")
+
     val saveProperties = SaveProperties(
         testFiles = mutableTestDir,
         reportType = ReportType.TEST,
@@ -40,7 +51,20 @@ fun runTestsWithDiktat(
         .performAnalysis() as TestReporter
 
     assertEquals(numberOfTests, testReporter.results.size)
-    testReporter.results.forEach {
-        assertEquals(Pass(null), it.status)
+    testReporter.results.forEach { test ->
+        // FixMe: if we will have other failing tests - we will make the logic less hardcoded
+        test.resources.find { it.name == "ThisShouldAlwaysFailTest.kt" }?.let {
+            assertEquals(
+                Fail(
+                    "Some warnings were expected but not received:" +
+                            " [Warning(message=[DUMMY_ERROR] this error should not match, line=8, column=1," +
+                            " fileName=ThisShouldAlwaysFailTest.kt)]",
+                    "Some warnings were expected but not received (1)"
+                ), test.status
+            )
+        }
+            ?: run {
+                assertEquals(Pass(null), test.status)
+            }
     }
 }

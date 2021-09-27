@@ -88,7 +88,7 @@ abstract class Plugin(
             }
 
         return if (testFiles.isNotEmpty()) {
-            val (foundTest, notFoundTest) = rawTestFiles.partition { rawTestFile ->
+            val foundTests = rawTestFiles.filter { rawTestFile ->
                 testFiles.any {
                     if (fs.exists(it.toPath())) {
                         it in rawTestFile.test.toString()
@@ -98,10 +98,11 @@ abstract class Plugin(
                     }
                 }
             }
-            if (notFoundTest.isNotEmpty()) {
-                logDebug("The following tests were not found: $notFoundTest. Try to make sure you have specified the correct relative path to the files.")
+            val notFoundTests = testFiles.filter { it !in foundTests.map { foundTest -> foundTest.test.toString() } }
+            if (notFoundTests.isNotEmpty()) {
+                logDebug("The following tests were not found: $notFoundTests. Try to make sure you have specified the correct relative path to the files.")
             }
-            return foundTest.asSequence()
+            return foundTests.asSequence()
         } else {
             rawTestFiles
         }
