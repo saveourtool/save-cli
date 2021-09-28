@@ -33,6 +33,7 @@ actual class AtomicInt actual constructor(value: Int) {
 
 /**
  * Escaping percent symbol in the string in case it is not escaped already
+ *
  * @return a new instance of a string with all percent symbols escaped
  */
 fun String.escapePercent(): String {
@@ -49,7 +50,9 @@ fun String.escapePercent(): String {
         }
     }
     // in case only percent symbols are in the string or in the end of the string: a%%%% OR %%%%
-    if (percentNum != 0) stringBuilder.append("%".repeat(if (percentNum % 2 == 0) percentNum else percentNum + 1))
+    if (percentNum != 0) {
+        stringBuilder.append("%".repeat(if (percentNum % 2 == 0) percentNum else percentNum + 1))
+    }
     return stringBuilder.toString()
 }
 

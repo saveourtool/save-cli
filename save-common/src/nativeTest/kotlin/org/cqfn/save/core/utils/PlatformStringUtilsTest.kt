@@ -9,10 +9,10 @@ class PlatformStringUtilsTest {
         assertEquals("%%", "%%".escapePercent())
         assertEquals("%%%%", "%%%".escapePercent())
         assertEquals("%%", "%%".escapePercent())
-        assertEquals("%%aa%%","%%aa%%".escapePercent())
-        assertEquals("%%aa%%","%aa%".escapePercent())
-        assertEquals("a%%%%a","a%%%%a".escapePercent())
-        assertEquals("aaaaa","aaaaa".escapePercent())
-        assertEquals("a%%%%a","a%%%a".escapePercent())
+        assertEquals("%%aa%%", "%%aa%%".escapePercent())
+        assertEquals("%%aa%%", "%aa%".escapePercent())
+        assertEquals("a%%%%a", "a%%%%a".escapePercent())
+        assertEquals("aaaaa", "aaaaa".escapePercent())
+        assertEquals("a%%%%a", "a%%%a".escapePercent())
     }
 }
