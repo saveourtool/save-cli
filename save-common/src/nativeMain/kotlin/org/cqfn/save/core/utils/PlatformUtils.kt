@@ -31,18 +31,25 @@ actual class AtomicInt actual constructor(value: Int) {
     actual fun addAndGet(delta: Int): Int = atomicInt.addAndGet(delta)
 }
 
-private fun String.escapePercent(): String {
+/**
+ * Escaping percent symbol in the string in case it is not escaped already
+ * @return a new instance of a string with all percent symbols escaped
+ */
+fun String.escapePercent(): String {
     val stringBuilder = StringBuilder("")
-    this.forEachIndexed { index, char ->
-        // last index in the string: aaa% -> aaa%
-        // next character is not a '%': %aaa -> %%aaa
-        if (char == '%' && index != this.length - 1 && this[index + 1] != '%') {
-            stringBuilder.append("%$char")
+    var percentNum = 0
+    this.forEach { char ->
+        if (char == '%') {
+            // accumulating the number of percents in a raw: a%%%%% -> %: 5
+            percentNum++
         } else {
-            // last char or next char is '%' %%aaa -> %%aaa
-            stringBuilder.append(char)
+            // normalizing percents and adding them to the string with a non-percent number
+            stringBuilder.append("${"%".repeat(if (percentNum % 2 == 0) percentNum else percentNum + 1)}$char")
+            percentNum = 0
         }
     }
+    // in case only percent symbols are in the string or in the end of the string: a%%%% OR %%%%
+    if (percentNum != 0) stringBuilder.append("%".repeat(if (percentNum % 2 == 0) percentNum else percentNum + 1))
     return stringBuilder.toString()
 }
 
