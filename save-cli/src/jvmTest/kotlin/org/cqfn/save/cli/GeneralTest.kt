@@ -11,12 +11,12 @@ import org.cqfn.save.reporter.Report
 import okio.FileSystem
 import okio.Path.Companion.toPath
 
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import kotlin.test.Ignore
 
 @Suppress(
     "TOO_LONG_FUNCTION",
