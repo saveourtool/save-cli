@@ -1,6 +1,7 @@
 package org.cqfn.save.core.plugin
 
 import org.cqfn.save.core.files.readLines
+import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logWarn
 
 import okio.FileSystem
@@ -20,10 +21,10 @@ class ExtraFlagsExtractor(private val generalConfig: GeneralConfig,
         val allExtraFlagsFromFile = fs.readLines(path).mapNotNull {
             extractExtraFlagsFrom(it)
         }
-        require(allExtraFlagsFromFile.size <= 1) {
+        logDebug(
             "Extra flags from multiple comments in a single file are not supported yet, but there are ${allExtraFlagsFromFile.size} in $path"
-        }
-        return allExtraFlagsFromFile.singleOrNull()
+        )
+        return allExtraFlagsFromFile.firstOrNull()
     }
 
     /**
