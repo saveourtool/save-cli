@@ -1,0 +1,8 @@
+[general]
+expectedWarningsPattern = ".*// ;warn:(\\d+):(\\d+) (.*)"
+
+["fix and warn"]
+    ["fix and warn".fix]
+
+    ["fix and warn".warn]
+        exactWarningsMatch = false
