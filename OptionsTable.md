@@ -6,7 +6,7 @@ Most (except for `-h` and `-prop`) of the options below can be passed to a SAVE 
 | parallel | parallel-mode | Whether to enable parallel mode | false |
 | t | threads | Number of threads | 1 |
 | d | debug | Turn on debug logging | false |
-| q | quiet | Do not log anything | false |
+| q | quiet | Log only test results without any warnings | false |
 | - | report-type | Type of generated report with execution results | PLAIN |
 | b | baseline | Path to the file with baseline data | - |
 | e | exclude-suites | Test suites, which won't be checked | - |

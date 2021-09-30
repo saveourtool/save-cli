@@ -28,7 +28,7 @@
       "kotlinType": "kotlin.Boolean",
       "fullName" : "quiet",
       "shortName" : "q",
-      "description" : "Do not log anything",
+      "description" : "Log only test results without any warnings",
       "default" : "false"
     },
     "reportType" : {
