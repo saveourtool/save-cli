@@ -83,9 +83,8 @@ abstract class Plugin(
 
         val rawTestFiles = rawDiscoverTestFiles(root.resourceDirectories())
             // removing excluded test resources
-            .filterNot {
-                isExcludedTest(it, excludedTests)
-            }
+            .filterNot { isExcludedTest(it, excludedTests) }
+            .filterNot { fs.metadata(it.test).isDirectory }
 
         return if (testFiles.isNotEmpty()) {
             val foundTests = rawTestFiles.filter { rawTestFile ->
