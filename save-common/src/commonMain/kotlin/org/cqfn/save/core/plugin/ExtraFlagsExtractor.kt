@@ -3,6 +3,7 @@ package org.cqfn.save.core.plugin
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logWarn
+import org.cqfn.save.core.utils.runIf
 
 import okio.FileSystem
 import okio.Path
@@ -60,7 +61,7 @@ class ExtraFlagsExtractor(private val generalConfig: GeneralConfig,
 internal fun List<String>.filterAndJoinBy(regex: Regex, ending: Char): List<String> = map(String::trim)
     .mapNotNull { regex.find(it) }
     .map { it.groupValues[1] }
-    .run {
+    .runIf({ size > 1 }) {
         // Put a MatchResult into a list, then concat the next one to it, if this one ends with `ending`.
         // Otherwise, append the next one to the list.
         drop(1).fold(mutableListOf(first())) { acc, text ->
