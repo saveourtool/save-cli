@@ -95,6 +95,8 @@ kotlin {
 }
 
 configurePublishing()
+configureDiktat()
+configureDetekt()
 
 tasks.withType<KotlinJvmTest> {
     useJUnitPlatform()
