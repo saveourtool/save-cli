@@ -207,6 +207,11 @@ fun Path.getCurrentDirectory() = if (fs.metadata(this).isRegularFile) {
 }
 
 /**
+ * @return a list of parent directories including itself
+ */
+fun Path.parentsWithSelf() = listOf(this) + this.parents().toList()
+
+/**
  * Create relative path from the current path to the root
  *
  * @param currentPath current path
