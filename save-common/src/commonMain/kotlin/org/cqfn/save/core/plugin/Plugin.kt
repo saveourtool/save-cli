@@ -4,6 +4,7 @@ import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.config.isSaveTomlConfig
 import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.findDescendantDirectoriesBy
+import org.cqfn.save.core.files.parents
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.ProcessBuilder
@@ -91,7 +92,11 @@ abstract class Plugin(
             val foundTests = rawTestFiles.filter { rawTestFile ->
                 testFiles.any {
                     if (fs.exists(it.toPath())) {
-                        it in rawTestFile.test.toString()
+                        (it.toPath().parents().toList() + listOf(it.toPath())).all { testFile ->
+                            (rawTestFile.test.parents().toList() + listOf(rawTestFile.test)).any { rawTestFileDir ->
+                                testFile.toString() == rawTestFileDir.toString()
+                            }
+                        }
                     } else {
                         logDebug("Could not find the next test directory: $it, check the path is correct.")
                         false
