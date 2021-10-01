@@ -42,6 +42,17 @@ class ClassicWarnTest {
             )
 
     @Test
+    @Ignore
+    // FixMe: this test should be investigated, as resource discovery looks to be buggy
+    // org.opentest4j.AssertionFailedError: expected: <3> but was: <8>
+    fun `executing warn plugin on parental directory`() =
+            runTestsWithDiktat(
+                listOf(
+                    "warn"
+                ), 3
+            )
+
+    @Test
     fun `executing warn plugin on save-toml file in directory`() =
             runTestsWithDiktat(
                 listOf(
