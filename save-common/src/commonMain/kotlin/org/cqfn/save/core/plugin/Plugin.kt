@@ -4,7 +4,7 @@ import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.config.isSaveTomlConfig
 import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.findDescendantDirectoriesBy
-import org.cqfn.save.core.files.parents
+import org.cqfn.save.core.files.parentsWithSelf
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.ProcessBuilder
@@ -110,8 +110,6 @@ abstract class Plugin(
             rawTestFiles
         }
     }
-
-    private fun Path.parentsWithSelf() = listOf(this) + this.parents().toList()
 
     private fun isExcludedTest(testFiles: TestFiles, excludedTests: List<String>?): Boolean {
         // common root of the test repository (not a location of a current test)
