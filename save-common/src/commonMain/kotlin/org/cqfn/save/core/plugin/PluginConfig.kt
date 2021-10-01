@@ -144,6 +144,7 @@ data class ExtraFlags(
     companion object {
         const val KEY_ARGS_1 = "args1"
         const val KEY_ARGS_2 = "args2"
+        val empty = ExtraFlags("", "")
 
         /**
          * Construct [ExtraFlags] from provided map

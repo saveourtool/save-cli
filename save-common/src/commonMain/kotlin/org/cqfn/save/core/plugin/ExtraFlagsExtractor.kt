@@ -18,9 +18,9 @@ class ExtraFlagsExtractor(private val generalConfig: GeneralConfig,
      * @return [ExtraFlags]
      */
     fun extractExtraFlagsFrom(path: Path): ExtraFlags? {
-        val allExtraFlagsFromFile = fs.readLines(path).mapNotNull {
-            extractExtraFlagsFrom(it)
-        }
+        val allExtraFlagsFromFile = fs.readLines(path)
+            .filterAndJoinBy(generalConfig.runConfigPattern!!, '\\')
+            .map { extractExtraFlagsFrom(it) }
         logDebug(
             "Extra flags from multiple comments in a single file are not supported yet, but there are ${allExtraFlagsFromFile.size} in $path"
         )
@@ -32,24 +32,46 @@ class ExtraFlagsExtractor(private val generalConfig: GeneralConfig,
      * @return [ExtraFlags] or null if no match occurred
      */
     @Suppress("COMPACT_OBJECT_INITIALIZATION")  // https://github.com/cqfn/diKTat/issues/1043
-    fun extractExtraFlagsFrom(line: String): ExtraFlags? {
-        val matchResult = generalConfig.runConfigPattern!!.find(line) ?: return null
-        return matchResult.groupValues[1]
-            .split(",", ", ")
-            .associate {
-                val pair = it.split("=", limit = 2).map {
-                    it.replace("\\=", "=")
-                }
-                pair.first() to pair.last()
+    internal fun extractExtraFlagsFrom(line: String) = line
+        .split(",", ", ")
+        .associate {
+            val pair = it.split("=", limit = 2).map {
+                it.replace("\\=", "=")
             }
-            .let(ExtraFlags::from)
-            .also {
-                if (it == ExtraFlags("", "")) {
-                    logWarn("Line <$line> is matched by extraFlagsPattern <${generalConfig.runConfigPattern}>, but no flags have been extracted")
-                }
+            pair.first() to pair.last()
+        }
+        .let(ExtraFlags::from)
+        .also {
+            if (it == ExtraFlags("", "")) {
+                logWarn("Line <$line> is matched by extraFlagsPattern <${generalConfig.runConfigPattern}>, but no flags have been extracted")
             }
-    }
+        }
 }
+
+/**
+ * Filters lines in the receiver list by matching against [regex]. Match results are then extracted (the first matched group
+ * is used), and subsequent ones are combined, if they end with `ending`.
+ * @see [ExtraFlagsExtractorTest.`should join multiline directives`] for examples.
+ *
+ * @param regex a regular expression to match lines against; should capture required part of the line in the first capture group
+ * @param ending treat lines ending with [ending] as parts of the same directive
+ * @return a list of extracted directives
+ */
+internal fun List<String>.filterAndJoinBy(regex: Regex, ending: Char): List<String> = map(String::trim)
+    .mapNotNull { regex.find(it) }
+    .map { it.groupValues[1] }
+    .run {
+        // Put a MatchResult into a list, then concat the next one to it, if this one ends with `ending`.
+        // Otherwise, append the next one to the list.
+        drop(1).fold(mutableListOf(first())) { acc, text ->
+            if (acc.last().endsWith(ending)) {
+                acc.add(acc.removeLast().trimEnd(ending) + text)
+            } else {
+                acc.add(text)
+            }
+            acc
+        }
+    }
 
 /**
  * Substitute placeholders in `this.execFlags` with values from provided arguments
