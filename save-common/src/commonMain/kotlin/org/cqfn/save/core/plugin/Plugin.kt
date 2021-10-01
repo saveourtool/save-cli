@@ -90,15 +90,13 @@ abstract class Plugin(
 
         return if (testFiles.isNotEmpty()) {
             val foundTests = rawTestFiles.filter { rawTestFile ->
-                testFiles.any {
-                    if (fs.exists(it.toPath())) {
-                        (it.toPath().parents().toList() + listOf(it.toPath())).all { testFile ->
-                            (rawTestFile.test.parents().toList() + listOf(rawTestFile.test)).any { rawTestFileDir ->
-                                testFile.toString() == rawTestFileDir.toString()
-                            }
+                testFiles.any { testFile ->
+                    if (fs.exists(testFile.toPath())) {
+                        (rawTestFile.test.parentsWithSelf()).any { rawTestFileDir ->
+                            testFile == rawTestFileDir.toString()
                         }
                     } else {
-                        logDebug("Could not find the next test directory: $it, check the path is correct.")
+                        logDebug("Could not find the next test or directory: $testFile, check the path is correct.")
                         false
                     }
                 }
@@ -112,6 +110,8 @@ abstract class Plugin(
             rawTestFiles
         }
     }
+
+    private fun Path.parentsWithSelf() = listOf(this) + this.parents().toList()
 
     private fun isExcludedTest(testFiles: TestFiles, excludedTests: List<String>?): Boolean {
         // common root of the test repository (not a location of a current test)
