@@ -7,11 +7,14 @@ import org.cqfn.save.core.files.findDescendantDirectoriesBy
 import org.cqfn.save.core.files.parentsWithSelf
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.result.TestResult
+import org.cqfn.save.core.utils.PathSerializer
 import org.cqfn.save.core.utils.ProcessBuilder
 
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
+
+import kotlinx.serialization.Serializable
 
 /**
  * Plugin that can be injected into SAVE during execution. Plugins accept contents of configuration file and then perform some work.
@@ -221,7 +224,8 @@ abstract class Plugin(
     /**
      * @property test test file
      */
-    data class Test(override val test: Path) : TestFiles {
+    @Serializable
+    data class Test(@Serializable(with = PathSerializer::class) override val test: Path) : TestFiles {
         override fun withRelativePaths(root: Path) =
                 copy(test = test.createRelativePathToTheRoot(root).toPath())
     }

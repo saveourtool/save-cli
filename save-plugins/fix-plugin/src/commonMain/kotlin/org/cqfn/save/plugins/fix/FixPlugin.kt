@@ -14,6 +14,7 @@ import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
+import org.cqfn.save.core.utils.PathSerializer
 import org.cqfn.save.core.utils.ProcessExecutionException
 
 import io.github.petertrr.diffutils.diff
@@ -25,6 +26,10 @@ import io.github.petertrr.diffutils.text.DiffRowGenerator
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
+
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.modules.PolymorphicModuleBuilder
+import kotlinx.serialization.modules.subclass
 
 /**
  * A plugin that runs an executable on a file and compares output with expected output.
@@ -197,10 +202,22 @@ class FixPlugin(
      * @property test test file
      * @property expected expected file
      */
-    data class FixTestFiles(override val test: Path, val expected: Path) : TestFiles {
+    @Serializable
+    data class FixTestFiles(
+        @Serializable(with = PathSerializer::class) override val test: Path,
+        @Serializable(with = PathSerializer::class) val expected: Path
+    ) : TestFiles {
         override fun withRelativePaths(root: Path) = copy(
             test = test.createRelativePathToTheRoot(root).toPath(),
             expected = expected.createRelativePathToTheRoot(root).toPath(),
         )
+
+        companion object {
+            /**
+             * @param builder `PolymorphicModuleBuilder` to which this class should be registered for serialization
+             */
+            fun register(builder: PolymorphicModuleBuilder<TestFiles>): Unit =
+                    builder.subclass(FixTestFiles::class)
+        }
     }
 }

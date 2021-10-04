@@ -21,6 +21,7 @@ import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.buildActivePlugins
 import org.cqfn.save.core.utils.processInPlace
+import org.cqfn.save.plugins.fix.FixPlugin
 import org.cqfn.save.reporter.json.JsonReporter
 import org.cqfn.save.reporter.plain.PlainOnlyFailedReporter
 import org.cqfn.save.reporter.plain.PlainTextReporter
@@ -162,7 +163,9 @@ class Save(
         return when (saveProperties.reportType) {
             ReportType.PLAIN -> PlainTextReporter(out)
             ReportType.PLAIN_FAILED -> PlainOnlyFailedReporter(out)
-            ReportType.JSON -> JsonReporter(out)
+            ReportType.JSON -> JsonReporter(out) {
+                FixPlugin.FixTestFiles.register(this)
+            }
             ReportType.TEST -> TestReporter(out)
             else -> TODO("Reporter for type ${saveProperties.reportType} is not yet supported")
         }
