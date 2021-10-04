@@ -11,7 +11,6 @@ import org.cqfn.save.reporter.Report
 import okio.FileSystem
 import okio.Path.Companion.toPath
 
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -29,7 +28,6 @@ class GeneralTest {
     private val fs = FileSystem.SYSTEM
 
     @Test
-    @Ignore
     fun `examples test`() {
         val binDir = "../save-cli/build/bin/" + when (getCurrentOs()) {
             CurrentOs.LINUX -> "linuxX64"
@@ -74,7 +72,7 @@ class GeneralTest {
         }
 
         // We need some time, before the report will be completely filled
-        Thread.sleep(100_000)
+        Thread.sleep(10_000)
 
         // Report should be created after successful completion
         assertTrue(fs.exists(reportFile))
