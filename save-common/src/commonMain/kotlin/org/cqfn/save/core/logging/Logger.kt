@@ -15,6 +15,11 @@ import kotlinx.datetime.toLocalDateTime
 /**
  * Is debug logging enabled
  */
+var isQuietMode: Boolean = false
+
+/**
+ * Is debug logging enabled
+ */
 var isDebugEnabled: Boolean = false
 
 /**
@@ -66,7 +71,11 @@ fun logInfo(msg: String): Unit = logMessage("INFO", msg)
  *
  * @param msg a message string
  */
-fun logWarn(msg: String): Unit = logMessage("WARN", msg, OutputStreamType.STDERR)
+fun logWarn(msg: String): Unit {
+    if (!isQuietMode) {
+        logMessage("WARN", msg, OutputStreamType.STDERR)
+    }
+}
 
 /**
  * Log a message with error level

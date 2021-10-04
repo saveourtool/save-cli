@@ -7,6 +7,7 @@ package org.cqfn.save.cli
 import org.cqfn.save.cli.logging.logErrorAndExit
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.logging.isDebugEnabled
+import org.cqfn.save.core.logging.isQuietMode
 import org.cqfn.save.core.logging.logDebug
 
 import okio.FileNotFoundException
@@ -132,6 +133,7 @@ fun readPropertiesFile(propertiesFileName: String?): SaveProperties {
 
 private fun tryToUpdateDebugLevel(properties: SaveProperties) {
     isDebugEnabled = properties.debug ?: false
+    isQuietMode = properties.quiet ?: false
 }
 
 private fun errorAndExitNotFoundDir() {
