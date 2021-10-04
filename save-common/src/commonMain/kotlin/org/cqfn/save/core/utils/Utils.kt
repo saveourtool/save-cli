@@ -1,3 +1,7 @@
+/**
+ * Various utility methods
+ */
+
 package org.cqfn.save.core.utils
 
 /**
