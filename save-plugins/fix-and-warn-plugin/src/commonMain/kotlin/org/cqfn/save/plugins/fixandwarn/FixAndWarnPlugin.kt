@@ -78,7 +78,7 @@ class FixAndWarnPlugin(
         val (fixTestResultsPassed, fixTestResultsFailed) = fixTestResults.partition { it.status is Pass }
 
         val expectedFilesWithPass = expectedFiles.filter { expectedFile ->
-            fixTestResultsPassed.map { it.resources.toList()[1] }.contains(expectedFile)
+            fixTestResultsPassed.map { (it.resources as FixPlugin.FixTestFiles).expected }.contains(expectedFile)
         }
 
         // Fill back original data with warnings

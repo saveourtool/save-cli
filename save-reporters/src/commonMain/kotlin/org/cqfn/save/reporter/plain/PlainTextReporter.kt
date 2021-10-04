@@ -74,7 +74,7 @@ open class PlainTextReporter(override val out: BufferedSink) : Reporter {
         }
             ?: ""
         out.write(
-            "| $currentTestSuite | $currentPlugin | ${event.resources.first()} | ${event.status::class.simpleName} | $shortComment |\n"
+            "| $currentTestSuite | $currentPlugin | ${event.resources.test} | ${event.status::class.simpleName} | $shortComment |\n"
                 .encodeToByteArray()
         )
     }

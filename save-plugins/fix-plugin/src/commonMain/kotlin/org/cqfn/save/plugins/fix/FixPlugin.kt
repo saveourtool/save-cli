@@ -2,6 +2,7 @@ package org.cqfn.save.plugins.fix
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.plugin.ExtraFlags
@@ -23,6 +24,7 @@ import io.github.petertrr.diffutils.patch.Patch
 import io.github.petertrr.diffutils.text.DiffRowGenerator
 import okio.FileSystem
 import okio.Path
+import okio.Path.Companion.toPath
 
 /**
  * A plugin that runs an executable on a file and compares output with expected output.
@@ -195,5 +197,10 @@ class FixPlugin(
      * @property test test file
      * @property expected expected file
      */
-    data class FixTestFiles(override val test: Path, val expected: Path) : TestFiles
+    data class FixTestFiles(override val test: Path, val expected: Path) : TestFiles {
+        override fun withRelativePaths(root: Path) = copy(
+            test = test.createRelativePathToTheRoot(root).toPath(),
+            expected = expected.createRelativePathToTheRoot(root).toPath(),
+        )
+    }
 }

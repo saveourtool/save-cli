@@ -7,7 +7,6 @@ import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.isSaveTomlConfig
 import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.files.StdStreamsSink
-import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
 import org.cqfn.save.core.logging.logInfo
@@ -135,8 +134,7 @@ class Save(
             plugin.execute()
                 .onEach { event ->
                     // calculate relative paths, because reporters don't need paths higher than root dir
-                    val resourcesRelative =
-                            event.resources.map { it.createRelativePathToTheRoot(testRepositoryRootPath).toPath() }
+                    val resourcesRelative = event.resources.withRelativePaths(testRepositoryRootPath)
                     reporter.onEvent(event.copy(resources = resourcesRelative))
                 }
                 .forEach(this::handleResult)

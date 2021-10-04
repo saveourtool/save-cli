@@ -210,10 +210,19 @@ abstract class Plugin(
          * path to test file
          */
         val test: Path
+
+        /**
+         * @param root path to calculate relative paths
+         * @return copy of `this` with relativized paths
+         */
+        fun withRelativePaths(root: Path): TestFiles
     }
 
     /**
      * @property test test file
      */
-    data class Test(override val test: Path) : TestFiles
+    data class Test(override val test: Path) : TestFiles {
+        override fun withRelativePaths(root: Path) =
+                copy(test = test.createRelativePathToTheRoot(root).toPath())
+    }
 }
