@@ -135,13 +135,13 @@ class WarnPlugin(
         val executionResult = try {
             pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo)
         } catch (ex: ProcessExecutionException) {
-            return sequenceOf(
+            return paths.map {
                 TestResult(
-                    paths,
+                    Test(it),
                     Fail(ex.describe(), ex.describe()),
                     DebugInfo(null, ex.message, null)
                 )
-            )
+            }.asSequence()
         }
         val stdout = executionResult.stdout
         val stderr = executionResult.stderr
@@ -169,7 +169,7 @@ class WarnPlugin(
 
         return paths.map { path ->
             TestResult(
-                listOf(path),
+                Test(path),
                 resultsChecker.checkResults(path.name),
                 DebugInfo(
                     stdout.filter { it.contains(path.name) }.joinToString("\n"),

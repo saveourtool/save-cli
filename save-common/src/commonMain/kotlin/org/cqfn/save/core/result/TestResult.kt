@@ -2,9 +2,8 @@
 
 package org.cqfn.save.core.result
 
+import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.utils.PathSerializer
-
-import okio.Path
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
@@ -18,7 +17,7 @@ import kotlinx.serialization.UseSerializers
  */
 @Serializable
 data class TestResult(
-    val resources: Collection<Path>,
+    val resources: Plugin.TestFiles,
     val status: TestStatus,
     val debugInfo: DebugInfo? = null,
 )

@@ -81,7 +81,7 @@ class FixPlugin(
             } catch (ex: ProcessExecutionException) {
                 return@map chunk.map {
                     TestResult(
-                        pathMap.map { (test, expected) -> listOf(test, expected) }.flatten(),
+                        it,
                         Fail(ex.describe(), ex.describe()),
                         DebugInfo(null, ex.message, null)
                     )
@@ -98,7 +98,7 @@ class FixPlugin(
                 val test = pathMap.first { (test, _) -> test.name == testCopy.name }.first
 
                 TestResult(
-                    listOf(test, expected),
+                    FixTestFiles(test, expected),
                     checkStatus(expectedLines, fixedLines),
                     DebugInfo(
                         stdout.filter { it.contains(testCopy.name) }.joinToString("\n"),
