@@ -14,6 +14,7 @@ import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization")
+    id("org.gradle.test-retry")
 }
 
 kotlin {
@@ -98,4 +99,12 @@ configurePublishing()
 
 tasks.withType<KotlinJvmTest> {
     useJUnitPlatform()
+}
+
+tasks.withType<Test> {
+    retry {
+        failOnPassedAfterRetry.set(false)
+        maxFailures.set(10)
+        maxRetries.set(5)
+    }
 }

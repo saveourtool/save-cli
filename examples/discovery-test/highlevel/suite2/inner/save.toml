@@ -1,7 +1,7 @@
 [general]
 execCmd="./ktlint -R diktat-0.4.2.jar"
 tags = ["mytags"]
-description = "My suite description"
+description = "Empty suite"
 suiteName = "DocsCheck"
 
 [fix]

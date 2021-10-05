@@ -17,4 +17,5 @@ dependencies {
     implementation("org.ajoberstar.grgit:grgit-core:4.1.0")
     implementation("com.squareup:kotlinpoet:1.8.0")
     implementation("com.google.code.gson:gson:2.8.6")
+    implementation("org.gradle:test-retry-gradle-plugin:1.3.1")
 }

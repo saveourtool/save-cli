@@ -37,8 +37,8 @@ class ConfigDetector(private val fs: FileSystem) {
             }
             ?: run {
                 logError("Config file was not found in $testConfig")
-                throw IllegalArgumentException("Provided option '--test-config' $testConfig doesn't correspond" +
-                        " to a valid save.toml file")
+                throw IllegalArgumentException("Provided directory [$testConfig] doesn't contain" +
+                        " save.toml configuration file")
             }
     }
 
