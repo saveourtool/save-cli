@@ -22,9 +22,6 @@ class ExtraFlagsExtractor(private val generalConfig: GeneralConfig,
         val allExtraFlagsFromFile = fs.readLines(path)
             .filterAndJoinBy(generalConfig.runConfigPattern!!, '\\')
             .map { extractExtraFlagsFrom(it) }
-        logDebug(
-            "Extra flags from multiple comments in a single file are not supported yet, but there are ${allExtraFlagsFromFile.size} in $path"
-        )
         return allExtraFlagsFromFile.firstOrNull()
     }
 
