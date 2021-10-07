@@ -53,7 +53,7 @@ fun runTestsWithDiktat(
     assertEquals(numberOfTests, testReporter.results.size)
     testReporter.results.forEach { test ->
         // FixMe: if we will have other failing tests - we will make the logic less hardcoded
-        test.resources.find { it.name == "ThisShouldAlwaysFailTest.kt" }?.let {
+        if (test.resources.test.name == "ThisShouldAlwaysFailTest.kt") {
             assertEquals(
                 Fail(
                     "Some warnings were expected but not received:" +
@@ -62,9 +62,8 @@ fun runTestsWithDiktat(
                     "Some warnings were expected but not received (1)"
                 ), test.status
             )
+        } else {
+            assertEquals(Pass(null), test.status)
         }
-            ?: run {
-                assertEquals(Pass(null), test.status)
-            }
     }
 }

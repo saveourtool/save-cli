@@ -10,19 +10,35 @@ import okio.BufferedSink
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.PolymorphicModuleBuilder
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
 
 /**
  * Reporter that produces a JSON report as a [Report]
  *
  * @property out a sink for output
+ *
+ * @param builder additional configuration lambda for serializers module
  */
-class JsonReporter(override val out: BufferedSink) : Reporter {
+class JsonReporter(
+    override val out: BufferedSink,
+    builder: PolymorphicModuleBuilder<Plugin.TestFiles>.() -> Unit = {}
+) : Reporter {
     override val type: ReportType = ReportType.JSON
 
     /**
      * Formatter to serialize/deserialize to JSON
      */
-    internal val json = Json
+    val json: Json = Json {
+        serializersModule = SerializersModule {
+            polymorphic(Plugin.TestFiles::class) {
+                subclass(Plugin.Test::class)
+                builder()
+            }
+        }
+    }
 
     private var isFirstEvent = true  // todo: use AtomicBoolean
 
