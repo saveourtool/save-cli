@@ -24,8 +24,6 @@ suiteName = "DocsCheck"
 [fix and warn]
     [fix and warn.fix]
         execFlags="-F"
-        testFilePattern="*Test.kt"
-        expectedFilePattern="*Expected.kt"
         batchSize = 1
         batchSeparator = ", "
         resourceNameTestSuffix = "Test"
