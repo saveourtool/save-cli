@@ -46,6 +46,8 @@ import kotlinx.serialization.UseSerializers
  * This prefix will be added to the name of the directory, if you would like to use directory mode without any prefix simply use ""
  * @property patternForRegexInWarning symbols that will be used to detect regular expressions in the text of expected warnings in test resource file.
  * For example: for `[warn] my {{[hello|world]}} warn` patternForRegexInWarning = {{.*}}. Opening and closing symbols should be split with '.*' symbol.
+ * @property partialWarnTextMatch if true - the regex created from expected warning will be wrapped with '.*': .*warn.*.
+ * That can help a user to write only main information in the warning without any need to add/copy-paste technical info
  */
 @Serializable
 data class WarnPluginConfig(
@@ -67,6 +69,7 @@ data class WarnPluginConfig(
     val linePlaceholder: String? = null,
     val wildCardInDirectoryMode: String? = null,
     val patternForRegexInWarning: List<String>? = null,
+    val partialWarnTextMatch: Boolean? = null
 ) : PluginConfig {
     @Transient
     override val type = TestConfigSections.WARN
@@ -109,7 +112,8 @@ data class WarnPluginConfig(
             this.testNameSuffix ?: other.testNameSuffix,
             this.linePlaceholder ?: other.linePlaceholder,
             this.wildCardInDirectoryMode ?: other.wildCardInDirectoryMode,
-            this.patternForRegexInWarning ?: other.patternForRegexInWarning
+            this.patternForRegexInWarning ?: other.patternForRegexInWarning,
+            this.partialWarnTextMatch ?: other.partialWarnTextMatch
         ).also { it.configLocation = this.configLocation }
     }
 
@@ -163,7 +167,8 @@ data class WarnPluginConfig(
             testName,
             linePlaceholder ?: "\$line",
             wildCardInDirectoryMode,
-            patternForRegexInWarning ?: defaultPatternForRegexInWarning
+            patternForRegexInWarning ?: defaultPatternForRegexInWarning,
+            partialWarnTextMatch ?: false
         ).also { it.configLocation = this.configLocation }
     }
 

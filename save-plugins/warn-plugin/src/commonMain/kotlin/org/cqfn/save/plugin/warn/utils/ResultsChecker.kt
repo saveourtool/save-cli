@@ -10,9 +10,9 @@ typealias FileToWarningsMap = Map<String, List<Warning>?>
 /**
  * Class that supports checking of the test results
  *
- * @param expectedWarningsMap expected warnings, grouped by LineCol
- * @param actualWarningsMap actual warnings, grouped by LineCol
- * @param warnPluginConfig configuration of warn plugin
+ * @property expectedWarningsMap expected warnings, grouped by LineCol
+ * @property actualWarningsMap actual warnings, grouped by LineCol
+ * @property warnPluginConfig configuration of warn plugin
  **/
 class ResultsChecker(
     private val expectedWarningsMap: FileToWarningsMap,
@@ -66,7 +66,13 @@ class ResultsChecker(
             // matched line and column
             (expected.line == actual.line && expected.column == actual.column) &&
                     // matched text of the message
-                    expected.message.createRegexFromString(openingDelimiter, closingDelimiter).matches(actual.message)
+                    expected.message
+                        .createRegexFromString(
+                            openingDelimiter,
+                            closingDelimiter,
+                            warnPluginConfig.partialWarnTextMatch ?: false
+                        )
+                        .matches(actual.message)
         }
 
         matchedWarning?.let {

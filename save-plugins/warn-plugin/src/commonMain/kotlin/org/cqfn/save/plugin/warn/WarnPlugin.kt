@@ -164,7 +164,7 @@ class WarnPlugin(
         val resultsChecker = ResultsChecker(
             expectedWarningsMap,
             actualWarningsMap,
-            warnPluginConfig
+            warnPluginConfig,
         )
 
         return paths.map { path ->
