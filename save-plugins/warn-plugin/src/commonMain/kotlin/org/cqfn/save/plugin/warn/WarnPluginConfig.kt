@@ -81,10 +81,12 @@ data class WarnPluginConfig(
      * keyword name of the test file.
      */
     val testName: String = testNameKeyword ?: "Test"
+
     /**
      * a string which cat later be interpreted as regex
      */
     val testNameRegPattern: String = """.*${(testName)}.*"""
+
     /**
      * regex for the name of the test files.
      */
