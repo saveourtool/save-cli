@@ -4,7 +4,7 @@
 
 [warn]
     # suffix to detect tests
-    testNameSuffix = "Test.kt"
+    testNameKeyword = "Test.kt"
     # enabling directory mode
     wildCardInDirectoryMode = "**/*"
     # diktat warnings have the following format: filename.kt:1:15: [WARN_NAME] my waring

@@ -124,7 +124,7 @@ class WarnPlugin(
                         .createRelativePathToTheRoot(testConfig.getRootConfig().location)
                     // a hack to put only the directory path to the execution command
                     // only in case a directory mode is enabled
-                    "$directoryPrefix$it${warnPluginConfig.testNameSuffix}"
+                    "$directoryPrefix$it${warnPluginConfig.testNameRegPattern}"
                 } ?: paths.joinToString(separator = warnPluginConfig.batchSeparator!!) {
                     it.createRelativePathToTheRoot(testConfig.getRootConfig().location)
                 }

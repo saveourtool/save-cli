@@ -38,7 +38,7 @@ import kotlinx.serialization.UseSerializers
  * @property messageCaptureGroupOut an index of capture group in regular expressions, corresponding to warning text. Indices start at 0 with 0
  * corresponding to the whole string.
  * @property exactWarningsMatch exact match of errors
- * @property testNameSuffix suffix name of the test file.
+ * @property testNameKeyword part of the name of the test file, which will be used to create a regex.
  * @property batchSize it controls how many files execCmd will process at a time.
  * @property batchSeparator separator for batch mode
  * @property linePlaceholder placeholder for line number, which resolved as current line and support addition and subtraction
@@ -65,7 +65,7 @@ data class WarnPluginConfig(
     val columnCaptureGroupOut: Long? = null,
     val messageCaptureGroupOut: Long? = null,
     val exactWarningsMatch: Boolean? = null,
-    val testNameSuffix: String? = null,
+    val testNameKeyword: String? = null,
     val linePlaceholder: String? = null,
     val wildCardInDirectoryMode: String? = null,
     val patternForRegexInWarning: List<String>? = null,
@@ -78,18 +78,17 @@ data class WarnPluginConfig(
     override var configLocation: Path = "undefined_toml_location".toPath()
 
     /**
-     * suffix name of the test file.
+     * keyword name of the test file.
      */
-    val testName: String = testNameSuffix ?: "Test"
-
+    val testName: String = testNameKeyword ?: "Test"
+    /**
+     * a string which cat later be interpreted as regex
+     */
+    val testNameRegPattern: String = """.*${(testName)}.*"""
     /**
      * regex for the name of the test files.
      */
-    val resourceNamePattern: Regex = if (testName == "Test") {
-        Regex("""(.+)${(testName)}\.[\w\d]+""")
-    } else {
-        Regex("""(.+)${(testName)}""")
-    }
+    val resourceNamePattern: Regex = Regex(testNameRegPattern)
 
     @Suppress("ComplexMethod")
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
@@ -109,7 +108,7 @@ data class WarnPluginConfig(
             this.columnCaptureGroupOut ?: other.columnCaptureGroupOut,
             this.messageCaptureGroupOut ?: other.messageCaptureGroupOut,
             this.exactWarningsMatch ?: other.exactWarningsMatch,
-            this.testNameSuffix ?: other.testNameSuffix,
+            this.testNameKeyword ?: other.testNameKeyword,
             this.linePlaceholder ?: other.linePlaceholder,
             this.wildCardInDirectoryMode ?: other.wildCardInDirectoryMode,
             this.patternForRegexInWarning ?: other.patternForRegexInWarning,
