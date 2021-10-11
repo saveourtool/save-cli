@@ -38,8 +38,16 @@ class ClassicWarnTest {
             runTestsWithDiktat(
                 listOf(
                     "warn/chapter1"
-                ), 3
+                ), 4
             )
+
+    @Test
+    fun `executing warn plugin on directory, filenames contain keyword not as suffix`() =
+        runTestsWithDiktat(
+            listOf(
+                "warn/chapter1/TestsWithKeywordButNotSuffix"
+            ), 1
+        )
 
     @Test
     @Ignore
@@ -57,7 +65,7 @@ class ClassicWarnTest {
             runTestsWithDiktat(
                 listOf(
                     "warn/save.toml"
-                ), 3
+                ), 4
             )
 
     @Test
@@ -65,7 +73,7 @@ class ClassicWarnTest {
             runTestsWithDiktat(
                 listOf(
                     "warn/chapter1/save.toml"
-                ), 3
+                ), 4
             )
 
     @Test

@@ -1,0 +1,7 @@
+[general]
+    tags = ["tag2"]
+    description = "Test suite that check only raised warnings related to general coding practices."
+    suiteName = "Only Warnings: General"
+
+[warn]
+    testNameKeyword = "Test"
