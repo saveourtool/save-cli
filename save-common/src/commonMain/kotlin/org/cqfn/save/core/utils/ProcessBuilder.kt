@@ -213,3 +213,25 @@ data class ExecutionResult(
     val stdout: List<String>,
     val stderr: List<String>,
 )
+
+/**
+ * @param command executable command with arguments
+ * @param directory where to execute provided command, i.e. `cd [directory]` will be performed before [command] execution
+ * @param redirectTo a file where process output and errors should be redirected. If null, output will be returned as [ExecutionResult.stdout] and [ExecutionResult.stderr]
+ * @param pb instance that is capable of executing processes
+ * @param ms max command execution time
+ * @param tests list of tests
+ * @return [ExecutionResult] built from process output
+ */
+@Suppress(
+    "LongParameterList",
+    "TOO_MANY_PARAMETERS",
+)
+expect fun exec(
+    command: String,
+    directory: String,
+    redirectTo: Path?,
+    pb: ProcessBuilder,
+    ms: Long,
+    tests: List<Path>,
+): ExecutionResult

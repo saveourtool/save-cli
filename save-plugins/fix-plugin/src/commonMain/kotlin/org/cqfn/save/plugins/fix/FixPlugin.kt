@@ -82,9 +82,10 @@ class FixPlugin(
 
             val execFlagsAdjusted = resolvePlaceholdersFrom(fixPluginConfig.execFlags, extraFlags, testCopyNames)
             val execCmd = "${generalConfig.execCmd} $execFlagsAdjusted"
+            val time = generalConfig.ms!!.times(pathMap.size)
 
             val executionResult = try {
-                pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo)
+                exec(execCmd, testConfig.getRootConfig().directory.toString(), time, chunk.map { it.test })
             } catch (ex: ProcessExecutionException) {
                 return@map chunk.map {
                     TestResult(

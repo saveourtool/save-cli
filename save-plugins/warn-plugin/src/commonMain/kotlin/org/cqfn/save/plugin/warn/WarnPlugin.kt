@@ -83,7 +83,7 @@ class WarnPlugin(
     @Suppress(
         "TOO_LONG_FUNCTION",
         "SAY_NO_TO_VAR",
-        "LongMethod"
+        "LongMethod",
     )
     private fun handleTestFile(
         paths: List<Path>,
@@ -131,9 +131,10 @@ class WarnPlugin(
 
         val execFlagsAdjusted = resolvePlaceholdersFrom(warnPluginConfig.execFlags, extraFlags, fileNamesForExecCmd)
         val execCmd = "${generalConfig.execCmd} $execFlagsAdjusted"
+        val time = generalConfig.ms!!.times(paths.size)
 
         val executionResult = try {
-            pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo)
+            exec(execCmd, testConfig.getRootConfig().directory.toString(), time, paths)
         } catch (ex: ProcessExecutionException) {
             return paths.map {
                 TestResult(
