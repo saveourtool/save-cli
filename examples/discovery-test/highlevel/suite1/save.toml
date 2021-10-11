@@ -1,7 +1,7 @@
 [general]
 execCmd = "./detekt"
 tags = ["tag1"]
-description = "My suite description"
+description = "Test suite"
 suiteName = "DocsCheck"
 expectedWarningsPattern = "// ;warn:(\\d+):(\\d+): (.*)"
 
@@ -18,5 +18,3 @@ warningTextHasLine = true
 execFlags="-p"
 resourceNameTestSuffix="Test"
 resourceNameExpectedSuffix="Expected"
-# testFilePattern="*Test.kt"
-# expectedFilePattern="*Expected.kt"

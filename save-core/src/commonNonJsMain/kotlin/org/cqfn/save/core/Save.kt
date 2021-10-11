@@ -7,7 +7,6 @@ import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.config.isSaveTomlConfig
 import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.files.StdStreamsSink
-import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
 import org.cqfn.save.core.logging.logInfo
@@ -22,6 +21,7 @@ import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.buildActivePlugins
 import org.cqfn.save.core.utils.processInPlace
+import org.cqfn.save.plugins.fix.FixPlugin
 import org.cqfn.save.reporter.json.JsonReporter
 import org.cqfn.save.reporter.plain.PlainOnlyFailedReporter
 import org.cqfn.save.reporter.plain.PlainTextReporter
@@ -135,8 +135,7 @@ class Save(
             plugin.execute()
                 .onEach { event ->
                     // calculate relative paths, because reporters don't need paths higher than root dir
-                    val resourcesRelative =
-                            event.resources.map { it.createRelativePathToTheRoot(testRepositoryRootPath).toPath() }
+                    val resourcesRelative = event.resources.withRelativePaths(testRepositoryRootPath)
                     reporter.onEvent(event.copy(resources = resourcesRelative))
                 }
                 .forEach(this::handleResult)
@@ -164,7 +163,9 @@ class Save(
         return when (saveProperties.reportType) {
             ReportType.PLAIN -> PlainTextReporter(out)
             ReportType.PLAIN_FAILED -> PlainOnlyFailedReporter(out)
-            ReportType.JSON -> JsonReporter(out)
+            ReportType.JSON -> JsonReporter(out) {
+                FixPlugin.FixTestFiles.register(this)
+            }
             ReportType.TEST -> TestReporter(out)
             else -> TODO("Reporter for type ${saveProperties.reportType} is not yet supported")
         }

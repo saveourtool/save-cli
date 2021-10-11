@@ -82,10 +82,11 @@ class GeneralTest {
         // All result statuses should be Pass
         json.forEach { report ->
             report.pluginExecutions.forEach { pluginExecution ->
-                pluginExecution.testResults.forEach { result ->
+                pluginExecution.testResults.find { result ->
                     println(result.status)
-                    result.resources.find { it.name == "ThisShouldAlwaysFailTest.kt" }
-                        ?: assertTrue(result.status is Pass)
+                    result.resources.test.name != "ThisShouldAlwaysFailTest.kt"
+                }?.let {
+                    assertTrue(it.status is Pass)
                 }
             }
         }

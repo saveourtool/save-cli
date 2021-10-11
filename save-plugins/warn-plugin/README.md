@@ -59,7 +59,7 @@ and the content of the file `ExampleTest1.kt`:
 // ;warn:3:13: Method B() should follow camel-case convention 
 class a {
     // ;warn:2:13: Single symbol variables are not informative
-    // ;warn:2:14: Trailing semicolon is redundant in Kotlin
+    // ;warn:2:14: Trailing semicolon {{.*is.*}} redundant in Kotlin
      val b: String;
      fun B(): String {}
      fun setB(): String {}
@@ -103,6 +103,8 @@ batchSeparator  = ", " # (default value)
 defaultLineMode = false
 linePlaceholder = "$line"
 patternForRegexInWarning = ["{{", "}}"]
+# if true - the regex created from expected warning will be wrapped with '.*': .*warn.*.
+partialWarnTextMatch = false # (default value)
 ```
 
 When executed from project root (where `save.propertes` is located), SAVE will cd to `rootDir` and discover all files
