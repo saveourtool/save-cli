@@ -8,10 +8,11 @@ import okio.Path
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.newFixedThreadPoolContext
 
 @Suppress("MISSING_KDOC_TOP_LEVEL",
     "MISSING_KDOC_CLASS_ELEMENTS",
@@ -73,51 +74,12 @@ actual class ProcessBuilderInternal actual constructor(
  * @param directory where to execute provided command, i.e. `cd [directory]` will be performed before [command] execution
  * @param redirectTo a file where process output and errors should be redirected. If null, output will be returned as [ExecutionResult.stdout] and [ExecutionResult.stderr]
  * @param pb instance that is capable of executing processes
- * @param ms max command execution time
+ * @param timeOutMillis max command execution time
  * @param tests list of tests
  * @return [ExecutionResult] built from process output
  * @throws ProcessExecutionException
  */
-@Suppress(
-    "LongParameterList",
-    "TOO_MANY_PARAMETERS",
-)
-suspend fun execCom(
-    command: String,
-    directory: String,
-    redirectTo: Path?,
-    pb: ProcessBuilder,
-    ms: Long,
-    tests: List<Path>,
-): ExecutionResult {
-    var execResult = ExecutionResult(0, emptyList(), emptyList())
-
-    coroutineScope {
-        var endTimer = true
-        launch {
-            delay(ms)
-            if (endTimer) {
-                logWarn("The following tests took too long to run and were stopped: $tests")
-                throw ProcessExecutionException("Timeout is reached")
-            }
-        }
-
-        execResult = pb.exec(command, directory, redirectTo)
-        endTimer = false
-    }
-
-    return execResult
-}
-
-/**
- * @param command executable command with arguments
- * @param directory where to execute provided command, i.e. `cd [directory]` will be performed before [command] execution
- * @param redirectTo a file where process output and errors should be redirected. If null, output will be returned as [ExecutionResult.stdout] and [ExecutionResult.stderr]
- * @param pb instance that is capable of executing processes
- * @param ms max command execution time
- * @param tests list of tests
- * @return [ExecutionResult] built from process output
- */
+@OptIn(ObsoleteCoroutinesApi::class)
 @Suppress(
     "LongParameterList",
     "TOO_MANY_PARAMETERS",
@@ -127,8 +89,22 @@ actual fun exec(
     directory: String,
     redirectTo: Path?,
     pb: ProcessBuilder,
-    ms: Long,
+    timeOutMillis: Long,
     tests: List<Path>,
-) = runBlocking {
-    return@runBlocking execCom(command, directory, redirectTo, pb, ms, tests)
+): ExecutionResult {
+    val processContext = newFixedThreadPoolContext(2, "timeOut")
+    val endTimer = AtomicBoolean(true)
+
+    CoroutineScope(processContext).launch {
+        delay(timeOutMillis)
+        if (endTimer.get()) {
+            logWarn("The following tests took too long to run and were stopped: $tests")
+            throw ProcessExecutionException("Timeout is reached")
+        }
+    }
+
+    val execResult: ExecutionResult = pb.exec(command, directory, redirectTo)
+    endTimer.compareAndSet(true, false)
+
+    return execResult
 }

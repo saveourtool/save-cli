@@ -219,7 +219,7 @@ data class ExecutionResult(
  * @param directory where to execute provided command, i.e. `cd [directory]` will be performed before [command] execution
  * @param redirectTo a file where process output and errors should be redirected. If null, output will be returned as [ExecutionResult.stdout] and [ExecutionResult.stderr]
  * @param pb instance that is capable of executing processes
- * @param ms max command execution time
+ * @param timeOutMillis max command execution time
  * @param tests list of tests
  * @return [ExecutionResult] built from process output
  */
@@ -232,6 +232,6 @@ expect fun exec(
     directory: String,
     redirectTo: Path?,
     pb: ProcessBuilder,
-    ms: Long,
+    timeOutMillis: Long,
     tests: List<Path>,
 ): ExecutionResult

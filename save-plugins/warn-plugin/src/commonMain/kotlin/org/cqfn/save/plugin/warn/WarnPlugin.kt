@@ -131,7 +131,7 @@ class WarnPlugin(
 
         val execFlagsAdjusted = resolvePlaceholdersFrom(warnPluginConfig.execFlags, extraFlags, fileNamesForExecCmd)
         val execCmd = "${generalConfig.execCmd} $execFlagsAdjusted"
-        val time = generalConfig.ms!!.times(paths.size)
+        val time = generalConfig.timeOutMillis!!.times(paths.size)
 
         val executionResult = try {
             exec(execCmd, testConfig.getRootConfig().directory.toString(), time, paths)
