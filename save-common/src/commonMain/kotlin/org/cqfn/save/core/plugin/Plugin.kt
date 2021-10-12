@@ -58,16 +58,16 @@ abstract class Plugin(
     /**
      * @param command executable command with arguments
      * @param directory where to execute provided command, i.e. `cd [directory]` will be performed before [command] execution
-     * @param ms max command execution time
+     * @param timeOutMillis max command execution time
      * @param tests list of tests
      * @return [ExecutionResult] built from process output
      */
     fun exec(
         command: String,
         directory: String,
-        ms: Long,
+        timeOutMillis: Long,
         tests: List<Path>,
-    ): ExecutionResult = exec(command, directory, redirectTo, pb, ms, tests)
+    ): ExecutionResult = exec(command, directory, redirectTo, pb, timeOutMillis, tests)
 
     /**
      * Perform plugin's work on a set of files.
