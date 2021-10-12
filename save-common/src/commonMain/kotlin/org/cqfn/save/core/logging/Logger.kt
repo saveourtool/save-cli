@@ -71,7 +71,7 @@ fun logInfo(msg: String): Unit = logMessage("INFO", msg)
  *
  * @param msg a message string
  */
-fun logWarn(msg: String): Unit {
+fun logWarn(msg: String) {
     if (!isQuietMode) {
         logMessage("WARN", msg, OutputStreamType.STDERR)
     }
