@@ -21,7 +21,7 @@
       "fullName" : "debug",
       "shortName" : "d",
       "description" : "Type of debug logging mode",
-      "default" : "DebugType.NO_DEBUG"
+      "default" : "DebugType.NONE"
     },
     "quiet" : {
       "argType" : "ArgType.Boolean",
