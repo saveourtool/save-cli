@@ -11,6 +11,7 @@ import org.cqfn.save.core.utils.writeToStream
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.cqfn.save.core.config.DebugType
 
 /**
  * Is debug logging enabled
@@ -18,14 +19,9 @@ import kotlinx.datetime.toLocalDateTime
 var isQuietMode: Boolean = false
 
 /**
- * Is debug logging enabled
+ * Debug logging mode
  */
-var isDebugEnabled: Boolean = false
-
-/**
- * Is low-level debug enabled
- */
-var isTraceEnabled: Boolean = false
+var debugType: DebugType = DebugType.NO_DEBUG
 
 /**
  * Whether to add time stamps to log messages
@@ -59,7 +55,7 @@ fun logMessage(
  * @param msg a message string
  */
 fun logDebug(msg: String) {
-    if (isDebugEnabled) {
+    if (debugType == DebugType.LIGHT_DEBUG || debugType == DebugType.HARD_DEBUG) {
         logMessage("DEBUG", msg)
     }
 }
@@ -95,7 +91,7 @@ fun logError(msg: String): Unit = logMessage("ERROR", msg, OutputStreamType.STDE
  * @param msg a message string
  */
 fun logTrace(msg: String) {
-    if(isTraceEnabled) {
+    if(debugType == DebugType.HARD_DEBUG) {
         logMessage("TRACE", msg)
     }
 }
