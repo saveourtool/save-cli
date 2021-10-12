@@ -83,3 +83,10 @@ fun logWarn(msg: String): Unit {
  * @param msg a message string
  */
 fun logError(msg: String): Unit = logMessage("ERROR", msg, OutputStreamType.STDERR)
+
+/**
+ * Log a message with trace level
+ *
+ * @param msg a message string
+ */
+fun logTrace(msg: String): Unit = logMessage("TRACE", msg)

@@ -10,6 +10,7 @@ import org.cqfn.save.core.files.StdStreamsSink
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
 import org.cqfn.save.core.logging.logInfo
+import org.cqfn.save.core.logging.logTrace
 import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.plugin.PluginException
