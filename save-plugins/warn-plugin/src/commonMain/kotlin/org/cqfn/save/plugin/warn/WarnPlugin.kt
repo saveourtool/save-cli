@@ -124,7 +124,9 @@ class WarnPlugin(
                         .createRelativePathToTheRoot(testConfig.getRootConfig().location)
                     // a hack to put only the directory path to the execution command
                     // only in case a directory mode is enabled
-                    "$directoryPrefix$it${warnPluginConfig.testNameSuffix}"
+                    // We should remember that here we have not kotlin regulars but os-based so testNameRegPattern is
+                    // not suitable. Need to create a usual regex: path/to/dir/*keyword*
+                    "$directoryPrefix$it${warnPluginConfig.testNameKeyword}*"
                 } ?: paths.joinToString(separator = warnPluginConfig.batchSeparator!!) {
                     it.createRelativePathToTheRoot(testConfig.getRootConfig().location)
                 }
