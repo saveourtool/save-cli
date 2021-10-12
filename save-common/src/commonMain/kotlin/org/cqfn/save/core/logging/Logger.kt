@@ -23,6 +23,11 @@ var isQuietMode: Boolean = false
 var isDebugEnabled: Boolean = false
 
 /**
+ * Is low-level debug enabled
+ */
+var isTraceEnabled: Boolean = false
+
+/**
  * Whether to add time stamps to log messages
  */
 var isTimeStampsEnabled: Boolean = false
@@ -89,4 +94,8 @@ fun logError(msg: String): Unit = logMessage("ERROR", msg, OutputStreamType.STDE
  *
  * @param msg a message string
  */
-fun logTrace(msg: String): Unit = logMessage("TRACE", msg)
+fun logTrace(msg: String) {
+    if(isTraceEnabled) {
+        logMessage("TRACE", msg)
+    }
+}
