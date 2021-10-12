@@ -3,4 +3,4 @@
     description = "Test suite that check only raised warnings related to general coding practices in files detected by a keyword."
 
 [warn]
-    testNameKeyword = "Test"
+    testNameRegex = "^E.*T.*D.*"

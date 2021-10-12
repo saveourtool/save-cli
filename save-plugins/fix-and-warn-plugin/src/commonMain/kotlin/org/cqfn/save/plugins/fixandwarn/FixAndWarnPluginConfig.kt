@@ -36,11 +36,11 @@ data class FixAndWarnPluginConfig(
     }
 
     override fun validateAndSetDefaults(): PluginConfig {
-        require(fix.resourceNameTest == warn.testName &&
+        require(warn.testName.toRegex().matches(fix.resourceNameTest) &&
                 fix.batchSize == warn.batchSize
         ) {
             """
-               Test files suffix names and batch sizes should be identical for [fix] and [warn] plugins.
+               Test files batch sizes should be identical for [fix] and [warn] plugins and [fix] files should match [warn] regex .
                But found [fix]: {${fix.resourceNameTest}, ${fix.batchSize}},
                          [warn]: {${warn.testName}, ${warn.batchSize}}
            """

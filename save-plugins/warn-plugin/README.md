@@ -97,7 +97,7 @@ messageCaptureGroup = 4 # (default value)
 
 warningTextHasColumn = true # (default value)
 warningTextHasLine = true # (default value)
-testNameKeyword = "Test" # (default value)
+testNameRegex = ".*Test.*" # (default value)
 batchSize = 1 # (default value)
 batchSeparator  = ", " # (default value)
 defaultLineMode = false
@@ -118,7 +118,7 @@ If line number is not present in the comment, it's assumed to be `current line +
 for column number (if `warningTextHasColumn` is true) and for warning text. Their indices can be customized
 with `lineCaptureGroup`, `columnCaptureGroup` and `messageCaptureGroup` parameters. These parameters are shared between input and output pattern;
 usually you'll want them to be consistent to make testing easier, i.e. if input has line number, then so should output.
-`testNameKeyword` must include keyword - a part of the name of the test file.
+`testNameRegex` is a regular expression which sets the name of the test file.
 
 ### Customize `execCmd` per file
 As the next level of customization, execution command can be customized per individual test. To do so, one can use a special comment in that file.

@@ -4,7 +4,7 @@
 
 [warn]
     # keyword to detect tests
-    testNameKeyword = "Test.kt"
+    testNameRegex = ".*Test.kt"
     wildCardInDirectoryMode = "**/*"
     # diktat warnings have the following format: filename.kt:1:15: [WARN_NAME] my waring
     actualWarningsPattern="(\\w+\\..+):(\\d+):(\\d+): (\\[.*\\].*)"
