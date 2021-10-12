@@ -15,13 +15,13 @@
       "description" : "Number of threads",
       "default" : "1"
     },
-    "debug" : {
-      "argType" : "ArgType.Boolean",
-      "kotlinType": "kotlin.Boolean",
+    "debugType" : {
+      "argType" : "ArgType.Choice<DebugType>()",
+      "kotlinType": "org.cqfn.save.core.config.DebugType",
       "fullName" : "debug",
       "shortName" : "d",
-      "description" : "Turn on debug logging",
-      "default" : "false"
+      "description" : "Type of debug logging mode",
+      "default" : "DebugType.NO_DEBUG"
     },
     "quiet" : {
       "argType" : "ArgType.Boolean",

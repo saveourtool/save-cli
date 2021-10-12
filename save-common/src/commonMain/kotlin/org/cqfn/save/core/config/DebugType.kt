@@ -10,6 +10,6 @@ import kotlinx.serialization.Serializable
 enum class DebugType {
     @SerialName("none") NO_DEBUG,
     @SerialName("light") LIGHT_DEBUG,
-    @SerialName("hard") HARD_DEBUG,
+    @SerialName("full") FULL_DEBUG,
     ;
 }
