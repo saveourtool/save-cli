@@ -1,11 +1,13 @@
 package org.cqfn.save.cli
 
 import org.cqfn.save.core.files.readFile
+import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.utils.CurrentOs
 import org.cqfn.save.core.utils.ProcessBuilder
 import org.cqfn.save.core.utils.getCurrentOs
 import org.cqfn.save.core.utils.isCurrentOsWindows
+import org.cqfn.save.plugins.fix.FixPlugin
 import org.cqfn.save.reporter.Report
 
 import okio.FileSystem
@@ -16,6 +18,9 @@ import kotlin.test.assertTrue
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
 
 @Suppress(
     "TOO_LONG_FUNCTION",
@@ -26,6 +31,14 @@ import kotlinx.serialization.json.Json
 @OptIn(ExperimentalSerializationApi::class)
 class GeneralTest {
     private val fs = FileSystem.SYSTEM
+    private val json = Json {
+        serializersModule = SerializersModule {
+            polymorphic(Plugin.TestFiles::class) {
+                subclass(Plugin.Test::class)
+                subclass(FixPlugin.FixTestFiles::class)
+            }
+        }
+    }
 
     @Test
     fun `examples test`() {
@@ -77,10 +90,9 @@ class GeneralTest {
         // Report should be created after successful completion
         assertTrue(fs.exists(reportFile))
 
-        val json: List<Report> = Json.decodeFromString(fs.readFile(reportFile))
-
+        val reports: List<Report> = json.decodeFromString(fs.readFile(reportFile))
         // All result statuses should be Pass
-        json.forEach { report ->
+        reports.forEach { report ->
             report.pluginExecutions.forEach { pluginExecution ->
                 pluginExecution.testResults.find { result ->
                     println(result.status)

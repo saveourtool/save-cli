@@ -60,6 +60,7 @@ kotlin {
                 implementation(kotlin("test-annotations-common"))
                 implementation(project(":save-common"))
                 implementation(project(":save-reporters"))
+                implementation(project(":save-plugins:fix-plugin"))
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.Kotlinx.serialization}")
             }
         }
