@@ -3,7 +3,7 @@
     description = "Test warnings discovered by diKTat"
 
 [warn]
-    # suffix to detect tests
+    # keyword to detect tests
     testNameKeyword = "Test.kt"
     wildCardInDirectoryMode = "**/*"
     # diktat warnings have the following format: filename.kt:1:15: [WARN_NAME] my waring
