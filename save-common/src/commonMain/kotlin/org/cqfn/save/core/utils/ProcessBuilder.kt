@@ -36,9 +36,14 @@ expect class ProcessBuilderInternal(
      * Execute [cmd] and wait for its completion.
      *
      * @param cmd executable command with arguments
+     * @param timeOutMillis max command execution time
+     * @param tests list of tests
      * @return exit status
      */
-    fun exec(cmd: String): Int
+    fun exec(
+        cmd: String,
+        timeOutMillis: Long,
+        tests: List<Path>): Int
 }
 
 /**
@@ -54,6 +59,8 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
      * @param command executable command with arguments
      * @param directory where to execute provided command, i.e. `cd [directory]` will be performed before [command] execution
      * @param redirectTo a file where process output and errors should be redirected. If null, output will be returned as [ExecutionResult.stdout] and [ExecutionResult.stderr].
+     * @param timeOutMillis max command execution time
+     * @param tests list of tests
      * @return [ExecutionResult] built from process output
      * @throws ProcessExecutionException in case of impossibility of command execution
      */
@@ -64,7 +71,10 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
     fun exec(
         command: String,
         directory: String,
-        redirectTo: Path?): ExecutionResult {
+        redirectTo: Path?,
+        timeOutMillis: Long,
+        tests: List<Path>,
+    ): ExecutionResult {
         if (command.isBlank()) {
             logErrorAndThrowProcessBuilderException("Command couldn't be empty!")
         }
@@ -91,7 +101,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
 
         logDebug("Executing: $cmd")
         val status = try {
-            processBuilderInternal.exec(cmd)
+            processBuilderInternal.exec(cmd, timeOutMillis, tests)
         } catch (ex: Exception) {
             fs.deleteRecursively(tmpDir)
             logErrorAndThrowProcessBuilderException(ex.message ?: "Couldn't execute $cmd")
@@ -213,25 +223,3 @@ data class ExecutionResult(
     val stdout: List<String>,
     val stderr: List<String>,
 )
-
-/**
- * @param command executable command with arguments
- * @param directory where to execute provided command, i.e. `cd [directory]` will be performed before [command] execution
- * @param redirectTo a file where process output and errors should be redirected. If null, output will be returned as [ExecutionResult.stdout] and [ExecutionResult.stderr]
- * @param pb instance that is capable of executing processes
- * @param timeOutMillis max command execution time
- * @param tests list of tests
- * @return [ExecutionResult] built from process output
- */
-@Suppress(
-    "LongParameterList",
-    "TOO_MANY_PARAMETERS",
-)
-expect fun exec(
-    command: String,
-    directory: String,
-    redirectTo: Path?,
-    pb: ProcessBuilder,
-    timeOutMillis: Long,
-    tests: List<Path>,
-): ExecutionResult

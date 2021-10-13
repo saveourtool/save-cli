@@ -136,7 +136,7 @@ class WarnPlugin(
         val time = generalConfig.timeOutMillis!!.times(paths.size)
 
         val executionResult = try {
-            exec(execCmd, testConfig.getRootConfig().directory.toString(), time, paths)
+            pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time, paths)
         } catch (ex: ProcessExecutionException) {
             return paths.map {
                 TestResult(

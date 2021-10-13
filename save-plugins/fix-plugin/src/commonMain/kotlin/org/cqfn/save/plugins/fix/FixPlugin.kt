@@ -85,7 +85,7 @@ class FixPlugin(
             val time = generalConfig.timeOutMillis!!.times(pathMap.size)
 
             val executionResult = try {
-                exec(execCmd, testConfig.getRootConfig().directory.toString(), time, chunk.map { it.test })
+                pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time, chunk.map { it.test })
             } catch (ex: ProcessExecutionException) {
                 return@map chunk.map {
                     TestResult(

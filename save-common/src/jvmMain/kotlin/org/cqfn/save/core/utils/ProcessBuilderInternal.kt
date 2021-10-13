@@ -9,7 +9,6 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newFixedThreadPoolContext
@@ -38,11 +37,27 @@ actual class ProcessBuilderInternal actual constructor(
         return cmd.joinToString()
     }
 
-    actual fun exec(cmd: String): Int {
+    actual fun exec(
+        cmd: String,
+        timeOutMillis: Long,
+        tests: List<Path>): Int {
+        val processContext = newFixedThreadPoolContext(2, "timeOut")
+        val endTimer = AtomicBoolean(true)
+
         val runTime = Runtime.getRuntime()
         val process = runTime.exec(cmd.split(", ").toTypedArray())
         writeDataFromBufferToFile(process, "stdout", stdoutFile)
         writeDataFromBufferToFile(process, "stderr", stderrFile)
+
+        CoroutineScope(processContext).launch {
+            delay(timeOutMillis)
+            if (endTimer.get()) {
+                logWarn("The following tests took too long to run and were stopped: $tests")
+                process.destroy()
+                throw ProcessExecutionException("Timeout is reached")
+            }
+        }
+
         return process.waitFor()
     }
 
@@ -67,44 +82,4 @@ actual class ProcessBuilderInternal actual constructor(
             write(data.encodeToByteArray())
         }
     }
-}
-
-/**
- * @param command executable command with arguments
- * @param directory where to execute provided command, i.e. `cd [directory]` will be performed before [command] execution
- * @param redirectTo a file where process output and errors should be redirected. If null, output will be returned as [ExecutionResult.stdout] and [ExecutionResult.stderr]
- * @param pb instance that is capable of executing processes
- * @param timeOutMillis max command execution time
- * @param tests list of tests
- * @return [ExecutionResult] built from process output
- * @throws ProcessExecutionException
- */
-@OptIn(ObsoleteCoroutinesApi::class)
-@Suppress(
-    "LongParameterList",
-    "TOO_MANY_PARAMETERS",
-)
-actual fun exec(
-    command: String,
-    directory: String,
-    redirectTo: Path?,
-    pb: ProcessBuilder,
-    timeOutMillis: Long,
-    tests: List<Path>,
-): ExecutionResult {
-    val processContext = newFixedThreadPoolContext(2, "timeOut")
-    val endTimer = AtomicBoolean(true)
-
-    CoroutineScope(processContext).launch {
-        delay(timeOutMillis)
-        if (endTimer.get()) {
-            logWarn("The following tests took too long to run and were stopped: $tests")
-            throw ProcessExecutionException("Timeout is reached")
-        }
-    }
-
-    val execResult: ExecutionResult = pb.exec(command, directory, redirectTo)
-    endTimer.compareAndSet(true, false)
-
-    return execResult
 }

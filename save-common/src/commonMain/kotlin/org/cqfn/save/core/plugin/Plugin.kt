@@ -7,10 +7,8 @@ import org.cqfn.save.core.files.findDescendantDirectoriesBy
 import org.cqfn.save.core.files.parentsWithSelf
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.result.TestResult
-import org.cqfn.save.core.utils.ExecutionResult
 import org.cqfn.save.core.utils.PathSerializer
 import org.cqfn.save.core.utils.ProcessBuilder
-import org.cqfn.save.core.utils.exec
 
 import okio.FileSystem
 import okio.Path
@@ -54,20 +52,6 @@ abstract class Plugin(
             emptySequence()
         }
     }
-
-    /**
-     * @param command executable command with arguments
-     * @param directory where to execute provided command, i.e. `cd [directory]` will be performed before [command] execution
-     * @param timeOutMillis max command execution time
-     * @param tests list of tests
-     * @return [ExecutionResult] built from process output
-     */
-    fun exec(
-        command: String,
-        directory: String,
-        timeOutMillis: Long,
-        tests: List<Path>,
-    ): ExecutionResult = exec(command, directory, redirectTo, pb, timeOutMillis, tests)
 
     /**
      * Perform plugin's work on a set of files.

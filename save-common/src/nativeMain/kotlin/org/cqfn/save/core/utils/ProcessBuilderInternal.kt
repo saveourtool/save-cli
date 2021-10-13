@@ -26,52 +26,35 @@ actual class ProcessBuilderInternal actual constructor(
         command
     }
 
-    actual fun exec(cmd: String): Int {
-        val status = system(cmd)
+    actual fun exec(
+        cmd: String,
+        timeOutMillis: Long,
+        tests: List<Path>): Int {
+        var status = -1
+
+        runBlocking {
+            val endTimer = AtomicBoolean(true)
+            launch {
+                delay(timeOutMillis)
+                if (endTimer.get()) {
+                    logWarn("The following tests took too long to run and were stopped: $tests")
+                    destroy(cmd)
+                    throw ProcessExecutionException("Timeout is reached")
+                }
+            }
+
+            status = system(cmd)
+            endTimer.compareAndSet(true, false)
+        }
+
         if (status == -1) {
             error("Couldn't execute $cmd, exit status: $status")
         }
         return status
     }
-}
 
-/**
- * @param command executable command with arguments
- * @param directory where to execute provided command, i.e. `cd [directory]` will be performed before [command] execution
- * @param redirectTo a file where process output and errors should be redirected. If null, output will be returned as [ExecutionResult.stdout] and [ExecutionResult.stderr]
- * @param pb instance that is capable of executing processes
- * @param timeOutMillis max command execution time
- * @param tests list of tests
- * @return [ExecutionResult] built from process output
- * @throws ProcessExecutionException
- */
-@Suppress(
-    "LongParameterList",
-    "TOO_MANY_PARAMETERS",
-)
-actual fun exec(
-    command: String,
-    directory: String,
-    redirectTo: Path?,
-    pb: ProcessBuilder,
-    timeOutMillis: Long,
-    tests: List<Path>,
-): ExecutionResult {
-    var execResult: ExecutionResult = ExecutionResult(0, emptyList(), emptyList())
-
-    runBlocking {
-        val endTimer = AtomicBoolean(true)
-        launch {
-            delay(timeOutMillis)
-            if (endTimer.get()) {
-                logWarn("The following tests took too long to run and were stopped: $tests")
-                throw ProcessExecutionException("Timeout is reached")
-            }
-        }
-
-        execResult = pb.exec(command, directory, redirectTo)
-        endTimer.compareAndSet(true, false)
+    private fun destroy(cmd: String) {
+        val killCmd = "pkill $cmd"
+        system(killCmd)
     }
-
-    return execResult
 }
