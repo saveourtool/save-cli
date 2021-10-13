@@ -121,7 +121,7 @@ class FixPluginTest {
         // FixMe: after https://github.com/cqfn/save/issues/158
         val executionCmd = if (isCurrentOsWindows()) {
             // We call ProcessBuilder ourselves, because the command ">" does not work for the list of files
-            ProcessBuilder(false, fs).exec("echo Expected file > $testFile2", "", null)
+            ProcessBuilder(false, fs).exec("echo Expected file > $testFile2", "", null, 10_000L, emptyList())
             "${diskWithTmpDir}cd $tmpDir && echo Expected file >"
         } else {
             "${diskWithTmpDir}cd $tmpDir && echo Expected file | tee"
@@ -141,7 +141,7 @@ class FixPluginTest {
         ).execute()
 
         // We call ProcessBuilder ourselves, because the command ">" does not work for the list of files
-        ProcessBuilder(false, fs).exec("echo Expected file > $testFile2", "", null)
+        ProcessBuilder(false, fs).exec("echo Expected file > $testFile2", "", null, 10_000L, emptyList())
 
         assertEquals(2, results.count(), "Size of results should equal number of pairs")
         assertTrue(results.all {
