@@ -98,8 +98,6 @@ kotlin {
 configurePublishing()
 
 tasks.withType<KotlinJvmTest> {
-    
-tasks.withType<KotlinJvmTest> {
     // for some reason KotlinJvmTest is not a subclass of KotlinTest, so this is a WA
     // to avoid race conditions: https://github.com/cqfn/save/issues/156#issuecomment-943285572
     mustRunAfter(tasks.withType<KotlinTest>())
