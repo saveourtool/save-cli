@@ -1,6 +1,7 @@
 package org.cqfn.save.reporter.json
 
 import org.cqfn.save.core.files.readFile
+import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.Crash
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.plugin.MockPlugin
@@ -59,7 +60,7 @@ class JsonReporterTest {
         jsonReporter.onPluginExecutionStart(mockPlugin)
         jsonReporter.onEvent(
             TestResult(
-                emptyList(),
+                Plugin.Test(tmpFile),
                 Crash("IllegalArgumentException", "foo")
             )
         )

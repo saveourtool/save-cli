@@ -42,7 +42,7 @@ data class FixAndWarnPluginConfig(
             """
                Test files suffix names and batch sizes should be identical for [fix] and [warn] plugins.
                But found [fix]: {${fix.resourceNameTest}, ${fix.batchSize}},
-                         [warn]: {${warn.testNameSuffix}, ${warn.batchSize}}
+                         [warn]: {${warn.testName}, ${warn.batchSize}}
            """
         }
         return FixAndWarnPluginConfig(

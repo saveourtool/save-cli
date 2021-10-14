@@ -82,9 +82,14 @@ fun String.findFirstDelimitedSubStringBy(openingDelimiter: String, closingDelimi
  *
  * @param openingDelimiter opening group of symbols that is used to separate pattern
  * @param closingDelimiter closing group of symbols that is used to separate pattern
+ * @param isPartialWarnTextMatch if true - the regex created from expected warning will be wrapped with '.*': .*warn.*
  * @return Regex with an escaped string
  */
-fun String.createRegexFromString(openingDelimiter: String, closingDelimiter: String): Regex {
+fun String.createRegexFromString(
+    openingDelimiter: String,
+    closingDelimiter: String,
+    isPartialWarnTextMatch: Boolean = false
+): Regex {
     // searching all delimited regex in the warning
     val foundSubStringsWithRegex = this
         .findDelimitedSubStringsWith(openingDelimiter, closingDelimiter)
@@ -130,7 +135,7 @@ fun String.createRegexFromString(openingDelimiter: String, closingDelimiter: Str
     // if no regex were found in the string we should simply escape all symbols
     val res = if (foundSubStringsWithRegex.isEmpty()) this.escapeSpecialRegexSymbols() else resultWithRegex
 
-    return Regex(res)
+    return if (isPartialWarnTextMatch) Regex(".*$res.*") else Regex(res)
 }
 
 /**

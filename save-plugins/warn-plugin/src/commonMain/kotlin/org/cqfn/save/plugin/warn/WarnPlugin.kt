@@ -124,7 +124,9 @@ class WarnPlugin(
                         .createRelativePathToTheRoot(testConfig.getRootConfig().location)
                     // a hack to put only the directory path to the execution command
                     // only in case a directory mode is enabled
-                    "$directoryPrefix$it${warnPluginConfig.testNameSuffix}"
+                    // We should remember that here we have not kotlin regulars but os-based so testNameRegPattern is
+                    // not suitable. Need to create a usual regex: path/to/dir/*keyword*
+                    "$directoryPrefix$it${warnPluginConfig.testNameKeyword}*"
                 } ?: paths.joinToString(separator = warnPluginConfig.batchSeparator!!) {
                     it.createRelativePathToTheRoot(testConfig.getRootConfig().location)
                 }
@@ -135,13 +137,13 @@ class WarnPlugin(
         val executionResult = try {
             pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo)
         } catch (ex: ProcessExecutionException) {
-            return sequenceOf(
+            return paths.map {
                 TestResult(
-                    paths,
+                    Test(it),
                     Fail(ex.describe(), ex.describe()),
                     DebugInfo(null, ex.message, null)
                 )
-            )
+            }.asSequence()
         }
         val stdout = executionResult.stdout
         val stderr = executionResult.stderr
@@ -164,12 +166,12 @@ class WarnPlugin(
         val resultsChecker = ResultsChecker(
             expectedWarningsMap,
             actualWarningsMap,
-            warnPluginConfig
+            warnPluginConfig,
         )
 
         return paths.map { path ->
             TestResult(
-                listOf(path),
+                Test(path),
                 resultsChecker.checkResults(path.name),
                 DebugInfo(
                     stdout.filter { it.contains(path.name) }.joinToString("\n"),

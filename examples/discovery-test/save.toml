@@ -1,7 +1,7 @@
 [general]
 execCmd = "./detekt"
 tags = ["test"]
-description = "My description 1"
+description = "Root test directory"
 suiteName = "DocsCheck"
 
 [warn]

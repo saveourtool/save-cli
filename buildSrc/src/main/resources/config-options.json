@@ -28,7 +28,7 @@
       "kotlinType": "kotlin.Boolean",
       "fullName" : "quiet",
       "shortName" : "q",
-      "description" : "Do not log anything",
+      "description" : "Log only test results (if `--result-output` is `stdout`) without any warnings (only with critical errors)",
       "default" : "false"
     },
     "reportType" : {
