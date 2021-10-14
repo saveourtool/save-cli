@@ -1,6 +1,6 @@
 # SAVE warn plugin
 Plugin that runs the provided executable and compares emitted warnings with expected; expected warnings are set in the same input files.
-Please note, that it is important for test resources to have specific postfixes. For test file it should be `Test`.
+Please note, that it is important for test resources to have specific keywords. For test file it should be `Test`.
 
 ### Examples
 If you don't like to read long readme file, you can simply check [examples](/examples/kotlin-diktat/warn).
@@ -59,7 +59,7 @@ and the content of the file `ExampleTest1.kt`:
 // ;warn:3:13: Method B() should follow camel-case convention 
 class a {
     // ;warn:2:13: Single symbol variables are not informative
-    // ;warn:2:14: Trailing semicolon is redundant in Kotlin
+    // ;warn:2:14: Trailing semicolon {{.*is.*}} redundant in Kotlin
      val b: String;
      fun B(): String {}
      fun setB(): String {}
@@ -97,12 +97,14 @@ messageCaptureGroup = 4 # (default value)
 
 warningTextHasColumn = true # (default value)
 warningTextHasLine = true # (default value)
-testNameSuffix = "Test" # (default value)
+testNameKeyword = "Test" # (default value)
 batchSize = 1 # (default value)
 batchSeparator  = ", " # (default value)
 defaultLineMode = false
 linePlaceholder = "$line"
 patternForRegexInWarning = ["{{", "}}"]
+# if true - the regex created from expected warning will be wrapped with '.*': .*warn.*.
+partialWarnTextMatch = false # (default value)
 ```
 
 When executed from project root (where `save.propertes` is located), SAVE will cd to `rootDir` and discover all files
@@ -116,7 +118,7 @@ If line number is not present in the comment, it's assumed to be `current line +
 for column number (if `warningTextHasColumn` is true) and for warning text. Their indices can be customized
 with `lineCaptureGroup`, `columnCaptureGroup` and `messageCaptureGroup` parameters. These parameters are shared between input and output pattern;
 usually you'll want them to be consistent to make testing easier, i.e. if input has line number, then so should output.
-`testNameSuffix` must include suffix name of the test file.
+`testNameKeyword` must include keyword - a part of the name of the test file.
 
 ### Customize `execCmd` per file
 As the next level of customization, execution command can be customized per individual test. To do so, one can use a special comment in that file.
