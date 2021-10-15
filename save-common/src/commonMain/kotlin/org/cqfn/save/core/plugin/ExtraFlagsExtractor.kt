@@ -6,6 +6,7 @@ import org.cqfn.save.core.logging.logWarn
 
 import okio.FileSystem
 import okio.Path
+import org.cqfn.save.core.logging.logTrace
 
 /**
  * Class that is capable of extracting [ExtraFlags] from a text line
@@ -21,7 +22,7 @@ class ExtraFlagsExtractor(private val generalConfig: GeneralConfig,
         val allExtraFlagsFromFile = fs.readLines(path).mapNotNull {
             extractExtraFlagsFrom(it)
         }
-        logDebug(
+        logTrace(
             "Extra flags from multiple comments in a single file are not supported yet, but there are ${allExtraFlagsFromFile.size} in $path"
         )
         return allExtraFlagsFromFile.firstOrNull()

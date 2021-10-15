@@ -27,7 +27,7 @@ open class PlainTextReporter(override val out: BufferedSink) : Reporter {
     private val statistics = Statistics()
 
     override fun beforeAll() {
-        logDebug("Initializing reporter ${this::class.qualifiedName} of type $type\n")
+        logDebug("Initializing reporter ${this::class.qualifiedName} of type $type")
         val headers = listOf("Test suite", "Plugin", "Test", "result", "comment")
         out.write("--------------------------------\n".encodeToByteArray())
         out.write(headers.joinToString(prefix = "| ", separator = " | ", postfix = " |\n").encodeToByteArray())

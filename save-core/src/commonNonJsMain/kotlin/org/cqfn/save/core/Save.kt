@@ -177,7 +177,7 @@ class Save(
         when (val status = testResult.status) {
             is Pass -> {
                 val passMessage = "Test on resources [${testResult.resources}] has completed successfully"
-                status.message?.let { logDebug("$passMessage. $it") } ?: logDebug(passMessage)
+                status.message?.let { logTrace("$passMessage. $it") } ?: logTrace(passMessage)
             }
             is Fail -> logWarn("Test on resources [${testResult.resources}] has failed: ${status.reason}")
             is Ignored -> logWarn("Test on resources [${testResult.resources}] has been ignored: ${status.reason}")
@@ -186,6 +186,6 @@ class Save(
                         "Please report an issue at https://github.com/cqfn/save"
             )
         }
-        logDebug("Completed test execution for resources [${testResult.resources}]. Additional info: ${testResult.debugInfo}")
+        logTrace("Completed test execution for resources [${testResult.resources}]. Additional info: ${testResult.debugInfo}")
     }
 }

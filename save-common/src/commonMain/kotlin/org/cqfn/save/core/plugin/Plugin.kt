@@ -15,6 +15,7 @@ import okio.Path
 import okio.Path.Companion.toPath
 
 import kotlinx.serialization.Serializable
+import org.cqfn.save.core.logging.logTrace
 
 /**
  * Plugin that can be injected into SAVE during execution. Plugins accept contents of configuration file and then perform some work.
@@ -46,7 +47,7 @@ abstract class Plugin(
         val testFilesSequence = discoverTestFiles(testConfig.directory)
 
         return if (testFilesSequence.any()) {
-            logDebug("Discovered the following test resources: ${testFilesSequence.toList()}")
+            logTrace("Discovered the following test resources: ${testFilesSequence.toList()}")
             handleFiles(testFilesSequence)
         } else {
             emptySequence()
@@ -82,7 +83,7 @@ abstract class Plugin(
                     ?.excludedTests
 
         if (!excludedTests.isNullOrEmpty()) {
-            logDebug("Excluded tests for [${testConfig.location}] : $excludedTests")
+            logTrace("Excluded tests for [${testConfig.location}] : $excludedTests")
         }
 
         val rawTestFiles = rawDiscoverTestFiles(root.resourceDirectories())

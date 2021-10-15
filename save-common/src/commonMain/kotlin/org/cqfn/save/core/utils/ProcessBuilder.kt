@@ -8,6 +8,7 @@ import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
+import org.cqfn.save.core.logging.logTrace
 import org.cqfn.save.core.logging.logWarn
 
 import okio.FileSystem
@@ -85,7 +86,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
         fs.createDirectories(tmpDir)
         fs.createFile(stdoutFile)
         fs.createFile(stderrFile)
-        logDebug("Created temp directory $tmpDir for stderr and stdout of ProcessBuilder")
+        logTrace("Created temp directory $tmpDir for stderr and stdout of ProcessBuilder")
 
         val cmd = modifyCmd(command, directory, processBuilderInternal)
 
@@ -99,7 +100,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
         val stdout = fs.readLines(stdoutFile)
         val stderr = fs.readLines(stderrFile)
         fs.deleteRecursively(tmpDir)
-        logDebug("Removed temp directory $tmpDir")
+        logTrace("Removed temp directory $tmpDir")
         if (stderr.isNotEmpty()) {
             logDebug("The following errors occurred after executing of `$command`:\n${stderr.joinToString("\n")}")
         }
@@ -108,7 +109,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
                 write(stdout.joinToString("\n").encodeToByteArray())
                 write(stderr.joinToString("\n").encodeToByteArray())
             }
-        } ?: logDebug("Execution output:\n$stdout")
+        } ?: logTrace("Execution output:\n$stdout")
         return ExecutionResult(status, stdout, stderr)
     }
 
@@ -197,7 +198,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
                 }
             }
             val modifiedCommand = listOfCommands.joinToString(separator).trim(' ')
-            logDebug("Modify command:`$command` to `$modifiedCommand` because of `echo` on Windows add extra newlines")
+            logTrace("Modify command:`$command` to `$modifiedCommand` because of `echo` on Windows add extra newlines")
             return modifiedCommand
         }
     }

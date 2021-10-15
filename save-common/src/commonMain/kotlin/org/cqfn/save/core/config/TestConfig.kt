@@ -13,6 +13,7 @@ import org.cqfn.save.core.plugin.PluginConfig
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
+import org.cqfn.save.core.logging.logTrace
 
 /**
  * Configuration for a test suite, that is read from test suite configuration file (toml config)
@@ -49,7 +50,7 @@ data class TestConfig(
 
     init {
         parentConfig?.let {
-            logDebug("Add child ${this.location} for ${parentConfig.location}")
+            logTrace("Add child ${this.location} for ${parentConfig.location}")
             parentConfig.childConfigs.add(this)
         }
         require(fs.metadata(location).isRegularFile) {
@@ -144,7 +145,7 @@ data class TestConfig(
                 .filter { plugin ->
                     plugin.discoverTestFiles(directory).any().also { isNotEmpty ->
                         if (!isNotEmpty) {
-                            logDebug("Plugin <${plugin::class.simpleName}> in config file ${plugin.testConfig.location} has no test resources; " +
+                            logTrace("Plugin <${plugin::class.simpleName}> in config file ${plugin.testConfig.location} has no test resources; " +
                                     "it's config will only be used for inheritance")
                         }
                     }
