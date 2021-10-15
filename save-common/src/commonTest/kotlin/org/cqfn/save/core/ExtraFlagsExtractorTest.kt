@@ -23,7 +23,7 @@ class ExtraFlagsExtractorTest {
             "// RUN: args1=stuff" to ExtraFlags("stuff", ""),
             "// RUN: args2=extraStuff" to ExtraFlags("", "extraStuff"),
             "// RUN: Unparseable nonsense" to null,
-            "// RUN: args1=--flag --opt,args2=-debug --flag2" to ExtraFlags("--flag --opt", "-debug --flag2"),
+            "// RUN: args1=--flag --opt,args2=-debug light --flag2" to ExtraFlags("--flag --opt", "-debug light --flag2"),
             "// RUN: args1=--flag\\=value,args2=--foo=bar" to ExtraFlags("--flag=value", "--foo=bar"),
         )
             .forEach { (line, extraFlags) ->

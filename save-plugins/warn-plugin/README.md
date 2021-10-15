@@ -132,8 +132,8 @@ These placeholders are optional; if present, they should be comma-separated. Equ
 from `warn.execFlags` with `$` sign. Additionally, `$fileName` in `execFlags` is substituted by the name of analyzed file
 (or a set of names in batch mode).
 
-For example, the comment `// RUN: args1=--foo\=bar,args2=--debug` in combination with `warn.execCmd = ./my-tool` will lead to execution
+For example, the comment `// RUN: args1=--foo\=bar,args2=--debug light` in combination with `warn.execCmd = ./my-tool` will lead to execution
 of the following command when checking file `FileName`:
 ```bash
-./my-tool --foo=bar FileName --debug
+./my-tool --foo=bar FileName --debug light
 ```
