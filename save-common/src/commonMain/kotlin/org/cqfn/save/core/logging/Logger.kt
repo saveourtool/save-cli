@@ -13,7 +13,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 /**
- * Is debug logging enabled
+ * Is warning logging enabled
  */
 var isQuietMode: Boolean = false
 
@@ -64,7 +64,7 @@ fun logDebug(msg: String) {
  *
  * @param msg a message string
  */
-fun logInfo(msg: String): Unit = logMessage("INFO", msg)
+fun logInfo(msg: String) = logMessage("INFO", msg)
 
 /**
  * Log a message with warn level
@@ -82,7 +82,7 @@ fun logWarn(msg: String) {
  *
  * @param msg a message string
  */
-fun logError(msg: String): Unit = logMessage("ERROR", msg, OutputStreamType.STDERR)
+fun logError(msg: String) = logMessage("ERROR", msg, OutputStreamType.STDERR)
 
 /**
  * Log a message with trace level

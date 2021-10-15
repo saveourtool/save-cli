@@ -133,7 +133,7 @@ fun readPropertiesFile(propertiesFileName: String?): SaveProperties {
 }
 
 private fun tryToUpdateDebugLevel(properties: SaveProperties) {
-    // debugType = properties.debugType ?: DebugType.NONE
+    debugType = properties.debugType ?: DebugType.NONE
     isQuietMode = properties.quiet ?: false
 }
 
