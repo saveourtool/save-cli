@@ -1,6 +1,7 @@
 [general]
     tags = ["warn"]
     description = "Test warnings discovered by diKTat"
+    timeOutMillis = 1
 
 [warn]
     # keyword to detect tests

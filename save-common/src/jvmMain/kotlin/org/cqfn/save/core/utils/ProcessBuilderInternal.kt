@@ -1,17 +1,16 @@
 package org.cqfn.save.core.utils
 
-import org.cqfn.save.core.logging.logWarn
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.newFixedThreadPoolContext
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 
 import okio.FileSystem
 import okio.Path
 
 import java.io.BufferedReader
 import java.io.InputStreamReader
-
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.newFixedThreadPoolContext
 
 @Suppress("MISSING_KDOC_TOP_LEVEL",
     "MISSING_KDOC_CLASS_ELEMENTS",
@@ -37,10 +36,11 @@ actual class ProcessBuilderInternal actual constructor(
         return cmd.joinToString()
     }
 
+    @OptIn(ObsoleteCoroutinesApi::class)
     actual fun exec(
         cmd: String,
         timeOutMillis: Long,
-        tests: List<Path>): Int {
+    ): Int {
         val processContext = newFixedThreadPoolContext(2, "timeOut")
         val endTimer = AtomicBoolean(true)
 
@@ -52,12 +52,10 @@ actual class ProcessBuilderInternal actual constructor(
         CoroutineScope(processContext).launch {
             delay(timeOutMillis)
             if (endTimer.get()) {
-                logWarn("The following tests took too long to run and were stopped: $tests")
                 process.destroy()
-                throw ProcessExecutionException("Timeout is reached")
+                throw ProcessTimeoutException(timeOutMillis, "Timeout is reached")
             }
         }
-
         return process.waitFor()
     }
 

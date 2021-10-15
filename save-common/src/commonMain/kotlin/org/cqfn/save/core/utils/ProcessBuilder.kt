@@ -43,7 +43,7 @@ expect class ProcessBuilderInternal(
     fun exec(
         cmd: String,
         timeOutMillis: Long,
-        tests: List<Path>): Int
+    ): Int
 }
 
 /**
@@ -73,7 +73,6 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
         directory: String,
         redirectTo: Path?,
         timeOutMillis: Long,
-        tests: List<Path>,
     ): ExecutionResult {
         if (command.isBlank()) {
             logErrorAndThrowProcessBuilderException("Command couldn't be empty!")
@@ -101,7 +100,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
 
         logDebug("Executing: $cmd")
         val status = try {
-            processBuilderInternal.exec(cmd, timeOutMillis, tests)
+            processBuilderInternal.exec(cmd, timeOutMillis)
         } catch (ex: Exception) {
             fs.deleteRecursively(tmpDir)
             logErrorAndThrowProcessBuilderException(ex.message ?: "Couldn't execute $cmd")

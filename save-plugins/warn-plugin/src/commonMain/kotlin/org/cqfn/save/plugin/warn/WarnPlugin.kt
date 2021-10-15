@@ -21,6 +21,7 @@ import org.cqfn.save.plugin.warn.utils.getLineNumber
 
 import okio.FileSystem
 import okio.Path
+import org.cqfn.save.core.utils.ProcessTimeoutException
 
 private typealias WarningMap = Map<String, List<Warning>>
 
@@ -136,15 +137,12 @@ class WarnPlugin(
         val time = generalConfig.timeOutMillis!!.times(paths.size)
 
         val executionResult = try {
-            pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time, paths)
+            pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time)
+        } catch (ex: ProcessTimeoutException) {
+            logWarn("The following tests took too long to run and were stopped: $paths, timeout for single test: ${ex.timeoutMillis}")
+            return failTestResult(paths, ex)
         } catch (ex: ProcessExecutionException) {
-            return paths.map {
-                TestResult(
-                    Test(it),
-                    Fail(ex.describe(), ex.describe()),
-                    DebugInfo(null, ex.message, null)
-                )
-            }.asSequence()
+            return failTestResult(paths, ex)
         }
         val stdout = executionResult.stdout
         val stderr = executionResult.stderr
@@ -179,6 +177,19 @@ class WarnPlugin(
                     stderr.filter { it.contains(path.name) }.joinToString("\n"),
                     null
                 )
+            )
+        }.asSequence()
+    }
+
+    private fun failTestResult(
+        paths: List<Path>,
+        ex: ProcessExecutionException,
+    ): Sequence<TestResult> {
+        return paths.map {
+            TestResult(
+                Test(it),
+                Fail(ex.describe(), ex.describe()),
+                DebugInfo(null, ex.message, null)
             )
         }.asSequence()
     }

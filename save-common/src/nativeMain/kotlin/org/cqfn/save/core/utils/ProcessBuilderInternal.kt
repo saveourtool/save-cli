@@ -2,14 +2,15 @@
 
 package org.cqfn.save.core.utils
 
-import org.cqfn.save.core.logging.logWarn
-
 import okio.Path
 import platform.posix.system
 
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.CoroutineExceptionHandler
 
 @Suppress("MISSING_KDOC_TOP_LEVEL",
     "MISSING_KDOC_CLASS_ELEMENTS",
@@ -28,23 +29,37 @@ actual class ProcessBuilderInternal actual constructor(
 
     actual fun exec(
         cmd: String,
-        timeOutMillis: Long,
-        tests: List<Path>): Int {
+        timeOutMillis: Long
+    ): Int {
         var status = -1
 
         runBlocking {
+
+            val handler = CoroutineExceptionHandler { _, exception ->
+                println("CoroutineExceptionHandler got $exception")
+            }
+
             val endTimer = AtomicBoolean(true)
-            launch {
+            val a1 = async(handler) {
                 delay(timeOutMillis)
                 if (endTimer.get()) {
-                    logWarn("The following tests took too long to run and were stopped: $tests")
-                    destroy(cmd)
-                    throw ProcessExecutionException("Timeout is reached")
+                    runCatching {
+                        destroy(cmd)
+                        throw ProcessTimeoutException(timeOutMillis, "Timeout is reached")
+                    }
                 }
             }
 
-            status = system(cmd)
-            endTimer.compareAndSet(true, false)
+            val a2 = async(handler) {
+                system(cmd).also {
+                    endTimer.compareAndSet(true, false)
+                }
+            }
+            try {
+                joinAll(a1, a2)
+            } catch (e: Exception) {
+                throw ProcessTimeoutException(timeOutMillis, "Timeout is reached")
+            }
         }
 
         if (status == -1) {

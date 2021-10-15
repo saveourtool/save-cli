@@ -1,9 +1,11 @@
 package org.cqfn.save.core.integration
 
 import org.cqfn.save.core.test.utils.runTestsWithDiktat
+import org.cqfn.save.core.utils.ProcessTimeoutException
 
 import kotlin.test.Ignore
 import kotlin.test.Test
+import kotlin.test.assertFailsWith
 
 // To run these tests locally on your Native platforms you would need to install curl for your OS:
 // On Windows you'll also need to install msys2 and run pacman -S mingw-w64-x86_64-curl to have libcurl for ktor-client.
@@ -20,18 +22,29 @@ class ClassicWarnTest {
     @Test
     @Ignore  // fixme: change directory in fix-plugin too?
     fun `execute warn plugin with default testFiles`() =
-            runTestsWithDiktat(
-                null, 9
-            )
+        runTestsWithDiktat(
+            null, 9
+        )
 
     @Test
     fun `execute warn plugin on separate files`() =
-            runTestsWithDiktat(
-                listOf(
-                    "warn/chapter1/EnumValueSnakeCaseTest.kt",
-                    "warn/chapter1/GenericFunctionTest.kt"
-                ), 2
-            )
+        runTestsWithDiktat(
+            listOf(
+                "warn/chapter1/EnumValueSnakeCaseTest.kt",
+                "warn/chapter1/GenericFunctionTest.kt"
+            ), 2
+        )
+
+    @Test
+    fun `execute warn plugin on separate files2`() {
+        runTestsWithDiktat(
+            listOf(
+                "warn/chapter1/EnumValueSnakeCaseTest.kt",
+                "warn/chapter1/GenericFunctionTest.kt"
+            ), 2
+        )
+        assertFailsWith<ProcessTimeoutException> { }
+}
 
     @Test
     fun `executing warn plugin on directory`() =

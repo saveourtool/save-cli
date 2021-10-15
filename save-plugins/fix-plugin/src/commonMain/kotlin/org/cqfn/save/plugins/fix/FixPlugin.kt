@@ -30,6 +30,8 @@ import okio.Path.Companion.toPath
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.PolymorphicModuleBuilder
 import kotlinx.serialization.modules.subclass
+import org.cqfn.save.core.logging.logWarn
+import org.cqfn.save.core.utils.ProcessTimeoutException
 
 /**
  * A plugin that runs an executable on a file and compares output with expected output.
@@ -85,15 +87,12 @@ class FixPlugin(
             val time = generalConfig.timeOutMillis!!.times(pathMap.size)
 
             val executionResult = try {
-                pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time, chunk.map { it.test })
+                pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time)
+            } catch (ex: ProcessTimeoutException) {
+                logWarn("The following tests took too long to run and were stopped: ${chunk.map { it.test }}, timeout for single test: ${ex.timeoutMillis}")
+                return@map failTestResult(chunk, ex)
             } catch (ex: ProcessExecutionException) {
-                return@map chunk.map {
-                    TestResult(
-                        it,
-                        Fail(ex.describe(), ex.describe()),
-                        DebugInfo(null, ex.message, null)
-                    )
-                }
+                return@map failTestResult(chunk, ex)
             }
 
             val stdout = executionResult.stdout
@@ -117,6 +116,19 @@ class FixPlugin(
             }
         }
             .flatten()
+    }
+
+    private fun failTestResult(
+        chunk: List<FixTestFiles>,
+        ex: ProcessExecutionException,
+    ): List<TestResult> {
+        return chunk.map {
+            TestResult(
+                it,
+                Fail(ex.describe(), ex.describe()),
+                DebugInfo(null, ex.message, null)
+            )
+        }
     }
 
     private fun checkStatus(expectedLines: List<String>, fixedLines: List<String>) =
