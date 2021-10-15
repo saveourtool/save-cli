@@ -176,16 +176,23 @@ class Save(
     private fun handleResult(testResult: TestResult) {
         when (val status = testResult.status) {
             is Pass -> {
-                val passMessage = "Test on resources [${testResult.resources}] has completed successfully"
-                status.message?.let { logTrace("$passMessage. $it") } ?: logTrace(passMessage)
+                logDebug("\"Test on resources [${testResult.resources}] has completed successfully.\"")
+                status.message?.let { logTrace(it) }
             }
-            is Fail -> logWarn("Test on resources [${testResult.resources}] has failed: ${status.reason}")
-            is Ignored -> logWarn("Test on resources [${testResult.resources}] has been ignored: ${status.reason}")
+            is Fail -> {
+                logWarn("Test on resources [${testResult.resources}] has failed.")
+                logTrace(" - Additional info: ${status.reason}.")
+            }
+            is Ignored -> {
+                logWarn("Test on resources [${testResult.resources}] has been ignored.")
+                logTrace(" - Additional info: ${status.reason}.")
+            }
             is Crash -> logError(
                 "Test on resources [${testResult.resources}] has crashed: ${status.description}." +
                         "Please report an issue at https://github.com/cqfn/save"
             )
         }
-        logTrace("Completed test execution for resources [${testResult.resources}]. Additional info: ${testResult.debugInfo}")
+        logDebug("Completed test execution for resources [${testResult.resources}].")
+        logTrace(" - Additional info: ${testResult.debugInfo}.")
     }
 }
