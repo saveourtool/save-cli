@@ -3,7 +3,7 @@
 object Versions {
     const val kotlin = "1.5.31"
     const val junit = "5.8.0"
-    const val okio = "3.0.0-alpha.9"
+    const val okio = "3.0.0-alpha.10"
     const val ktoml = "0.2.7"
     const val multiplatformDiff = "0.2.0"
 

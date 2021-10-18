@@ -6,14 +6,14 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(project(":save-common"))
+                implementation(projects.saveCommon)
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.Kotlinx.serialization}")
             }
         }
         val commonTest by getting {
             dependencies {
-                implementation(project(":save-common-test"))
+                implementation(projects.saveCommonTest)
             }
         }
     }
