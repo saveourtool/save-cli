@@ -38,7 +38,7 @@ class ClassicWarnTest {
             runTestsWithDiktat(
                 listOf(
                     "warn/chapter1"
-                ), 4
+                ), 5
             )
 
     @Test
@@ -65,7 +65,7 @@ class ClassicWarnTest {
             runTestsWithDiktat(
                 listOf(
                     "warn/save.toml"
-                ), 4
+                ), 5
             )
 
     @Test
@@ -73,7 +73,7 @@ class ClassicWarnTest {
             runTestsWithDiktat(
                 listOf(
                     "warn/chapter1/save.toml"
-                ), 4
+                ), 5
             )
 
     @Test

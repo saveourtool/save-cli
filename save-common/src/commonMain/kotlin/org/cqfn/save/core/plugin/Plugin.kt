@@ -6,6 +6,7 @@ import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.findDescendantDirectoriesBy
 import org.cqfn.save.core.files.parentsWithSelf
 import org.cqfn.save.core.logging.logDebug
+import org.cqfn.save.core.result.Ignored
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.PathSerializer
 import org.cqfn.save.core.utils.ProcessBuilder
@@ -43,11 +44,29 @@ abstract class Plugin(
      */
     fun execute(): Sequence<TestResult> {
         clean()
-        val testFilesSequence = discoverTestFiles(testConfig.directory)
+        val testFilesList = discoverTestFiles(testConfig.directory).toList()
 
-        return if (testFilesSequence.any()) {
-            logDebug("Discovered the following test resources: ${testFilesSequence.toList()}")
-            handleFiles(testFilesSequence)
+        val excludedTests = testConfig
+            .pluginConfigs
+            .filterIsInstance<GeneralConfig>()
+            .singleOrNull()
+            ?.excludedTests
+
+        if (!excludedTests.isNullOrEmpty()) {
+            logDebug("Excluded tests for [${testConfig.location}] : $excludedTests")
+        }
+
+        return if (testFilesList.isNotEmpty()) {
+            // fixme: remove this logging and convert `testFilesList` back to Sequence
+            // or at least make `logDebug` accept lazy messages
+            logDebug("Discovered the following test resources: $testFilesList")
+            val (excludedTestFiles, actualTestFiles) = testFilesList.partition {
+                isExcludedTest(it, excludedTests)
+            }
+            val excludedTestResults = excludedTestFiles.map {
+                TestResult(it, Ignored("Excluded by configuration"))
+            }
+            handleFiles(actualTestFiles.asSequence()) + excludedTestResults
         } else {
             emptySequence()
         }
@@ -74,20 +93,7 @@ abstract class Plugin(
         "SwallowedException",
     )
     fun discoverTestFiles(root: Path): Sequence<TestFiles> {
-        val excludedTests =
-                testConfig
-                    .pluginConfigs
-                    .filterIsInstance<GeneralConfig>()
-                    .singleOrNull()
-                    ?.excludedTests
-
-        if (!excludedTests.isNullOrEmpty()) {
-            logDebug("Excluded tests for [${testConfig.location}] : $excludedTests")
-        }
-
         val rawTestFiles = rawDiscoverTestFiles(root.resourceDirectories())
-            // removing excluded test resources
-            .filterNot { isExcludedTest(it, excludedTests) }
             .filterNot { fs.metadata(it.test).isDirectory }
 
         return if (testFiles.isNotEmpty()) {
@@ -199,7 +205,7 @@ abstract class Plugin(
      *
      * @return a sequence of directories possibly containing this plugin's test resources
      */
-    fun Path.resourceDirectories(): Sequence<Path> = findDescendantDirectoriesBy(true) { file ->
+    private fun Path.resourceDirectories(): Sequence<Path> = findDescendantDirectoriesBy(true) { file ->
         // this matches directories which contain their own SAVE config
         fs.metadata(file).isRegularFile || fs.list(file).none { it.isSaveTomlConfig() }
     }
