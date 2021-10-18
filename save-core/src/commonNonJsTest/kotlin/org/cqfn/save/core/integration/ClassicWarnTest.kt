@@ -42,10 +42,10 @@ class ClassicWarnTest {
             )
 
     @Test
-    fun `executing warn plugin on directory, filenames contain keyword not as suffix`() =
+    fun `executing warn plugin on directory, files are set with regex`() =
             runTestsWithDiktat(
                 listOf(
-                    "warn/chapter1/TestsWithKeywordButNotSuffix"
+                    "warn/chapter1/TestsWithRegex"
                 ), 1
             )
 
