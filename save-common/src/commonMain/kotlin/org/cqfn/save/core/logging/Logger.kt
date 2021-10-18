@@ -5,22 +5,18 @@
 
 package org.cqfn.save.core.logging
 
-import org.cqfn.save.core.config.DebugType
+import org.cqfn.save.core.config.LogType
 import org.cqfn.save.core.config.OutputStreamType
 import org.cqfn.save.core.utils.writeToStream
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-/**
- * Is warning logging enabled
- */
-var isQuietMode: Boolean = false
 
 /**
  * Debug logging mode
  */
-var debugType: DebugType = DebugType.NONE
+var logType: LogType = LogType.WARN
 
 /**
  * Whether to add time stamps to log messages
@@ -49,33 +45,11 @@ fun logMessage(
 }
 
 /**
- * Log a message with debug level
- *
- * @param msg a message string
- */
-fun logDebug(msg: String) {
-    if (debugType == DebugType.LIGHT || debugType == DebugType.HARD) {
-        logMessage("DEBUG", msg)
-    }
-}
-
-/**
  * Log a message with info level
  *
  * @param msg a message string
  */
 fun logInfo(msg: String) = logMessage("INFO", msg)
-
-/**
- * Log a message with warn level
- *
- * @param msg a message string
- */
-fun logWarn(msg: String) {
-    if (!isQuietMode) {
-        logMessage("WARN", msg, OutputStreamType.STDERR)
-    }
-}
 
 /**
  * Log a message with error level
@@ -85,12 +59,34 @@ fun logWarn(msg: String) {
 fun logError(msg: String) = logMessage("ERROR", msg, OutputStreamType.STDERR)
 
 /**
+ * Log a message with warn level
+ *
+ * @param msg a message string
+ */
+fun logWarn(msg: String) {
+    if (logType == LogType.WARN || logType == LogType.DEBUG || logType == LogType.ALL) {
+        logMessage("WARN", msg, OutputStreamType.STDERR)
+    }
+}
+
+/**
+ * Log a message with debug level
+ *
+ * @param msg a message string
+ */
+fun logDebug(msg: String) {
+    if (logType == LogType.DEBUG || logType == LogType.ALL) {
+        logMessage("DEBUG", msg)
+    }
+}
+
+/**
  * Log a message with trace level
  *
  * @param msg a message string
  */
 fun logTrace(msg: String) {
-    if(debugType == DebugType.HARD) {
+    if(logType == LogType.ALL) {
         logMessage("TRACE", msg)
     }
 }

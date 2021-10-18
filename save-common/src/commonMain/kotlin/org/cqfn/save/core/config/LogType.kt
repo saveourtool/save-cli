@@ -7,9 +7,10 @@ import kotlinx.serialization.Serializable
  * Possible debug mode
  */
 @Serializable
-enum class DebugType {
-    @SerialName("none") NONE,
-    @SerialName("light") LIGHT,
-    @SerialName("hard") HARD,
+enum class LogType {
+    @SerialName("results_only") RESULTS_ONLY,
+    @SerialName("warnings") WARN,
+    @SerialName("debug") DEBUG,
+    @SerialName("all") ALL,
     ;
 }
