@@ -96,6 +96,8 @@ kotlin {
 }
 
 configurePublishing()
+configureDiktat()
+configureDetekt()
 
 tasks.withType<KotlinJvmTest> {
     // for some reason KotlinJvmTest is not a subclass of KotlinTest, so this is a WA

@@ -14,21 +14,21 @@ kotlin {
     sourceSets {
         val commonNonJsMain by getting {
             dependencies {
-                implementation(project(":save-common"))
-                implementation(project(":save-reporters"))
-                api("com.squareup.okio:okio-multiplatform:${Versions.okio}")
+                implementation(projects.saveCommon)
+                implementation(projects.saveReporters)
+                api("com.squareup.okio:okio:${Versions.okio}")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
                 implementation("org.jetbrains.kotlinx:kotlinx-cli:${Versions.Kotlinx.cli}")
                 implementation("com.akuleshov7:ktoml-core:${Versions.ktoml}")
                 implementation("com.akuleshov7:ktoml-file:${Versions.ktoml}")
-                implementation(project(":save-plugins:fix-plugin"))
-                implementation(project(":save-plugins:fix-and-warn-plugin"))
-                implementation(project(":save-plugins:warn-plugin"))
+                implementation(projects.savePlugins.fixPlugin)
+                implementation(projects.savePlugins.fixAndWarnPlugin)
+                implementation(projects.savePlugins.warnPlugin)
             }
         }
         val commonNonJsTest by getting {
             dependencies {
-                implementation(project(":save-common-test"))
+                implementation(projects.saveCommonTest)
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.Kotlinx.coroutines}")
@@ -66,7 +66,7 @@ val generateVersionFileTaskProvider = tasks.register("generateVersionsFile") {
 val generatedKotlinSrc = kotlin.sourceSets.create("generated") {
     kotlin.srcDir("$buildDir/generated/src")
     dependencies {
-        implementation(project(":save-common"))
+        implementation(projects.saveCommon)
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
         implementation("org.jetbrains.kotlinx:kotlinx-cli:${Versions.Kotlinx.cli}")
     }
