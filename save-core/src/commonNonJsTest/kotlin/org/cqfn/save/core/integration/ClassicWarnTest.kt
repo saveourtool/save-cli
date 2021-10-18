@@ -45,7 +45,7 @@ class ClassicWarnTest {
     fun `executing warn plugin on directory, files are set with regex`() =
             runTestsWithDiktat(
                 listOf(
-                    "warn/chapter1/TestsWithKeywordButNotSuffix"
+                    "warn/chapter1/TestsWithRegex"
                 ), 1
             )
 

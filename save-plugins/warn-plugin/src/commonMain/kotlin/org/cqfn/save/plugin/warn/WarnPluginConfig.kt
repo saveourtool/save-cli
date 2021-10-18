@@ -78,7 +78,7 @@ data class WarnPluginConfig(
     override var configLocation: Path = "undefined_toml_location".toPath()
 
     /**
-     * keyword name of the test file.
+     * regex for name of the test file.
      */
     val testName: String = testNameRegex ?: ".*Test.*"
 
