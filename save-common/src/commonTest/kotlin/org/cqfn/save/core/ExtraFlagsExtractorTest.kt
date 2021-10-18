@@ -3,6 +3,7 @@ package org.cqfn.save.core
 import org.cqfn.save.core.plugin.ExtraFlags
 import org.cqfn.save.core.plugin.ExtraFlagsExtractor
 import org.cqfn.save.core.plugin.GeneralConfig
+import org.cqfn.save.core.plugin.filterAndJoinBy
 import org.cqfn.save.core.plugin.resolvePlaceholdersFrom
 
 import okio.fakefilesystem.FakeFileSystem
@@ -19,12 +20,12 @@ class ExtraFlagsExtractorTest {
         )
 
         listOf(
-            "// RUN: args1=stuff,args2=extraStuff" to ExtraFlags("stuff", "extraStuff"),
-            "// RUN: args1=stuff" to ExtraFlags("stuff", ""),
-            "// RUN: args2=extraStuff" to ExtraFlags("", "extraStuff"),
-            "// RUN: Unparseable nonsense" to null,
-            "// RUN: args1=--flag --opt,args2=-debug --flag2" to ExtraFlags("--flag --opt", "-debug --flag2"),
-            "// RUN: args1=--flag\\=value,args2=--foo=bar" to ExtraFlags("--flag=value", "--foo=bar"),
+            "args1=stuff,args2=extraStuff" to ExtraFlags("stuff", "extraStuff"),
+            "args1=stuff" to ExtraFlags("stuff", ""),
+            "args2=extraStuff" to ExtraFlags("", "extraStuff"),
+            "Unparseable nonsense" to ExtraFlags.empty,
+            "args1=--flag --opt,args2=-debug --flag2" to ExtraFlags("--flag --opt", "-debug --flag2"),
+            "args1=--flag\\=value,args2=--foo=bar" to ExtraFlags("--flag=value", "--foo=bar"),
         )
             .forEach { (line, extraFlags) ->
                 assertEquals(extraFlags, extraFlagsExtractor.extractExtraFlagsFrom(line))
@@ -67,6 +68,53 @@ class ExtraFlagsExtractorTest {
             "--foo",
             ExtraFlags("", ""),
             "testFile"
+        )
+    }
+
+    @Test
+    fun `should join multiline directives`() {
+        checkMultilineDirectives(
+            Regex("""// RUN: (.*([^\\]=)?.*)\\?"""),
+            listOf(
+                "// RUN: command --flag \\",
+                "// RUN: --another-flag",
+            ),
+            listOf("command --flag --another-flag")
+        )
+
+        checkMultilineDirectives(
+            Regex("""// RUN: (.*([^\\]=)?.*)\\?"""),
+            listOf(
+                "// RUN: command --flag \\",
+                "// RUN: --another-flag \\",
+                "// RUN: --yet-another-flag",
+            ),
+            listOf("command --flag --another-flag --yet-another-flag")
+        )
+
+        checkMultilineDirectives(
+            Regex("""// RUN: (.*([^\\]=)?.*)\\?"""),
+            listOf(
+                "// RUN: command --flag \\",
+                "// RUN: --another-flag",
+                "// RUN: another-cmd \\",
+                "// RUN: --flag",
+            ),
+            listOf(
+                "command --flag --another-flag",
+                "another-cmd --flag"
+            )
+        )
+    }
+
+    private fun checkMultilineDirectives(
+        regex: Regex,
+        lines: List<String>,
+        expectedDirectives: List<String>,
+    ) {
+        assertEquals(
+            expectedDirectives,
+            lines.filterAndJoinBy(regex, '\\')
         )
     }
 
