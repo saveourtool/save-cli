@@ -71,7 +71,7 @@ class ValidationTest {
         assertEquals(3, actualWarnConfig.columnCaptureGroupOut)
         assertEquals(4, actualWarnConfig.messageCaptureGroupOut)
         assertEquals(true, actualWarnConfig.exactWarningsMatch)
-        assertEquals("Test", actualWarnConfig.testNameSuffix)
+        assertEquals("Test", actualWarnConfig.testNameKeyword)
     }
 
     // Add proper values for `lineCaptureGroup` and `columnCaptureGroup` according
