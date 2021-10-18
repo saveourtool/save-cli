@@ -46,7 +46,7 @@ open class PlainTextReporter(override val out: BufferedSink) : Reporter {
                     .encodeToByteArray()
             )
         }
-        logDebug("Finished reporter ${this::class.qualifiedName} of type $type\n")
+        logDebug("Finished reporter ${this::class.qualifiedName} of type $type")
     }
 
     override fun onSuiteStart(suiteName: String) {

@@ -46,7 +46,7 @@ class ExtraFlagsExtractor(private val generalConfig: GeneralConfig,
             .let(ExtraFlags::from)
             .also {
                 if (it == ExtraFlags("", "")) {
-                    logWarn("Line <$line> is matched by extraFlagsPattern <${generalConfig.runConfigPattern}>, but no flags have been extracted")
+                    logTrace("Line <$line> is matched by extraFlagsPattern <${generalConfig.runConfigPattern}>, but no flags have been extracted")
                 }
             }
     }

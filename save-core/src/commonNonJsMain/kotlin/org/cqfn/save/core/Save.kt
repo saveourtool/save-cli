@@ -181,11 +181,11 @@ class Save(
             }
             is Fail -> {
                 logWarn("Test on resources [${testResult.resources}] has failed.")
-                logTrace(" - Additional info: ${status.reason}.")
+                logTrace("Additional info: ${status.reason}.")
             }
             is Ignored -> {
                 logWarn("Test on resources [${testResult.resources}] has been ignored.")
-                logTrace(" - Additional info: ${status.reason}.")
+                logTrace("Additional info: ${status.reason}.")
             }
             is Crash -> logError(
                 "Test on resources [${testResult.resources}] has crashed: ${status.description}." +
@@ -193,6 +193,6 @@ class Save(
             )
         }
         logDebug("Completed test execution for resources [${testResult.resources}].")
-        logTrace(" - Additional info: ${testResult.debugInfo}.")
+        logTrace("Additional info: ${testResult.debugInfo}.")
     }
 }
