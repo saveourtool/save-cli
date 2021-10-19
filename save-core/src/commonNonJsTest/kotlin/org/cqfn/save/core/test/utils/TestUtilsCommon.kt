@@ -75,10 +75,10 @@ fun runTestsWithDiktat(
             assertTrue("test.status is actually ${test.status::class.simpleName}: $test") {
                 test.status is Pass || test.status is Ignored
             }
-            if (test.status is Pass) {
-                assertEquals(Pass(null), test.status)
-            } else {
+            if (test.status is Ignored) {
                 assertEquals(Ignored("Excluded by configuration"), test.status)
+            } else {
+                assertTrue(test.status is Pass)
             }
         }
     }
