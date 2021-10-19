@@ -38,7 +38,15 @@ class ClassicWarnTest {
             runTestsWithDiktat(
                 listOf(
                     "warn/chapter1"
-                ), 3
+                ), 5
+            )
+
+    @Test
+    fun `executing warn plugin on directory, files are set with regex`() =
+            runTestsWithDiktat(
+                listOf(
+                    "warn/chapter1/TestsWithRegex"
+                ), 1
             )
 
     @Test
@@ -57,7 +65,7 @@ class ClassicWarnTest {
             runTestsWithDiktat(
                 listOf(
                     "warn/save.toml"
-                ), 3
+                ), 5
             )
 
     @Test
@@ -65,7 +73,7 @@ class ClassicWarnTest {
             runTestsWithDiktat(
                 listOf(
                     "warn/chapter1/save.toml"
-                ), 3
+                ), 5
             )
 
     @Test

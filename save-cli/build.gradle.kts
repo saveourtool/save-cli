@@ -1,3 +1,5 @@
+import org.cqfn.save.buildutils.configureDetekt
+import org.cqfn.save.buildutils.configureDiktat
 import org.cqfn.save.buildutils.configurePublishing
 
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem
@@ -5,10 +7,6 @@ import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 
 plugins {
     kotlin("multiplatform")
-}
-
-repositories {
-    mavenCentral()
 }
 
 kotlin {
@@ -42,7 +40,7 @@ kotlin {
         val nativeMain by creating {
             dependsOn(commonMain)
             dependencies {
-                implementation(project(":save-core"))
+                implementation(projects.saveCore)
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-properties:${Versions.Kotlinx.serialization}")
             }
         }
@@ -58,9 +56,9 @@ kotlin {
                 implementation("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
-                implementation(project(":save-common"))
-                implementation(project(":save-reporters"))
-                implementation(project(":save-plugins:fix-plugin"))
+                implementation(projects.saveCommon)
+                implementation(projects.saveReporters)
+                implementation(projects.savePlugins.fixPlugin)
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.Kotlinx.serialization}")
             }
         }
@@ -100,6 +98,8 @@ kotlin {
 }
 
 configurePublishing()
+configureDiktat()
+configureDetekt()
 
 tasks.withType<KotlinJvmTest> {
     useJUnitPlatform()
