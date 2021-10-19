@@ -14,7 +14,6 @@ import org.cqfn.save.plugin.warn.WarnPluginConfig
 import org.cqfn.save.plugins.fix.FixPluginConfig
 import org.cqfn.save.plugins.fixandwarn.FixAndWarnPluginConfig
 
-
 import com.akuleshov7.ktoml.KtomlConf
 import com.akuleshov7.ktoml.exceptions.KtomlException
 import com.akuleshov7.ktoml.file.TomlFileReader

@@ -1,6 +1,5 @@
 package org.cqfn.save.plugin.warn
 
-import okio.FileNotFoundException
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.readLines
@@ -20,11 +19,9 @@ import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
 import org.cqfn.save.plugin.warn.utils.getLineNumber
 
+import okio.FileNotFoundException
 import okio.FileSystem
 import okio.Path
-import okio.Path.Companion.toPath
-import org.cqfn.save.core.logging.logDebug
-import org.cqfn.save.core.logging.logError
 
 private typealias WarningMap = Map<String, List<Warning>>
 
@@ -148,17 +145,18 @@ class WarnPlugin(
             }.asSequence()
         }
         val stdout =
-            if (warnPluginConfig.testToolResFileOutput != null) {
-                val testToolResFPath = testConfig.directory / warnPluginConfig.testToolResFileOutput
-                try {
-                    fs.readLines(testToolResFPath)
-                } catch (ex: FileNotFoundException) {
-                    logWarn("no such file: \"${warnPluginConfig.testToolResFileOutput}\", reading from stdout.")
-                    executionResult.stdout
+                warnPluginConfig.testToolResFileOutput?.let {
+                    val testToolResFpath = testConfig.directory / warnPluginConfig.testToolResFileOutput
+                    try {
+                        fs.readLines(testToolResFpath)
+                    } catch (ex: FileNotFoundException) {
+                        logWarn("no such file: \"${warnPluginConfig.testToolResFileOutput}\", reading from stdout.")
+                        executionResult.stdout
+                    }
                 }
-            } else {
-                executionResult.stdout
-            }
+                    ?: run {
+                        executionResult.stdout
+                    }
         val stderr = executionResult.stderr
 
         val actualWarningsMap = stdout.mapNotNull {

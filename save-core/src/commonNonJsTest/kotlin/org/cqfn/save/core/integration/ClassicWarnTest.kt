@@ -51,19 +51,19 @@ class ClassicWarnTest {
 
     @Test
     fun `executing warn plugin on directory, test output is in file`() =
-        runTestsWithDiktat(
-            listOf(
-                "warn/chapter1/TestResultsFromFileTest"
-            ), 1
-        )
+            runTestsWithDiktat(
+                listOf(
+                    "warn/chapter1/TestResultsFromFileTest"
+                ), 1
+            )
 
     @Test
     fun `test output file set but file doesn't exist`() =
-        runTestsWithDiktat(
-            listOf(
-                "warn/chapter1/TestResultsFileDoesNotExistTest"
-            ), 1
-        )
+            runTestsWithDiktat(
+                listOf(
+                    "warn/chapter1/TestResultsFileDoesNotExistTest"
+                ), 1
+            )
 
     @Test
     @Ignore

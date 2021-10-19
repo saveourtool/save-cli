@@ -48,6 +48,7 @@ import kotlinx.serialization.UseSerializers
  * For example: for `[warn] my {{[hello|world]}} warn` patternForRegexInWarning = {{.*}}. Opening and closing symbols should be split with '.*' symbol.
  * @property partialWarnTextMatch if true - the regex created from expected warning will be wrapped with '.*': .*warn.*.
  * That can help a user to write only main information in the warning without any need to add/copy-paste technical info
+ * @property testToolResFileOutput
  */
 @Serializable
 data class WarnPluginConfig(
