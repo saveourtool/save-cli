@@ -37,7 +37,6 @@ expect class ProcessBuilderInternal(
      *
      * @param cmd executable command with arguments
      * @param timeOutMillis max command execution time
-     * @param tests list of tests
      * @return exit status
      */
     fun exec(
@@ -60,14 +59,16 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
      * @param directory where to execute provided command, i.e. `cd [directory]` will be performed before [command] execution
      * @param redirectTo a file where process output and errors should be redirected. If null, output will be returned as [ExecutionResult.stdout] and [ExecutionResult.stderr].
      * @param timeOutMillis max command execution time
-     * @param tests list of tests
      * @return [ExecutionResult] built from process output
      * @throws ProcessExecutionException in case of impossibility of command execution
+     * @throws ProcessTimeoutException if timeout is exceeded
      */
     @Suppress(
         "TOO_LONG_FUNCTION",
         "TooGenericExceptionCaught",
-        "ReturnCount")
+        "ReturnCount",
+        "SwallowedException",
+    )
     fun exec(
         command: String,
         directory: String,
@@ -101,6 +102,9 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
         logDebug("Executing: $cmd")
         val status = try {
             processBuilderInternal.exec(cmd, timeOutMillis)
+        } catch (ex: ProcessTimeoutException) {
+            fs.deleteRecursively(tmpDir)
+            throw ProcessTimeoutException(ex.timeoutMillis, ex.message ?: "Timeout is reached")
         } catch (ex: Exception) {
             fs.deleteRecursively(tmpDir)
             logErrorAndThrowProcessBuilderException(ex.message ?: "Couldn't execute $cmd")

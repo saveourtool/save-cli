@@ -5,6 +5,7 @@ import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
+import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.plugin.ExtraFlags
 import org.cqfn.save.core.plugin.ExtraFlagsExtractor
 import org.cqfn.save.core.plugin.GeneralConfig
@@ -16,6 +17,7 @@ import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.PathSerializer
 import org.cqfn.save.core.utils.ProcessExecutionException
+import org.cqfn.save.core.utils.ProcessTimeoutException
 
 import io.github.petertrr.diffutils.diff
 import io.github.petertrr.diffutils.patch.ChangeDelta
@@ -30,8 +32,6 @@ import okio.Path.Companion.toPath
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.PolymorphicModuleBuilder
 import kotlinx.serialization.modules.subclass
-import org.cqfn.save.core.logging.logWarn
-import org.cqfn.save.core.utils.ProcessTimeoutException
 
 /**
  * A plugin that runs an executable on a file and compares output with expected output.
@@ -121,14 +121,12 @@ class FixPlugin(
     private fun failTestResult(
         chunk: List<FixTestFiles>,
         ex: ProcessExecutionException,
-    ): List<TestResult> {
-        return chunk.map {
-            TestResult(
-                it,
-                Fail(ex.describe(), ex.describe()),
-                DebugInfo(null, ex.message, null)
-            )
-        }
+    ) = chunk.map {
+        TestResult(
+            it,
+            Fail(ex.describe(), ex.describe()),
+            DebugInfo(null, ex.message, null)
+        )
     }
 
     private fun checkStatus(expectedLines: List<String>, fixedLines: List<String>) =

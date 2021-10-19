@@ -1,16 +1,16 @@
 package org.cqfn.save.core.utils
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.newFixedThreadPoolContext
-import kotlinx.coroutines.ObsoleteCoroutinesApi
-
 import okio.FileSystem
 import okio.Path
 
 import java.io.BufferedReader
 import java.io.InputStreamReader
+
+import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.newFixedThreadPoolContext
+import kotlinx.coroutines.runBlocking
 
 @Suppress("MISSING_KDOC_TOP_LEVEL",
     "MISSING_KDOC_CLASS_ELEMENTS",
@@ -41,22 +41,28 @@ actual class ProcessBuilderInternal actual constructor(
         cmd: String,
         timeOutMillis: Long,
     ): Int {
-        val processContext = newFixedThreadPoolContext(2, "timeOut")
-        val endTimer = AtomicBoolean(true)
+        var status = -1
+        runBlocking {
+            val processContext = newFixedThreadPoolContext(2, "timeOut")
 
-        val runTime = Runtime.getRuntime()
-        val process = runTime.exec(cmd.split(", ").toTypedArray())
-        writeDataFromBufferToFile(process, "stdout", stdoutFile)
-        writeDataFromBufferToFile(process, "stderr", stderrFile)
-
-        CoroutineScope(processContext).launch {
-            delay(timeOutMillis)
-            if (endTimer.get()) {
-                process.destroy()
-                throw ProcessTimeoutException(timeOutMillis, "Timeout is reached")
+            val runTime = Runtime.getRuntime()
+            var process: Process
+            val job = launch {
+                val timeOut = launch(processContext) {
+                    delay(timeOutMillis)
+                    throw ProcessTimeoutException(timeOutMillis, "Timeout is reached")
+                }
+                launch(processContext) {
+                    process = runTime.exec(cmd.split(", ").toTypedArray())
+                    writeDataFromBufferToFile(process, "stdout", stdoutFile)
+                    writeDataFromBufferToFile(process, "stderr", stderrFile)
+                    status = process.waitFor()
+                    timeOut.cancel()
+                }
             }
+            job.join()
         }
-        return process.waitFor()
+        return status
     }
 
     private fun writeDataFromBufferToFile(

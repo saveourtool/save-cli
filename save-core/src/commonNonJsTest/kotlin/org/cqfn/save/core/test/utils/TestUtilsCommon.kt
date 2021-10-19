@@ -30,6 +30,7 @@ data class ExpectedFail(val testName: String, val reason: String)
  * @param expectedFail list of expected failed tests
  * @param addProperties lambda to add/override SaveProperties during test
  */
+@Suppress("COMPLEX_EXPRESSION")
 fun runTestsWithDiktat(
     testDir: List<String>?,
     numberOfTests: Int,
@@ -62,6 +63,8 @@ fun runTestsWithDiktat(
                     "Some warnings were expected but not received (1)"
                 ), test.status
             )
+        } else if (test.resources.test.toString().contains("chapter2")) {
+            assertEquals(Fail("ProcessTimeoutException: Timeout is reached", "ProcessTimeoutException: Timeout is reached"), test.status)
         } else {
             assertEquals(Pass(null), test.status)
         }

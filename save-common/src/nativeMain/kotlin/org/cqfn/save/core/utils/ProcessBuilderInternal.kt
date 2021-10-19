@@ -5,12 +5,12 @@ package org.cqfn.save.core.utils
 import okio.Path
 import platform.posix.system
 
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.CoroutineExceptionHandler
 
 @Suppress("MISSING_KDOC_TOP_LEVEL",
     "MISSING_KDOC_CLASS_ELEMENTS",
@@ -27,6 +27,7 @@ actual class ProcessBuilderInternal actual constructor(
         command
     }
 
+    @OptIn(ObsoleteCoroutinesApi::class)
     actual fun exec(
         cmd: String,
         timeOutMillis: Long
@@ -34,32 +35,17 @@ actual class ProcessBuilderInternal actual constructor(
         var status = -1
 
         runBlocking {
-
-            val handler = CoroutineExceptionHandler { _, exception ->
-                println("CoroutineExceptionHandler got $exception")
-            }
-
-            val endTimer = AtomicBoolean(true)
-            val a1 = async(handler) {
+            val timeOut = async(newSingleThreadContext("timeOut")) {
                 delay(timeOutMillis)
-                if (endTimer.get()) {
-                    runCatching {
-                        destroy(cmd)
-                        throw ProcessTimeoutException(timeOutMillis, "Timeout is reached")
-                    }
-                }
-            }
-
-            val a2 = async(handler) {
-                system(cmd).also {
-                    endTimer.compareAndSet(true, false)
-                }
-            }
-            try {
-                joinAll(a1, a2)
-            } catch (e: Exception) {
+                destroy(cmd)
                 throw ProcessTimeoutException(timeOutMillis, "Timeout is reached")
             }
+
+            val command = async {
+                status = system(cmd)
+                timeOut.cancel()
+            }
+            joinAll(timeOut, command)
         }
 
         if (status == -1) {
@@ -69,7 +55,11 @@ actual class ProcessBuilderInternal actual constructor(
     }
 
     private fun destroy(cmd: String) {
-        val killCmd = "pkill $cmd"
+        val killCmd = if (isCurrentOsWindows()) {
+            "taskkill /im \"$cmd\" /f"
+        } else {
+            "pkill \"$cmd\""
+        }
         system(killCmd)
     }
 }

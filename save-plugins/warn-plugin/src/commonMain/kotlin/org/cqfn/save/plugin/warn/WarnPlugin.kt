@@ -14,6 +14,7 @@ import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.ProcessExecutionException
+import org.cqfn.save.core.utils.ProcessTimeoutException
 import org.cqfn.save.plugin.warn.utils.ResultsChecker
 import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
@@ -21,7 +22,6 @@ import org.cqfn.save.plugin.warn.utils.getLineNumber
 
 import okio.FileSystem
 import okio.Path
-import org.cqfn.save.core.utils.ProcessTimeoutException
 
 private typealias WarningMap = Map<String, List<Warning>>
 
@@ -85,6 +85,7 @@ class WarnPlugin(
         "TOO_LONG_FUNCTION",
         "SAY_NO_TO_VAR",
         "LongMethod",
+        "ReturnCount",
     )
     private fun handleTestFile(
         paths: List<Path>,
@@ -184,15 +185,13 @@ class WarnPlugin(
     private fun failTestResult(
         paths: List<Path>,
         ex: ProcessExecutionException,
-    ): Sequence<TestResult> {
-        return paths.map {
-            TestResult(
-                Test(it),
-                Fail(ex.describe(), ex.describe()),
-                DebugInfo(null, ex.message, null)
-            )
-        }.asSequence()
-    }
+    ) = paths.map {
+        TestResult(
+            Test(it),
+            Fail(ex.describe(), ex.describe()),
+            DebugInfo(null, ex.message, null)
+        )
+    }.asSequence()
 
     /**
      * method for getting warnings from test files:
