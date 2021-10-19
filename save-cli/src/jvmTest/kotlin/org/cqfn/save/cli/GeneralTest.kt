@@ -75,7 +75,7 @@ class GeneralTest {
         }
 
         val runCmd = if (isCurrentOsWindows()) "" else "sudo chmod +x $saveBinName && ./"
-        val saveFlags = " . --result-output FILE --report-type JSON"
+        val saveFlags = " . -d --result-output FILE --report-type JSON"
         // Execute the script from examples
         val execCmd = "$runCmd$saveBinName $saveFlags"
         val pb = ProcessBuilder(true, fs).exec(execCmd, examplesDir, null)
