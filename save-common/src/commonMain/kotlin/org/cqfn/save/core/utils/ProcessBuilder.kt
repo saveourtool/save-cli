@@ -104,7 +104,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
             processBuilderInternal.exec(cmd, timeOutMillis)
         } catch (ex: ProcessTimeoutException) {
             fs.deleteRecursively(tmpDir)
-            throw ProcessTimeoutException(ex.timeoutMillis, ex.message ?: "Timeout is reached")
+            throw ex
         } catch (ex: Exception) {
             fs.deleteRecursively(tmpDir)
             logErrorAndThrowProcessBuilderException(ex.message ?: "Couldn't execute $cmd")

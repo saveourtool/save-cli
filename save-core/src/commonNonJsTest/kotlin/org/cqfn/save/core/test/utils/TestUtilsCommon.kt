@@ -13,10 +13,10 @@ import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.Ignored
 import org.cqfn.save.core.result.Pass
-import org.cqfn.save.core.utils.isCurrentOsWindows
 import org.cqfn.save.reporter.test.TestReporter
 
 import okio.FileSystem
+import okio.Path
 
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -69,7 +69,7 @@ fun runTestsWithDiktat(
                     "Some warnings were expected but not received (1)"
                 ), test.status
             )
-        } else if (test.resources.test.toString().contains("warn${separator()}chapter2")) {
+        } else if (test.resources.test.toString().contains("warn${Path.DIRECTORY_SEPARATOR}chapter2")) {
             assertEquals(Fail("ProcessTimeoutException: Timeout is reached", "ProcessTimeoutException: Timeout is reached"), test.status)
         } else {
             assertTrue("test.status is actually ${test.status::class.simpleName}: $test") {
@@ -82,13 +82,4 @@ fun runTestsWithDiktat(
             }
         }
     }
-}
-
-/**
- * @return separator
- */
-fun separator() = if (isCurrentOsWindows()) {
-    "\\"
-} else {
-    "/"
 }

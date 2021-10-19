@@ -37,6 +37,7 @@ actual class ProcessBuilderInternal actual constructor(
     }
 
     @OptIn(ObsoleteCoroutinesApi::class)
+    @Suppress("UnsafeCallOnNullableType")
     actual fun exec(
         cmd: String,
         timeOutMillis: Long,
@@ -46,17 +47,18 @@ actual class ProcessBuilderInternal actual constructor(
             val processContext = newFixedThreadPoolContext(2, "timeOut")
 
             val runTime = Runtime.getRuntime()
-            var process: Process
-            val job = launch {
-                val timeOut = launch(processContext) {
+            var process: Process? = null
+            val job = launch(processContext) {
+                val timeOut = launch {
                     delay(timeOutMillis)
+                    process?.destroy()
                     throw ProcessTimeoutException(timeOutMillis, "Timeout is reached")
                 }
-                launch(processContext) {
+                launch {
                     process = runTime.exec(cmd.split(", ").toTypedArray())
-                    writeDataFromBufferToFile(process, "stdout", stdoutFile)
-                    writeDataFromBufferToFile(process, "stderr", stderrFile)
-                    status = process.waitFor()
+                    writeDataFromBufferToFile(process!!, "stdout", stdoutFile)
+                    writeDataFromBufferToFile(process!!, "stderr", stderrFile)
+                    status = process!!.waitFor()
                     timeOut.cancel()
                 }
             }
