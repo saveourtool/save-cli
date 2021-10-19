@@ -14,6 +14,7 @@ import org.cqfn.save.plugin.warn.WarnPluginConfig
 import org.cqfn.save.plugins.fix.FixPluginConfig
 import org.cqfn.save.plugins.fixandwarn.FixAndWarnPluginConfig
 
+
 import com.akuleshov7.ktoml.KtomlConf
 import com.akuleshov7.ktoml.exceptions.KtomlException
 import com.akuleshov7.ktoml.file.TomlFileReader
@@ -22,6 +23,7 @@ import com.akuleshov7.ktoml.parsers.node.TomlTable
 import okio.FileSystem
 import okio.Path
 
+import kotlin.system.exitProcess
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.serializer
 
@@ -64,7 +66,7 @@ private inline fun <reified T : PluginConfig> Path.createPluginConfig(
                 " This file has incorrect toml format or missing section [$pluginSectionName]." +
                 " Valid sections are: ${TestConfigSections.values().map { it.name.lowercase() }}."
     )
-    throw e
+    exitProcess(2)
 }
 
 /**

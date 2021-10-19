@@ -1,0 +1,7 @@
+[general]
+    tags = ["tag3"]
+    description = "Test suite that check only raised warnings related to general coding practices in files detected by a regular expression."
+
+[warn]
+    testNameRegex = "^E.*T.*D.*"
+    testToolResFileOutput = "not_result.out"

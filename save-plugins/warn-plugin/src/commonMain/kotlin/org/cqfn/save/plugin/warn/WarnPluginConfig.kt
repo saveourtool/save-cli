@@ -69,7 +69,8 @@ data class WarnPluginConfig(
     val linePlaceholder: String? = null,
     val wildCardInDirectoryMode: String? = null,
     val patternForRegexInWarning: List<String>? = null,
-    val partialWarnTextMatch: Boolean? = null
+    val partialWarnTextMatch: Boolean? = null,
+    val testToolResFileOutput: String? = null,
 ) : PluginConfig {
     @Transient
     override val type = TestConfigSections.WARN
@@ -109,7 +110,8 @@ data class WarnPluginConfig(
             this.linePlaceholder ?: other.linePlaceholder,
             this.wildCardInDirectoryMode ?: other.wildCardInDirectoryMode,
             this.patternForRegexInWarning ?: other.patternForRegexInWarning,
-            this.partialWarnTextMatch ?: other.partialWarnTextMatch
+            this.partialWarnTextMatch ?: other.partialWarnTextMatch,
+            this.testToolResFileOutput ?: other.testToolResFileOutput
         ).also { it.configLocation = this.configLocation }
     }
 
@@ -164,7 +166,8 @@ data class WarnPluginConfig(
             linePlaceholder ?: "\$line",
             wildCardInDirectoryMode,
             patternForRegexInWarning ?: defaultPatternForRegexInWarning,
-            partialWarnTextMatch ?: false
+            partialWarnTextMatch ?: false,
+            testToolResFileOutput
         ).also { it.configLocation = this.configLocation }
     }
 

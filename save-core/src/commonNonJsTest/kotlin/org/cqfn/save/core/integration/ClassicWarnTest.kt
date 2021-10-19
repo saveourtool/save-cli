@@ -38,7 +38,7 @@ class ClassicWarnTest {
             runTestsWithDiktat(
                 listOf(
                     "warn/chapter1"
-                ), 5
+                ), 6
             )
 
     @Test
@@ -48,6 +48,22 @@ class ClassicWarnTest {
                     "warn/chapter1/TestsWithRegex"
                 ), 1
             )
+
+    @Test
+    fun `executing warn plugin on directory, test output is in file`() =
+        runTestsWithDiktat(
+            listOf(
+                "warn/chapter1/TestResultsFromFileTest"
+            ), 1
+        )
+
+    @Test
+    fun `test output file set but file doesn't exist`() =
+        runTestsWithDiktat(
+            listOf(
+                "warn/chapter1/TestResultsFileDoesNotExistTest"
+            ), 1
+        )
 
     @Test
     @Ignore
@@ -65,7 +81,7 @@ class ClassicWarnTest {
             runTestsWithDiktat(
                 listOf(
                     "warn/save.toml"
-                ), 5
+                ), 6
             )
 
     @Test
@@ -73,7 +89,7 @@ class ClassicWarnTest {
             runTestsWithDiktat(
                 listOf(
                     "warn/chapter1/save.toml"
-                ), 5
+                ), 6
             )
 
     @Test
