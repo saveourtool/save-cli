@@ -69,7 +69,7 @@ fun runTestsWithDiktat(
                 test.status is Pass || test.status is Ignored
             }
             if (test.status is Pass) {
-                assertEquals(Pass(null), test.status)
+                assertTrue(test.status is Pass)
             } else {
                 assertEquals(Ignored("Excluded by configuration"), test.status)
             }
