@@ -85,7 +85,7 @@ class GeneralTest {
         }
 
         // We need some time, before the report will be completely filled
-        Thread.sleep(20_000)
+        Thread.sleep(30_000)
 
         // Report should be created after successful completion
         assertTrue(fs.exists(reportFile))
