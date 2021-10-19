@@ -30,6 +30,7 @@ import okio.Path.Companion.toPath
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.PolymorphicModuleBuilder
 import kotlinx.serialization.modules.subclass
+import org.cqfn.save.core.logging.logDebug
 
 /**
  * A plugin that runs an executable on a file and compares output with expected output.
@@ -130,9 +131,9 @@ class FixPlugin(
     private fun createTestFile(path: Path, generalConfig: GeneralConfig): Path {
         val pathCopy: Path = constructPathForCopyOfTestFile(FixPlugin::class.simpleName!!, path)
         createTempDir(pathCopy.parent!!)
-
+        logDebug("Created tmp directory ${pathCopy.parent!!}")
         val expectedWarningPattern = generalConfig.expectedWarningsPattern
-
+        logDebug("Write to copy file ${pathCopy}")
         fs.write(fs.createFile(pathCopy)) {
             fs.readLines(path).forEach {
                 if (expectedWarningPattern == null || !generalConfig.expectedWarningsPattern!!.matches(it)) {
@@ -142,6 +143,7 @@ class FixPlugin(
                 }
             }
         }
+        logDebug("Copy exist? ${fs.exists(pathCopy)}")
         return pathCopy
     }
 
