@@ -68,7 +68,7 @@ fun runTestsWithDiktat(
                     "Some warnings were expected but not received (1)"
                 ), test.status
             )
-        } else if (test.resources.test.toString().contains("chapter2")) {
+        } else if (test.resources.test.toString().contains("warn\\chapter2")) {
             assertEquals(Fail("ProcessTimeoutException: Timeout is reached", "ProcessTimeoutException: Timeout is reached"), test.status)
         } else {
             assertTrue("test.status is actually ${test.status::class.simpleName}: $test") {
