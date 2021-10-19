@@ -6,8 +6,8 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(project(":save-common"))
-                api("com.squareup.okio:okio-multiplatform:${Versions.okio}")
+                implementation(projects.saveCommon)
+                api("com.squareup.okio:okio:${Versions.okio}")
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
             }

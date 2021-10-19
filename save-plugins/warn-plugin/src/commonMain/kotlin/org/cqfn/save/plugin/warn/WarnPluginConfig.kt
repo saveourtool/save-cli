@@ -38,7 +38,7 @@ import kotlinx.serialization.UseSerializers
  * @property messageCaptureGroupOut an index of capture group in regular expressions, corresponding to warning text. Indices start at 0 with 0
  * corresponding to the whole string.
  * @property exactWarningsMatch exact match of errors
- * @property testNameKeyword part of the name of the test file, which will be used to create a regex.
+ * @property testNameRegex regular expression, which defines a test-file's name.
  * @property batchSize it controls how many files execCmd will process at a time.
  * @property batchSeparator separator for batch mode
  * @property linePlaceholder placeholder for line number, which resolved as current line and support addition and subtraction
@@ -65,7 +65,7 @@ data class WarnPluginConfig(
     val columnCaptureGroupOut: Long? = null,
     val messageCaptureGroupOut: Long? = null,
     val exactWarningsMatch: Boolean? = null,
-    val testNameKeyword: String? = null,
+    val testNameRegex: String? = null,
     val linePlaceholder: String? = null,
     val wildCardInDirectoryMode: String? = null,
     val patternForRegexInWarning: List<String>? = null,
@@ -78,19 +78,14 @@ data class WarnPluginConfig(
     override var configLocation: Path = "undefined_toml_location".toPath()
 
     /**
-     * keyword name of the test file.
+     * regex for name of the test file.
      */
-    val testName: String = testNameKeyword ?: "Test"
-
-    /**
-     * a string which cat later be interpreted as regex
-     */
-    val testNameRegPattern: String = """.*${(testName)}.*"""
+    val testName: String = testNameRegex ?: ".*Test.*"
 
     /**
      * regex for the name of the test files.
      */
-    val resourceNamePattern: Regex = Regex(testNameRegPattern)
+    val resourceNamePattern: Regex = Regex(testName)
 
     @Suppress("ComplexMethod")
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
@@ -110,7 +105,7 @@ data class WarnPluginConfig(
             this.columnCaptureGroupOut ?: other.columnCaptureGroupOut,
             this.messageCaptureGroupOut ?: other.messageCaptureGroupOut,
             this.exactWarningsMatch ?: other.exactWarningsMatch,
-            this.testNameKeyword ?: other.testNameKeyword,
+            this.testNameRegex ?: other.testNameRegex,
             this.linePlaceholder ?: other.linePlaceholder,
             this.wildCardInDirectoryMode ?: other.wildCardInDirectoryMode,
             this.patternForRegexInWarning ?: other.patternForRegexInWarning,

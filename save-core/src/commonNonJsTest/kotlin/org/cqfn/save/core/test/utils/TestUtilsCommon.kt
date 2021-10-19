@@ -11,12 +11,14 @@ import org.cqfn.save.core.config.OutputStreamType
 import org.cqfn.save.core.config.ReportType
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.result.Fail
+import org.cqfn.save.core.result.Ignored
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.reporter.test.TestReporter
 
 import okio.FileSystem
 
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * @property testName
@@ -66,7 +68,14 @@ fun runTestsWithDiktat(
         } else if (test.resources.test.toString().contains("chapter2")) {
             assertEquals(Fail("ProcessTimeoutException: Timeout is reached", "ProcessTimeoutException: Timeout is reached"), test.status)
         } else {
-            assertEquals(Pass(null), test.status)
+            assertTrue("test.status is actually ${test.status::class.simpleName}: $test") {
+                test.status is Pass || test.status is Ignored
+            }
+            if (test.status is Pass) {
+                assertEquals(Pass(null), test.status)
+            } else {
+                assertEquals(Ignored("Excluded by configuration"), test.status)
+            }
         }
     }
 }
