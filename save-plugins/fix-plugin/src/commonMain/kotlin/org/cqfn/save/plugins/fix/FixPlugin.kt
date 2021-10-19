@@ -85,6 +85,9 @@ class FixPlugin(
             val execCmd = "${generalConfig.execCmd} $execFlagsAdjusted"
 
             val executionResult = try {
+                pathCopyMap.forEach { (testFile, _) ->
+                    println("TEST FILES EXIST BEFORE? ${testFile} ${fs.exists(testFile)}")
+                }
                 pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo)
             } catch (ex: ProcessExecutionException) {
                 return@map chunk.map {
@@ -94,6 +97,10 @@ class FixPlugin(
                         DebugInfo(null, ex.message, null)
                     )
                 }
+            }
+
+            pathCopyMap.forEach { (testFile, _) ->
+                println("TEST FILES EXIST AFTER? ${testFile} ${fs.exists(testFile)}")
             }
 
             val stdout = executionResult.stdout
