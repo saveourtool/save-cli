@@ -32,7 +32,10 @@ data class ExpectedFail(val testName: String, val reason: String)
  * @param expectedFail list of expected failed tests
  * @param addProperties lambda to add/override SaveProperties during test
  */
-@Suppress("COMPLEX_EXPRESSION")
+@Suppress(
+    "COMPLEX_EXPRESSION",
+    "TOO_LONG_FUNCTION",
+)
 fun runTestsWithDiktat(
     testDir: List<String>?,
     numberOfTests: Int,
