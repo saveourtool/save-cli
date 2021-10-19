@@ -122,7 +122,7 @@ with `lineCaptureGroup`, `columnCaptureGroup` and `messageCaptureGroup` paramete
 usually you'll want them to be consistent to make testing easier, i.e. if input has line number, then so should output.
 `testNameRegex` is a regular expression which sets the name of the test file.
 
-### Customize `execCmd` per file
+### Customize `execCmd` per file with placefolders and execFlags
 As the next level of customization, execution command can be customized per individual test. To do so, one can use a special comment in that file.
 The pattern of the comment is taken from `WarnPluginConfig.runConfigPattern`. It should contain a single capture group, which corresponds to
 execution command.
@@ -139,3 +139,10 @@ of the following command when checking file `FileName`:
 ```bash
 ./my-tool --foo=bar FileName --debug
 ```
+
+The following images explain how `execFlags` can be used:
+
+![image](https://user-images.githubusercontent.com/58667063/137911101-2fd15061-4d9a-4e54-a40e-0d136ff81e47.png)
+![image](https://user-images.githubusercontent.com/58667063/137928360-0c3b8615-40c9-4fe3-8b4e-7c640b385491.png)
+
+
