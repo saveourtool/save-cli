@@ -82,7 +82,7 @@ class ClassicWarnTest {
             runTestsWithDiktat(
                 listOf(
                     "warn/save.toml"
-                ), 7
+                ), 8
             )
 
     @Test
