@@ -84,7 +84,8 @@ class WarnPlugin(
     @Suppress(
         "TOO_LONG_FUNCTION",
         "SAY_NO_TO_VAR",
-        "LongMethod"
+        "LongMethod",
+        "SwallowedException",
     )
     private fun handleTestFile(
         paths: List<Path>,
@@ -146,11 +147,12 @@ class WarnPlugin(
         }
         val stdout =
                 warnPluginConfig.testToolResFileOutput?.let {
-                    val testToolResFpath = testConfig.directory / warnPluginConfig.testToolResFileOutput
+                    val testToolResFilePath = testConfig.directory / warnPluginConfig.testToolResFileOutput
                     try {
-                        fs.readLines(testToolResFpath)
+                        fs.readLines(testToolResFilePath)
                     } catch (ex: FileNotFoundException) {
-                        logWarn("no such file: \"${warnPluginConfig.testToolResFileOutput}\", reading from stdout.")
+                        logWarn("Trying to read file \"${warnPluginConfig.testToolResFileOutput}\" that was set as an output for a tested tool with testToolResFileOutput," +
+                                " but no such file found. Will use the stdout as an input.")
                         executionResult.stdout
                     }
                 }

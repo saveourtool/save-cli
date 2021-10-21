@@ -4,4 +4,4 @@
 
 [warn]
     testNameRegex = "^E.*T.*D.*"
-    testToolResFileOutput = "not_result.out"
+    testToolResFileOutput = "result.out"
