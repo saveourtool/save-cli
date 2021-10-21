@@ -47,7 +47,7 @@ class ClassicWarnTest {
             runTestsWithDiktat(
                 listOf(
                     "warn/chapter1"
-                ), 5
+                ), 6
             )
 
     @Test
@@ -55,6 +55,14 @@ class ClassicWarnTest {
             runTestsWithDiktat(
                 listOf(
                     "warn/chapter1/TestsWithRegex"
+                ), 1
+            )
+
+    @Test
+    fun `test output file set`() =
+            runTestsWithDiktat(
+                listOf(
+                    "warn/chapter1/TestResultsFileTest"
                 ), 1
             )
 
@@ -82,7 +90,7 @@ class ClassicWarnTest {
             runTestsWithDiktat(
                 listOf(
                     "warn/chapter1/save.toml"
-                ), 5
+                ), 6
             )
 
     @Test

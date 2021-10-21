@@ -105,6 +105,8 @@ linePlaceholder = "$line"
 patternForRegexInWarning = ["{{", "}}"]
 # if true - the regex created from expected warning will be wrapped with '.*': .*warn.*.
 partialWarnTextMatch = false # (default value)
+ # if not set than stdout will be used as result of warn plugin execution
+testToolResFileOutput = "result.out" # (no default value is set)
 ```
 
 When executed from project root (where `save.propertes` is located), SAVE will cd to `rootDir` and discover all files
