@@ -50,10 +50,10 @@ class ClassicWarnTest {
             )
 
     @Test
-    fun `test output file set but file doesn't exist`() =
+    fun `test output file set`() =
             runTestsWithDiktat(
                 listOf(
-                    "warn/chapter1/TestResultsFileDoesNotExistTest"
+                    "warn/chapter1/TestResultsFileTest"
                 ), 1
             )
 
