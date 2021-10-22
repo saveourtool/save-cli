@@ -101,8 +101,9 @@ class FixAndWarnPlugin(
         // TODO: this probably could be obtained after https://github.com/cqfn/save/issues/164,
         val warnTestResults = warnPlugin.handleFiles(expectedFilesWithPass.map { Test(it) })
 
-        val fixAndWarnTestResults = (fixTestResultsFailed.asSequence() + warnTestResults).map { testResult ->
+        val fixAndWarnTestResults = fixTestResultsFailed.asSequence() + warnTestResults.map { testResult ->
             files.map { it as FixPlugin.FixTestFiles }
+                // find these results among all files and replace the paths to the *Expected with *Test
                 .filter { fixTestFiles -> fixTestFiles.expected == testResult.resources.test }
                 .map { path ->
                     TestResult(
@@ -110,7 +111,7 @@ class FixAndWarnPlugin(
                         testResult.status,
                         testResult.debugInfo
                     )
-                }.first()
+                }.single()
         }
 
         return fixAndWarnTestResults
