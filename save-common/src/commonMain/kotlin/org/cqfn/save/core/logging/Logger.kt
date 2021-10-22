@@ -49,14 +49,18 @@ fun logMessage(
  *
  * @param msg a message string
  */
-fun logInfo(msg: String) = logMessage("INFO", msg)
+fun logInfo(msg: String) {
+    logMessage("INFO", msg)
+}
 
 /**
  * Log a message with error level
  *
  * @param msg a message string
  */
-fun logError(msg: String) = logMessage("ERROR", msg, OutputStreamType.STDERR)
+fun logError(msg: String) {
+    logMessage("ERROR", msg, OutputStreamType.STDERR)
+}
 
 /**
  * Log a message with warn level
