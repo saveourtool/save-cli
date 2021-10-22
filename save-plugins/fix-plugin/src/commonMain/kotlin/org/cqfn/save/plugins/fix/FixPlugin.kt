@@ -76,7 +76,9 @@ class FixPlugin(
             val extraFlags = extraFlagsList.singleOrNull() ?: ExtraFlags("", "")
 
             val pathMap = chunk.map { it.test to it.expected }
-            val pathCopyMap = pathMap.map { (test, expected) -> createTestFile(test, generalConfig) to expected }
+            val pathCopyMap = pathMap.map {
+                    (test, expected) -> createTestFile(test, generalConfig, fixPluginConfig) to expected
+            }
             val testCopyNames =
                     pathCopyMap.joinToString(separator = fixPluginConfig.batchSeparator!!) { (testCopy, _) -> testCopy.toString() }
 
@@ -127,20 +129,34 @@ class FixPlugin(
                 }
             }
 
-    private fun createTestFile(path: Path, generalConfig: GeneralConfig): Path {
+    private fun createTestFile(path: Path, generalConfig: GeneralConfig, fixPluginConfig: FixPluginConfig): Path {
         val pathCopy: Path = constructPathForCopyOfTestFile(FixPlugin::class.simpleName!!, path)
         createTempDir(pathCopy.parent!!)
 
-        val expectedWarningPattern = generalConfig.expectedWarningsPattern
+        val defaultIgnoreLinesPatterns = mutableListOf<Regex>()
+        // fixme: make it more kotlin
+        if (generalConfig.expectedWarningsPattern != null) {
+            defaultIgnoreLinesPatterns.add(generalConfig.expectedWarningsPattern!!)
+        }
+        // fixme: and this if as well
+        if (generalConfig.runConfigPattern != null) {
+            defaultIgnoreLinesPatterns.add(generalConfig.runConfigPattern!!)
+        }
 
         fs.write(fs.createFile(pathCopy)) {
-            fs.readLines(path).forEach {
-                if (expectedWarningPattern == null || !generalConfig.expectedWarningsPattern!!.matches(it)) {
+            fs.readLines(path)
+                .filter { line ->
+                    if (fixPluginConfig.ignoreLines == null) {
+                        defaultIgnoreLinesPatterns.none {regex -> regex.matches(line)}
+                    } else {
+                        fixPluginConfig.ignoreLinesPatterns.none { pattern -> pattern.matches(line) }
+                    }
+                }
+                .forEach {
                     write(
                         (it + "\n").encodeToByteArray()
                     )
                 }
-            }
         }
         return pathCopy
     }

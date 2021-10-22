@@ -1,0 +1,7 @@
+[general]
+    tags = ["WarnIgnoreLines"]
+    description = "Test suite that checks if filtering by regex work."
+
+[warn]
+    testNameRegex = "^E.*T.*D.*"
+    ignoreLines = [".*// ;warn:0:0: \\[YOU SHOULD NOT SEE THIS\\] this warning should not be shown.*"]

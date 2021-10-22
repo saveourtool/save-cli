@@ -26,6 +26,11 @@ interface PluginConfig {
     val type: TestConfigSections
 
     /**
+     * list of regexes to be ignored
+     */
+    var ignoreLinesPatterns: MutableList<Regex>
+
+    /**
      * Location of the toml config
      */
     var configLocation: Path
@@ -70,6 +75,8 @@ data class GeneralConfig(
 ) : PluginConfig {
     override val type = TestConfigSections.GENERAL
 
+    override var ignoreLinesPatterns: MutableList<Regex> = mutableListOf()
+
     @Transient
     override var configLocation: Path = "undefined_toml_location".toPath()
 
@@ -88,8 +95,10 @@ data class GeneralConfig(
             this.suiteName ?: other.suiteName,
             this.excludedTests ?: other.excludedTests,
             this.expectedWarningsPattern ?: other.expectedWarningsPattern,
-            this.runConfigPattern ?: other.runConfigPattern,
-        ).also { it.configLocation = this.configLocation }
+            this.runConfigPattern ?: other.runConfigPattern
+        ).also {
+            it.configLocation = this.configLocation
+        }
     }
 
     override fun validateAndSetDefaults(): GeneralConfig {
@@ -113,7 +122,9 @@ data class GeneralConfig(
             excludedTests ?: emptyList(),
             expectedWarningsPattern ?: defaultExpectedWarningPattern,
             runConfigPattern ?: defaultRunConfigPattern,
-        ).also { it.configLocation = this.configLocation }
+        ).also {
+            it.configLocation = this.configLocation
+        }
     }
 
     private fun errorMsgForRequireCheck(field: String) =

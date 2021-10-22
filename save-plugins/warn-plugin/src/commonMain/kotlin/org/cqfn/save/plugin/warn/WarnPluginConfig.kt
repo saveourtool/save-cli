@@ -72,12 +72,16 @@ data class WarnPluginConfig(
     val patternForRegexInWarning: List<String>? = null,
     val partialWarnTextMatch: Boolean? = null,
     val testToolResFileOutput: String? = null,
+    val ignoreLines: MutableList<String>? = null
 ) : PluginConfig {
     @Transient
     override val type = TestConfigSections.WARN
 
     @Transient
     override var configLocation: Path = "undefined_toml_location".toPath()
+
+    @Transient
+    override var ignoreLinesPatterns: MutableList<Regex> = ignoreLines?.map{ it.toRegex() }?.toMutableList() ?: defaultIgnoreLines
 
     /**
      * regex for name of the test file.
@@ -113,7 +117,12 @@ data class WarnPluginConfig(
             this.patternForRegexInWarning ?: other.patternForRegexInWarning,
             this.partialWarnTextMatch ?: other.partialWarnTextMatch,
             this.testToolResFileOutput ?: other.testToolResFileOutput,
-        ).also { it.configLocation = this.configLocation }
+            other.ignoreLines?.let {
+                this.ignoreLines?.let { other.ignoreLines.union(this.ignoreLines) } ?: other.ignoreLines
+            } ?.toMutableList() ?: this.ignoreLines
+        ).also {
+            it.configLocation = this.configLocation
+        }
     }
 
     @Suppress(
@@ -169,7 +178,10 @@ data class WarnPluginConfig(
             patternForRegexInWarning ?: defaultPatternForRegexInWarning,
             partialWarnTextMatch ?: false,
             testToolResFileOutput,
-        ).also { it.configLocation = this.configLocation }
+            ignoreLines?.filter { it != "null" }?.toMutableList() ?: ignoreLines
+        ).also {
+            it.configLocation = this.configLocation
+        }
     }
 
     private fun requirePositiveIfNotNull(value: Long?) {
@@ -202,5 +214,6 @@ data class WarnPluginConfig(
          */
         internal val defaultOutputPattern = Regex("(.+):(\\d*):(\\d*): (.+)")
         internal val defaultPatternForRegexInWarning = listOf("{{", "}}")
+        internal val defaultIgnoreLines = mutableListOf<Regex>()
     }
 }

@@ -12,6 +12,8 @@ import okio.Path.Companion.toPath
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.UseSerializers
+import org.cqfn.save.core.logging.logDebug
+import org.cqfn.save.core.logging.logError
 
 /**
  * Some fields by default are null, instead of some natural value, because of the fact, that in stage of merging
@@ -31,11 +33,15 @@ data class FixPluginConfig(
     val batchSeparator: String? = null,
     val resourceNameTestSuffix: String? = null,
     val resourceNameExpectedSuffix: String? = null,
+    val ignoreLines: MutableList<String>? = null
 ) : PluginConfig {
     override val type = TestConfigSections.FIX
 
     @Transient
     override var configLocation: Path = "undefined_toml_location".toPath()
+
+    @Transient
+    override var ignoreLinesPatterns: MutableList<Regex> = ignoreLines?.map{ it.toRegex() }?.toMutableList() ?: defaultIgnoreLines
 
     /**
      *  @property resourceNameTest
@@ -60,14 +66,26 @@ data class FixPluginConfig(
             this.batchSeparator ?: other.batchSeparator,
             this.resourceNameTestSuffix ?: other.resourceNameTestSuffix,
             this.resourceNameExpectedSuffix ?: other.resourceNameExpectedSuffix,
-        ).also { it.configLocation = this.configLocation }
+            other.ignoreLines?.let {
+                this.ignoreLines?.let { other.ignoreLines.union(this.ignoreLines) } ?: other.ignoreLines
+            } ?.toMutableList() ?: this.ignoreLines
+        ).also {
+            it.configLocation = this.configLocation
+        }
     }
 
+    // due to probable bug in ktoml, ignoreLines = [] and no ignoreLines is ktoml are parsed to be mutableListOf("null")
     override fun validateAndSetDefaults() = FixPluginConfig(
         execFlags ?: "",
         batchSize ?: 1,
         batchSeparator ?: ", ",
         resourceNameTest,
-        resourceNameExpected
-    ).also { it.configLocation = this.configLocation }
+        resourceNameExpected,
+        ignoreLines?.filter { it != "null" }?.toMutableList() ?: ignoreLines
+    ).also {
+        it.configLocation = this.configLocation
+    }
+    companion object {
+        internal val defaultIgnoreLines = mutableListOf<Regex>()
+    }
 }

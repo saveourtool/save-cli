@@ -25,6 +25,9 @@ data class FixAndWarnPluginConfig(
     @Transient
     override var configLocation: Path = "undefined_toml_location".toPath()
 
+    @Transient
+    override var ignoreLinesPatterns: MutableList<Regex> = defaultIgnoreLines
+
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as FixAndWarnPluginConfig
         val mergedFixPluginConfig = fix.mergeWith(other.fix)
@@ -32,7 +35,9 @@ data class FixAndWarnPluginConfig(
         return FixAndWarnPluginConfig(
             mergedFixPluginConfig as FixPluginConfig,
             mergedWarnPluginConfig as WarnPluginConfig
-        ).also { it.configLocation = this.configLocation }
+        ).also {
+            it.configLocation = this.configLocation
+        }
     }
 
     override fun validateAndSetDefaults(): PluginConfig {
@@ -48,6 +53,11 @@ data class FixAndWarnPluginConfig(
         return FixAndWarnPluginConfig(
             fix.validateAndSetDefaults(),
             warn.validateAndSetDefaults()
-        ).also { it.configLocation = this.configLocation }
+        ).also {
+            it.configLocation = this.configLocation
+        }
+    }
+    companion object {
+        internal val defaultIgnoreLines = mutableListOf<Regex>()
     }
 }

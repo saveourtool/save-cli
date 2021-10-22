@@ -38,7 +38,7 @@ class ClassicWarnTest {
             runTestsWithDiktat(
                 listOf(
                     "warn/chapter1"
-                ), 6
+                ), 7
             )
 
     @Test
@@ -48,6 +48,14 @@ class ClassicWarnTest {
                     "warn/chapter1/TestsWithRegex"
                 ), 1
             )
+
+    @Test
+    fun `lines that match ignoreLines should be ignored`() =
+        runTestsWithDiktat(
+            listOf(
+                "warn/chapter1/IgnoreLinesTest"
+            ), 1
+        )
 
     @Test
     fun `test output file set`() =
@@ -73,7 +81,7 @@ class ClassicWarnTest {
             runTestsWithDiktat(
                 listOf(
                     "warn/save.toml"
-                ), 6
+                ), 7
             )
 
     @Test
@@ -81,7 +89,7 @@ class ClassicWarnTest {
             runTestsWithDiktat(
                 listOf(
                     "warn/chapter1/save.toml"
-                ), 6
+                ), 7
             )
 
     @Test

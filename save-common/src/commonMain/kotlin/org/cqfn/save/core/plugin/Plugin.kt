@@ -81,6 +81,15 @@ abstract class Plugin(
     abstract fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult>
 
     /**
+     * Method, which filters out all the strings that match any pattern from ignoreLinesPatterns, creating a new file
+     *
+     * @param path to source file
+     * @param pluginConfig - setting of a plugin
+     * @return list of [String]s, each of which doesn't match any pattern
+     */
+    //abstract fun createTestFile(path: Path, pluginConfig: PluginConfig): Path
+
+    /**
      * Discover groups of resource files which will be used to run tests, applying additional filtering
      * for execution of individual tests.
      *

@@ -22,6 +22,8 @@ import org.cqfn.save.plugin.warn.utils.getLineNumber
 import okio.FileNotFoundException
 import okio.FileSystem
 import okio.Path
+import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.logging.logError
 
 private typealias WarningMap = Map<String, List<Warning>>
 
@@ -81,6 +83,22 @@ class WarnPlugin(
         }
     }
 
+    private fun createTestFile(path: Path, warnPluginConfig: WarnPluginConfig): Path {
+        val pathCopy: Path = constructPathForCopyOfTestFile(WarnPlugin::class.simpleName!!, path)
+        createTempDir(pathCopy.parent!!)
+
+        val ignorePatterns = warnPluginConfig.ignoreLinesPatterns
+
+        fs.write(fs.createFile(pathCopy)) {
+            fs.readLines(path)
+                .filter { line ->
+                    ignorePatterns.none { pattern -> pattern.matches(line) }
+                }
+                .map { write((it + "\n").encodeToByteArray()) }
+        }
+        return pathCopy
+    }
+
     @Suppress(
         "TOO_LONG_FUNCTION",
         "SAY_NO_TO_VAR",
@@ -93,12 +111,13 @@ class WarnPlugin(
         generalConfig: GeneralConfig
     ): Sequence<TestResult> {
         // extracting all warnings from test resource files
-        val expectedWarningsMap: WarningMap = paths.associate {
+        val copyPaths: List<Path> = paths.map { path -> createTestFile(path, warnPluginConfig) }
+        val expectedWarningsMap: WarningMap = copyPaths.associate {
             val warningsForCurrentPath = it.collectWarningsWithLineNumbers(warnPluginConfig, generalConfig)
             it.name to warningsForCurrentPath
         }
 
-        val extraFlagsList = paths.mapNotNull { path ->
+        val extraFlagsList = copyPaths.mapNotNull { path ->
             extraFlagsExtractor.extractExtraFlagsFrom(path)
         }
             .distinct()
@@ -121,23 +140,17 @@ class WarnPlugin(
         // NOTE: SAVE will pass relative paths of Tests (calculated from testRootConfig dir) into the executed tool
         val fileNamesForExecCmd =
                 warnPluginConfig.wildCardInDirectoryMode?.let {
-                    val directoryPrefix = testConfig
-                        .directory
-                        .createRelativePathToTheRoot(testConfig.getRootConfig().location)
                     // a hack to put only the directory path to the execution command
                     // only in case a directory mode is enabled
-                    "$directoryPrefix$it"
-                } ?: paths.joinToString(separator = warnPluginConfig.batchSeparator!!) {
-                    it.createRelativePathToTheRoot(testConfig.getRootConfig().location)
-                }
-
+                    "${copyPaths[0].parent!!}$it"
+                } ?: copyPaths.joinToString(separator = warnPluginConfig.batchSeparator!!)
         val execFlagsAdjusted = resolvePlaceholdersFrom(warnPluginConfig.execFlags, extraFlags, fileNamesForExecCmd)
         val execCmd = "${generalConfig.execCmd} $execFlagsAdjusted"
 
         val executionResult = try {
             pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo)
         } catch (ex: ProcessExecutionException) {
-            return paths.map {
+            return copyPaths.map {
                 TestResult(
                     Test(it),
                     Fail(ex.describe(), ex.describe()),
@@ -145,6 +158,7 @@ class WarnPlugin(
                 )
             }.asSequence()
         }
+
         val stdout =
                 warnPluginConfig.testToolResFileOutput?.let {
                     val testToolResFilePath = testConfig.directory / warnPluginConfig.testToolResFileOutput
@@ -161,7 +175,8 @@ class WarnPlugin(
                     }
         val stderr = executionResult.stderr
 
-        val actualWarningsMap = stdout.mapNotNull {
+        val actualWarningsMap = stdout
+            .mapNotNull {
             with(warnPluginConfig) {
                 val line = it.getLineNumber(actualWarningsPattern!!, lineCaptureGroupOut)
                 it.extractWarning(
@@ -208,7 +223,8 @@ class WarnPlugin(
         generalConfig: GeneralConfig
     ): List<Warning> {
         val linesFile = fs.readLines(this)
-        return linesFile.mapIndexed { index, line ->
+        return linesFile
+            .mapIndexed { index, line ->
             val newLine = line.getLineNumber(
                 generalConfig.expectedWarningsPattern!!,
                 warnPluginConfig.lineCaptureGroup,
