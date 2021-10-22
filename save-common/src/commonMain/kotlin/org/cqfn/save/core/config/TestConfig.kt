@@ -6,6 +6,7 @@ package org.cqfn.save.core.config
 
 import org.cqfn.save.core.files.parents
 import org.cqfn.save.core.logging.logDebug
+import org.cqfn.save.core.logging.logTrace
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.plugin.PluginConfig
@@ -13,7 +14,6 @@ import org.cqfn.save.core.plugin.PluginConfig
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
-import org.cqfn.save.core.logging.logTrace
 
 /**
  * Configuration for a test suite, that is read from test suite configuration file (toml config)

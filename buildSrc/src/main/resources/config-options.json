@@ -71,14 +71,6 @@
       "description" : "Data output stream",
       "default" : "OutputStreamType.STDOUT"
     },
-    "configInheritance" : {
-      "argType" : "ArgType.Boolean",
-      "kotlinType": "kotlin.Boolean",
-      "fullName" : "config-inheritance",
-      "shortName" : "",
-      "description" : "Whether configuration files should inherit configurations from the previous level of directories",
-      "default" : "true"
-    },
     "reportDir" : {
       "argType" : "ArgType.String",
       "kotlinType": "kotlin.String",
