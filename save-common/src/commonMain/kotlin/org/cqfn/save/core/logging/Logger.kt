@@ -44,6 +44,7 @@ fun logMessage(
     writeToStream("[$level]$currentTime: $msg", stream)
 }
 
+
 /**
  * Log a message with info level
  *
