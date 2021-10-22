@@ -1,5 +1,4 @@
-import org.cqfn.save.buildutils.configureDetekt
-import org.cqfn.save.buildutils.configureDiktat
+
 import org.cqfn.save.buildutils.configurePublishing
 import org.cqfn.save.buildutils.configureVersioning
 import org.cqfn.save.buildutils.createDetektTask
@@ -13,13 +12,6 @@ plugins {
 
 configureVersioning()
 
-allprojects {
-    repositories {
-        mavenCentral()
-    }
-    configureDiktat()
-    configureDetekt()
-}
 createDiktatTask()
 createDetektTask()
 installGitHooks()
