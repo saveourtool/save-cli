@@ -14,7 +14,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 /**
- * Debug logging mode
+ *  Logging mode
  */
 var logType: LogType = LogType.WARN
 
@@ -43,7 +43,6 @@ fun logMessage(
     }
     writeToStream("[$level]$currentTime: $msg", stream)
 }
-
 
 /**
  * Log a message with info level
@@ -87,7 +86,7 @@ fun logDebug(msg: String) {
  * @param msg a message string
  */
 fun logTrace(msg: String) {
-    if(logType == LogType.ALL) {
+    if (logType == LogType.ALL) {
         logMessage("TRACE", msg)
     }
 }

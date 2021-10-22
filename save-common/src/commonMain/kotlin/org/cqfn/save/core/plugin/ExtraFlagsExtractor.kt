@@ -1,12 +1,11 @@
 package org.cqfn.save.core.plugin
 
 import org.cqfn.save.core.files.readLines
-import org.cqfn.save.core.logging.logWarn
+import org.cqfn.save.core.logging.logTrace
 import org.cqfn.save.core.utils.runIf
 
 import okio.FileSystem
 import okio.Path
-import org.cqfn.save.core.logging.logTrace
 
 /**
  * Class that is capable of extracting [ExtraFlags] from a text line
@@ -19,7 +18,6 @@ class ExtraFlagsExtractor(private val generalConfig: GeneralConfig,
      * @return [ExtraFlags]
      */
     fun extractExtraFlagsFrom(path: Path): ExtraFlags? {
-
         val allExtraFlagsFromFile = fs.readLines(path)
             .filterAndJoinBy(generalConfig.runConfigPattern!!, '\\')
             .map { extractExtraFlagsFrom(it) }
@@ -43,7 +41,6 @@ class ExtraFlagsExtractor(private val generalConfig: GeneralConfig,
         .also {
             if (it == ExtraFlags("", "")) {
                 logTrace("Line <$line> is matched by extraFlagsPattern <${generalConfig.runConfigPattern}>, but no flags have been extracted")
-
             }
         }
 }

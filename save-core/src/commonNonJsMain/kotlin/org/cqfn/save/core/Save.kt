@@ -22,7 +22,9 @@ import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.buildActivePlugins
 import org.cqfn.save.core.utils.processInPlace
+import org.cqfn.save.plugin.warn.WarnPluginConfig
 import org.cqfn.save.plugins.fix.FixPlugin
+import org.cqfn.save.plugins.fix.FixPluginConfig
 import org.cqfn.save.reporter.json.JsonReporter
 import org.cqfn.save.reporter.plain.PlainOnlyFailedReporter
 import org.cqfn.save.reporter.plain.PlainTextReporter
@@ -51,7 +53,6 @@ class Save(
     @Suppress("TOO_LONG_FUNCTION")
     fun performAnalysis(): Reporter {
         logInfo("Welcome to SAVE version $SAVE_VERSION")
-
         // FixMe: now we work only with the save.toml config and it's hierarchy, but we should work properly here with directories as well
         // FixMe: get(0) to [0] after https://github.com/cqfn/diKTat/issues/1047
         val testRootPath = saveProperties.testFiles!!.get(0).toPath()
@@ -107,13 +108,33 @@ class Save(
                    |$excludedNote
                 """.trimMargin()
             } else {
-                "SAVE wasn't able to run tests, please check the correctness of configuration and test resources"
+                for (item in testConfigs) {
+                    logWarn(item::class.simpleName ?: "")
+                }
+                val fixPluginPatterns = testConfigs
+                    .last()
+                    .pluginConfigs
+                    .filterIsInstance<FixPluginConfig>()
+                    .map { it.resourceNamePatternStr }
+                    .distinct()
+                    .joinToString(", ")
+                    .ifEmpty { "NONE" }
+                val warnPluginPatterns = testConfigs
+                    .last()
+                    .pluginConfigs
+                    .filterIsInstance<WarnPluginConfig>()
+                    .map { it.resourceNamePatternStr }
+                    .distinct()
+                    .joinToString(", ")
+                    .ifEmpty { "NONE" }
+                "SAVE wasn't able to run tests, please check the correctness of configuration and test resources." +
+                        "(fix plugin resourceNamePatternStrs: $fixPluginPatterns, warn plugin resourceNamePatternStrs: $warnPluginPatterns)"
             }
             logWarn(warnMsg)
         }
         reporter.afterAll()
         reporter.out.close()
-        logInfo("SAVE has finished execution. You can rerun with --debug for additional information.")
+        logInfo("SAVE has finished execution. You can rerun with --log debug or --log trace for additional information.")
 
         return reporter
     }

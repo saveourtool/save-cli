@@ -46,11 +46,12 @@ data class FixPluginConfig(
      *  @property resourceNameExpected
      */
     val resourceNameExpected: String = resourceNameExpectedSuffix ?: "Expected"
+    override val resourceNamePatternStr: String = """(.+)($resourceNameExpected|$resourceNameTest)\.[\w\d]+"""
 
     /**
      *  @property resourceNamePattern regex for the name of the test files.
      */
-    val resourceNamePattern: Regex = Regex("""(.+)($resourceNameExpected|$resourceNameTest)\.[\w\d]+""")
+    val resourceNamePattern: Regex = Regex(resourceNamePatternStr)
 
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as FixPluginConfig
