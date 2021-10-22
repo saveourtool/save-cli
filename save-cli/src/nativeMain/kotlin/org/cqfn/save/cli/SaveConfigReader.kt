@@ -7,9 +7,9 @@ package org.cqfn.save.cli
 import org.cqfn.save.cli.logging.logErrorAndExit
 import org.cqfn.save.core.config.LogType
 import org.cqfn.save.core.config.SaveProperties
-import org.cqfn.save.core.logging.logType
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logTrace
+import org.cqfn.save.core.logging.logType
 
 import okio.FileNotFoundException
 import okio.FileSystem
