@@ -97,7 +97,7 @@ messageCaptureGroup = 4 # (default value)
 
 warningTextHasColumn = true # (default value)
 warningTextHasLine = true # (default value)
-testNameKeyword = "Test" # (default value)
+testNameRegex = ".*Test.*" # (default value)
 batchSize = 1 # (default value)
 batchSeparator  = ", " # (default value)
 defaultLineMode = false
@@ -105,6 +105,8 @@ linePlaceholder = "$line"
 patternForRegexInWarning = ["{{", "}}"]
 # if true - the regex created from expected warning will be wrapped with '.*': .*warn.*.
 partialWarnTextMatch = false # (default value)
+ # if not set than stdout will be used as result of warn plugin execution
+testToolResFileOutput = "result.out" # (no default value is set)
 ```
 
 When executed from project root (where `save.propertes` is located), SAVE will cd to `rootDir` and discover all files
@@ -118,9 +120,9 @@ If line number is not present in the comment, it's assumed to be `current line +
 for column number (if `warningTextHasColumn` is true) and for warning text. Their indices can be customized
 with `lineCaptureGroup`, `columnCaptureGroup` and `messageCaptureGroup` parameters. These parameters are shared between input and output pattern;
 usually you'll want them to be consistent to make testing easier, i.e. if input has line number, then so should output.
-`testNameKeyword` must include keyword - a part of the name of the test file.
+`testNameRegex` is a regular expression which sets the name of the test file.
 
-### Customize `execCmd` per file
+### Customize `execCmd` per file with placefolders and execFlags
 As the next level of customization, execution command can be customized per individual test. To do so, one can use a special comment in that file.
 The pattern of the comment is taken from `WarnPluginConfig.runConfigPattern`. It should contain a single capture group, which corresponds to
 execution command.
@@ -132,8 +134,14 @@ These placeholders are optional; if present, they should be comma-separated. Equ
 from `warn.execFlags` with `$` sign. Additionally, `$fileName` in `execFlags` is substituted by the name of analyzed file
 (or a set of names in batch mode).
 
-For example, the comment `// RUN: args1=--foo\=bar,args2=--debug light` in combination with `warn.execCmd = ./my-tool` will lead to execution
+For example, the comment `// RUN: args1=--foo\=bar,args2=--log debug` in combination with `warn.execCmd = ./my-tool` will lead to execution
 of the following command when checking file `FileName`:
 ```bash
-./my-tool --foo=bar FileName --debug light
+./my-tool --foo=bar FileName --log debug
 ```
+
+The following images explain how `execFlags` can be used:
+
+![image](https://user-images.githubusercontent.com/58667063/137911101-2fd15061-4d9a-4e54-a40e-0d136ff81e47.png)
+![image](https://user-images.githubusercontent.com/58667063/137928360-0c3b8615-40c9-4fe3-8b4e-7c640b385491.png)
+

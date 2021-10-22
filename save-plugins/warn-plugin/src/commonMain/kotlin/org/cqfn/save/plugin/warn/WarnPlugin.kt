@@ -19,6 +19,7 @@ import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
 import org.cqfn.save.plugin.warn.utils.getLineNumber
 
+import okio.FileNotFoundException
 import okio.FileSystem
 import okio.Path
 
@@ -83,7 +84,8 @@ class WarnPlugin(
     @Suppress(
         "TOO_LONG_FUNCTION",
         "SAY_NO_TO_VAR",
-        "LongMethod"
+        "LongMethod",
+        "SwallowedException",
     )
     private fun handleTestFile(
         paths: List<Path>,
@@ -124,9 +126,7 @@ class WarnPlugin(
                         .createRelativePathToTheRoot(testConfig.getRootConfig().location)
                     // a hack to put only the directory path to the execution command
                     // only in case a directory mode is enabled
-                    // We should remember that here we have not kotlin regulars but os-based so testNameRegPattern is
-                    // not suitable. Need to create a usual regex: path/to/dir/*keyword*
-                    "$directoryPrefix$it${warnPluginConfig.testNameKeyword}*"
+                    "$directoryPrefix$it"
                 } ?: paths.joinToString(separator = warnPluginConfig.batchSeparator!!) {
                     it.createRelativePathToTheRoot(testConfig.getRootConfig().location)
                 }
@@ -145,10 +145,23 @@ class WarnPlugin(
                 )
             }.asSequence()
         }
-        val stdout = executionResult.stdout
+        val stdout =
+                warnPluginConfig.testToolResFileOutput?.let {
+                    val testToolResFilePath = testConfig.directory / warnPluginConfig.testToolResFileOutput
+                    try {
+                        fs.readLines(testToolResFilePath)
+                    } catch (ex: FileNotFoundException) {
+                        logWarn("Trying to read file \"${warnPluginConfig.testToolResFileOutput}\" that was set as an output for a tested tool with testToolResFileOutput," +
+                                " but no such file found. Will use the stdout as an input.")
+                        executionResult.stdout
+                    }
+                }
+                    ?: run {
+                        executionResult.stdout
+                    }
         val stderr = executionResult.stderr
 
-        val actualWarningsMap = executionResult.stdout.mapNotNull {
+        val actualWarningsMap = stdout.mapNotNull {
             with(warnPluginConfig) {
                 val line = it.getLineNumber(actualWarningsPattern!!, lineCaptureGroupOut)
                 it.extractWarning(

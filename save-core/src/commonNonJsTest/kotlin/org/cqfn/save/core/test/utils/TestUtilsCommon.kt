@@ -11,12 +11,14 @@ import org.cqfn.save.core.config.OutputStreamType
 import org.cqfn.save.core.config.ReportType
 import org.cqfn.save.core.config.SaveProperties
 import org.cqfn.save.core.result.Fail
+import org.cqfn.save.core.result.Ignored
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.reporter.test.TestReporter
 
 import okio.FileSystem
 
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * @property testName
@@ -63,7 +65,14 @@ fun runTestsWithDiktat(
                 ), test.status
             )
         } else {
-            assertEquals(Pass(null), test.status)
+            assertTrue("test.status is actually ${test.status::class.simpleName}: $test") {
+                test.status is Pass || test.status is Ignored
+            }
+            if (test.status is Ignored) {
+                assertEquals(Ignored("Excluded by configuration"), test.status)
+            } else {
+                assertTrue(test.status is Pass)
+            }
         }
     }
 }

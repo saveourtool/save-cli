@@ -42,12 +42,12 @@ fun Project.createDiktatTask() {
     }
     tasks.register("diktatCheckAll") {
         allprojects {
-            this@register.dependsOn(tasks.getByName("diktatCheck"))
+            tasks.findByName("diktatCheck")?.let { this@register.dependsOn(it) }
         }
     }
     tasks.register("diktatFixAll") {
         allprojects {
-            this@register.dependsOn(tasks.getByName("diktatFix"))
+            tasks.findByName("diktatFix")?.let { this@register.dependsOn(it) }
         }
     }
 }

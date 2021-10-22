@@ -42,11 +42,13 @@ class ResultsChecker(
         return when (missingWarnings.isEmpty() to unexpectedWarnings.isEmpty()) {
             false to true -> createFailFromSingleMiss(EXPECTED_BUT_NOT_RECEIVED, missingWarnings)
             false to false -> createFailFromDoubleMiss(missingWarnings, unexpectedWarnings)
-            true to true -> Pass(null)
+            true to true -> Pass(
+                "$ALL_EXPECTED: ${expectedWarningsMatchedWithActual.size} warnings",
+            )
             true to false -> if (warnPluginConfig.exactWarningsMatch == false) {
                 Pass(
                     "$UNEXPECTED: $unexpectedWarnings",
-                    "$UNEXPECTED: ${unexpectedWarnings.size} warnings"
+                    "$EXPECTED: ${expectedWarningsMatchedWithActual.size} warnings, $UNEXPECTED: ${unexpectedWarnings.size} warnings"
                 )
             } else {
                 createFailFromSingleMiss(UNEXPECTED, unexpectedWarnings)
@@ -91,6 +93,8 @@ class ResultsChecker(
             )
 
     companion object {
+        private const val ALL_EXPECTED = "All warnings were expected"
+        private const val EXPECTED = "Received expected warnings"
         private const val EXPECTED_BUT_NOT_RECEIVED = "Some warnings were expected but not received"
         private const val UNEXPECTED = "Some warnings were unexpected"
     }
