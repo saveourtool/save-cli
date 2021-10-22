@@ -100,7 +100,6 @@ warningTextHasLine = true # (default value)
 testNameRegex = ".*Test.*" # (default value)
 batchSize = 1 # (default value)
 batchSeparator  = ", " # (default value)
-defaultLineMode = false
 linePlaceholder = "$line"
 patternForRegexInWarning = ["{{", "}}"]
 # if true - the regex created from expected warning will be wrapped with '.*': .*warn.*.
