@@ -116,3 +116,4 @@ jobs:
         with:
           name: gradle-reports-windows-latest
           path: '**/build/reports/'
+          retention-days: 1
