@@ -1,11 +1,5 @@
 package org.cqfn.save.core
 
-import org.cqfn.save.core.config.OutputStreamType
-import org.cqfn.save.core.config.ReportType
-import org.cqfn.save.core.config.SAVE_VERSION
-import org.cqfn.save.core.config.SaveProperties
-import org.cqfn.save.core.config.TestConfig
-import org.cqfn.save.core.config.isSaveTomlConfig
 import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.files.StdStreamsSink
 import org.cqfn.save.core.logging.logDebug
@@ -14,7 +8,6 @@ import org.cqfn.save.core.logging.logInfo
 import org.cqfn.save.core.logging.logTrace
 import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.plugin.Plugin
-import org.cqfn.save.core.plugin.PluginConfig
 import org.cqfn.save.core.plugin.PluginException
 import org.cqfn.save.core.reporter.Reporter
 import org.cqfn.save.core.result.Crash
@@ -35,6 +28,8 @@ import org.cqfn.save.reporter.test.TestReporter
 import okio.FileSystem
 import okio.Path.Companion.toPath
 import okio.buffer
+import org.cqfn.save.core.config.*
+import org.cqfn.save.core.plugin.PluginConfig
 
 /**
  * @property saveProperties an instance of [SaveProperties]
@@ -110,8 +105,8 @@ class Save(
                    |$excludedNote
                 """.trimMargin()
             } else {
-                val fixPluginPatterns: String = getPluginPatterns<FixPluginConfig>(testConfigs)
-                val warnPluginPatterns: String = getPluginPatterns<WarnPluginConfig>(testConfigs)
+                val fixPluginPatterns = getPluginPatterns<FixPluginConfig>(testConfigs)
+                val warnPluginPatterns = getPluginPatterns<WarnPluginConfig>(testConfigs)
                 "SAVE wasn't able to run tests, please check the correctness of configuration and test resources." +
                         "(fix plugin resourceNamePatternStrs: $fixPluginPatterns, warn plugin resourceNamePatternStrs: $warnPluginPatterns)"
             }
@@ -124,13 +119,15 @@ class Save(
         return reporter
     }
 
-    private inline fun <reified PluginConfigType : PluginConfig> getPluginPatterns(testConfigs: List<TestConfig>) = testConfigs
-        .last()
-        .pluginConfigs
-        .filterIsInstance<PluginConfigType>()
-        .map { it.resourceNamePatternStr }
-        .distinct()
-        .joinToString(", ")
+    private inline fun <reified PluginConfigType: PluginConfig> getPluginPatterns(testConfigs: List<TestConfig>): String {
+        return testConfigs
+            .last()
+            .pluginConfigs
+            .filterIsInstance<PluginConfigType>()
+            .map { it.resourceNamePatternStr }
+            .distinct()
+            .joinToString(", ")
+    }
 
     private fun Plugin.isFromEnabledSuite(includeSuites: List<String>, excludeSuites: List<String>): Boolean {
         val suiteName = testConfig.getGeneralConfig()?.suiteName
