@@ -145,7 +145,7 @@ data class TestConfig(
                 .filter { plugin ->
                     plugin.discoverTestFiles(directory).any().also { isNotEmpty ->
                         if (!isNotEmpty) {
-                            logTrace("Plugin <${plugin::class.simpleName}> in config file ${plugin.testConfig.location} has no test resources; " +
+                            logDebug("Plugin <${plugin::class.simpleName}> in config file ${plugin.testConfig.location} has no test resources; " +
                                     "it's config will only be used for inheritance")
                         }
                     }
