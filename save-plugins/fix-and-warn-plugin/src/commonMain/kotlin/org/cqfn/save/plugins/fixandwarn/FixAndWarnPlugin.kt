@@ -107,7 +107,7 @@ class FixAndWarnPlugin(
                 .filter { fixTestFiles -> fixTestFiles.expected == testResult.resources.test }
                 .map { path ->
                     TestResult(
-                        Test(path.test),
+                        path,
                         testResult.status,
                         testResult.debugInfo
                     )
