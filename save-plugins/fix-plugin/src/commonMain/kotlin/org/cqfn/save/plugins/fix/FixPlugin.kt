@@ -90,7 +90,7 @@ class FixPlugin(
                     TestResult(
                         it,
                         Fail(ex.describe(), ex.describe()),
-                        DebugInfo(null, ex.message, null)
+                        DebugInfo(execCmd, null, ex.message, null)
                     )
                 }
             }
@@ -108,6 +108,7 @@ class FixPlugin(
                     FixTestFiles(test, expected),
                     checkStatus(expectedLines, fixedLines),
                     DebugInfo(
+                        execCmd,
                         stdout.filter { it.contains(testCopy.name) }.joinToString("\n"),
                         stderr.filter { it.contains(testCopy.name) }.joinToString("\n"),
                         null
