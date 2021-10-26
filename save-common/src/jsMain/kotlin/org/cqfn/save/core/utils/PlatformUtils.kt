@@ -10,12 +10,12 @@ package org.cqfn.save.core.utils
 import org.cqfn.save.core.config.OutputStreamType
 
 actual class AtomicInt actual constructor(value: Int) {
-    actual fun get(): Int = TODO()
-    actual fun addAndGet(delta: Int): Int = TODO()
+    actual fun get(): Int = error("Not implemented for JS")
+    actual fun addAndGet(delta: Int): Int = error("Not implemented for JS")
 }
 
-actual fun getCurrentOs(): CurrentOs = error("OS is not defined for JS")
+actual fun getCurrentOs(): CurrentOs = error("Not implemented for JS")
 
 actual fun writeToConsole(msg: String, outputType: OutputStreamType) {
-    error("This method is not defined for JS")
+    error("Not implemented for JS")
 }

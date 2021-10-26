@@ -11,4 +11,6 @@ package org.cqfn.save.core.files
 
 import okio.FileSystem
 
-actual val fs: FileSystem = error("FileSystem is not available in JS")
+actual val fs: FileSystem by lazy {
+    error("Not implemented for JS")
+}

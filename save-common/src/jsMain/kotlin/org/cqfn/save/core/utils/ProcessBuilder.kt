@@ -13,7 +13,7 @@ actual class ProcessBuilderInternal actual constructor(
     stdoutFile: Path,
     stderrFile: Path,
     useInternalRedirections: Boolean) {
-    actual fun prepareCmd(command: String): String = TODO()
+    actual fun prepareCmd(command: String): String = error("Not implemented for JS")
 
-    actual fun exec(cmd: String): Int = TODO()
+    actual fun exec(cmd: String): Int = error("Not implemented for JS")
 }
