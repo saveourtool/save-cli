@@ -89,7 +89,7 @@ class FixPluginTest {
 
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
         assertEquals(TestResult(FixPlugin.FixTestFiles(testFile, expectedFile), Pass(null),
-            DebugInfo(executionCmd, results.single().debugInfo?.stdout, results.single().debugInfo?.stderr, null)), results.single())
+            DebugInfo(results.single().debugInfo?.execCmd, results.single().debugInfo?.stdout, results.single().debugInfo?.stderr, null)), results.single())
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
         assertTrue("Files should be identical") {
             diff(fs.readLines(tmpDir / "Test3Test.java"), fs.readLines(expectedFile))
