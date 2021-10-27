@@ -204,6 +204,9 @@ enum class TestConfigSections {
     FIX,
     GENERAL,
     WARN,
+
+    // fixme: if we will read TOML configs in JS, we'll need ability to use name w/p spaces in JS too.
+    // This is illegal for JS identifier name, but can be done by adding a new field to this class.
     @JsName("FIX_AND_WARN") `FIX AND WARN`,
     ;
 }
