@@ -29,7 +29,7 @@ fun TestConfig.processInPlace() = processInPlace {
 fun TestConfig.buildActivePlugins(testFiles: List<String>) = buildActivePlugins { pluginConfig, testConfig ->
     when (pluginConfig.type) {
         TestConfigSections.FIX -> FixPlugin(testConfig, testFiles, fs)
-        TestConfigSections.FIX_AND_WARN -> FixAndWarnPlugin(testConfig, testFiles, fs)
+        TestConfigSections.`FIX AND WARN` -> FixAndWarnPlugin(testConfig, testFiles, fs)
         TestConfigSections.WARN -> WarnPlugin(testConfig, testFiles, fs)
         else -> throw PluginException("Unknown type <${pluginConfig::class}> of plugin config was provided")
     }

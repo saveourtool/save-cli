@@ -13,6 +13,7 @@ import org.cqfn.save.core.plugin.PluginConfig
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
+import kotlin.js.JsName
 
 /**
  * Configuration for a test suite, that is read from test suite configuration file (toml config)
@@ -200,7 +201,11 @@ data class TestConfig(
  */
 @Suppress("EnumNaming", "BACKTICKS_PROHIBITED")
 enum class TestConfigSections {
-    FIX, FIX_AND_WARN, GENERAL, WARN;
+    FIX,
+    GENERAL,
+    WARN,
+    @JsName("FIX_AND_WARN") `FIX AND WARN`,
+    ;
 }
 
 /**

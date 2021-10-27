@@ -30,7 +30,7 @@ private fun Path.testConfigFactory(table: TomlTable) =
             TestConfigSections.FIX.name -> this.createPluginConfig<FixPluginConfig>(
                 table.fullTableName
             )
-            TestConfigSections.FIX_AND_WARN.name -> this.createPluginConfig<FixAndWarnPluginConfig>(
+            TestConfigSections.`FIX AND WARN`.name -> this.createPluginConfig<FixAndWarnPluginConfig>(
                 table.fullTableName
             )
             TestConfigSections.WARN.name -> this.createPluginConfig<WarnPluginConfig>(
