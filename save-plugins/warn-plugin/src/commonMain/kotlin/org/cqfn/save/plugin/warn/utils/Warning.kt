@@ -158,7 +158,10 @@ private fun getRegexGroupSafe(idx: Long?,
         try {
             return groups[idx.toInt()]!!.value
         } catch (e: Exception) {
-            throw ResourceFormatException("Could not extract $exceptionMessage from line [$line], cause: ${e.message}")
+            throw ResourceFormatException("Could not extract $exceptionMessage from line [$line]." +
+                    " In most cases it can happen due to an invalid capture groups. For example, in your warnings column number is missing." +
+                    " To fix it, use capture groups like lineCaptureGroup or warningTextHasColumn" +
+                    " cause: ${e.describe()}")
         }
     }
 }
