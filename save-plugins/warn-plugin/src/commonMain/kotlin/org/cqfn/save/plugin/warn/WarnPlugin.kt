@@ -199,10 +199,7 @@ class WarnPlugin(
     /**
      * method for getting warnings from test files:
      * 1) reading the file
-     * 2) in case of defaultLineMode:
-     *     a) calculate real line number
-     *     b) get line number from the warning
-     * 3) for each line get the warning
+     * 2) for each line get the warning
      */
     private fun Path.collectWarningsWithLineNumbers(
         warnPluginConfig: WarnPluginConfig,
