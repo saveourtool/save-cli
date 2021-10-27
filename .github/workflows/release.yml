@@ -53,6 +53,7 @@ jobs:
         with:
           name: save-cli-${{ runner.os }}
           path: save-cli/build/bin/**/releaseExecutable/*
+          retention-days: 1
 
   github_release:
     needs: release
