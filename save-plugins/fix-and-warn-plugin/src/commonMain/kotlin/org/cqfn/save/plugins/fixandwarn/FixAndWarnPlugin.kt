@@ -105,9 +105,9 @@ class FixAndWarnPlugin(
             files.map { it as FixPlugin.FixTestFiles }
                 // find these results among all files and replace the paths to the *Expected with *Test
                 .filter { fixTestFiles -> fixTestFiles.expected == testResult.resources.test }
-                .map { path ->
+                .map { testFile ->
                     TestResult(
-                        path,
+                        testFile,
                         testResult.status,
                         testResult.debugInfo
                     )
