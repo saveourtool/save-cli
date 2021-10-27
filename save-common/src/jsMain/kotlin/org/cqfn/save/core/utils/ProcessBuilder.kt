@@ -3,7 +3,9 @@
     "MISSING_KDOC_CLASS_ELEMENTS",
     "KDOC_NO_EMPTY_TAGS",
     "MISSING_KDOC_ON_FUNCTION",
-    "FILE_NAME_MATCH_CLASS")
+    "FILE_NAME_MATCH_CLASS",
+    "MatchingDeclarationName",
+)
 
 package org.cqfn.save.core.utils
 
