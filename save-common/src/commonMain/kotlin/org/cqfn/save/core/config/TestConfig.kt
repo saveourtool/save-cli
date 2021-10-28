@@ -13,6 +13,7 @@ import org.cqfn.save.core.plugin.PluginConfig
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
+import kotlin.js.JsName
 
 /**
  * Configuration for a test suite, that is read from test suite configuration file (toml config)
@@ -200,7 +201,14 @@ data class TestConfig(
  */
 @Suppress("EnumNaming", "BACKTICKS_PROHIBITED")
 enum class TestConfigSections {
-    FIX, GENERAL, WARN, `FIX AND WARN`;
+    FIX,
+    GENERAL,
+    WARN,
+
+    // fixme: if we will read TOML configs in JS, we'll need ability to use name w/p spaces in JS too.
+    // This is illegal for JS identifier name, but can be done by adding a new field to this class.
+    @JsName("FIX_AND_WARN") `FIX AND WARN`,
+    ;
 }
 
 /**
