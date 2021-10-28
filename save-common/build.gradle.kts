@@ -3,9 +3,6 @@ plugins {
 }
 
 kotlin {
-    // additionally, save-common should be available for JS too
-    js(BOTH).browser()
-
     sourceSets {
         val commonMain by getting {
             dependencies {
