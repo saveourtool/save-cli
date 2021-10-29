@@ -141,7 +141,7 @@ class WarnPlugin(
                 TestResult(
                     Test(it),
                     Fail(ex.describe(), ex.describe()),
-                    DebugInfo(null, ex.message, null)
+                    DebugInfo(execCmd, null, ex.message, null)
                 )
             }.asSequence()
         }
@@ -187,6 +187,7 @@ class WarnPlugin(
                 Test(path),
                 resultsChecker.checkResults(path.name),
                 DebugInfo(
+                    execCmd,
                     stdout.filter { it.contains(path.name) }.joinToString("\n"),
                     stderr.filter { it.contains(path.name) }.joinToString("\n"),
                     null
@@ -198,10 +199,7 @@ class WarnPlugin(
     /**
      * method for getting warnings from test files:
      * 1) reading the file
-     * 2) in case of defaultLineMode:
-     *     a) calculate real line number
-     *     b) get line number from the warning
-     * 3) for each line get the warning
+     * 2) for each line get the warning
      */
     private fun Path.collectWarningsWithLineNumbers(
         warnPluginConfig: WarnPluginConfig,
