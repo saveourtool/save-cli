@@ -100,12 +100,11 @@ warningTextHasLine = true # (default value)
 testNameRegex = ".*Test.*" # (default value)
 batchSize = 1 # (default value)
 batchSeparator  = ", " # (default value)
-defaultLineMode = false
-linePlaceholder = "$line"
+linePlaceholder = "$line" # (default value)
 patternForRegexInWarning = ["{{", "}}"]
 # if true - the regex created from expected warning will be wrapped with '.*': .*warn.*.
 partialWarnTextMatch = false # (default value)
- # if not set than stdout will be used as result of warn plugin execution
+# if not set than stdout will be used as result of warn plugin execution
 testToolResFileOutput = "result.out" # (no default value is set)
 ```
 
