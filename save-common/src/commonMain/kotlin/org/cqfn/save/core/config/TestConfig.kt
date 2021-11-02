@@ -6,6 +6,7 @@ package org.cqfn.save.core.config
 
 import org.cqfn.save.core.files.parents
 import org.cqfn.save.core.logging.logDebug
+import org.cqfn.save.core.logging.logTrace
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.plugin.PluginConfig
@@ -50,7 +51,7 @@ data class TestConfig(
 
     init {
         parentConfig?.let {
-            logDebug("Add child ${this.location} for ${parentConfig.location}")
+            logTrace("Add child ${this.location} for ${parentConfig.location}")
             parentConfig.childConfigs.add(this)
         }
         require(fs.metadata(location).isRegularFile) {

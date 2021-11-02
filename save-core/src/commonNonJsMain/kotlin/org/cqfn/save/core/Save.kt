@@ -4,14 +4,17 @@ import org.cqfn.save.core.config.OutputStreamType
 import org.cqfn.save.core.config.ReportType
 import org.cqfn.save.core.config.SAVE_VERSION
 import org.cqfn.save.core.config.SaveProperties
+import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.config.isSaveTomlConfig
 import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.files.StdStreamsSink
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
 import org.cqfn.save.core.logging.logInfo
+import org.cqfn.save.core.logging.logTrace
 import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.plugin.Plugin
+import org.cqfn.save.core.plugin.PluginConfig
 import org.cqfn.save.core.plugin.PluginException
 import org.cqfn.save.core.reporter.Reporter
 import org.cqfn.save.core.result.Crash
@@ -21,7 +24,9 @@ import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.buildActivePlugins
 import org.cqfn.save.core.utils.processInPlace
+import org.cqfn.save.plugin.warn.WarnPluginConfig
 import org.cqfn.save.plugins.fix.FixPlugin
+import org.cqfn.save.plugins.fix.FixPluginConfig
 import org.cqfn.save.reporter.json.JsonReporter
 import org.cqfn.save.reporter.plain.PlainOnlyFailedReporter
 import org.cqfn.save.reporter.plain.PlainTextReporter
@@ -50,7 +55,6 @@ class Save(
     @Suppress("TOO_LONG_FUNCTION")
     fun performAnalysis(): Reporter {
         logInfo("Welcome to SAVE version $SAVE_VERSION")
-
         // FixMe: now we work only with the save.toml config and it's hierarchy, but we should work properly here with directories as well
         // FixMe: get(0) to [0] after https://github.com/cqfn/diKTat/issues/1047
         val testRootPath = saveProperties.testFiles!!.get(0).toPath()
@@ -106,16 +110,27 @@ class Save(
                    |$excludedNote
                 """.trimMargin()
             } else {
-                "SAVE wasn't able to run tests, please check the correctness of configuration and test resources"
+                val fixPluginPatterns: String = getPluginPatterns<FixPluginConfig>(testConfigs)
+                val warnPluginPatterns: String = getPluginPatterns<WarnPluginConfig>(testConfigs)
+                "SAVE wasn't able to run tests, please check the correctness of configuration and test resources." +
+                        "(fix plugin resourceNamePatternStrs: $fixPluginPatterns, warn plugin resourceNamePatternStrs: $warnPluginPatterns)"
             }
             logWarn(warnMsg)
         }
         reporter.afterAll()
         reporter.out.close()
-        logInfo("SAVE has finished execution. You can rerun with --debug for additional information.")
+        logInfo("SAVE has finished execution. You can rerun with --log debug or --log trace for additional information.")
 
         return reporter
     }
+
+    private inline fun <reified PluginConfigType : PluginConfig> getPluginPatterns(testConfigs: List<TestConfig>): String = testConfigs
+        .last()
+        .pluginConfigs
+        .filterIsInstance<PluginConfigType>()
+        .map { it.resourceNamePatternStr }
+        .distinct()
+        .joinToString(", ")
 
     private fun Plugin.isFromEnabledSuite(includeSuites: List<String>, excludeSuites: List<String>): Boolean {
         val suiteName = testConfig.getGeneralConfig()?.suiteName
@@ -175,16 +190,23 @@ class Save(
     private fun handleResult(testResult: TestResult) {
         when (val status = testResult.status) {
             is Pass -> {
-                val passMessage = "Test on resources [${testResult.resources}] has completed successfully"
-                status.message?.let { logDebug("$passMessage. $it") } ?: logDebug(passMessage)
+                logDebug("\"Test on resources [${testResult.resources}] has completed successfully.\"")
+                status.message?.let { logTrace(it) }
             }
-            is Fail -> logWarn("Test on resources [${testResult.resources}] has failed: ${status.reason}")
-            is Ignored -> logWarn("Test on resources [${testResult.resources}] has been ignored: ${status.reason}")
+            is Fail -> {
+                logWarn("Test on resources [${testResult.resources}] has failed.")
+                logTrace("Additional info: ${status.reason}.")
+            }
+            is Ignored -> {
+                logWarn("Test on resources [${testResult.resources}] has been ignored.")
+                logTrace("Additional info: ${status.reason}.")
+            }
             is Crash -> logError(
                 "Test on resources [${testResult.resources}] has crashed: ${status.description}." +
                         "Please report an issue at https://github.com/cqfn/save"
             )
         }
-        logDebug("Completed test execution for resources [${testResult.resources}]. Additional info: ${testResult.debugInfo}")
+        logDebug("Completed test execution for resources [${testResult.resources}].")
+        logTrace("Additional info: ${testResult.debugInfo}.")
     }
 }

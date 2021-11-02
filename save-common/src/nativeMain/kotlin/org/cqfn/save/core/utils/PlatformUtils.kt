@@ -9,9 +9,10 @@ package org.cqfn.save.core.utils
 
 import org.cqfn.save.core.config.OutputStreamType
 
-import platform.posix.fdopen
 import platform.posix.fflush
 import platform.posix.fprintf
+import platform.posix.stderr
+import platform.posix.stdout
 
 /**
  * Atomic values
@@ -79,8 +80,8 @@ actual fun writeToConsole(msg: String, outputType: OutputStreamType) {
  */
 fun processStandardStreams(msg: String, output: OutputStreamType) {
     val stream = when (output) {
-        OutputStreamType.STDERR -> fdopen(2, "w")
-        else -> fdopen(1, "w")
+        OutputStreamType.STDERR -> stderr
+        else -> stdout
     }
     fprintf(stream, msg.escapePercent() + "\n")
     fflush(stream)

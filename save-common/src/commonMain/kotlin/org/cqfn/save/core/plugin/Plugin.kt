@@ -6,6 +6,7 @@ import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.findDescendantDirectoriesBy
 import org.cqfn.save.core.files.parentsWithSelf
 import org.cqfn.save.core.logging.logDebug
+import org.cqfn.save.core.logging.logTrace
 import org.cqfn.save.core.result.Ignored
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.PathSerializer
@@ -59,7 +60,7 @@ abstract class Plugin(
         return if (testFilesList.isNotEmpty()) {
             // fixme: remove this logging and convert `testFilesList` back to Sequence
             // or at least make `logDebug` accept lazy messages
-            logDebug("Discovered the following test resources: $testFilesList")
+            logTrace("Discovered the following test resources: $testFilesList")
             val (excludedTestFiles, actualTestFiles) = testFilesList.partition {
                 isExcludedTest(it, excludedTests)
             }

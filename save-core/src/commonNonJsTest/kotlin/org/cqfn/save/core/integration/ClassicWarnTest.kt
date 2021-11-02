@@ -93,6 +93,15 @@ class ClassicWarnTest {
     }
 
     @Test
+    fun `executing warn plugin so that no resources will be found`() {
+        runTestsWithDiktat(
+            listOf(
+                "warn/chapter1/TestsWithRegex/NoMatchingTests/",
+            ), 0
+        )
+    }
+
+    @Test
     @Ignore
     fun `execute warn plugin with included and excluded suites`() {
         runTestsWithDiktat(
