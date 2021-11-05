@@ -15,50 +15,56 @@ class ClassicFixTest {
     }
 
     @Test
-    fun `executing fix plugin on save-toml file in directory`() =
-            runTestsWithDiktat(
-                listOf(
-                    "fix/save.toml"
-                ), 5
-            )
+    fun `executing fix plugin on save-toml file in directory`() {
+        runTestsWithDiktat(
+            listOf(
+                "fix/save.toml"
+            ), 5
+        )
+    }
 
     @Test
-    fun `executing fix plugin on parental save-toml file`() =
-            runTestsWithDiktat(
-                listOf(
-                    "fix/smoke/save.toml"
-                ), 5
-            )
+    fun `executing fix plugin on parental save-toml file`() {
+        runTestsWithDiktat(
+            listOf(
+                "fix/smoke/save.toml"
+            ), 5
+        )
+    }
 
     @Test
-    fun `execute fix plugin on folder`() =
-            runTestsWithDiktat(
-                listOf(
-                    "fix/smoke/src/main/kotlin/org/cqfn/save/"
-                ), 5
-            )
+    fun `execute fix plugin on folder`() {
+        runTestsWithDiktat(
+            listOf(
+                "fix/smoke/src/main/kotlin/org/cqfn/save/"
+            ), 5
+        )
+    }
 
     @Test
-    fun `check NoIgnoreLines`() =
-            runTestsWithDiktat(
-                listOf(
-                    "fix/smoke/src/main/kotlin/org/cqfn/save/IgnoreLinesTest/NoIgnoreLines"
-                ), 1
-            )
+    fun `check NoIgnoreLines`() {
+        runTestsWithDiktat(
+            listOf(
+                "fix/smoke/src/main/kotlin/org/cqfn/save/IgnoreLinesTest/NoIgnoreLines"
+            ), 1
+        )
+    }
 
     @Test
-    fun `check IgnoreLinesIsEmpty`() =
-            runTestsWithDiktat(
-                listOf(
-                    "fix/smoke/src/main/kotlin/org/cqfn/save/IgnoreLinesTest/IgnoreLinesIsEmpty"
-                ), 1
-            )
+    fun `check IgnoreLinesIsEmpty`() {
+        runTestsWithDiktat(
+            listOf(
+                "fix/smoke/src/main/kotlin/org/cqfn/save/IgnoreLinesTest/IgnoreLinesIsEmpty"
+            ), 1
+        )
+    }
 
     @Test
-    fun `check IgnoreLines`() =
-            runTestsWithDiktat(
-                listOf(
-                    "fix/smoke/src/main/kotlin/org/cqfn/save/IgnoreLinesTest/IgnoreLines"
-                ), 1
-            )
+    fun `check IgnoreLines`() {
+        runTestsWithDiktat(
+            listOf(
+                "fix/smoke/src/main/kotlin/org/cqfn/save/IgnoreLinesTest/IgnoreLines"
+            ), 1
+        )
+    }
 }

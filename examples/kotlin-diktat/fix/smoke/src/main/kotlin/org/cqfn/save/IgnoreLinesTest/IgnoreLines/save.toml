@@ -4,4 +4,4 @@
     suiteName = "Autofix: Smoke Tests"
 
 [fix]
-    ignoreLines = ["// IGNORE_ME"]
+    ignoreLines = ["^// IGNORE.*", "^#.*"]

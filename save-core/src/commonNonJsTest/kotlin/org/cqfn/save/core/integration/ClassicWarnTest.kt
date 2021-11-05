@@ -36,13 +36,13 @@ class ClassicWarnTest {
     }
 
     @Test
-    fun `executing warn plugin on directory`() =
-            runTestsWithDiktat(
-                listOf(
-                    "warn/chapter1"
-                ), 7
-            )
-
+    fun `executing warn plugin on directory`() {
+        runTestsWithDiktat(
+            listOf(
+                "warn/chapter1"
+            ), 7
+        )
+    }
 
     @Test
     fun `executing warn plugin on directory, files are set with regex`() {
@@ -54,21 +54,22 @@ class ClassicWarnTest {
     }
 
     @Test
-
-    fun `lines that match ignoreLines should be ignored`() =
-            runTestsWithDiktat(
-                listOf(
-                    "warn/chapter1/IgnoreLinesTest"
-                ), 1
-            )
+    fun `lines that match ignoreLines should be ignored`() {
+        runTestsWithDiktat(
+            listOf(
+                "warn/chapter1/IgnoreLinesTest"
+            ), 1
+        )
+    }
 
     @Test
-    fun `test output file set`() =
-            runTestsWithDiktat(
-                listOf(
-                    "warn/chapter1/TestResultsFileTest"
-                ), 1
-            )
+    fun `test output file set`() {
+        runTestsWithDiktat(
+            listOf(
+                "warn/chapter1/TestResultsFileTest"
+            ), 1
+        )
+    }
 
     @Test
     @Ignore
@@ -83,20 +84,22 @@ class ClassicWarnTest {
     }
 
     @Test
-    fun `executing warn plugin on save-toml file in directory`() =
-            runTestsWithDiktat(
-                listOf(
-                    "warn/save.toml"
-                ), 7
-            )
+    fun `executing warn plugin on save-toml file in directory`() {
+        runTestsWithDiktat(
+            listOf(
+                "warn/save.toml"
+            ), 7
+        )
+    }
 
     @Test
-    fun `executing warn plugin on parental save-toml file`() =
-            runTestsWithDiktat(
-                listOf(
-                    "warn/chapter1/save.toml"
-                ), 7
-            )
+    fun `executing warn plugin on parental save-toml file`() {
+        runTestsWithDiktat(
+            listOf(
+                "warn/chapter1/save.toml"
+            ), 7
+        )
+    }
 
     @Test
     @Ignore

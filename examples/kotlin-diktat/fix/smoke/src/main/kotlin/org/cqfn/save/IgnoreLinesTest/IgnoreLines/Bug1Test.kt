@@ -9,3 +9,4 @@ fun bar(): Bar {val qux = 42; return Bar(qux)}
 }
 // ;warn:0: [TEST] JUST_A_TEST
 // IGNORE_ME
+# I WILL DISSAPEAR AS WELL
