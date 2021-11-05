@@ -58,6 +58,6 @@ data class FixAndWarnPluginConfig(
         }
     }
     companion object {
-        internal val defaultIgnoreLines = mutableListOf<Regex>()
+        internal val defaultIgnoreLines: MutableList<Regex> = mutableListOf()
     }
 }

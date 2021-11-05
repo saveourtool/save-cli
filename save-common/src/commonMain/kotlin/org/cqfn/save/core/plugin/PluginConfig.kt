@@ -74,7 +74,6 @@ data class GeneralConfig(
     val runConfigPattern: Regex? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.GENERAL
-
     override var ignoreLinesPatterns: MutableList<Regex> = mutableListOf()
 
     @Transient

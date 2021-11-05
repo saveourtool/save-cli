@@ -51,11 +51,11 @@ class ClassicWarnTest {
 
     @Test
     fun `lines that match ignoreLines should be ignored`() =
-        runTestsWithDiktat(
-            listOf(
-                "warn/chapter1/IgnoreLinesTest"
-            ), 1
-        )
+            runTestsWithDiktat(
+                listOf(
+                    "warn/chapter1/IgnoreLinesTest"
+                ), 1
+            )
 
     @Test
     fun `test output file set`() =

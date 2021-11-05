@@ -76,8 +76,8 @@ class FixPlugin(
             val extraFlags = extraFlagsList.singleOrNull() ?: ExtraFlags("", "")
 
             val pathMap = chunk.map { it.test to it.expected }
-            val pathCopyMap = pathMap.map {
-                    (test, expected) -> createTestFile(test, generalConfig, fixPluginConfig) to expected
+            val pathCopyMap = pathMap.map { (test, expected) ->
+                createTestFile(test, generalConfig, fixPluginConfig) to expected
             }
             val testCopyNames =
                     pathCopyMap.joinToString(separator = fixPluginConfig.batchSeparator!!) { (testCopy, _) -> testCopy.toString() }
@@ -129,28 +129,26 @@ class FixPlugin(
                 }
             }
 
-    private fun createTestFile(path: Path, generalConfig: GeneralConfig, fixPluginConfig: FixPluginConfig): Path {
+    private fun createTestFile(
+        path: Path,
+        generalConfig: GeneralConfig,
+        fixPluginConfig: FixPluginConfig): Path {
         val pathCopy: Path = constructPathForCopyOfTestFile(FixPlugin::class.simpleName!!, path)
         createTempDir(pathCopy.parent!!)
 
-        val defaultIgnoreLinesPatterns = mutableListOf<Regex>()
-        // fixme: make it more kotlin
-        if (generalConfig.expectedWarningsPattern != null) {
-            defaultIgnoreLinesPatterns.add(generalConfig.expectedWarningsPattern!!)
-        }
-        // fixme: and this if as well
-        if (generalConfig.runConfigPattern != null) {
-            defaultIgnoreLinesPatterns.add(generalConfig.runConfigPattern!!)
-        }
+        val defaultIgnoreLinesPatterns: MutableList<Regex> = mutableListOf()
+        generalConfig.expectedWarningsPattern?.let { defaultIgnoreLinesPatterns.add(it) }
+        generalConfig.runConfigPattern?.let { defaultIgnoreLinesPatterns.add(it) }
 
         fs.write(fs.createFile(pathCopy)) {
             fs.readLines(path)
                 .filter { line ->
-                    if (fixPluginConfig.ignoreLines == null) {
-                        defaultIgnoreLinesPatterns.none {regex -> regex.matches(line)}
-                    } else {
+                    fixPluginConfig.ignoreLines?.let {
                         fixPluginConfig.ignoreLinesPatterns.none { pattern -> pattern.matches(line) }
                     }
+                        ?: run {
+                            defaultIgnoreLinesPatterns.none {regex -> regex.matches(line) }
+                        }
                 }
                 .forEach {
                     write(

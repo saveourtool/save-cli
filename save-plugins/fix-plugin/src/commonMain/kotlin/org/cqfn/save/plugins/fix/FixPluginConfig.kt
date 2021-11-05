@@ -12,8 +12,6 @@ import okio.Path.Companion.toPath
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.UseSerializers
-import org.cqfn.save.core.logging.logDebug
-import org.cqfn.save.core.logging.logError
 
 /**
  * Some fields by default are null, instead of some natural value, because of the fact, that in stage of merging
@@ -25,6 +23,7 @@ import org.cqfn.save.core.logging.logError
  * @property resourceNameTestSuffix suffix name of the test file.
  * @property resourceNameExpectedSuffix suffix name of the expected file.
  * @property batchSeparator
+ * @property ignoreLines mutable list of patterns that later will be used to filter lines in test file
  */
 @Serializable
 data class FixPluginConfig(
@@ -41,7 +40,7 @@ data class FixPluginConfig(
     override var configLocation: Path = "undefined_toml_location".toPath()
 
     @Transient
-    override var ignoreLinesPatterns: MutableList<Regex> = ignoreLines?.map{ it.toRegex() }?.toMutableList() ?: defaultIgnoreLines
+    override var ignoreLinesPatterns: MutableList<Regex> = ignoreLines?.map { it.toRegex() }?.toMutableList() ?: defaultIgnoreLines
 
     /**
      *  @property resourceNameTest
@@ -68,7 +67,7 @@ data class FixPluginConfig(
             this.resourceNameExpectedSuffix ?: other.resourceNameExpectedSuffix,
             other.ignoreLines?.let {
                 this.ignoreLines?.let { other.ignoreLines.union(this.ignoreLines) } ?: other.ignoreLines
-            } ?.toMutableList() ?: this.ignoreLines
+            }?.toMutableList() ?: this.ignoreLines
         ).also {
             it.configLocation = this.configLocation
         }
@@ -86,6 +85,6 @@ data class FixPluginConfig(
         it.configLocation = this.configLocation
     }
     companion object {
-        internal val defaultIgnoreLines = mutableListOf<Regex>()
+        internal val defaultIgnoreLines: MutableList<Regex> = mutableListOf()
     }
 }

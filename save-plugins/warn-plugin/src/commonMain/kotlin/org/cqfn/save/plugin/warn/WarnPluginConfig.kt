@@ -49,6 +49,7 @@ import kotlinx.serialization.UseSerializers
  * @property partialWarnTextMatch if true - the regex created from expected warning will be wrapped with '.*': .*warn.*.
  * That can help a user to write only main information in the warning without any need to add/copy-paste technical info
  * @property testToolResFileOutput file with actual warnings
+ * @property ignoreLines mutable list of patterns that later will be ignored in test files
  */
 @Serializable
 data class WarnPluginConfig(
@@ -81,7 +82,7 @@ data class WarnPluginConfig(
     override var configLocation: Path = "undefined_toml_location".toPath()
 
     @Transient
-    override var ignoreLinesPatterns: MutableList<Regex> = ignoreLines?.map{ it.toRegex() }?.toMutableList() ?: defaultIgnoreLines
+    override var ignoreLinesPatterns: MutableList<Regex> = ignoreLines?.map { it.toRegex() }?.toMutableList() ?: defaultIgnoreLines
 
     /**
      * regex for name of the test file.
@@ -119,7 +120,7 @@ data class WarnPluginConfig(
             this.testToolResFileOutput ?: other.testToolResFileOutput,
             other.ignoreLines?.let {
                 this.ignoreLines?.let { other.ignoreLines.union(this.ignoreLines) } ?: other.ignoreLines
-            } ?.toMutableList() ?: this.ignoreLines
+            }?.toMutableList() ?: this.ignoreLines
         ).also {
             it.configLocation = this.configLocation
         }
@@ -214,6 +215,6 @@ data class WarnPluginConfig(
          */
         internal val defaultOutputPattern = Regex("(.+):(\\d*):(\\d*): (.+)")
         internal val defaultPatternForRegexInWarning = listOf("{{", "}}")
-        internal val defaultIgnoreLines = mutableListOf<Regex>()
+        internal val defaultIgnoreLines: MutableList<Regex> = mutableListOf()
     }
 }

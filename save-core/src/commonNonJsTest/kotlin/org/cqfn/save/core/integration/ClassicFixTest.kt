@@ -1,7 +1,6 @@
 package org.cqfn.save.core.integration
 
 import org.cqfn.save.core.test.utils.runTestsWithDiktat
-import kotlin.test.Ignore
 import kotlin.test.Test
 
 class ClassicFixTest {
@@ -32,33 +31,33 @@ class ClassicFixTest {
 
     @Test
     fun `execute fix plugin on folder`() =
-        runTestsWithDiktat(
-            listOf(
-                "fix/smoke/src/main/kotlin/org/cqfn/save/"
-            ), 5
-        )
+            runTestsWithDiktat(
+                listOf(
+                    "fix/smoke/src/main/kotlin/org/cqfn/save/"
+                ), 5
+            )
 
     @Test
     fun `check NoIgnoreLines`() =
-        runTestsWithDiktat(
-            listOf(
-                "fix/smoke/src/main/kotlin/org/cqfn/save/IgnoreLinesTest/NoIgnoreLines"
-            ), 1
-        )
+            runTestsWithDiktat(
+                listOf(
+                    "fix/smoke/src/main/kotlin/org/cqfn/save/IgnoreLinesTest/NoIgnoreLines"
+                ), 1
+            )
 
     @Test
     fun `check IgnoreLinesIsEmpty`() =
-        runTestsWithDiktat(
-            listOf(
-                "fix/smoke/src/main/kotlin/org/cqfn/save/IgnoreLinesTest/IgnoreLinesIsEmpty"
-            ), 1
-        )
+            runTestsWithDiktat(
+                listOf(
+                    "fix/smoke/src/main/kotlin/org/cqfn/save/IgnoreLinesTest/IgnoreLinesIsEmpty"
+                ), 1
+            )
 
     @Test
     fun `check IgnoreLines`() =
-        runTestsWithDiktat(
-            listOf(
-                "fix/smoke/src/main/kotlin/org/cqfn/save/IgnoreLinesTest/IgnoreLines"
-            ), 1
-        )
+            runTestsWithDiktat(
+                listOf(
+                    "fix/smoke/src/main/kotlin/org/cqfn/save/IgnoreLinesTest/IgnoreLines"
+                ), 1
+            )
 }
