@@ -24,6 +24,7 @@ data class FixAndWarnPluginConfig(
 
     @Transient
     override var configLocation: Path = "undefined_toml_location".toPath()
+    override val resourceNamePatternStr: String = "(${fix.resourceNamePatternStr})|(${warn.resourceNamePatternStr})"
 
     @Transient
     override var ignoreLinesPatterns: MutableList<Regex> = defaultIgnoreLines
@@ -41,13 +42,13 @@ data class FixAndWarnPluginConfig(
     }
 
     override fun validateAndSetDefaults(): PluginConfig {
-        require(warn.testName.toRegex().matches(fix.resourceNameTest) &&
+        require(warn.resourceNamePattern.matches(fix.resourceNameTest) &&
                 fix.batchSize == warn.batchSize
         ) {
             """
                Test files batch sizes should be identical for [fix] and [warn] plugins and [fix] files should match [warn] regex .
                But found [fix]: {${fix.resourceNameTest}, ${fix.batchSize}},
-                         [warn]: {${warn.testName}, ${warn.batchSize}}
+                         [warn]: {${warn.resourceNamePatternStr}, ${warn.batchSize}}
            """
         }
         return FixAndWarnPluginConfig(

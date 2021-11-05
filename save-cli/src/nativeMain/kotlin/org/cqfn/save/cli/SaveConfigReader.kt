@@ -5,10 +5,11 @@
 package org.cqfn.save.cli
 
 import org.cqfn.save.cli.logging.logErrorAndExit
+import org.cqfn.save.core.config.LogType
 import org.cqfn.save.core.config.SaveProperties
-import org.cqfn.save.core.logging.isDebugEnabled
-import org.cqfn.save.core.logging.isQuietMode
 import org.cqfn.save.core.logging.logDebug
+import org.cqfn.save.core.logging.logTrace
+import org.cqfn.save.core.logging.logType
 
 import okio.FileNotFoundException
 import okio.FileSystem
@@ -74,7 +75,7 @@ fun createConfigFromArgs(args: Array<String>): SaveProperties {
     }
     val configFromCli = SaveProperties(args)
     tryToUpdateDebugLevel(configFromCli)
-    logDebug("Properties after parsed command line args:\n${configFromCli.getFields()}")
+    logTrace("Properties after parsed command line args:\n${configFromCli.getFields()}")
     // reading configuration from the properties file
     val testFiles = configFromCli.testFiles
     if (!testFiles.isNullOrEmpty() && !fs.exists(testFiles.first().toPath())) {
@@ -132,8 +133,7 @@ fun readPropertiesFile(propertiesFileName: String?): SaveProperties {
 }
 
 private fun tryToUpdateDebugLevel(properties: SaveProperties) {
-    isDebugEnabled = properties.debug ?: false
-    isQuietMode = properties.quiet ?: false
+    logType = properties.logType ?: LogType.WARN
 }
 
 private fun errorAndExitNotFoundDir() {

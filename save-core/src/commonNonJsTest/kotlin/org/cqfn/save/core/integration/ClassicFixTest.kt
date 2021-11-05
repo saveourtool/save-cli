@@ -5,13 +5,14 @@ import kotlin.test.Test
 
 class ClassicFixTest {
     @Test
-    fun `execute fix plugin on separate files`() =
-            runTestsWithDiktat(
-                listOf(
-                    "fix/smoke/src/main/kotlin/org/cqfn/save/Example1Test.kt",
-                    "fix/smoke/src/main/kotlin/org/cqfn/save/Example1Expected.kt"
-                ), 1
-            )
+    fun `execute fix plugin on separate files`() {
+        runTestsWithDiktat(
+            listOf(
+                "fix/smoke/src/main/kotlin/org/cqfn/save/Example1Test.kt",
+                "fix/smoke/src/main/kotlin/org/cqfn/save/Example1Expected.kt"
+            ), 1
+        )
+    }
 
     @Test
     fun `executing fix plugin on save-toml file in directory`() =

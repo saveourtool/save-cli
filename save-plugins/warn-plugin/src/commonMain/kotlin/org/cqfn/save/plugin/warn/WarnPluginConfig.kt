@@ -87,12 +87,12 @@ data class WarnPluginConfig(
     /**
      * regex for name of the test file.
      */
-    val testName: String = testNameRegex ?: ".*Test.*"
+    override val resourceNamePatternStr: String = testNameRegex ?: ".*Test.*"
 
     /**
      * regex for the name of the test files.
      */
-    val resourceNamePattern: Regex = Regex(testName)
+    val resourceNamePattern: Regex = Regex(resourceNamePatternStr)
 
     @Suppress("ComplexMethod")
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
@@ -173,7 +173,7 @@ data class WarnPluginConfig(
             newColumnCaptureGroupOut,
             newMessageCaptureGroupOut,
             exactWarningsMatch ?: true,
-            testName,
+            resourceNamePatternStr,
             linePlaceholder ?: "\$line",
             wildCardInDirectoryMode,
             patternForRegexInWarning ?: defaultPatternForRegexInWarning,

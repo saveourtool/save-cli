@@ -100,7 +100,21 @@ class FixAndWarnPlugin(
         // TODO: However it's required changes in warn plugin logic (it's should be able to compare expected and actual warnings from different places),
         // TODO: this probably could be obtained after https://github.com/cqfn/save/issues/164,
         val warnTestResults = warnPlugin.handleFiles(expectedFilesWithPass.map { Test(it) })
-        return fixTestResultsFailed.asSequence() + warnTestResults
+
+        val fixAndWarnTestResults = fixTestResultsFailed.asSequence() + warnTestResults.map { testResult ->
+            files.map { it as FixPlugin.FixTestFiles }
+                // find these results among all files and replace the paths to the *Expected with *Test
+                .filter { fixTestFiles -> fixTestFiles.expected == testResult.resources.test }
+                .map { testFile ->
+                    TestResult(
+                        testFile,
+                        testResult.status,
+                        testResult.debugInfo
+                    )
+                }.single()
+        }
+
+        return fixAndWarnTestResults
     }
 
     override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<TestFiles> {

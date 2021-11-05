@@ -5,6 +5,7 @@
 
 package org.cqfn.save.core.logging
 
+import org.cqfn.save.core.config.LogType
 import org.cqfn.save.core.config.OutputStreamType
 import org.cqfn.save.core.utils.writeToStream
 
@@ -13,14 +14,9 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 /**
- * Is debug logging enabled
+ *  Logging mode
  */
-var isQuietMode: Boolean = false
-
-/**
- * Is debug logging enabled
- */
-var isDebugEnabled: Boolean = false
+var logType: LogType = LogType.WARN
 
 /**
  * Whether to add time stamps to log messages
@@ -49,32 +45,12 @@ fun logMessage(
 }
 
 /**
- * Log a message with debug level
- *
- * @param msg a message string
- */
-fun logDebug(msg: String) {
-    if (isDebugEnabled) {
-        logMessage("DEBUG", msg)
-    }
-}
-
-/**
  * Log a message with info level
  *
  * @param msg a message string
  */
-fun logInfo(msg: String): Unit = logMessage("INFO", msg)
-
-/**
- * Log a message with warn level
- *
- * @param msg a message string
- */
-fun logWarn(msg: String): Unit {
-    if (!isQuietMode) {
-        logMessage("WARN", msg, OutputStreamType.STDERR)
-    }
+fun logInfo(msg: String) {
+    logMessage("INFO", msg)
 }
 
 /**
@@ -82,4 +58,39 @@ fun logWarn(msg: String): Unit {
  *
  * @param msg a message string
  */
-fun logError(msg: String): Unit = logMessage("ERROR", msg, OutputStreamType.STDERR)
+fun logError(msg: String) {
+    logMessage("ERROR", msg, OutputStreamType.STDERR)
+}
+
+/**
+ * Log a message with warn level
+ *
+ * @param msg a message string
+ */
+fun logWarn(msg: String) {
+    if (logType == LogType.WARN || logType == LogType.DEBUG || logType == LogType.ALL) {
+        logMessage("WARN", msg, OutputStreamType.STDERR)
+    }
+}
+
+/**
+ * Log a message with debug level
+ *
+ * @param msg a message string
+ */
+fun logDebug(msg: String) {
+    if (logType == LogType.DEBUG || logType == LogType.ALL) {
+        logMessage("DEBUG", msg)
+    }
+}
+
+/**
+ * Log a message with trace level
+ *
+ * @param msg a message string
+ */
+fun logTrace(msg: String) {
+    if (logType == LogType.ALL) {
+        logMessage("TRACE", msg)
+    }
+}

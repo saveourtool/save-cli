@@ -36,6 +36,11 @@ interface PluginConfig {
     var configLocation: Path
 
     /**
+     * Regex to find resources of a given plugin
+     */
+    val resourceNamePatternStr: String
+
+    /**
      * @param otherConfig - 'this' will be merged with 'other'
      * @return merged config
      */
@@ -78,6 +83,7 @@ data class GeneralConfig(
 
     @Transient
     override var configLocation: Path = "undefined_toml_location".toPath()
+    override val resourceNamePatternStr: String = ".*"
 
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as GeneralConfig
