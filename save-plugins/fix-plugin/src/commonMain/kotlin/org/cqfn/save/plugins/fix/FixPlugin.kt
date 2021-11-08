@@ -90,9 +90,9 @@ class FixPlugin(
                 pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time)
             } catch (ex: ProcessTimeoutException) {
                 logWarn("The following tests took too long to run and were stopped: ${chunk.map { it.test }}, timeout for single test: ${ex.timeoutMillis}")
-                return@map failTestResult(chunk, ex)
+                return@map failTestResult(chunk, ex, execCmd)
             } catch (ex: ProcessExecutionException) {
-                return@map failTestResult(chunk, ex)
+                return@map failTestResult(chunk, ex, execCmd)
             }
 
             val stdout = executionResult.stdout
@@ -108,6 +108,7 @@ class FixPlugin(
                     FixTestFiles(test, expected),
                     checkStatus(expectedLines, fixedLines),
                     DebugInfo(
+                        execCmd,
                         stdout.filter { it.contains(testCopy.name) }.joinToString("\n"),
                         stderr.filter { it.contains(testCopy.name) }.joinToString("\n"),
                         null
@@ -121,11 +122,12 @@ class FixPlugin(
     private fun failTestResult(
         chunk: List<FixTestFiles>,
         ex: ProcessExecutionException,
+        execCmd: String
     ) = chunk.map {
         TestResult(
             it,
             Fail(ex.describe(), ex.describe()),
-            DebugInfo(null, ex.message, null)
+            DebugInfo(execCmd, null, ex.message, null)
         )
     }
 

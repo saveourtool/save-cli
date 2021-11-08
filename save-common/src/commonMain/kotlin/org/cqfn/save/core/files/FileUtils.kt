@@ -10,8 +10,8 @@
 package org.cqfn.save.core.files
 
 import org.cqfn.save.core.config.OutputStreamType
-import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
+import org.cqfn.save.core.logging.logTrace
 import org.cqfn.save.core.utils.writeToStream
 
 import okio.Buffer
@@ -135,10 +135,10 @@ fun FileSystem.copyRecursively(source: Path, target: Path) {
     }
     list(source).forEach {
         if (metadata(it).isDirectory) {
-            logDebug("Copying dir $it into ${target / it.name}")
+            logTrace("Copying dir $it into ${target / it.name}")
             copyRecursively(it, target / it.name)
         } else {
-            logDebug("Copying $it into ${target / it.name}")
+            logTrace("Copying $it into ${target / it.name}")
             copy(it, target / it.name)
         }
     }

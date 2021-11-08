@@ -32,6 +32,7 @@ data class ExpectedFail(val testName: String, val reason: String)
  * @param numberOfTests expected number of executed tests with this configuration
  * @param expectedFail list of expected failed tests
  * @param addProperties lambda to add/override SaveProperties during test
+ * @return TestReporter
  */
 @Suppress(
     "COMPLEX_EXPRESSION",
@@ -42,7 +43,7 @@ fun runTestsWithDiktat(
     numberOfTests: Int,
     expectedFail: List<ExpectedFail> = listOf(),
     addProperties: SaveProperties.() -> Unit = {},
-) {
+): TestReporter {
     val mutableTestDir: MutableList<String> = mutableListOf()
     testDir?.let { mutableTestDir.addAll(testDir) }
     mutableTestDir.add(0, "../examples/kotlin-diktat/")
@@ -82,4 +83,5 @@ fun runTestsWithDiktat(
             }
         }
     }
+    return testReporter
 }
