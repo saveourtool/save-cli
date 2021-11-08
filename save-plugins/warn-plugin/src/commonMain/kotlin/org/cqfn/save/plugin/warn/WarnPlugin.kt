@@ -199,7 +199,7 @@ class WarnPlugin(
     private fun failTestResult(
         paths: List<Path>,
         ex: ProcessExecutionException,
-        execCmd, String
+        execCmd: String
     ) = paths.map {
         TestResult(
             Test(it),
