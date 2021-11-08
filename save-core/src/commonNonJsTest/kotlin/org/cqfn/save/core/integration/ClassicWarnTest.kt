@@ -84,6 +84,7 @@ class ClassicWarnTest {
         )
     }
 
+    @Test
     fun `executing warn plugin on save-toml file in directory`() {
         runTestsWithDiktat(
             listOf(
