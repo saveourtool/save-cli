@@ -16,6 +16,11 @@ actual class AtomicInt actual constructor(value: Int) {
     actual fun addAndGet(delta: Int): Int = error("Not implemented for JS")
 }
 
+actual class AtomicBoolean actual constructor(value: Boolean) {
+    actual fun get(): Boolean = error("Not implemented for JS")
+    actual fun compareAndSet(expect: Boolean, update: Boolean): Boolean = error("Not implemented for JS")
+}
+
 actual fun getCurrentOs(): CurrentOs = error("Not implemented for JS")
 
 actual fun writeToConsole(msg: String, outputType: OutputStreamType) {
