@@ -1,7 +1,6 @@
 package org.cqfn.save.plugin.warn
 
 import org.cqfn.save.core.config.TestConfig
-import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.logging.logWarn
@@ -123,12 +122,12 @@ class WarnPlugin(
                 warnPluginConfig.wildCardInDirectoryMode?.let {
                     val directoryPrefix = testConfig
                         .directory
-                        .createRelativePathToTheRoot(testConfig.getRootConfig().location)
+                        .relativeTo(testConfig.getRootConfig().location)
                     // a hack to put only the directory path to the execution command
                     // only in case a directory mode is enabled
                     "$directoryPrefix$it"
                 } ?: paths.joinToString(separator = warnPluginConfig.batchSeparator!!) {
-                    it.createRelativePathToTheRoot(testConfig.getRootConfig().location)
+                    it.relativeTo(testConfig.getRootConfig().location).toString()
                 }
 
         val execFlagsAdjusted = resolvePlaceholdersFrom(warnPluginConfig.execFlags, extraFlags, fileNamesForExecCmd)

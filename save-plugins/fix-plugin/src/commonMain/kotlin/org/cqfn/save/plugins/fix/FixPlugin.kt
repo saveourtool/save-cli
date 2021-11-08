@@ -2,7 +2,6 @@ package org.cqfn.save.plugins.fix
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
-import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.plugin.ExtraFlags
@@ -209,8 +208,8 @@ class FixPlugin(
         @Serializable(with = PathSerializer::class) val expected: Path
     ) : TestFiles {
         override fun withRelativePaths(root: Path) = copy(
-            test = test.createRelativePathToTheRoot(root).toPath(),
-            expected = expected.createRelativePathToTheRoot(root).toPath(),
+            test = test.relativeTo(root),
+            expected = expected.relativeTo(root),
         )
 
         companion object {

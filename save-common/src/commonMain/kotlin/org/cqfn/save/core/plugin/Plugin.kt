@@ -2,7 +2,6 @@ package org.cqfn.save.core.plugin
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.config.isSaveTomlConfig
-import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.findDescendantDirectoriesBy
 import org.cqfn.save.core.files.parentsWithSelf
 import org.cqfn.save.core.logging.logDebug
@@ -125,9 +124,9 @@ abstract class Plugin(
         val testRepositoryRoot = testConfig.getRootConfig().location
         // creating relative to root path from a test file
         // "Expected" file for Fix plugin
-        val testFileRelative =
-                (testFiles.test.createRelativePathToTheRoot(testRepositoryRoot))
-                    .replace('\\', '/')
+        val testFileRelative = fs.canonicalize(
+            testFiles.test.relativeTo(testRepositoryRoot)
+        ).toString().replace('\\', '/')
 
         // excluding tests that are included in the excluded list
         return excludedTests
@@ -195,7 +194,7 @@ abstract class Plugin(
      */
     protected fun constructPathForCopyOfTestFile(dirName: String, path: Path): Path {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / dirName)
-        val relativePath = path.createRelativePathToTheRoot(testConfig.getRootConfig().location)
+        val relativePath = path.relativeTo(testConfig.getRootConfig().location)
         return tmpDir / relativePath
     }
 
@@ -234,6 +233,6 @@ abstract class Plugin(
     @Serializable
     data class Test(@Serializable(with = PathSerializer::class) override val test: Path) : TestFiles {
         override fun withRelativePaths(root: Path) =
-                copy(test = test.createRelativePathToTheRoot(root).toPath())
+                copy(test = test.relativeTo(root))
     }
 }

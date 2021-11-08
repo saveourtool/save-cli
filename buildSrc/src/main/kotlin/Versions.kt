@@ -2,14 +2,14 @@
 
 object Versions {
     const val kotlin = "1.5.31"
-    const val junit = "5.8.0"
-    const val okio = "3.0.0-alpha.10"
+    const val junit = "5.8.1"
+    const val okio = "3.0.0"
     const val ktoml = "0.2.7"
-    const val multiplatformDiff = "0.2.0"
+    const val multiplatformDiff = "0.3.0"
 
     object Kotlinx {
-        const val serialization = "1.2.2"
-        const val datetime = "0.2.1"
+        const val serialization = "1.3.0"
+        const val datetime = "0.3.1"
         const val cli = "0.3.3"
         const val coroutines = "1.5.2"
     }

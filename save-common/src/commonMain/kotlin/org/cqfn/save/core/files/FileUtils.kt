@@ -180,24 +180,6 @@ fun Path.findDescendantDirectoriesBy(withSelf: Boolean = false, directoryPredica
         }
 
 /**
- * Wrapper function in case of incorrect usage:
- * rootPath should be hierarchically higher than [this], also it should be in the same
- * branch of the file tree
- *
- * @param rootPath root of the file tree, relates to which path will be created
- * @return string representation of relative path
- * @throws NullPointerException if invalid arguments have been provided
- */
-@Suppress("TooGenericExceptionCaught")
-fun Path.createRelativePathToTheRoot(rootPath: Path) = try {
-    createRelativePathFromThisToTheRoot(this, rootPath)
-} catch (ex: NullPointerException) {
-    logError("Incorrect usage of `createRelativePathToTheRoot`: rootPath should be hierarchically higher than [this], " +
-            "also it should be in the same branch of the file tree")
-    throw ex
-}
-
-/**
  * @return if provided path is file then return parent directory, otherwise return itself
  */
 fun Path.getCurrentDirectory() = if (fs.metadata(this).isRegularFile) {
@@ -210,27 +192,3 @@ fun Path.getCurrentDirectory() = if (fs.metadata(this).isRegularFile) {
  * @return a list of parent directories including itself
  */
 fun Path.parentsWithSelf() = listOf(this) + this.parents().toList()
-
-/**
- * Create relative path from the current path to the root
- *
- * @param currentPath current path
- * @param rootPath root of the file tree, relates to which path will be created
- * @return string representation of relative path
- */
-private fun createRelativePathFromThisToTheRoot(currentPath: Path, rootPath: Path): String {
-    val rootDirectory = rootPath.getCurrentDirectory()
-    var parentDirectory = currentPath.parent!!
-
-    // Files located at the same directory, no need additional operations
-    if (rootDirectory == parentDirectory) {
-        return currentPath.name
-    }
-    // Goes through all intermediate dirs and construct relative path
-    var relativePath = ""
-    while (parentDirectory != rootDirectory) {
-        relativePath = parentDirectory.name + Path.DIRECTORY_SEPARATOR + relativePath
-        parentDirectory = parentDirectory.parent!!
-    }
-    return relativePath + currentPath.name
-}

@@ -96,7 +96,7 @@ class FileUtilsTest {
         val testFile = fs.createFile(tmpDir / "Test1Test.java")
 
         // Should be name of current file, since they are located in the same dir
-        assertEquals("Test1Test.java", testFile.createRelativePathToTheRoot(config))
+        assertEquals("Test1Test.java", testFile.relativeTo(config).toString())
     }
 
     @Test
@@ -117,15 +117,15 @@ class FileUtilsTest {
 
         val separator = Path.DIRECTORY_SEPARATOR
 
-        assertEquals("Test1Test.java", testFile1.createRelativePathToTheRoot(config1))
-        assertEquals("dir2${separator}Test2Test.java", testFile2.createRelativePathToTheRoot(config1))
-        assertEquals("dir2${separator}dir3${separator}Test3Test.java", testFile3.createRelativePathToTheRoot(config1))
-        assertEquals("dir2${separator}dir3${separator}dir33${separator}Test33Test.java", testFile33.createRelativePathToTheRoot(config1))
+        assertEquals("Test1Test.java", testFile1.relativeTo(config1).toString())
+        assertEquals("dir2${separator}Test2Test.java", testFile2.relativeTo(config1).toString())
+        assertEquals("dir2${separator}dir3${separator}Test3Test.java", testFile3.relativeTo(config1).toString())
+        assertEquals("dir2${separator}dir3${separator}dir33${separator}Test33Test.java", testFile33.relativeTo(config1).toString())
 
-        assertEquals("dir33${separator}Test33Test.java", testFile33.createRelativePathToTheRoot(config3))
-        assertEquals("dir3${separator}dir33${separator}Test33Test.java", testFile33.createRelativePathToTheRoot(config2))
+        assertEquals("dir33${separator}Test33Test.java", testFile33.relativeTo(config3).toString())
+        assertEquals("dir3${separator}dir33${separator}Test33Test.java", testFile33.relativeTo(config2).toString())
         val dir4 = tmpDir / "dir2" / "dir3" / "dir4"
-        assertEquals("dir2${separator}dir3${separator}dir4", dir4.createRelativePathToTheRoot(config1))
-        assertEquals("dir2${separator}dir3${separator}dir4", dir4.createRelativePathToTheRoot(tmpDir))
+        assertEquals("dir2${separator}dir3${separator}dir4", dir4.relativeTo(config1).toString())
+        assertEquals("dir2${separator}dir3${separator}dir4", dir4.relativeTo(tmpDir).toString())
     }
 }
