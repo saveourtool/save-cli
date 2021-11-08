@@ -5,6 +5,8 @@
     "MISSING_KDOC_CLASS_ELEMENTS",
     "FILE_NAME_MATCH_CLASS",
     "MatchingDeclarationName",
+    "HEADER_MISSING_IN_NON_SINGLE_CLASS_FILE",
+    "FUNCTION_BOOLEAN_PREFIX",
 )
 
 package org.cqfn.save.core.utils
