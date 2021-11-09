@@ -16,6 +16,7 @@ import org.cqfn.save.core.result.Pass
 import org.cqfn.save.reporter.test.TestReporter
 
 import okio.FileSystem
+import okio.Path
 
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -33,6 +34,10 @@ data class ExpectedFail(val testName: String, val reason: String)
  * @param addProperties lambda to add/override SaveProperties during test
  * @return TestReporter
  */
+@Suppress(
+    "COMPLEX_EXPRESSION",
+    "TOO_LONG_FUNCTION",
+)
 fun runTestsWithDiktat(
     testDir: List<String>?,
     numberOfTests: Int,
@@ -65,6 +70,8 @@ fun runTestsWithDiktat(
                     "Some warnings were expected but not received (1)"
                 ), test.status
             )
+        } else if (test.resources.test.toString().contains("warn${Path.DIRECTORY_SEPARATOR}chapter2")) {
+            assertEquals(Fail("ProcessTimeoutException: Timeout is reached", "ProcessTimeoutException: Timeout is reached"), test.status)
         } else {
             assertTrue("test.status is actually ${test.status::class.simpleName}: $test") {
                 test.status is Pass || test.status is Ignored

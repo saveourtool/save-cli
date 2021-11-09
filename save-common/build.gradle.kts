@@ -9,6 +9,7 @@ kotlin {
                 api("com.squareup.okio:okio:${Versions.okio}")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:${Versions.Kotlinx.datetime}")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.Kotlinx.coroutines}")
             }
         }
         val commonTest by getting {

@@ -148,6 +148,9 @@ execCmd="./ktlint -R diktat-0.4.2.jar"
 # excluded tests in the suite (optional). Here you can provide names of excluded tests, separated by comma. By the default no tests are excluded. 
 # to exclude tests use relative path to the root of test project (to the root directory of `save.toml`)
 excludedTests = ["warn/chapter1/GarbageTest.kt", "warn/otherDir/NewTest.kt"], e.t.c
+
+# command execution time for one test (milliseconds)
+timeOutMillis = 10000
 ```
 
 ## Executing specific tests

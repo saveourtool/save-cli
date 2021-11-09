@@ -9,6 +9,8 @@ import org.cqfn.save.core.config.OutputStreamType
 
 actual typealias AtomicInt = java.util.concurrent.atomic.AtomicInteger
 
+actual typealias AtomicBoolean = java.util.concurrent.atomic.AtomicBoolean
+
 actual fun getCurrentOs() = when {
     System.getProperty("os.name").startsWith("Linux", ignoreCase = true) -> CurrentOs.LINUX
     System.getProperty("os.name").startsWith("Mac", ignoreCase = true) -> CurrentOs.MACOS
