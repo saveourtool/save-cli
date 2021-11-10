@@ -7,8 +7,8 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(projects.saveCommon)
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.Kotlinx.serialization}")
+                implementation(libs.kotlinx.serialization.core)
+                implementation(libs.kotlinx.serialization.json)
             }
         }
         val commonTest by getting {
