@@ -36,6 +36,16 @@ class ClassicWarnTest {
     }
 
     @Test
+    fun `execute warn plugin with timeout`() {
+        runTestsWithDiktat(
+            listOf(
+                "warn/chapter2/EnumValueSnakeCaseTest.kt",
+                "warn/chapter2/GenericFunctionTest.kt"
+            ), 2
+        )
+    }
+
+    @Test
     fun `executing warn plugin on directory`() {
         runTestsWithDiktat(
             listOf(
@@ -88,7 +98,7 @@ class ClassicWarnTest {
         runTestsWithDiktat(
             listOf(
                 "warn/save.toml"
-            ), 7
+            ), 8
         )
     }
 

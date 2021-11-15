@@ -67,6 +67,7 @@ interface PluginConfig {
  * @property excludedTests excluded tests from the run
  * @property expectedWarningsPattern - pattern with warnings that are expected from the test file
  * @property runConfigPattern everything from the capture group will be split by comma and then by `=`
+ * @property timeOutMillis command execution time for one test
  */
 @Serializable
 data class GeneralConfig(
@@ -77,6 +78,7 @@ data class GeneralConfig(
     val excludedTests: List<String>? = null,
     val expectedWarningsPattern: Regex? = null,
     val runConfigPattern: Regex? = null,
+    val timeOutMillis: Long? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.GENERAL
     override var ignoreLinesPatterns: MutableList<Regex> = mutableListOf()
@@ -100,12 +102,12 @@ data class GeneralConfig(
             this.suiteName ?: other.suiteName,
             this.excludedTests ?: other.excludedTests,
             this.expectedWarningsPattern ?: other.expectedWarningsPattern,
-            this.runConfigPattern ?: other.runConfigPattern
-        ).also {
-            it.configLocation = this.configLocation
-        }
+            this.runConfigPattern ?: other.runConfigPattern,
+            this.timeOutMillis ?: other.timeOutMillis,
+        ).also { it.configLocation = this.configLocation }
     }
 
+    @Suppress("MagicNumber")
     override fun validateAndSetDefaults(): GeneralConfig {
         requireNotNull(execCmd) {
             errorMsgForRequireCheck("execCmd")
@@ -127,9 +129,8 @@ data class GeneralConfig(
             excludedTests ?: emptyList(),
             expectedWarningsPattern ?: defaultExpectedWarningPattern,
             runConfigPattern ?: defaultRunConfigPattern,
-        ).also {
-            it.configLocation = this.configLocation
-        }
+            timeOutMillis ?: 10_000L,
+        ).also { it.configLocation = this.configLocation }
     }
 
     private fun errorMsgForRequireCheck(field: String) =

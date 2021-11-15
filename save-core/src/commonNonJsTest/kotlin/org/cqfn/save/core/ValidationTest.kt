@@ -12,6 +12,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+@Suppress("LONG_LINE")
 class ValidationTest {
     private val fs: FileSystem = FileSystem.SYSTEM
 
@@ -41,7 +42,7 @@ class ValidationTest {
             assertEquals(
                 """
                     Error: Couldn't find `execCmd` in [general] section of `${generalConfig.configLocation}` config.
-                    Current configuration: execCmd=null, tags=null, description=null, suiteName=null, excludedTests=null, expectedWarningsPattern=null, runConfigPattern=null
+                    Current configuration: execCmd=null, tags=null, description=null, suiteName=null, excludedTests=null, expectedWarningsPattern=null, runConfigPattern=null, timeOutMillis=null
                     Please provide it in this, or at least in one of the parent configs.
                 """.trimIndent(),
                 ex.message

@@ -15,7 +15,7 @@ class ProcessBuilderInternalTest {
 
     @Test
     fun `check stderr`() {
-        val actualResult = processBuilder.exec("cd non_existent_dir", "", null)
+        val actualResult = processBuilder.exec("cd non_existent_dir", "", null, 10_000L)
         val expectedStdout: List<String> = emptyList()
         var expectedCode: Int
         lateinit var expectedStderr: List<String>
@@ -41,7 +41,7 @@ class ProcessBuilderInternalTest {
 
     @Test
     fun `check stderr with additional warning`() {
-        val actualResult = processBuilder.exec("cd non_existent_dir 2>/dev/null", "", null)
+        val actualResult = processBuilder.exec("cd non_existent_dir 2>/dev/null", "", null, 10_000L)
         val expectedStdout: List<String> = emptyList()
         var expectedCode: Int
         lateinit var expectedStderr: List<String>
