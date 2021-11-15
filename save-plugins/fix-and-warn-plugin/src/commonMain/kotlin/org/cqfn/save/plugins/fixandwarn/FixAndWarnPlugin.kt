@@ -40,7 +40,7 @@ class FixAndWarnPlugin(
             testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().warn
     private val generalConfig: GeneralConfig =
             testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
-    private lateinit var fixPlugin: FixPlugin
+    internal lateinit var fixPlugin: FixPlugin
     private lateinit var warnPlugin: WarnPlugin
 
     private fun initOrUpdateConfigs() {

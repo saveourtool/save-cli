@@ -76,7 +76,7 @@ class FixPluginTest {
         val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").lowercase()} && " else ""
         val executionCmd = "${diskWithTmpDir}cd $tmpDir && echo Expected file >"
 
-        val results = FixPlugin(TestConfig(config,
+        val fixPlugin = FixPlugin(TestConfig(config,
             null,
             mutableListOf(
                 FixPluginConfig(executionCmd),
@@ -85,12 +85,13 @@ class FixPluginTest {
             testFiles = emptyList(),
             fs,
             useInternalRedirections = false
-        ).execute()
+        )
+        val results = fixPlugin.execute()
 
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
         assertEquals(TestResult(FixPlugin.FixTestFiles(testFile, expectedFile), Pass(null),
             DebugInfo(results.single().debugInfo?.execCmd, results.single().debugInfo?.stdout, results.single().debugInfo?.stderr, null)), results.single())
-        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
+        val tmpDir = FileSystem.SYSTEM_TEMPORARY_DIRECTORY / fixPlugin.dirName
         assertTrue("Files should be identical") {
             diff(fs.readLines(tmpDir / "Test3Test.java"), fs.readLines(expectedFile))
                 .deltas.isEmpty()
@@ -129,7 +130,7 @@ class FixPluginTest {
 
         val fixPluginConfig = if (isCurrentOsWindows()) FixPluginConfig(executionCmd, 2) else FixPluginConfig(executionCmd, 2, " ")
 
-        val results = FixPlugin(TestConfig(config,
+        val fixPlugin = FixPlugin(TestConfig(config,
             null,
             mutableListOf(
                 fixPluginConfig,
@@ -138,7 +139,8 @@ class FixPluginTest {
             testFiles = emptyList(),
             fs,
             useInternalRedirections = false
-        ).execute()
+        )
+        val results = fixPlugin.execute()
 
         // We call ProcessBuilder ourselves, because the command ">" does not work for the list of files
         ProcessBuilder(false, fs).exec("echo Expected file > $testFile2", "", null, 10_000L)
@@ -147,7 +149,7 @@ class FixPluginTest {
         assertTrue(results.all {
             it.status == Pass(null)
         })
-        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
+        val tmpDir = FileSystem.SYSTEM_TEMPORARY_DIRECTORY / fixPlugin.dirName
         assertTrue("Files should be identical") {
             diff(fs.readLines(tmpDir / "Test3Test.java"), fs.readLines(expectedFile1))
                 .deltas.isEmpty()

@@ -29,6 +29,7 @@ import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
 
+import kotlin.random.Random
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.PolymorphicModuleBuilder
 import kotlinx.serialization.modules.subclass
@@ -141,7 +142,7 @@ class FixPlugin(
             }
 
     private fun createTestFile(path: Path, generalConfig: GeneralConfig): Path {
-        val pathCopy: Path = constructPathForCopyOfTestFile(FixPlugin::class.simpleName!!, path)
+        val pathCopy: Path = constructPathForCopyOfTestFile(dirName, path)
         createTempDir(pathCopy.parent!!)
 
         val expectedWarningPattern = generalConfig.expectedWarningsPattern
@@ -157,6 +158,8 @@ class FixPlugin(
         }
         return pathCopy
     }
+
+    val dirName by lazy { "${FixPlugin::class.simpleName!!}-${Random.nextInt()}" }
 
     override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<TestFiles> {
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()

@@ -24,10 +24,6 @@ class FixAndWarnPluginTest {
     private val fs = FileSystem.SYSTEM
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "${FixAndWarnPluginTest::class.simpleName!!}-${Random.nextInt()}")
 
-    /**
-     * Temporary directory used by fix-plugin. FixMe: Should be un-hardcoded from tests
-     */
-    private val internalTmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
     private val defaultExtraConfigPattern = Regex("(.+):(\\d+):(\\d+): (.+)")
 
     @BeforeTest
@@ -77,7 +73,7 @@ class FixAndWarnPluginTest {
         val fixExecutionCmd = "${diskWithTmpDir}cd $tmpDir && $catCmd $expectedFile >"
         val warnExecutionCmd = "echo Test1Expected.java:4:6: Some Warning && set stub="
 
-        val results = FixAndWarnPlugin(
+        val fixAndWarnPlugin = FixAndWarnPlugin(
             TestConfig(
                 config,
                 null,
@@ -96,11 +92,13 @@ class FixAndWarnPluginTest {
             testFiles = emptyList(),
             fs,
             useInternalRedirections = false
-        ).execute().toList()
+        )
+        val results = fixAndWarnPlugin.execute().toList()
 
         println("Results ${results.toList()}")
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
         // Check FixPlugin results
+        val internalTmpDir = FileSystem.SYSTEM_TEMPORARY_DIRECTORY / fixAndWarnPlugin.fixPlugin.dirName
         assertTrue("Files should be identical") {
             // Additionally ignore warnings in expected file
             diff(fs.readLines(internalTmpDir / "Test1Test.java"), fs.readLines(expectedFile).filterNot { it.contains("warn") })
