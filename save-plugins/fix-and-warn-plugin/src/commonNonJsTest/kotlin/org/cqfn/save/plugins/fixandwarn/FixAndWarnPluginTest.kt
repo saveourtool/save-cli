@@ -2,15 +2,12 @@ package org.cqfn.save.plugins.fixandwarn
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
-import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.utils.isCurrentOsWindows
 import org.cqfn.save.plugin.warn.WarnPluginConfig
-import org.cqfn.save.plugins.fix.FixPlugin
 import org.cqfn.save.plugins.fix.FixPluginConfig
 
-import io.github.petertrr.diffutils.diff
 import okio.FileSystem
 
 import kotlin.random.Random
@@ -23,7 +20,6 @@ import kotlin.test.assertTrue
 class FixAndWarnPluginTest {
     private val fs = FileSystem.SYSTEM
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "${FixAndWarnPluginTest::class.simpleName!!}-${Random.nextInt()}")
-
     private val defaultExtraConfigPattern = Regex("(.+):(\\d+):(\\d+): (.+)")
 
     @BeforeTest

@@ -2,7 +2,6 @@ package org.cqfn.save.plugins.fix
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
-import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Pass
@@ -10,7 +9,6 @@ import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.ProcessBuilder
 import org.cqfn.save.core.utils.isCurrentOsWindows
 
-import io.github.petertrr.diffutils.diff
 import okio.FileSystem
 
 import kotlin.random.Random
