@@ -98,7 +98,7 @@ fun FileSystem.createFile(pathString: String): Path = createFile(pathString.toPa
  * @param path path to a new file
  * @return [path]
  */
-expect fun FileSystem.createFile(path: Path): Path
+expect fun FileSystem.createFile(path: Path, overwrite: Boolean = true): Path
 
 /**
  * @param path a path to a file

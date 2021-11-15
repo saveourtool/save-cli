@@ -17,6 +17,6 @@ actual val fs: FileSystem by lazy {
     error("Not implemented for JS")
 }
 
-actual fun FileSystem.createFile(path: Path): Path = error("Not implemented for JS")
+actual fun FileSystem.createFile(path: Path, overwrite: Boolean): Path = error("Not implemented for JS")
 
 actual fun FileSystem.myDeleteRecursively(path: Path): Unit = error("Not implemented for JS")

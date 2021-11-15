@@ -23,6 +23,11 @@ import kotlin.test.assertTrue
 class FixAndWarnPluginTest {
     private val fs = FileSystem.SYSTEM
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "${FixAndWarnPluginTest::class.simpleName!!}-${Random.nextInt()}")
+
+    /**
+     * Temporary directory used by fix-plugin. FixMe: Should be un-hardcoded from tests
+     */
+    private val internalTmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
     private val defaultExtraConfigPattern = Regex("(.+):(\\d+):(\\d+): (.+)")
 
     @BeforeTest
@@ -96,10 +101,9 @@ class FixAndWarnPluginTest {
         println("Results ${results.toList()}")
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
         // Check FixPlugin results
-        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
         assertTrue("Files should be identical") {
             // Additionally ignore warnings in expected file
-            diff(fs.readLines(tmpDir / "Test1Test.java"), fs.readLines(expectedFile).filterNot { it.contains("warn") })
+            diff(fs.readLines(internalTmpDir / "Test1Test.java"), fs.readLines(expectedFile).filterNot { it.contains("warn") })
                 .deltas.isEmpty()
         }
         // Check WarnPlugin results

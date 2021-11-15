@@ -20,7 +20,10 @@ import kotlinx.cinterop.toKString
 
 actual val fs: FileSystem = FileSystem.SYSTEM
 
-actual fun FileSystem.createFile(path: Path): Path {
+actual fun FileSystem.createFile(path: Path, overwrite: Boolean): Path {
+    if (overwrite) {
+        remove(path.toString())
+    }
     val fd = open(
         path.toString(),
         O_RDWR.or(O_CREAT),
