@@ -98,10 +98,7 @@ fun FileSystem.createFile(pathString: String): Path = createFile(pathString.toPa
  * @param path path to a new file
  * @return [path]
  */
-fun FileSystem.createFile(path: Path): Path {
-    sink(path).close()
-    return path
-}
+expect fun FileSystem.createFile(path: Path): Path
 
 /**
  * @param path a path to a file
@@ -210,6 +207,8 @@ fun Path.getCurrentDirectory() = if (fs.metadata(this).isRegularFile) {
  * @return a list of parent directories including itself
  */
 fun Path.parentsWithSelf() = listOf(this) + this.parents().toList()
+
+expect fun FileSystem.myDeleteRecursively(path: Path)
 
 /**
  * Create relative path from the current path to the root

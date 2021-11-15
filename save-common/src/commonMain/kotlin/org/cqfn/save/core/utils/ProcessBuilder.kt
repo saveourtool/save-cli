@@ -5,6 +5,7 @@
 package org.cqfn.save.core.utils
 
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.files.myDeleteRecursively
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
@@ -112,7 +113,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
         }
         val stdout = fs.readLines(stdoutFile)
         val stderr = fs.readLines(stderrFile)
-        fs.deleteRecursively(tmpDir)
+        fs.myDeleteRecursively(tmpDir)
         logTrace("Removed temp directory $tmpDir")
         if (stderr.isNotEmpty()) {
             logDebug("The following errors occurred after executing of `$command`:\t${stderr.joinToString("\t")}")

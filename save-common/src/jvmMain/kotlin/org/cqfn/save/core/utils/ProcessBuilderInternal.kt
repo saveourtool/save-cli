@@ -83,7 +83,9 @@ actual class ProcessBuilderInternal actual constructor(
                 }
             )
         )
-        val data = br.lineSequence().joinToString("\n")
+        val data = br.useLines {
+            it.joinToString("\n")
+        }
         FileSystem.SYSTEM.write(file) {
             write(data.encodeToByteArray())
         }
