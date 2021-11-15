@@ -142,7 +142,10 @@ class FixPlugin(
             }
 
     private fun createTestFile(path: Path, generalConfig: GeneralConfig): Path {
-        val pathCopy: Path = constructPathForCopyOfTestFile(dirName, path)
+        val pathCopy: Path = constructPathForCopyOfTestFile(
+            "${FixPlugin::class.simpleName!!}-${Random.nextInt()}",
+            path
+        )
         createTempDir(pathCopy.parent!!)
 
         val expectedWarningPattern = generalConfig.expectedWarningsPattern
@@ -158,8 +161,6 @@ class FixPlugin(
         }
         return pathCopy
     }
-
-    val dirName by lazy { "${FixPlugin::class.simpleName!!}-${Random.nextInt()}" }
 
     override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<TestFiles> {
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()

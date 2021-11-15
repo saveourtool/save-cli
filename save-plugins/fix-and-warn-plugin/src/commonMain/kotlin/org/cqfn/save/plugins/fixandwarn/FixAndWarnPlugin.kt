@@ -71,6 +71,7 @@ class FixAndWarnPlugin(
         val expectedFiles = files.map { it as FixPlugin.FixTestFiles }.map { it.expected }
 
         // Remove (in place) warnings from test files before fix plugin execution
+        // fixme: should be performed on copies of files
         val filesAndTheirWarningsMap = removeWarningsFromExpectedFiles(expectedFiles)
 
         val fixTestResults = fixPlugin.handleFiles(files).toList()
