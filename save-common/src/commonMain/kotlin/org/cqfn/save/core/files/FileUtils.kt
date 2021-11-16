@@ -96,7 +96,6 @@ fun FileSystem.createFile(pathString: String): Path = createFile(pathString.toPa
  * Create file in [this] [FileSystem], denoted by [Path] [path]
  *
  * @param path path to a new file
- * @param overwrite
  * @return [path]
  */
 fun FileSystem.createFile(path: Path): Path {
@@ -212,6 +211,11 @@ fun Path.getCurrentDirectory() = if (fs.metadata(this).isRegularFile) {
  */
 fun Path.parentsWithSelf() = listOf(this) + this.parents().toList()
 
+/**
+ * Delete this directory and all other files and directories in it
+ *
+ * @param path a path to a directory
+ */
 expect fun FileSystem.myDeleteRecursively(path: Path)
 
 /**

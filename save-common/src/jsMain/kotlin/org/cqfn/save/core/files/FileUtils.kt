@@ -4,7 +4,9 @@
 
 @file:Suppress(
     "FILE_NAME_MATCH_CLASS",
-    "MatchingDeclarationName"
+    "MISSING_KDOC_TOP_LEVEL",
+    "MISSING_KDOC_ON_FUNCTION",
+    "MatchingDeclarationName",
 )
 
 package org.cqfn.save.core.files
