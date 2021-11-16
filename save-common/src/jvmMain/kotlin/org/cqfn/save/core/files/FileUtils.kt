@@ -13,18 +13,7 @@ import okio.Path
 
 import java.nio.file.Files
 
-import kotlin.io.path.createFile
-import kotlin.io.path.deleteIfExists
-
 actual val fs: FileSystem = FileSystem.SYSTEM
-
-actual fun FileSystem.createFile(path: Path, overwrite: Boolean): Path {
-    if (overwrite) {
-        path.toNioPath().deleteIfExists()
-    }
-    path.toNioPath().createFile()
-    return path
-}
 
 actual fun FileSystem.myDeleteRecursively(path: Path) {
     path.toFile().walkBottomUp().forEach {
