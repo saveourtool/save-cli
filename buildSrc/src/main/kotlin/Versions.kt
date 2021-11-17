@@ -11,7 +11,7 @@ object Versions {
         const val serialization = "1.2.2"
         const val datetime = "0.2.1"
         const val cli = "0.3.3"
-        const val coroutines = "1.5.2"
+        const val coroutines = "1.5.2-native-mt"
     }
 
     object IntegrationTest {

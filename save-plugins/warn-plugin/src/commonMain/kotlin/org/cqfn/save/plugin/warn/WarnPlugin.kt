@@ -14,6 +14,7 @@ import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.ProcessExecutionException
+import org.cqfn.save.core.utils.ProcessTimeoutException
 import org.cqfn.save.plugin.warn.utils.ResultsChecker
 import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
@@ -85,6 +86,7 @@ class WarnPlugin(
         "TOO_LONG_FUNCTION",
         "SAY_NO_TO_VAR",
         "LongMethod",
+        "ReturnCount",
         "SwallowedException",
     )
     private fun handleTestFile(
@@ -133,17 +135,15 @@ class WarnPlugin(
 
         val execFlagsAdjusted = resolvePlaceholdersFrom(warnPluginConfig.execFlags, extraFlags, fileNamesForExecCmd)
         val execCmd = "${generalConfig.execCmd} $execFlagsAdjusted"
+        val time = generalConfig.timeOutMillis!!.times(paths.size)
 
         val executionResult = try {
-            pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo)
+            pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time)
+        } catch (ex: ProcessTimeoutException) {
+            logWarn("The following tests took too long to run and were stopped: $paths, timeout for single test: ${ex.timeoutMillis}")
+            return failTestResult(paths, ex, execCmd)
         } catch (ex: ProcessExecutionException) {
-            return paths.map {
-                TestResult(
-                    Test(it),
-                    Fail(ex.describe(), ex.describe()),
-                    DebugInfo(execCmd, null, ex.message, null)
-                )
-            }.asSequence()
+            return failTestResult(paths, ex, execCmd)
         }
         val stdout =
                 warnPluginConfig.testToolResFileOutput?.let {
@@ -195,6 +195,18 @@ class WarnPlugin(
             )
         }.asSequence()
     }
+
+    private fun failTestResult(
+        paths: List<Path>,
+        ex: ProcessExecutionException,
+        execCmd: String
+    ) = paths.map {
+        TestResult(
+            Test(it),
+            Fail(ex.describe(), ex.describe()),
+            DebugInfo(execCmd, null, ex.message, null)
+        )
+    }.asSequence()
 
     /**
      * method for getting warnings from test files:

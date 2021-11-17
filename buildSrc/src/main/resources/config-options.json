@@ -15,21 +15,13 @@
       "description" : "Number of threads",
       "default" : "1"
     },
-    "debug" : {
-      "argType" : "ArgType.Boolean",
-      "kotlinType": "kotlin.Boolean",
-      "fullName" : "debug",
-      "shortName" : "d",
-      "description" : "Turn on debug logging",
-      "default" : "false"
-    },
-    "quiet" : {
-      "argType" : "ArgType.Boolean",
-      "kotlinType": "kotlin.Boolean",
-      "fullName" : "quiet",
-      "shortName" : "q",
-      "description" : "Log only test results (if `--result-output` is `stdout`) without any warnings (only with critical errors)",
-      "default" : "false"
+    "logType" : {
+      "argType" : "ArgType.Choice<LogType>()",
+      "kotlinType": "org.cqfn.save.core.config.LogType",
+      "fullName" : "log",
+      "shortName" : "",
+      "description" : "Type of logging mode",
+      "default" : "LogType.WARN"
     },
     "reportType" : {
       "argType" : "ArgType.Choice<ReportType>()",
@@ -78,14 +70,6 @@
       "shortName" : "out",
       "description" : "Data output stream",
       "default" : "OutputStreamType.STDOUT"
-    },
-    "configInheritance" : {
-      "argType" : "ArgType.Boolean",
-      "kotlinType": "kotlin.Boolean",
-      "fullName" : "config-inheritance",
-      "shortName" : "",
-      "description" : "Whether configuration files should inherit configurations from the previous level of directories",
-      "default" : "true"
     },
     "reportDir" : {
       "argType" : "ArgType.String",

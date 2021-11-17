@@ -9,9 +9,10 @@ package org.cqfn.save.core.utils
 
 import org.cqfn.save.core.config.OutputStreamType
 
-import platform.posix.fdopen
 import platform.posix.fflush
 import platform.posix.fprintf
+import platform.posix.stderr
+import platform.posix.stdout
 
 /**
  * Atomic values
@@ -29,6 +30,23 @@ actual class AtomicInt actual constructor(value: Int) {
      * @return the new value
      */
     actual fun addAndGet(delta: Int): Int = atomicInt.addAndGet(delta)
+}
+
+@Suppress("FUNCTION_BOOLEAN_PREFIX")
+actual class AtomicBoolean actual constructor(value: Boolean) {
+    private val atomicBoolean = kotlin.native.concurrent.AtomicReference(value)
+
+    /**
+     * @return value
+     */
+    actual fun get(): Boolean = atomicBoolean.value
+
+    /**
+     * @param expect expected value
+     * @param update updated value
+     * @return the result of the comparison
+     */
+    actual fun compareAndSet(expect: Boolean, update: Boolean): Boolean = atomicBoolean.compareAndSet(expect, update)
 }
 
 /**
@@ -79,8 +97,8 @@ actual fun writeToConsole(msg: String, outputType: OutputStreamType) {
  */
 fun processStandardStreams(msg: String, output: OutputStreamType) {
     val stream = when (output) {
-        OutputStreamType.STDERR -> fdopen(2, "w")
-        else -> fdopen(1, "w")
+        OutputStreamType.STDERR -> stderr
+        else -> stdout
     }
     fprintf(stream, msg.escapePercent() + "\n")
     fflush(stream)

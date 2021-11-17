@@ -5,10 +5,6 @@ import org.cqfn.save.core.test.utils.runTestsWithDiktat
 import kotlin.test.Ignore
 import kotlin.test.Test
 
-// To run these tests locally on your Native platforms you would need to install curl for your OS:
-// On Windows you'll also need to install msys2 and run pacman -S mingw-w64-x86_64-curl to have libcurl for ktor-client.
-// On ubuntu install libcurl4-openssl-dev for ktor client and libncurses5 for kotlin/native compiler.
-
 /**
  * testing that save can successfully work with:
  * 1) separate files
@@ -19,87 +15,116 @@ import kotlin.test.Test
 class ClassicWarnTest {
     @Test
     @Ignore  // fixme: change directory in fix-plugin too?
-    fun `execute warn plugin with default testFiles`() =
-            runTestsWithDiktat(
-                null, 9
-            )
+    fun `execute warn plugin with default testFiles`() {
+        runTestsWithDiktat(
+            null, 9
+        )
+    }
 
     @Test
-    fun `execute warn plugin on separate files`() =
-            runTestsWithDiktat(
-                listOf(
-                    "warn/chapter1/EnumValueSnakeCaseTest.kt",
-                    "warn/chapter1/GenericFunctionTest.kt"
-                ), 2
-            )
+    fun `execute warn plugin on separate files`() {
+        runTestsWithDiktat(
+            listOf(
+                "warn/chapter1/EnumValueSnakeCaseTest.kt",
+                "warn/chapter1/GenericFunctionTest.kt"
+            ), 2
+        )
+    }
 
     @Test
-    fun `executing warn plugin on directory`() =
-            runTestsWithDiktat(
-                listOf(
-                    "warn/chapter1"
-                ), 6
-            )
+    fun `execute warn plugin with timeout`() {
+        runTestsWithDiktat(
+            listOf(
+                "warn/chapter2/EnumValueSnakeCaseTest.kt",
+                "warn/chapter2/GenericFunctionTest.kt"
+            ), 2
+        )
+    }
 
     @Test
-    fun `executing warn plugin on directory, files are set with regex`() =
-            runTestsWithDiktat(
-                listOf(
-                    "warn/chapter1/TestsWithRegex"
-                ), 1
-            )
+    fun `executing warn plugin on directory`() {
+        runTestsWithDiktat(
+            listOf(
+                "warn/chapter1"
+            ), 6
+        )
+    }
 
     @Test
-    fun `test output file set`() =
-            runTestsWithDiktat(
-                listOf(
-                    "warn/chapter1/TestResultsFileTest"
-                ), 1
-            )
+    fun `executing warn plugin on directory, files are set with regex`() {
+        runTestsWithDiktat(
+            listOf(
+                "warn/chapter1/TestsWithRegex"
+            ), 1
+        )
+    }
+
+    @Test
+    fun `test output file set`() {
+        runTestsWithDiktat(
+            listOf(
+                "warn/chapter1/TestResultsFileTest"
+            ), 1
+        )
+    }
 
     @Test
     @Ignore
     // FixMe: this test should be investigated, as resource discovery looks to be buggy
     // org.opentest4j.AssertionFailedError: expected: <3> but was: <8>
-    fun `executing warn plugin on parental directory`() =
-            runTestsWithDiktat(
-                listOf(
-                    "warn"
-                ), 3
-            )
+    fun `executing warn plugin on parental directory`() {
+        runTestsWithDiktat(
+            listOf(
+                "warn"
+            ), 3
+        )
+    }
 
     @Test
-    fun `executing warn plugin on save-toml file in directory`() =
-            runTestsWithDiktat(
-                listOf(
-                    "warn/save.toml"
-                ), 6
-            )
+    fun `executing warn plugin on save-toml file in directory`() {
+        runTestsWithDiktat(
+            listOf(
+                "warn/save.toml"
+            ), 8
+        )
+    }
 
     @Test
-    fun `executing warn plugin on parental save-toml file`() =
-            runTestsWithDiktat(
-                listOf(
-                    "warn/chapter1/save.toml"
-                ), 6
-            )
+    fun `executing warn plugin on parental save-toml file`() {
+        runTestsWithDiktat(
+            listOf(
+                "warn/chapter1/save.toml"
+            ), 6
+        )
+    }
+
+    @Test
+    fun `executing warn plugin so that no resources will be found`() {
+        runTestsWithDiktat(
+            listOf(
+                "warn/chapter1/TestsWithRegex/NoMatchingTests/",
+            ), 0
+        )
+    }
 
     @Test
     @Ignore
-    fun `execute warn plugin with included and excluded suites`() =
-            runTestsWithDiktat(
-                emptyList(), 1
-            ) {
-                includeSuites = "Autofix and Warn"
-                excludeSuites = "Directory: Chapter1"
-            }
+    fun `execute warn plugin with included and excluded suites`() {
+        runTestsWithDiktat(
+            emptyList(), 1
+        ) {
+            includeSuites = "Autofix and Warn"
+            excludeSuites = "Directory: Chapter1"
+        }
+    }
 
     @Test
-    fun `tests should have a relative path`() =
-            runTestsWithDiktat(
-                listOf(
-                    "EnumValueSnakeCaseTest.kt",
-                    "GenericFunctionTest.kt"
-                ), 0
-            )
+    fun `tests should have a relative path`() {
+        runTestsWithDiktat(
+            listOf(
+                "EnumValueSnakeCaseTest.kt",
+                "GenericFunctionTest.kt"
+            ), 0
+        )
+    }
 }

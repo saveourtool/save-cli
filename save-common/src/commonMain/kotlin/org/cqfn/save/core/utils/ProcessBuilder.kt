@@ -5,9 +5,11 @@
 package org.cqfn.save.core.utils
 
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.files.myDeleteRecursively
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
+import org.cqfn.save.core.logging.logTrace
 import org.cqfn.save.core.logging.logWarn
 
 import okio.FileSystem
@@ -36,9 +38,13 @@ expect class ProcessBuilderInternal(
      * Execute [cmd] and wait for its completion.
      *
      * @param cmd executable command with arguments
+     * @param timeOutMillis max command execution time
      * @return exit status
      */
-    fun exec(cmd: String): Int
+    fun exec(
+        cmd: String,
+        timeOutMillis: Long,
+    ): Int
 }
 
 /**
@@ -54,17 +60,23 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
      * @param command executable command with arguments
      * @param directory where to execute provided command, i.e. `cd [directory]` will be performed before [command] execution
      * @param redirectTo a file where process output and errors should be redirected. If null, output will be returned as [ExecutionResult.stdout] and [ExecutionResult.stderr].
+     * @param timeOutMillis max command execution time
      * @return [ExecutionResult] built from process output
      * @throws ProcessExecutionException in case of impossibility of command execution
+     * @throws ProcessTimeoutException if timeout is exceeded
      */
     @Suppress(
         "TOO_LONG_FUNCTION",
         "TooGenericExceptionCaught",
-        "ReturnCount")
+        "ReturnCount",
+        "SwallowedException",
+    )
     fun exec(
         command: String,
         directory: String,
-        redirectTo: Path?): ExecutionResult {
+        redirectTo: Path?,
+        timeOutMillis: Long,
+    ): ExecutionResult {
         if (command.isBlank()) {
             logErrorAndThrowProcessBuilderException("Command couldn't be empty!")
         }
@@ -85,30 +97,33 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
         fs.createDirectories(tmpDir)
         fs.createFile(stdoutFile)
         fs.createFile(stderrFile)
-        logDebug("Created temp directory $tmpDir for stderr and stdout of ProcessBuilder")
+        logTrace("Created temp directory $tmpDir for stderr and stdout of ProcessBuilder")
 
         val cmd = modifyCmd(command, directory, processBuilderInternal)
 
         logDebug("Executing: $cmd")
         val status = try {
-            processBuilderInternal.exec(cmd)
+            processBuilderInternal.exec(cmd, timeOutMillis)
+        } catch (ex: ProcessTimeoutException) {
+            fs.deleteRecursively(tmpDir)
+            throw ex
         } catch (ex: Exception) {
             fs.deleteRecursively(tmpDir)
             logErrorAndThrowProcessBuilderException(ex.message ?: "Couldn't execute $cmd")
         }
         val stdout = fs.readLines(stdoutFile)
         val stderr = fs.readLines(stderrFile)
-        fs.deleteRecursively(tmpDir)
-        logDebug("Removed temp directory $tmpDir")
+        fs.myDeleteRecursively(tmpDir)
+        logTrace("Removed temp directory $tmpDir")
         if (stderr.isNotEmpty()) {
-            logDebug("The following errors occurred after executing of `$command`:\n${stderr.joinToString("\n")}")
+            logDebug("The following errors occurred after executing of `$command`:\t${stderr.joinToString("\t")}")
         }
         redirectTo?.let {
             fs.write(redirectTo) {
                 write(stdout.joinToString("\n").encodeToByteArray())
                 write(stderr.joinToString("\n").encodeToByteArray())
             }
-        } ?: logDebug("Execution output:\n$stdout")
+        } ?: logTrace("Execution output:\t$stdout")
         return ExecutionResult(status, stdout, stderr)
     }
 
@@ -197,7 +212,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
                 }
             }
             val modifiedCommand = listOfCommands.joinToString(separator).trim(' ')
-            logDebug("Modify command:`$command` to `$modifiedCommand` because of `echo` on Windows add extra newlines")
+            logTrace("Modify command:`$command` to `$modifiedCommand` because of `echo` on Windows add extra newlines")
             return modifiedCommand
         }
     }

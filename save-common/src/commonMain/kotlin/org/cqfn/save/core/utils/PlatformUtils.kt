@@ -32,6 +32,24 @@ expect class AtomicInt(value: Int) {
 }
 
 /**
+ * Atomic boolean
+ */
+@Suppress("FUNCTION_BOOLEAN_PREFIX")
+expect class AtomicBoolean(value: Boolean) {
+    /**
+     * @return value
+     */
+    fun get(): Boolean
+
+    /**
+     * @param expect expected value
+     * @param update updated value
+     * @return the result of the comparison
+     */
+    fun compareAndSet(expect: Boolean, update: Boolean): Boolean
+}
+
+/**
  * Get type of current OS
  *
  * @return type of current OS

@@ -31,6 +31,11 @@ interface PluginConfig {
     var configLocation: Path
 
     /**
+     * Regex to find resources of a given plugin
+     */
+    val resourceNamePatternStr: String
+
+    /**
      * @param otherConfig - 'this' will be merged with 'other'
      * @return merged config
      */
@@ -57,6 +62,7 @@ interface PluginConfig {
  * @property excludedTests excluded tests from the run
  * @property expectedWarningsPattern - pattern with warnings that are expected from the test file
  * @property runConfigPattern everything from the capture group will be split by comma and then by `=`
+ * @property timeOutMillis command execution time for one test
  */
 @Serializable
 data class GeneralConfig(
@@ -67,11 +73,13 @@ data class GeneralConfig(
     val excludedTests: List<String>? = null,
     val expectedWarningsPattern: Regex? = null,
     val runConfigPattern: Regex? = null,
+    val timeOutMillis: Long? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.GENERAL
 
     @Transient
     override var configLocation: Path = "undefined_toml_location".toPath()
+    override val resourceNamePatternStr: String = ".*"
 
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as GeneralConfig
@@ -89,9 +97,11 @@ data class GeneralConfig(
             this.excludedTests ?: other.excludedTests,
             this.expectedWarningsPattern ?: other.expectedWarningsPattern,
             this.runConfigPattern ?: other.runConfigPattern,
+            this.timeOutMillis ?: other.timeOutMillis,
         ).also { it.configLocation = this.configLocation }
     }
 
+    @Suppress("MagicNumber")
     override fun validateAndSetDefaults(): GeneralConfig {
         requireNotNull(execCmd) {
             errorMsgForRequireCheck("execCmd")
@@ -113,6 +123,7 @@ data class GeneralConfig(
             excludedTests ?: emptyList(),
             expectedWarningsPattern ?: defaultExpectedWarningPattern,
             runConfigPattern ?: defaultRunConfigPattern,
+            timeOutMillis ?: 10_000L,
         ).also { it.configLocation = this.configLocation }
     }
 

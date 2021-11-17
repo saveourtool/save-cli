@@ -10,7 +10,6 @@ package org.cqfn.save.buildutils
 import org.gradle.kotlin.dsl.kotlin
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
-import org.jetbrains.kotlin.gradle.tasks.KotlinTest
 
 plugins {
     kotlin("multiplatform")
@@ -27,6 +26,11 @@ kotlin {
         }
     }
     val nativeTargets = listOf(linuxX64(), mingwX64(), macosX64())
+    if (project.name == "save-common") {
+        // additionally, save-common should be available for JS too
+        // fixme: shouldn't rely on hardcoded project name here
+        js(BOTH).browser()
+    }
 
     if (hasProperty("disableRedundantTargets") && (property("disableRedundantTargets") as String?) != "false") {
         // with this flag we exclude targets that are present on multiple OS to speed up build
@@ -100,8 +104,5 @@ configureDiktat()
 configureDetekt()
 
 tasks.withType<KotlinJvmTest> {
-    // for some reason KotlinJvmTest is not a subclass of KotlinTest, so this is a WA
-    // to avoid race conditions: https://github.com/cqfn/save/issues/156#issuecomment-943285572
-    mustRunAfter(tasks.withType<KotlinTest>())
     useJUnitPlatform()
 }
