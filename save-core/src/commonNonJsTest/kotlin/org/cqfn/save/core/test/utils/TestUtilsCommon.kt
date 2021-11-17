@@ -7,6 +7,7 @@
 package org.cqfn.save.core.test.utils
 
 import org.cqfn.save.core.Save
+import org.cqfn.save.core.config.LogType
 import org.cqfn.save.core.config.OutputStreamType
 import org.cqfn.save.core.config.ReportType
 import org.cqfn.save.core.config.SaveProperties
@@ -49,6 +50,7 @@ fun runTestsWithDiktat(
     mutableTestDir.add(0, "../examples/kotlin-diktat/")
 
     val saveProperties = SaveProperties(
+        logType = LogType.ALL,
         testFiles = mutableTestDir,
         reportType = ReportType.TEST,
         resultOutput = OutputStreamType.STDOUT,

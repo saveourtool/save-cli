@@ -10,7 +10,6 @@ package org.cqfn.save.buildutils
 import org.gradle.kotlin.dsl.kotlin
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
-import org.jetbrains.kotlin.gradle.tasks.KotlinTest
 
 plugins {
     kotlin("multiplatform")
@@ -105,8 +104,5 @@ configureDiktat()
 configureDetekt()
 
 tasks.withType<KotlinJvmTest> {
-    // for some reason KotlinJvmTest is not a subclass of KotlinTest, so this is a WA
-    // to avoid race conditions: https://github.com/cqfn/save/issues/156#issuecomment-943285572
-    mustRunAfter(tasks.withType<KotlinTest>())
     useJUnitPlatform()
 }
