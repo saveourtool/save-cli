@@ -3,6 +3,7 @@ package org.cqfn.save.plugins.fix
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.createRelativePathToTheRoot
+import org.cqfn.save.core.files.myDeleteRecursively
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.logging.logWarn
@@ -57,6 +58,10 @@ class FixPlugin(
         .oldTag { start -> if (start) "[" else "]" }
         .newTag { start -> if (start) "<" else ">" }
         .build()
+
+    // fixme: consider refactoring under https://github.com/diktat-static-analysis/save/issues/156
+    // fixme: should not be common for a class instance during https://github.com/diktat-static-analysis/save/issues/28
+    private var tmpDirectory: Path? = null
     private lateinit var extraFlagsExtractor: ExtraFlagsExtractor
 
     @Suppress("TOO_LONG_FUNCTION")
@@ -146,7 +151,8 @@ class FixPlugin(
             "${FixPlugin::class.simpleName!!}-${Random.nextInt()}",
             path
         )
-        createTempDir(pathCopy.parent!!)
+        tmpDirectory = pathCopy.parent!!
+        createTempDir(tmpDirectory!!)
 
         val expectedWarningPattern = generalConfig.expectedWarningsPattern
 
@@ -187,9 +193,10 @@ class FixPlugin(
     }
 
     override fun cleanupTempDir() {
-        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
-        if (fs.exists(tmpDir)) {
-            fs.deleteRecursively(tmpDir)
+        tmpDirectory?.also {
+            if (fs.exists(it)) {
+                fs.myDeleteRecursively(it)
+            }
         }
     }
 
