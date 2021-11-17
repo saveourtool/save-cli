@@ -75,7 +75,7 @@ class GeneralTest {
         }
 
         val runCmd = if (isCurrentOsWindows()) "" else "sudo chmod +x $saveBinName && ./"
-        val saveFlags = " . -d --result-output FILE --report-type JSON"
+        val saveFlags = " . --result-output FILE --report-type JSON"
         // Execute the script from examples
         val execCmd = "$runCmd$saveBinName $saveFlags"
         val pb = ProcessBuilder(true, fs).exec(execCmd, examplesDir, null, 10_000L)
@@ -85,7 +85,7 @@ class GeneralTest {
         }
 
         // We need some time, before the report will be completely filled
-        Thread.sleep(30_000)
+        Thread.sleep(10_000)
 
         // Report should be created after successful completion
         assertTrue(fs.exists(reportFile))
