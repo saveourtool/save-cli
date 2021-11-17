@@ -58,6 +58,7 @@ class FixPlugin(
         .oldTag { start -> if (start) "[" else "]" }
         .newTag { start -> if (start) "<" else ">" }
         .build()
+
     // fixme: consider refactoring under https://github.com/diktat-static-analysis/save/issues/156
     // fixme: should not be common for a class instance during https://github.com/diktat-static-analysis/save/issues/28
     private var tmpDirectory: Path? = null
