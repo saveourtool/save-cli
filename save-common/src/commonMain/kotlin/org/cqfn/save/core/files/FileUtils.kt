@@ -212,6 +212,13 @@ fun Path.getCurrentDirectory() = if (fs.metadata(this).isRegularFile) {
 fun Path.parentsWithSelf() = listOf(this) + this.parents().toList()
 
 /**
+ * Delete this directory and all other files and directories in it
+ *
+ * @param path a path to a directory
+ */
+expect fun FileSystem.myDeleteRecursively(path: Path)
+
+/**
  * Create relative path from the current path to the root
  *
  * @param currentPath current path

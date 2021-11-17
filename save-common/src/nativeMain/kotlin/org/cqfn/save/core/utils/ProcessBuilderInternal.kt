@@ -5,7 +5,7 @@ package org.cqfn.save.core.utils
 import okio.Path
 import platform.posix.system
 
-import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
@@ -27,7 +27,7 @@ actual class ProcessBuilderInternal actual constructor(
         command
     }
 
-    @OptIn(ObsoleteCoroutinesApi::class)
+    @OptIn(ExperimentalCoroutinesApi::class)
     actual fun exec(
         cmd: String,
         timeOutMillis: Long
