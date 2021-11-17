@@ -78,14 +78,14 @@ class GeneralTest {
         val saveFlags = " . --result-output FILE --report-type JSON"
         // Execute the script from examples
         val execCmd = "$runCmd$saveBinName $saveFlags"
-        val pb = ProcessBuilder(true, fs).exec(execCmd, examplesDir, null, 10_000L)
+        val pb = ProcessBuilder(true, fs).exec(execCmd, examplesDir, null, 100_000L)
         println("SAVE execution output:\n${pb.stdout.joinToString("\n")}")
         if (pb.stderr.isNotEmpty()) {
             println("Warning and errors during SAVE execution:\n${pb.stderr.joinToString("\n")}")
         }
 
         // We need some time, before the report will be completely filled
-        Thread.sleep(10_000)
+        Thread.sleep(30_000)
 
         // Report should be created after successful completion
         assertTrue(fs.exists(reportFile))
