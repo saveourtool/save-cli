@@ -10,20 +10,16 @@
       "matchDepTypes": [
         "action"
       ],
-      "matchUpdateTypes": [
-        "major",
-        "minor",
-        "patch"
-      ],
       "groupName": "all github actions",
       "groupSlug": "all-github-actions"
     },
     {
+      "managers": ["gradle"],
       "matchPackagePatterns": [
         "*"
       ],
       "excludePackagePatterns": [
-        "^org\\.jetbrains\\.kotlin\\."
+        "^org\\.jetbrains\\.kotlin[.:]"
       ],
       "matchUpdateTypes": [
         "minor",
@@ -33,8 +29,9 @@
       "groupSlug": "all-minor-patch"
     },
     {
+      "managers": ["gradle"],
       "matchPackagePatterns": [
-        "^org\\.jetbrains\\.kotlin\\."
+        "^org\\.jetbrains\\.kotlin[.:]"
       ],
       "groupName": "Kotlin core dependencies",
       "groupSlug": "core-kotlin"
