@@ -14,8 +14,9 @@
         "major",
         "minor",
         "patch",
+        "pin",
         "bump"
-      ],
+      ]
     },
     {
       "managers": ["gradle"],
