@@ -2,6 +2,9 @@
   "extends": [
     "config:base"
   ],
+  "schedule": [
+    "before 3am on Monday"
+  ],
   "packageRules": [
     {
       "matchDepTypes": [
@@ -14,11 +17,14 @@
       "matchPackagePatterns": [
         "*"
       ],
+      "excludePackagePatterns": [
+        "^org.jetbrains.kotlin"
+      ],
       "matchUpdateTypes": [
         "minor",
         "patch"
       ],
-      "groupName": "all non-major dependencies",
+      "groupName": "all non-major dependencies (except Kotlin)",
       "groupSlug": "all-minor-patch"
     }
   ]
