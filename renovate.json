@@ -10,6 +10,11 @@
       "matchDepTypes": [
         "action"
       ],
+      "matchUpdateTypes": [
+        "major",
+        "minor",
+        "patch"
+      ],
       "groupName": "all github actions",
       "groupSlug": "all-github-actions"
     },
@@ -18,7 +23,7 @@
         "*"
       ],
       "excludePackagePatterns": [
-        "^org.jetbrains.kotlin."
+        "^org\\.jetbrains\\.kotlin\\."
       ],
       "matchUpdateTypes": [
         "minor",
@@ -29,7 +34,7 @@
     },
     {
       "matchPackagePatterns": [
-        "^org.jetbrains.kotlin."
+        "^org\\.jetbrains\\.kotlin\\."
       ],
       "groupName": "Kotlin core dependencies",
       "groupSlug": "core-kotlin"
