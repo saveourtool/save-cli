@@ -3,7 +3,7 @@
     "config:base"
   ],
   "schedule": [
-    "before 3am on Monday"
+    "before 4am on Monday"
   ],
   "packageRules": [
     {
