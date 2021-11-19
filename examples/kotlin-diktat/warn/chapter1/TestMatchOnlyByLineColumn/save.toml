@@ -5,5 +5,5 @@
 
 [warn]
     # Don't look at message of warning
-    ignoreWarningMessage = true
+    benchmarkMode = true
     exactWarningsMatch = true

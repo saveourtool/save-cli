@@ -33,20 +33,22 @@ data class Warning(
  * @param messageGroupIdx index of capture group for waring text
  * @param fileName file name
  * @param line line number of warning
+ * @param benchmarkMode whether to ignore the warning messages
  * @return a [Warning] or null if [this] string doesn't match [warningRegex]
  * @throws ResourceFormatException when parsing a file
  */
+@Suppress("TOO_MANY_PARAMETERS")
 internal fun String.extractWarning(warningRegex: Regex,
                                    fileName: String,
                                    line: Int?,
                                    columnGroupIdx: Long?,
                                    messageGroupIdx: Long,
-                                   ignoreWarningMessage: Boolean,
+                                   benchmarkMode: Boolean,
 ): Warning? {
     val groups = warningRegex.find(this)?.groups ?: return null
 
     val column = getRegexGroupSafe(columnGroupIdx, groups, this, "column number")?.toIntOrNull()
-    val message = if (!ignoreWarningMessage) getRegexGroupSafe(messageGroupIdx, groups, this, "warning message")!!.trim() else " "
+    val message = if (!benchmarkMode) getRegexGroupSafe(messageGroupIdx, groups, this, "warning message")!!.trim() else " "
     return Warning(
         message,
         line,
@@ -63,23 +65,26 @@ internal fun String.extractWarning(warningRegex: Regex,
  * @param messageGroupIdx index of capture group for waring text
  * @param fileNameGroupIdx index of capture group for file name
  * @param line line number of warning
+ * @param benchmarkMode whether to ignore the warning messages
  * @return a [Warning] or null if [this] string doesn't match [warningRegex]
  * @throws ResourceFormatException when parsing a file
  */
 @Suppress(
     "TooGenericExceptionCaught",
-    "SwallowedException")
+    "SwallowedException",
+    "TOO_MANY_PARAMETERS",
+)
 internal fun String.extractWarning(warningRegex: Regex,
                                    fileNameGroupIdx: Long,
                                    line: Int?,
                                    columnGroupIdx: Long?,
                                    messageGroupIdx: Long,
-                                   ignoreWarningMessage: Boolean,
+                                   benchmarkMode: Boolean,
 ): Warning? {
     val groups = warningRegex.find(this)?.groups ?: return null
     val fileName = getRegexGroupSafe(fileNameGroupIdx, groups, this, "file name")!!
 
-    return extractWarning(warningRegex, fileName, line, columnGroupIdx, messageGroupIdx, ignoreWarningMessage)
+    return extractWarning(warningRegex, fileName, line, columnGroupIdx, messageGroupIdx, benchmarkMode)
 }
 
 /**

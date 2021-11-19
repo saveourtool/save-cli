@@ -11,5 +11,5 @@ enum class EnumValueSnakeCaseTest {
     PascAsl_f
     // ;warn:$line-2:5
 
-    // ;warn:1:9
+    // ;warn:1:9:
 }
