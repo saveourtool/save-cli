@@ -37,7 +37,7 @@ data class Warning(
  * @return a [Warning] or null if [this] string doesn't match [warningRegex]
  * @throws ResourceFormatException when parsing a file
  */
-@Suppress("TOO_MANY_PARAMETERS")
+@Suppress("TOO_MANY_PARAMETERS", "LongParameterList")
 internal fun String.extractWarning(warningRegex: Regex,
                                    fileName: String,
                                    line: Int?,
@@ -73,6 +73,7 @@ internal fun String.extractWarning(warningRegex: Regex,
     "TooGenericExceptionCaught",
     "SwallowedException",
     "TOO_MANY_PARAMETERS",
+    "LongParameterList"
 )
 internal fun String.extractWarning(warningRegex: Regex,
                                    fileNameGroupIdx: Long,

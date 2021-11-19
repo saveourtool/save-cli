@@ -47,7 +47,7 @@ class ClassicWarnTest {
         runTestsWithDiktat(
             listOf(
                 "warn/chapter1"
-            ), 6
+            ), 7
         )
     }
 
@@ -86,7 +86,7 @@ class ClassicWarnTest {
         runTestsWithDiktat(
             listOf(
                 "warn/save.toml"
-            ), 8
+            ), 9
         )
     }
 
@@ -95,7 +95,7 @@ class ClassicWarnTest {
         runTestsWithDiktat(
             listOf(
                 "warn/chapter1/save.toml"
-            ), 6
+            ), 7
         )
     }
 
