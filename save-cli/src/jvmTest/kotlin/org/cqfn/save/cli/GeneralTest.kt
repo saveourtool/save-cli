@@ -11,6 +11,7 @@ import org.cqfn.save.plugins.fix.FixPlugin
 import org.cqfn.save.reporter.Report
 
 import okio.FileSystem
+import okio.Path
 import okio.Path.Companion.toPath
 
 import kotlin.test.Test
@@ -91,12 +92,15 @@ class GeneralTest {
         assertTrue(fs.exists(reportFile))
 
         val reports: List<Report> = json.decodeFromString(fs.readFile(reportFile))
-        // All result statuses should be Pass
+        // Almost all result statuses should be Pass, except the few cases
         reports.forEach { report ->
             report.pluginExecutions.forEach { pluginExecution ->
                 pluginExecution.testResults.find { result ->
                     println(result.status)
-                    result.resources.test.name != "ThisShouldAlwaysFailTest.kt"
+                    // FixMe: if we will have other failing tests - we will make the logic less hardcoded
+                    result.resources.test.name != "GarbageTest.kt" &&
+                            result.resources.test.name != "ThisShouldAlwaysFailTest.kt" &&
+                            !result.resources.test.toString().contains("warn${Path.DIRECTORY_SEPARATOR}chapter2")
                 }?.let {
                     assertTrue(it.status is Pass)
                 }
