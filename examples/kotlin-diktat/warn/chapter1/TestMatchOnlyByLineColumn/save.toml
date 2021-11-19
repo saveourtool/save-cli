@@ -1,0 +1,7 @@
+[general]
+    tags = ["warn"]
+    description = "Test warnings discovered by diKTat"
+
+[warn]
+    # Don't look at message of warning
+    ignoreWarningMessage = true

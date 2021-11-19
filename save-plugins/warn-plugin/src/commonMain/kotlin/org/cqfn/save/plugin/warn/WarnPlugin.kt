@@ -169,7 +169,8 @@ class WarnPlugin(
                     fileNameCaptureGroupOut!!,
                     line,
                     columnCaptureGroupOut,
-                    messageCaptureGroupOut!!
+                    messageCaptureGroupOut!!,
+                    ignoreWarningMessage!!,
                 )
             }
         }
@@ -234,6 +235,7 @@ class WarnPlugin(
                     newLine,
                     columnCaptureGroup,
                     messageCaptureGroup!!,
+                    ignoreWarningMessage!!,
                 )
             }
         }

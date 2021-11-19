@@ -41,11 +41,12 @@ internal fun String.extractWarning(warningRegex: Regex,
                                    line: Int?,
                                    columnGroupIdx: Long?,
                                    messageGroupIdx: Long,
+                                   ignoreWarningMessage: Boolean,
 ): Warning? {
     val groups = warningRegex.find(this)?.groups ?: return null
 
     val column = getRegexGroupSafe(columnGroupIdx, groups, this, "column number")?.toIntOrNull()
-    val message = getRegexGroupSafe(messageGroupIdx, groups, this, "warning message")!!.trim()
+    val message = if (!ignoreWarningMessage) getRegexGroupSafe(messageGroupIdx, groups, this, "warning message")!!.trim() else " "
     return Warning(
         message,
         line,
@@ -73,11 +74,12 @@ internal fun String.extractWarning(warningRegex: Regex,
                                    line: Int?,
                                    columnGroupIdx: Long?,
                                    messageGroupIdx: Long,
+                                   ignoreWarningMessage: Boolean,
 ): Warning? {
     val groups = warningRegex.find(this)?.groups ?: return null
     val fileName = getRegexGroupSafe(fileNameGroupIdx, groups, this, "file name")!!
 
-    return extractWarning(warningRegex, fileName, line, columnGroupIdx, messageGroupIdx)
+    return extractWarning(warningRegex, fileName, line, columnGroupIdx, messageGroupIdx, ignoreWarningMessage)
 }
 
 /**

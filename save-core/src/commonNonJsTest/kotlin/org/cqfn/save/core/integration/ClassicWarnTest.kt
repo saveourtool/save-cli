@@ -26,8 +26,9 @@ class ClassicWarnTest {
         runTestsWithDiktat(
             listOf(
                 "warn/chapter1/EnumValueSnakeCaseTest.kt",
+                "warn/chapter1/TestMatchOnlyByLineColumn/EnumValueSnakeCaseTest.kt",
                 "warn/chapter1/GenericFunctionTest.kt"
-            ), 2
+            ), 3
         )
     }
 
