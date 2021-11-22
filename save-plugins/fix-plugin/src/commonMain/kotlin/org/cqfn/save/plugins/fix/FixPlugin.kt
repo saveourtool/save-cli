@@ -148,7 +148,10 @@ class FixPlugin(
                 }
             }
 
-    private fun createTestFile(path: Path, generalConfig: GeneralConfig, fixPluginConfig: FixPluginConfig): Path {
+    private fun createTestFile(
+        path: Path,
+        generalConfig: GeneralConfig,
+        fixPluginConfig: FixPluginConfig): Path {
         val pathCopy: Path = constructPathForCopyOfTestFile("${FixPlugin::class.simpleName!!}-${Random.nextInt()}", path)
         tmpDirectory = pathCopy.parent!!
         createTempDir(tmpDirectory!!)
