@@ -94,7 +94,7 @@ class ClassicWarnTest {
         runTestsWithDiktat(
             listOf(
                 "warn/save.toml"
-            ), 8
+            ), 9
         )
     }
 
