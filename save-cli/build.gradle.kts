@@ -54,6 +54,7 @@ kotlin {
             dependencies {
                 implementation(projects.saveCommon)
                 implementation(projects.saveReporters)
+                implementation(projects.savePlugins.fixPlugin)
                 implementation(kotlin("test-junit5"))
                 implementation(libs.junit.jupiter.engine)
                 implementation(libs.kotlinx.serialization.json)
