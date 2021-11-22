@@ -9,8 +9,8 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(projects.saveCommon)
-                implementation("io.github.petertrr:kotlin-multiplatform-diff:${Versions.multiplatformDiff}")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
+                implementation(libs.multiplatform.diff)
+                implementation(libs.kotlinx.serialization.core)
             }
         }
     }

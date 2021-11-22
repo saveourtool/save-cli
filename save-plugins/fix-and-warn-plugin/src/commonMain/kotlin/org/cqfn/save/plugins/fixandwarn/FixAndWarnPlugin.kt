@@ -40,7 +40,9 @@ class FixAndWarnPlugin(
             testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().warn
     private val generalConfig: GeneralConfig =
             testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
-    private lateinit var fixPlugin: FixPlugin
+
+    @Suppress("MISSING_KDOC_CLASS_ELEMENTS")
+    internal lateinit var fixPlugin: FixPlugin
     private lateinit var warnPlugin: WarnPlugin
 
     private fun initOrUpdateConfigs() {
@@ -71,6 +73,7 @@ class FixAndWarnPlugin(
         val expectedFiles = files.map { it as FixPlugin.FixTestFiles }.map { it.expected }
 
         // Remove (in place) warnings from test files before fix plugin execution
+        // fixme: should be performed on copies of files
         val filesAndTheirWarningsMap = removeWarningsFromExpectedFiles(expectedFiles)
 
         val fixTestResults = fixPlugin.handleFiles(files).toList()

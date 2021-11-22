@@ -3,6 +3,7 @@ package org.cqfn.save.plugins.fix
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.createRelativePathToTheRoot
+import org.cqfn.save.core.files.myDeleteRecursively
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.logging.logWarn
@@ -29,6 +30,7 @@ import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
 
+import kotlin.random.Random
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.PolymorphicModuleBuilder
 import kotlinx.serialization.modules.subclass
@@ -56,6 +58,10 @@ class FixPlugin(
         .oldTag { start -> if (start) "[" else "]" }
         .newTag { start -> if (start) "<" else ">" }
         .build()
+
+    // fixme: consider refactoring under https://github.com/diktat-static-analysis/save/issues/156
+    // fixme: should not be common for a class instance during https://github.com/diktat-static-analysis/save/issues/28
+    private var tmpDirectory: Path? = null
     private lateinit var extraFlagsExtractor: ExtraFlagsExtractor
 
     @Suppress("TOO_LONG_FUNCTION")
@@ -142,12 +148,14 @@ class FixPlugin(
                 }
             }
 
-    private fun createTestFile(
-        path: Path,
-        generalConfig: GeneralConfig,
-        fixPluginConfig: FixPluginConfig): Path {
-        val pathCopy: Path = constructPathForCopyOfTestFile(FixPlugin::class.simpleName!!, path)
-        createTempDir(pathCopy.parent!!)
+
+    private fun createTestFile(path: Path, generalConfig: GeneralConfig, fixPluginConfig: FixPluginConfig): Path {
+        val pathCopy: Path = constructPathForCopyOfTestFile(
+            "${FixPlugin::class.simpleName!!}-${Random.nextInt()}",
+            path
+        )
+        tmpDirectory = pathCopy.parent!!
+        createTempDir(tmpDirectory!!)
 
         val defaultIgnoreLinesPatterns: MutableList<Regex> = mutableListOf()
         generalConfig.expectedWarningsPattern?.let { defaultIgnoreLinesPatterns.add(it) }
@@ -197,9 +205,10 @@ class FixPlugin(
     }
 
     override fun cleanupTempDir() {
-        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
-        if (fs.exists(tmpDir)) {
-            fs.deleteRecursively(tmpDir)
+        tmpDirectory?.also {
+            if (fs.exists(it)) {
+                fs.myDeleteRecursively(it)
+            }
         }
     }
 

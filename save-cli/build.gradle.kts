@@ -41,7 +41,7 @@ kotlin {
             dependsOn(commonMain)
             dependencies {
                 implementation(projects.saveCore)
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-properties:${Versions.Kotlinx.serialization}")
+                implementation(libs.kotlinx.serialization.properties)
             }
         }
         saveTarget.forEach {
@@ -52,13 +52,12 @@ kotlin {
 
         val jvmTest by getting {
             dependencies {
-                implementation(kotlin("test-junit5"))
-                implementation("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
-                implementation(kotlin("test-common"))
-                implementation(kotlin("test-annotations-common"))
                 implementation(projects.saveCommon)
                 implementation(projects.saveReporters)
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.Kotlinx.serialization}")
+                implementation(projects.savePlugins.fixPlugin)
+                implementation(kotlin("test-junit5"))
+                implementation(libs.junit.jupiter.engine)
+                implementation(libs.kotlinx.serialization.json)
             }
         }
     }
