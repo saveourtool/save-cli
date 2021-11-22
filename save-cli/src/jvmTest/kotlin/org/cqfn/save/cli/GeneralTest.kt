@@ -1,7 +1,8 @@
 package org.cqfn.save.cli
 
+import org.cqfn.save.core.config.OutputStreamType
+import org.cqfn.save.core.files.StdStreamsSink
 import org.cqfn.save.core.files.readFile
-import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.utils.CurrentOs
 import org.cqfn.save.core.utils.ProcessBuilder
@@ -9,19 +10,17 @@ import org.cqfn.save.core.utils.getCurrentOs
 import org.cqfn.save.core.utils.isCurrentOsWindows
 import org.cqfn.save.plugins.fix.FixPlugin
 import org.cqfn.save.reporter.Report
+import org.cqfn.save.reporter.json.JsonReporter
 
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
+import okio.buffer
 
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
 
 @Suppress(
     "TOO_LONG_FUNCTION",
@@ -32,14 +31,11 @@ import kotlinx.serialization.modules.subclass
 @OptIn(ExperimentalSerializationApi::class)
 class GeneralTest {
     private val fs = FileSystem.SYSTEM
-    private val json = Json {
-        serializersModule = SerializersModule {
-            polymorphic(Plugin.TestFiles::class) {
-                subclass(Plugin.Test::class)
-                subclass(FixPlugin.FixTestFiles::class)
-            }
-        }
-    }
+
+    // The `out` property for reporter is basically the stub, just need to create an instance in aim to use json formatter
+    private val json = JsonReporter(StdStreamsSink(OutputStreamType.STDOUT).buffer()) {
+        FixPlugin.FixTestFiles.register(this)
+    }.json
 
     @Test
     fun `examples test`() {
