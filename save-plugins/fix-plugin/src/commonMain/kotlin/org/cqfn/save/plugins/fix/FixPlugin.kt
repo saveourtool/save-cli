@@ -145,10 +145,10 @@ class FixPlugin(
             fs.readLines(path)
                 .filter { line ->
                     fixPluginConfig.ignoreLines?.let {
-                        fixPluginConfig.ignoreLinesPatterns.none { pattern -> pattern.matches(line) }
+                        fixPluginConfig.ignoreLinesPatterns.none { it.matches(line) }
                     }
                         ?: run {
-                            defaultIgnoreLinesPatterns.none {regex -> regex.matches(line) }
+                            defaultIgnoreLinesPatterns.none { it.matches(line) }
                         }
                 }
                 .forEach {

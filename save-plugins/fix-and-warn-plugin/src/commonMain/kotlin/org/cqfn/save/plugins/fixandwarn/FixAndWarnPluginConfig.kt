@@ -27,7 +27,7 @@ data class FixAndWarnPluginConfig(
     override val resourceNamePatternStr: String = "(${fix.resourceNamePatternStr})|(${warn.resourceNamePatternStr})"
 
     @Transient
-    override var ignoreLinesPatterns: MutableList<Regex> = defaultIgnoreLines
+    override val ignoreLinesPatterns: MutableList<Regex> = mutableListOf()
 
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as FixAndWarnPluginConfig
@@ -57,8 +57,5 @@ data class FixAndWarnPluginConfig(
         ).also {
             it.configLocation = this.configLocation
         }
-    }
-    companion object {
-        internal val defaultIgnoreLines: MutableList<Regex> = mutableListOf()
     }
 }

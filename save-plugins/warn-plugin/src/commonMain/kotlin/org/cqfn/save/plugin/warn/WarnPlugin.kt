@@ -90,7 +90,7 @@ class WarnPlugin(
         fs.write(fs.createFile(pathCopy)) {
             fs.readLines(path)
                 .filter { line ->
-                    ignorePatterns.none { pattern -> pattern.matches(line) }
+                    ignorePatterns.none { it.matches(line) }
                 }
                 .map { write((it + "\n").encodeToByteArray()) }
         }
@@ -109,16 +109,13 @@ class WarnPlugin(
         generalConfig: GeneralConfig
     ): Sequence<TestResult> {
         // extracting all warnings from test resource files
-        val copyPaths: List<Path> = paths.map { path -> createTestFile(path, warnPluginConfig) }
+        val copyPaths: List<Path> = paths.map { createTestFile(it, warnPluginConfig) }
         val expectedWarningsMap: WarningMap = copyPaths.associate {
             val warningsForCurrentPath = it.collectWarningsWithLineNumbers(warnPluginConfig, generalConfig)
             it.name to warningsForCurrentPath
         }
 
-        val extraFlagsList = copyPaths.mapNotNull { path ->
-            extraFlagsExtractor.extractExtraFlagsFrom(path)
-        }
-            .distinct()
+        val extraFlagsList = copyPaths.mapNotNull { extraFlagsExtractor.extractExtraFlagsFrom(it) }.distinct()
         require(extraFlagsList.size <= 1) {
             "Extra flags for all files in a batch should be same, but you have batchSize=${warnPluginConfig.batchSize}" +
                     " and there are ${extraFlagsList.size} different sets of flags inside it, namely $extraFlagsList"

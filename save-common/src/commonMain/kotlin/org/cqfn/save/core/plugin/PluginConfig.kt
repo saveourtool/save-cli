@@ -28,7 +28,7 @@ interface PluginConfig {
     /**
      * list of regexes to be ignored
      */
-    var ignoreLinesPatterns: MutableList<Regex>
+    val ignoreLinesPatterns: MutableList<Regex>
 
     /**
      * Location of the toml config
@@ -79,7 +79,7 @@ data class GeneralConfig(
     val runConfigPattern: Regex? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.GENERAL
-    override var ignoreLinesPatterns: MutableList<Regex> = mutableListOf()
+    override val ignoreLinesPatterns: MutableList<Regex> = mutableListOf()
 
     @Transient
     override var configLocation: Path = "undefined_toml_location".toPath()

@@ -40,7 +40,7 @@ data class FixPluginConfig(
     override var configLocation: Path = "undefined_toml_location".toPath()
 
     @Transient
-    override var ignoreLinesPatterns: MutableList<Regex> = ignoreLines?.map { it.toRegex() }?.toMutableList() ?: defaultIgnoreLines
+    override val ignoreLinesPatterns: MutableList<Regex> = ignoreLines?.map { it.toRegex() }?.toMutableList() ?: mutableListOf()
 
     /**
      *  @property resourceNameTest
@@ -81,11 +81,8 @@ data class FixPluginConfig(
         batchSeparator ?: ", ",
         resourceNameTest,
         resourceNameExpected,
-        ignoreLines?.filter { it != "null" }?.toMutableList() ?: ignoreLines
+        ignoreLines
     ).also {
         it.configLocation = this.configLocation
-    }
-    companion object {
-        internal val defaultIgnoreLines: MutableList<Regex> = mutableListOf()
     }
 }
