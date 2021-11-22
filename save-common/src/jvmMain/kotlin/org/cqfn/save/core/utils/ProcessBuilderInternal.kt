@@ -6,6 +6,12 @@ import okio.Path
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
+import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.newFixedThreadPoolContext
+import kotlinx.coroutines.runBlocking
+
 @Suppress("MISSING_KDOC_TOP_LEVEL",
     "MISSING_KDOC_CLASS_ELEMENTS",
     "MISSING_KDOC_ON_FUNCTION"
@@ -30,12 +36,35 @@ actual class ProcessBuilderInternal actual constructor(
         return cmd.joinToString()
     }
 
-    actual fun exec(cmd: String): Int {
-        val runTime = Runtime.getRuntime()
-        val process = runTime.exec(cmd.split(", ").toTypedArray())
-        writeDataFromBufferToFile(process, "stdout", stdoutFile)
-        writeDataFromBufferToFile(process, "stderr", stderrFile)
-        return process.waitFor()
+    @OptIn(ObsoleteCoroutinesApi::class)
+    @Suppress("UnsafeCallOnNullableType")
+    actual fun exec(
+        cmd: String,
+        timeOutMillis: Long,
+    ): Int {
+        var status = -1
+        runBlocking {
+            val processContext = newFixedThreadPoolContext(2, "timeOut")
+
+            val runTime = Runtime.getRuntime()
+            var process: Process? = null
+            val job = launch(processContext) {
+                val timeOut = launch {
+                    delay(timeOutMillis)
+                    process?.destroy()
+                    throw ProcessTimeoutException(timeOutMillis, "Timeout is reached")
+                }
+                launch {
+                    process = runTime.exec(cmd.split(", ").toTypedArray())
+                    writeDataFromBufferToFile(process!!, "stdout", stdoutFile)
+                    writeDataFromBufferToFile(process!!, "stderr", stderrFile)
+                    status = process!!.waitFor()
+                    timeOut.cancel()
+                }
+            }
+            job.join()
+        }
+        return status
     }
 
     private fun writeDataFromBufferToFile(

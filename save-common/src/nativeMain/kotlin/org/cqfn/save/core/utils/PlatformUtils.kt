@@ -32,6 +32,23 @@ actual class AtomicInt actual constructor(value: Int) {
     actual fun addAndGet(delta: Int): Int = atomicInt.addAndGet(delta)
 }
 
+@Suppress("FUNCTION_BOOLEAN_PREFIX")
+actual class AtomicBoolean actual constructor(value: Boolean) {
+    private val atomicBoolean = kotlin.native.concurrent.AtomicReference(value)
+
+    /**
+     * @return value
+     */
+    actual fun get(): Boolean = atomicBoolean.value
+
+    /**
+     * @param expect expected value
+     * @param update updated value
+     * @return the result of the comparison
+     */
+    actual fun compareAndSet(expect: Boolean, update: Boolean): Boolean = atomicBoolean.compareAndSet(expect, update)
+}
+
 /**
  * Escaping percent symbol in the string in case it is not escaped already
  *
