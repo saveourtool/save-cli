@@ -2,6 +2,7 @@ package org.cqfn.save.core
 
 import org.cqfn.save.core.files.ConfigDetector
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.createTempDir
 
 import okio.FileSystem
 
@@ -14,9 +15,7 @@ import kotlin.test.assertTrue
 
 class ConfigDetectorTest {
     private val fs = FileSystem.SYSTEM
-    private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / ConfigDetectorTest::class.simpleName!!).also {
-        fs.createDirectory(it)
-    }
+    private val tmpDir = fs.createTempDir(ConfigDetectorTest::class.simpleName!!)
     private val configDetector = ConfigDetector(fs)
 
     @Test

@@ -8,7 +8,7 @@ repositories {
 }
 
 dependencies {
-    implementation("org.cqfn.diktat:diktat-gradle-plugin:1.0.0-rc.3")
+    implementation("org.cqfn.diktat:diktat-gradle-plugin:1.0.0-rc.4")
     implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.17.1")
     implementation(kotlin("gradle-plugin", "1.5.31"))
     implementation(kotlin("serialization", "1.5.31"))

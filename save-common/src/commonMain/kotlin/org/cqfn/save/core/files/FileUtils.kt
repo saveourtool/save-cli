@@ -10,7 +10,6 @@
 package org.cqfn.save.core.files
 
 import org.cqfn.save.core.config.OutputStreamType
-import org.cqfn.save.core.logging.logError
 import org.cqfn.save.core.logging.logTrace
 import org.cqfn.save.core.utils.writeToStream
 
@@ -192,3 +191,10 @@ fun Path.getCurrentDirectory() = if (fs.metadata(this).isRegularFile) {
  * @return a list of parent directories including itself
  */
 fun Path.parentsWithSelf() = listOf(this) + this.parents().toList()
+
+/**
+ * Delete this directory and all other files and directories in it
+ *
+ * @param path a path to a directory
+ */
+expect fun FileSystem.myDeleteRecursively(path: Path)

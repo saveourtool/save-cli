@@ -2,6 +2,7 @@ package org.cqfn.save.core
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.files.myDeleteRecursively
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.utils.createPluginConfigListFromToml
 import org.cqfn.save.plugin.warn.WarnPluginConfig
@@ -202,6 +203,9 @@ class MergeConfigsTest {
 }
 
 internal fun createTomlFiles() {
+    if (fs.exists(tmpDir)) {
+        fs.myDeleteRecursively(tmpDir)
+    }
     fs.createDirectory(tmpDir)
     fs.createFile(toml1)
     fs.createDirectory(nestedDir1)

@@ -16,11 +16,11 @@ kotlin {
             dependencies {
                 implementation(projects.saveCommon)
                 implementation(projects.saveReporters)
-                api("com.squareup.okio:okio:${Versions.okio}")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
-                implementation("org.jetbrains.kotlinx:kotlinx-cli:${Versions.Kotlinx.cli}")
-                implementation("com.akuleshov7:ktoml-core:${Versions.ktoml}")
-                implementation("com.akuleshov7:ktoml-file:${Versions.ktoml}")
+                api(libs.okio)
+                implementation(libs.kotlinx.serialization.core)
+                implementation(libs.kotlinx.cli)
+                implementation(libs.ktoml.core)
+                implementation(libs.ktoml.file)
                 implementation(projects.savePlugins.fixPlugin)
                 implementation(projects.savePlugins.fixAndWarnPlugin)
                 implementation(projects.savePlugins.warnPlugin)
@@ -31,7 +31,7 @@ kotlin {
                 implementation(projects.saveCommonTest)
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.Kotlinx.coroutines}")
+                implementation(libs.kotlinx.coroutines.core)
             }
         }
     }
@@ -63,15 +63,9 @@ val generateVersionFileTaskProvider = tasks.register("generateVersionsFile") {
         )
     }
 }
-val generatedKotlinSrc = kotlin.sourceSets.create("generated") {
+kotlin.sourceSets.getByName("commonNonJsMain") {
     kotlin.srcDir("$buildDir/generated/src")
-    dependencies {
-        implementation(projects.saveCommon)
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
-        implementation("org.jetbrains.kotlinx:kotlinx-cli:${Versions.Kotlinx.cli}")
-    }
 }
-kotlin.sourceSets.getByName("commonNonJsMain").dependsOn(generatedKotlinSrc)
 tasks.withType<KotlinCompile<*>>().forEach {
     it.dependsOn(generateConfigOptionsTaskProvider)
     it.dependsOn(generateVersionFileTaskProvider)

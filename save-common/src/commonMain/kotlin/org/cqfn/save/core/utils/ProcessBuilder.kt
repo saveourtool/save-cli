@@ -5,6 +5,7 @@
 package org.cqfn.save.core.utils
 
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.files.myDeleteRecursively
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
@@ -37,9 +38,13 @@ expect class ProcessBuilderInternal(
      * Execute [cmd] and wait for its completion.
      *
      * @param cmd executable command with arguments
+     * @param timeOutMillis max command execution time
      * @return exit status
      */
-    fun exec(cmd: String): Int
+    fun exec(
+        cmd: String,
+        timeOutMillis: Long,
+    ): Int
 }
 
 /**
@@ -55,17 +60,23 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
      * @param command executable command with arguments
      * @param directory where to execute provided command, i.e. `cd [directory]` will be performed before [command] execution
      * @param redirectTo a file where process output and errors should be redirected. If null, output will be returned as [ExecutionResult.stdout] and [ExecutionResult.stderr].
+     * @param timeOutMillis max command execution time
      * @return [ExecutionResult] built from process output
      * @throws ProcessExecutionException in case of impossibility of command execution
+     * @throws ProcessTimeoutException if timeout is exceeded
      */
     @Suppress(
         "TOO_LONG_FUNCTION",
         "TooGenericExceptionCaught",
-        "ReturnCount")
+        "ReturnCount",
+        "SwallowedException",
+    )
     fun exec(
         command: String,
         directory: String,
-        redirectTo: Path?): ExecutionResult {
+        redirectTo: Path?,
+        timeOutMillis: Long,
+    ): ExecutionResult {
         if (command.isBlank()) {
             logErrorAndThrowProcessBuilderException("Command couldn't be empty!")
         }
@@ -92,14 +103,17 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
 
         logDebug("Executing: $cmd")
         val status = try {
-            processBuilderInternal.exec(cmd)
+            processBuilderInternal.exec(cmd, timeOutMillis)
+        } catch (ex: ProcessTimeoutException) {
+            fs.deleteRecursively(tmpDir)
+            throw ex
         } catch (ex: Exception) {
             fs.deleteRecursively(tmpDir)
             logErrorAndThrowProcessBuilderException(ex.message ?: "Couldn't execute $cmd")
         }
         val stdout = fs.readLines(stdoutFile)
         val stderr = fs.readLines(stderrFile)
-        fs.deleteRecursively(tmpDir)
+        fs.myDeleteRecursively(tmpDir)
         logTrace("Removed temp directory $tmpDir")
         if (stderr.isNotEmpty()) {
             logDebug("The following errors occurred after executing of `$command`:\t${stderr.joinToString("\t")}")

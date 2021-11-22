@@ -6,14 +6,15 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api("com.squareup.okio:okio:${Versions.okio}")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:${Versions.Kotlinx.datetime}")
+                api(libs.okio)
+                implementation(libs.kotlinx.serialization.core)
+                implementation(libs.kotlinx.datetime)
+                implementation(libs.kotlinx.coroutines.core)
             }
         }
         val commonTest by getting {
             dependencies {
-                implementation("com.squareup.okio:okio-fakefilesystem:${Versions.okio}")
+                implementation(libs.okio.fakefilesystem)
             }
         }
     }

@@ -35,8 +35,7 @@ fun SaveProperties.validate(): SaveProperties {
                     "Save is not able to start processing without an information about the tests or test root path that should be used for execution."
         )
     }
-    // FixMe: get(0) to [0] after https://github.com/cqfn/diKTat/issues/1047
-    val testRootPath = testFiles!!.get(0).toPath()
+    val testRootPath = testFiles!![0].toPath()
     try {
         if (!FileSystem.SYSTEM.metadata(testRootPath).isDirectory) {
             errorAndExitNotFoundDir()

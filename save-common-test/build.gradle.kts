@@ -7,7 +7,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(projects.saveCommon)
-                api("com.squareup.okio:okio:${Versions.okio}")
+                api(libs.okio)
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
             }

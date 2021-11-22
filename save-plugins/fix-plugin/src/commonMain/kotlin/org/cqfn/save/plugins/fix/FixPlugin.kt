@@ -2,8 +2,10 @@ package org.cqfn.save.plugins.fix
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.files.myDeleteRecursively
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
+import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.plugin.ExtraFlags
 import org.cqfn.save.core.plugin.ExtraFlagsExtractor
 import org.cqfn.save.core.plugin.GeneralConfig
@@ -15,6 +17,7 @@ import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.PathSerializer
 import org.cqfn.save.core.utils.ProcessExecutionException
+import org.cqfn.save.core.utils.ProcessTimeoutException
 
 import io.github.petertrr.diffutils.diff
 import io.github.petertrr.diffutils.patch.ChangeDelta
@@ -24,8 +27,8 @@ import io.github.petertrr.diffutils.patch.Patch
 import io.github.petertrr.diffutils.text.DiffRowGenerator
 import okio.FileSystem
 import okio.Path
-import okio.Path.Companion.toPath
 
+import kotlin.random.Random
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.PolymorphicModuleBuilder
 import kotlinx.serialization.modules.subclass
@@ -53,6 +56,10 @@ class FixPlugin(
         .oldTag { start -> if (start) "[" else "]" }
         .newTag { start -> if (start) "<" else ">" }
         .build()
+
+    // fixme: consider refactoring under https://github.com/diktat-static-analysis/save/issues/156
+    // fixme: should not be common for a class instance during https://github.com/diktat-static-analysis/save/issues/28
+    private var tmpDirectory: Path? = null
     private lateinit var extraFlagsExtractor: ExtraFlagsExtractor
 
     @Suppress("TOO_LONG_FUNCTION")
@@ -81,17 +88,15 @@ class FixPlugin(
 
             val execFlagsAdjusted = resolvePlaceholdersFrom(fixPluginConfig.execFlags, extraFlags, testCopyNames)
             val execCmd = "${generalConfig.execCmd} $execFlagsAdjusted"
+            val time = generalConfig.timeOutMillis!!.times(pathMap.size)
 
             val executionResult = try {
-                pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo)
+                pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time)
+            } catch (ex: ProcessTimeoutException) {
+                logWarn("The following tests took too long to run and were stopped: ${chunk.map { it.test }}, timeout for single test: ${ex.timeoutMillis}")
+                return@map failTestResult(chunk, ex, execCmd)
             } catch (ex: ProcessExecutionException) {
-                return@map chunk.map {
-                    TestResult(
-                        it,
-                        Fail(ex.describe(), ex.describe()),
-                        DebugInfo(execCmd, null, ex.message, null)
-                    )
-                }
+                return@map failTestResult(chunk, ex, execCmd)
             }
 
             val stdout = executionResult.stdout
@@ -118,6 +123,18 @@ class FixPlugin(
             .flatten()
     }
 
+    private fun failTestResult(
+        chunk: List<FixTestFiles>,
+        ex: ProcessExecutionException,
+        execCmd: String
+    ) = chunk.map {
+        TestResult(
+            it,
+            Fail(ex.describe(), ex.describe()),
+            DebugInfo(execCmd, null, ex.message, null)
+        )
+    }
+
     private fun checkStatus(expectedLines: List<String>, fixedLines: List<String>) =
             diff(expectedLines, fixedLines).let { patch ->
                 if (patch.deltas.isEmpty()) {
@@ -128,8 +145,12 @@ class FixPlugin(
             }
 
     private fun createTestFile(path: Path, generalConfig: GeneralConfig): Path {
-        val pathCopy: Path = constructPathForCopyOfTestFile(FixPlugin::class.simpleName!!, path)
-        createTempDir(pathCopy.parent!!)
+        val pathCopy: Path = constructPathForCopyOfTestFile(
+            "${FixPlugin::class.simpleName!!}-${Random.nextInt()}",
+            path
+        )
+        tmpDirectory = pathCopy.parent!!
+        createTempDir(tmpDirectory!!)
 
         val expectedWarningPattern = generalConfig.expectedWarningsPattern
 
@@ -170,9 +191,10 @@ class FixPlugin(
     }
 
     override fun cleanupTempDir() {
-        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FixPlugin::class.simpleName!!)
-        if (fs.exists(tmpDir)) {
-            fs.deleteRecursively(tmpDir)
+        tmpDirectory?.also {
+            if (fs.exists(it)) {
+                fs.myDeleteRecursively(it)
+            }
         }
     }
 

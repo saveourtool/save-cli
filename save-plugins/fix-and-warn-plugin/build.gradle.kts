@@ -11,8 +11,8 @@ kotlin {
                 implementation(projects.saveCommon)
                 implementation(projects.savePlugins.fixPlugin)
                 implementation(projects.savePlugins.warnPlugin)
-                implementation("io.github.petertrr:kotlin-multiplatform-diff:${Versions.multiplatformDiff}")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.Kotlinx.serialization}")
+                implementation(libs.multiplatform.diff)
+                implementation(libs.kotlinx.serialization.core)
             }
         }
     }
