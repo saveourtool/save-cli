@@ -104,6 +104,7 @@ class WarnPlugin(
         "LongMethod",
         "ReturnCount",
         "SwallowedException",
+        "TOO_MANY_LINES_IN_LAMBDA",
     )
     private fun handleTestFile(
         paths: List<Path>,
@@ -170,18 +171,17 @@ class WarnPlugin(
                     }
         val stderr = executionResult.stderr
 
-        val actualWarningsMap = stdout
-            .mapNotNull {
-                with(warnPluginConfig) {
-                    val line = it.getLineNumber(actualWarningsPattern!!, lineCaptureGroupOut)
-                    it.extractWarning(
-                        actualWarningsPattern,
-                        fileNameCaptureGroupOut!!,
-                        line,
-                        columnCaptureGroupOut,
-                        messageCaptureGroupOut!!
-                    )
-                }
+        val actualWarningsMap = stdout.mapNotNull {
+            with(warnPluginConfig) {
+                val line = it.getLineNumber(actualWarningsPattern!!, lineCaptureGroupOut)
+                it.extractWarning(
+                    actualWarningsPattern,
+                    fileNameCaptureGroupOut!!,
+                    line,
+                    columnCaptureGroupOut,
+                    messageCaptureGroupOut!!,
+                    benchmarkMode!!,
+                )
             }
             .groupBy { it.fileName }
             .mapValues { (_, warning) -> warning.sortedBy { it.message } }
@@ -232,11 +232,11 @@ class WarnPlugin(
             .mapIndexed { index, line ->
                 val newLine = line.getLineNumber(
                     generalConfig.expectedWarningsPattern!!,
-                    warnPluginConfig.lineCaptureGroup,
-                    warnPluginConfig.linePlaceholder!!,
-                    index + 1,
-                    this,
-                    linesFile,
+                    this@collectWarningsWithLineNumbers.name,
+                    newLine,
+                    columnCaptureGroup,
+                    messageCaptureGroup!!,
+                    benchmarkMode!!,
                 )
                 with(warnPluginConfig) {
                     line.extractWarning(

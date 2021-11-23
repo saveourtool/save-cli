@@ -104,7 +104,8 @@ class UtilsTest {
             fileName = "Test.kt",
             line = line,
             columnGroupIdx = warnPluginConfig.columnCaptureGroup,
-            messageGroupIdx = warnPluginConfig.messageCaptureGroup!!
+            messageGroupIdx = warnPluginConfig.messageCaptureGroup!!,
+            benchmarkMode = false
         )
 
         requireNotNull(warning)
@@ -129,7 +130,8 @@ class UtilsTest {
             fileName = "fileName",
             line = line,
             columnGroupIdx = warnPluginConfig.columnCaptureGroup,
-            messageGroupIdx = warnPluginConfig.messageCaptureGroup!!
+            messageGroupIdx = warnPluginConfig.messageCaptureGroup!!,
+            benchmarkMode = false
         )
         assertNull(warning)
     }

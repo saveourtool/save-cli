@@ -50,6 +50,7 @@ import kotlinx.serialization.UseSerializers
  * That can help a user to write only main information in the warning without any need to add/copy-paste technical info
  * @property testToolResFileOutput file with actual warnings
  * @property ignoreLines mutable list of patterns that later will be ignored in test files
+ * @property benchmarkMode whether to ignore the warning messages
  */
 @Serializable
 data class WarnPluginConfig(
@@ -74,6 +75,7 @@ data class WarnPluginConfig(
     val partialWarnTextMatch: Boolean? = null,
     val testToolResFileOutput: String? = null,
     val ignoreLines: MutableList<String>? = null
+    val benchmarkMode: Boolean? = null,
 ) : PluginConfig {
     @Transient
     override val type = TestConfigSections.WARN
@@ -120,7 +122,8 @@ data class WarnPluginConfig(
             this.testToolResFileOutput ?: other.testToolResFileOutput,
             other.ignoreLines?.let {
                 this.ignoreLines?.let { other.ignoreLines.union(this.ignoreLines) } ?: other.ignoreLines
-            }?.toMutableList() ?: this.ignoreLines
+            }?.toMutableList() ?: this.ignoreLines,
+            this.benchmarkMode ?: other.benchmarkMode
         ).also {
             it.configLocation = this.configLocation
         }
@@ -179,10 +182,12 @@ data class WarnPluginConfig(
             patternForRegexInWarning ?: defaultPatternForRegexInWarning,
             partialWarnTextMatch ?: false,
             testToolResFileOutput,
-            ignoreLines
+            ignoreLines,
+            benchmarkMode ?: false
         ).also {
             it.configLocation = this.configLocation
         }
+
     }
 
     private fun requirePositiveIfNotNull(value: Long?) {

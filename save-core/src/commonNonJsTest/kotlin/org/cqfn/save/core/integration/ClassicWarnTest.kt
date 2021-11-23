@@ -26,8 +26,9 @@ class ClassicWarnTest {
         runTestsWithDiktat(
             listOf(
                 "warn/chapter1/EnumValueSnakeCaseTest.kt",
+                "warn/chapter1/TestMatchOnlyByLineColumn/EnumValueSnakeCaseTest.kt",
                 "warn/chapter1/GenericFunctionTest.kt"
-            ), 2
+            ), 3
         )
     }
 
@@ -104,6 +105,15 @@ class ClassicWarnTest {
             listOf(
                 "warn/chapter1/save.toml"
             ), 7
+        )
+    }
+
+    @Test
+    fun `executing warn plugin so that no resources will be found`() {
+        runTestsWithDiktat(
+            listOf(
+                "warn/chapter1/TestsWithRegex/NoMatchingTests/",
+            ), 0
         )
     }
 
