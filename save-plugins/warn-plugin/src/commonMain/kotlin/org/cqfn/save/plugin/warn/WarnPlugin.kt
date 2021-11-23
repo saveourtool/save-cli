@@ -83,20 +83,22 @@ class WarnPlugin(
         }
     }
 
-    private fun createTestFile(path: Path, warnPluginConfig: WarnPluginConfig): Path {
-        val pathCopy: Path = constructPathForCopyOfTestFile("${WarnPlugin::class.simpleName!!}-${ Random.nextInt()}", path)
-        createTempDir(pathCopy.parent!!)
+    private fun createTestFiles(paths: List<Path>, warnPluginConfig: WarnPluginConfig): List<Path> {
+        val dirName = "${WarnPlugin::class.simpleName!!}-${Random.nextInt()}"
+        val dirPath = constructPathForCopyOfTestFile(dirName, paths[0]).parent!!
+        createTempDir(dirPath)
 
         val ignorePatterns = warnPluginConfig.ignoreLinesPatterns
 
-        fs.write(fs.createFile(pathCopy)) {
-            fs.readLines(path)
-                .filter { line ->
-                    ignorePatterns.none { it.matches(line) }
-                }
-                .map { write((it + "\n").encodeToByteArray()) }
+        return paths.map { path ->
+            val copyPath = constructPathForCopyOfTestFile(dirName, path)
+            fs.write(fs.createFile(copyPath)) {
+                fs.readLines(path)
+                    .filter { line -> ignorePatterns.none { it.matches(line) } }
+                    .map { write((it + "\n").encodeToByteArray()) }
+            }
+            copyPath
         }
-        return pathCopy
     }
 
     @Suppress(
@@ -113,7 +115,7 @@ class WarnPlugin(
         generalConfig: GeneralConfig
     ): Sequence<TestResult> {
         // extracting all warnings from test resource files
-        val copyPaths: List<Path> = paths.map { createTestFile(it, warnPluginConfig) }
+        val copyPaths: List<Path> = createTestFiles(paths, warnPluginConfig)
         val expectedWarningsMap: WarningMap = copyPaths.associate {
             val warningsForCurrentPath = it.collectWarningsWithLineNumbers(warnPluginConfig, generalConfig)
             it.name to warningsForCurrentPath
