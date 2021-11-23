@@ -104,7 +104,7 @@ class WarnPlugin(
         "LongMethod",
         "ReturnCount",
         "SwallowedException",
-        "TOO_MANY_LINES_IN_LAMBDA",
+        "TOO_MANY_LINES_IN_LAMBDA"
     )
     private fun handleTestFile(
         paths: List<Path>,
@@ -183,6 +183,7 @@ class WarnPlugin(
                     benchmarkMode!!,
                 )
             }
+        }
             .groupBy { it.fileName }
             .mapValues { (_, warning) -> warning.sortedBy { it.message } }
 
@@ -232,11 +233,11 @@ class WarnPlugin(
             .mapIndexed { index, line ->
                 val newLine = line.getLineNumber(
                     generalConfig.expectedWarningsPattern!!,
-                    this@collectWarningsWithLineNumbers.name,
-                    newLine,
-                    columnCaptureGroup,
-                    messageCaptureGroup!!,
-                    benchmarkMode!!,
+                    warnPluginConfig.lineCaptureGroup,
+                    warnPluginConfig.linePlaceholder!!,
+                    index + 1,
+                    this,
+                    linesFile
                 )
                 with(warnPluginConfig) {
                     line.extractWarning(
@@ -245,6 +246,7 @@ class WarnPlugin(
                         newLine,
                         columnCaptureGroup,
                         messageCaptureGroup!!,
+                        benchmarkMode!!
                     )
                 }
             }

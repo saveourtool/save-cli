@@ -74,8 +74,8 @@ data class WarnPluginConfig(
     val patternForRegexInWarning: List<String>? = null,
     val partialWarnTextMatch: Boolean? = null,
     val testToolResFileOutput: String? = null,
-    val ignoreLines: MutableList<String>? = null
-    val benchmarkMode: Boolean? = null,
+    val ignoreLines: MutableList<String>? = null,
+    val benchmarkMode: Boolean? = null
 ) : PluginConfig {
     @Transient
     override val type = TestConfigSections.WARN
