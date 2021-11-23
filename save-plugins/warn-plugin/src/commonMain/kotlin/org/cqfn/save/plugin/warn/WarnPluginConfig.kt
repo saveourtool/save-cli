@@ -187,7 +187,6 @@ data class WarnPluginConfig(
         ).also {
             it.configLocation = this.configLocation
         }
-
     }
 
     private fun requirePositiveIfNotNull(value: Long?) {
