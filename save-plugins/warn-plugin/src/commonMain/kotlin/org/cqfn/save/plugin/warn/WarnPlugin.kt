@@ -23,6 +23,7 @@ import org.cqfn.save.plugin.warn.utils.getLineNumber
 import okio.FileNotFoundException
 import okio.FileSystem
 import okio.Path
+import kotlin.random.Random
 
 private typealias WarningMap = Map<String, List<Warning>>
 
@@ -83,7 +84,7 @@ class WarnPlugin(
     }
 
     private fun createTestFile(path: Path, warnPluginConfig: WarnPluginConfig): Path {
-        val pathCopy: Path = constructPathForCopyOfTestFile(WarnPlugin::class.simpleName!!, path)
+        val pathCopy: Path = constructPathForCopyOfTestFile("${WarnPlugin::class.simpleName!!}-${ Random.nextInt()}", path)
         createTempDir(pathCopy.parent!!)
 
         val ignorePatterns = warnPluginConfig.ignoreLinesPatterns
@@ -144,7 +145,7 @@ class WarnPlugin(
                 } ?: copyPaths.joinToString(separator = warnPluginConfig.batchSeparator!!)
         val execFlagsAdjusted = resolvePlaceholdersFrom(warnPluginConfig.execFlags, extraFlags, fileNamesForExecCmd)
         val execCmd = "${generalConfig.execCmd} $execFlagsAdjusted"
-        val time = generalConfig.timeOutMillis!!.times(paths.size)
+        val time = generalConfig.timeOutMillis!!.times(copyPaths.size)
 
         val executionResult = try {
             pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time)
@@ -152,7 +153,7 @@ class WarnPlugin(
             logWarn("The following tests took too long to run and were stopped: $paths, timeout for single test: ${ex.timeoutMillis}")
             return failTestResult(paths, ex, execCmd)
         } catch (ex: ProcessExecutionException) {
-            return failTestResult(copyPaths, ex, execCmd)
+            return failTestResult(paths, ex, execCmd)
         }
 
         val stdout =
