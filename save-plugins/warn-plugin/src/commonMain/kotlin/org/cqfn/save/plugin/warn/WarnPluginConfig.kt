@@ -49,6 +49,7 @@ import kotlinx.serialization.UseSerializers
  * @property partialWarnTextMatch if true - the regex created from expected warning will be wrapped with '.*': .*warn.*.
  * That can help a user to write only main information in the warning without any need to add/copy-paste technical info
  * @property testToolResFileOutput file with actual warnings
+ * @property benchmarkMode whether to ignore the warning messages
  */
 @Serializable
 data class WarnPluginConfig(
@@ -72,6 +73,7 @@ data class WarnPluginConfig(
     val patternForRegexInWarning: List<String>? = null,
     val partialWarnTextMatch: Boolean? = null,
     val testToolResFileOutput: String? = null,
+    val benchmarkMode: Boolean? = null,
 ) : PluginConfig {
     @Transient
     override val type = TestConfigSections.WARN
@@ -113,6 +115,7 @@ data class WarnPluginConfig(
             this.patternForRegexInWarning ?: other.patternForRegexInWarning,
             this.partialWarnTextMatch ?: other.partialWarnTextMatch,
             this.testToolResFileOutput ?: other.testToolResFileOutput,
+            this.benchmarkMode ?: other.benchmarkMode,
         ).also { it.configLocation = this.configLocation }
     }
 
@@ -169,6 +172,7 @@ data class WarnPluginConfig(
             patternForRegexInWarning ?: defaultPatternForRegexInWarning,
             partialWarnTextMatch ?: false,
             testToolResFileOutput,
+            benchmarkMode ?: false,
         ).also { it.configLocation = this.configLocation }
     }
 

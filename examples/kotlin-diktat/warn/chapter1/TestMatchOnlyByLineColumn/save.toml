@@ -1,0 +1,9 @@
+[general]
+    tags = ["warn"]
+    description = "Test warnings discovered by diKTat"
+    expectedWarningsPattern = "// ;warn:?(.*):(\\d+):? ?(.+)?"
+
+[warn]
+    # Don't look at message of warning
+    benchmarkMode = true
+    exactWarningsMatch = true

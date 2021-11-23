@@ -88,6 +88,7 @@ class WarnPlugin(
         "LongMethod",
         "ReturnCount",
         "SwallowedException",
+        "TOO_MANY_LINES_IN_LAMBDA",
     )
     private fun handleTestFile(
         paths: List<Path>,
@@ -169,7 +170,8 @@ class WarnPlugin(
                     fileNameCaptureGroupOut!!,
                     line,
                     columnCaptureGroupOut,
-                    messageCaptureGroupOut!!
+                    messageCaptureGroupOut!!,
+                    benchmarkMode!!,
                 )
             }
         }
@@ -234,6 +236,7 @@ class WarnPlugin(
                     newLine,
                     columnCaptureGroup,
                     messageCaptureGroup!!,
+                    benchmarkMode!!,
                 )
             }
         }

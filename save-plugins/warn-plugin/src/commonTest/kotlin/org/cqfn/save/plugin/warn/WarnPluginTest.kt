@@ -406,6 +406,7 @@ class WarnPluginTest {
                 1,
                 5,
                 2,
+                false,
             )
         }
     }
