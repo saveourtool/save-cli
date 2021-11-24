@@ -19,7 +19,7 @@ class ClassicFixTest {
         runTestsWithDiktat(
             listOf(
                 "fix/save.toml"
-            ), 2
+            ), 5
         )
     }
 
@@ -28,7 +28,43 @@ class ClassicFixTest {
         runTestsWithDiktat(
             listOf(
                 "fix/smoke/save.toml"
-            ), 2
+            ), 5
+        )
+    }
+
+    @Test
+    fun `execute fix plugin on folder`() {
+        runTestsWithDiktat(
+            listOf(
+                "fix/smoke/src/main/kotlin/org/cqfn/save/"
+            ), 5
+        )
+    }
+
+    @Test
+    fun `check NoIgnoreLines`() {
+        runTestsWithDiktat(
+            listOf(
+                "fix/smoke/src/main/kotlin/org/cqfn/save/IgnoreLinesTest/NoIgnoreLines"
+            ), 1
+        )
+    }
+
+    @Test
+    fun `check IgnoreLinesIsEmpty`() {
+        runTestsWithDiktat(
+            listOf(
+                "fix/smoke/src/main/kotlin/org/cqfn/save/IgnoreLinesTest/IgnoreLinesIsEmpty"
+            ), 1
+        )
+    }
+
+    @Test
+    fun `check IgnoreLines`() {
+        runTestsWithDiktat(
+            listOf(
+                "fix/smoke/src/main/kotlin/org/cqfn/save/IgnoreLinesTest/IgnoreLines"
+            ), 1
         )
     }
 }
