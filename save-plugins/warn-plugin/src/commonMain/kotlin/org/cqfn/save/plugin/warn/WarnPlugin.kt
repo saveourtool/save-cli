@@ -15,14 +15,13 @@ import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.ProcessExecutionException
 import org.cqfn.save.core.utils.ProcessTimeoutException
-import org.cqfn.save.plugin.warn.utils.ResultsChecker
-import org.cqfn.save.plugin.warn.utils.Warning
-import org.cqfn.save.plugin.warn.utils.extractWarning
-import org.cqfn.save.plugin.warn.utils.getLineNumber
 
 import okio.FileNotFoundException
 import okio.FileSystem
 import okio.Path
+import org.cqfn.save.plugin.warn.utils.*
+import org.cqfn.save.plugin.warn.utils.extractWarning
+import org.cqfn.save.plugin.warn.utils.getLineNumber
 
 private typealias WarningMap = Map<String, List<Warning>>
 
@@ -220,27 +219,53 @@ class WarnPlugin(
         generalConfig: GeneralConfig
     ): List<Warning> {
         val linesFile = fs.readLines(this)
-        return linesFile.mapIndexed { index, line ->
-            val newLine = line.getLineNumber(
-                generalConfig.expectedWarningsPattern!!,
-                warnPluginConfig.lineCaptureGroup,
-                warnPluginConfig.linePlaceholder!!,
-                index + 1,
-                this,
-                linesFile,
-            )
-            with(warnPluginConfig) {
-                line.extractWarning(
+        return if (generalConfig.expectedWarningsEndPattern == null) {
+            linesFile.mapIndexed { index, line ->
+                val newLine = line.getLineNumber(
                     generalConfig.expectedWarningsPattern!!,
-                    this@collectWarningsWithLineNumbers.name,
-                    newLine,
-                    columnCaptureGroup,
-                    messageCaptureGroup!!,
-                    benchmarkMode!!,
+                    warnPluginConfig.lineCaptureGroup,
+                    warnPluginConfig.linePlaceholder!!,
+                    index + 1,
+                    this,
+                    linesFile,
                 )
+                with(warnPluginConfig) {
+                    line.extractWarning(
+                        generalConfig.expectedWarningsPattern!!,
+                        this@collectWarningsWithLineNumbers.name,
+                        newLine,
+                        columnCaptureGroup,
+                        messageCaptureGroup!!,
+                        benchmarkMode!!,
+                    )
+                }
             }
+                .filterNotNull()
+                .sortedBy { warn -> warn.message }
+        } else {
+            linesFile.mapIndexed { index, line ->
+                val newLineAndMessage = line.getLineNumberAndMessage(
+                    generalConfig.expectedWarningsPattern!!,
+                    generalConfig.expectedWarningsEndPattern!!,
+                    warnPluginConfig.lineCaptureGroup,
+                    warnPluginConfig.linePlaceholder!!,
+                    warnPluginConfig.messageCaptureGroup!!,
+                    index + 1,
+                    this,
+                    linesFile,
+                )
+                with(warnPluginConfig) {
+                    line.extractWarning(
+                        generalConfig.expectedWarningsPattern!!,
+                        this@collectWarningsWithLineNumbers.name,
+                        newLineAndMessage?.first,
+                        newLineAndMessage?.second,
+                        messageCaptureGroup!!,
+                    )
+                }
+            }
+                .filterNotNull()
+                .sortedBy { warn -> warn.message }
         }
-            .filterNotNull()
-            .sortedBy { warn -> warn.message }
     }
 }

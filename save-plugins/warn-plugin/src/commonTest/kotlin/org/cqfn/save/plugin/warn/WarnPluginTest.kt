@@ -411,6 +411,49 @@ class WarnPluginTest {
         }
     }
 
+    @Test
+    @Suppress("TOO_LONG_FUNCTION")
+    fun `warn-plugin test - multiline warnings`() {
+        mockExecCmd(
+            """
+                |Test1Test.java:2: Avoid using default package
+                |Test1Test.java:5: Variable name should be in lowerCamelCase
+                |""".trimMargin()
+        )
+        performTest(
+            listOf(
+                """
+                /* ;warn: Avoid using default package */
+                class example {
+                    /* ;warn: Variable name should be 
+                     * in lowerCamelCase */
+                    int Foo = 42;
+                }
+            """.trimIndent()
+            ),
+            defaultWarnConfig.copy(
+                actualWarningsPattern = Regex("(.+):(\\d+): (.+)"),
+                warningTextHasColumn = false,
+                lineCaptureGroup = 1,
+                columnCaptureGroup = null,
+                messageCaptureGroup = 2,
+                fileNameCaptureGroupOut = 1,
+                lineCaptureGroupOut = 2,
+                columnCaptureGroupOut = null,
+                messageCaptureGroupOut = 3,
+            ),
+            defaultGeneralConfig.copy(
+                expectedWarningsPattern = Regex("/\\* ;warn:?(\\d*): (.*)"),
+                expectedWarningsEndPattern = Regex("(.*) \\*/")
+            ),
+        ) { results ->
+            assertEquals(1, results.size)
+            results.single().status.let {
+                assertTrue(it is Pass, "Expected test to pass, but actually got status $it")
+            }
+        }
+    }
+
     private fun performTest(
         texts: List<String>,
         warnPluginConfig: WarnPluginConfig,

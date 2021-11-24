@@ -57,6 +57,24 @@ internal fun String.extractWarning(warningRegex: Regex,
     )
 }
 
+@Suppress("TOO_MANY_PARAMETERS", "LongParameterList")
+internal fun String.extractWarning(warningRegex: Regex,
+                                   fileName: String,
+                                   line: Int?,
+                                   message: String?,
+                                   columnGroupIdx: Long?,
+): Warning? {
+    val groups = warningRegex.find(this)?.groups ?: return null
+
+    val column = getRegexGroupSafe(columnGroupIdx, groups, this, "column number")?.toIntOrNull()
+    return Warning(
+        message ?: "",
+        line,
+        column,
+        fileName,
+    )
+}
+
 /**
  * Extract warning from [this] string using provided parameters
  *
@@ -140,6 +158,44 @@ internal fun String.getLineNumber(warningRegex: Regex,
     }
 }
 
+internal fun String.getLineNumberAndMessage(
+    warningRegex: Regex,
+    endWarningRegex: Regex,
+    lineGroupIdx: Long?,
+    placeholder: String,
+    messageGroupIdx: Long,
+    lineNum: Int,
+    file: Path?,
+    linesFile: List<String>,
+): Pair<Int, String>? {
+    if (lineGroupIdx == null) {
+        throw ResourceFormatException("line capture group is not configured in save.toml.")
+    }
+
+    val groups = warningRegex.find(this)?.groups ?: return null
+    val lineValue = groups[lineGroupIdx.toInt()]!!.value
+    val messageValue = groups[messageGroupIdx.toInt()]!!.value
+
+    return if (lineValue.isEmpty()) {
+        nextLineMatchingRegex(file!!, endWarningRegex, linesFile, lineNum) to getAllMessage(endWarningRegex, linesFile, lineNum, messageValue)
+    } else {
+        val line = lineValue.toIntOrNull()
+        if (line == null) {
+            if (lineValue[0] != placeholder[0]) {
+                throw ResourceFormatException("The group <$lineValue> is neither a number nor a placeholder.")
+            }
+            try {
+                val adjustment = lineValue.substringAfterLast(placeholder)
+                lineNum + adjustment.ifBlank { "0" }.toInt() to getAllMessage(endWarningRegex, linesFile, lineNum, messageValue)
+            } catch (e: Exception) {
+                throw ResourceFormatException("Could not extract line number from line [$this], cause: ${e.describe()}")
+            }
+        } else {
+            line to getAllMessage(endWarningRegex, linesFile, lineNum, messageValue)
+        }
+    }
+}
+
 /**
  * @param warningRegex regular expression for warning
  * @param lineGroupIdx index of capture group for line number
@@ -192,4 +248,49 @@ private fun nextLineNotMatchingRegex(
     } else {
         nextLineNumber
     }
+}
+
+/**
+ * Returns number of the next line after [lineNum] that match [regex].
+ */
+private fun nextLineMatchingRegex(
+    file: Path,
+    regex: Regex,
+    linesFile: List<String>,
+    lineNum: Int,
+): Int {
+    val fileSize = linesFile.size
+    val nextLineNumber = lineNum + 1 + linesFile.drop(lineNum).takeWhile { !regex.containsMatchIn(it) }.count()
+    return if (nextLineNumber > fileSize) {
+        logWarn("Some warnings are at the end of the file: <$file>. They will be assigned the following line: $nextLineNumber")
+        fileSize
+    } else {
+        nextLineNumber
+    }
+}
+
+private fun getAllMessage(
+    regex: Regex,
+    linesFile: List<String>,
+    lineNum: Int,
+    messageValue: String,
+): String {
+    var message = messageValue
+
+    val onlyOneLine = regex.containsMatchIn(linesFile[lineNum-1])
+
+    if (onlyOneLine) {
+        return messageValue
+    }
+
+    linesFile.drop(lineNum).takeWhile { line ->
+
+        val groups = regex.find(line)?.groups
+        val lineValue = if (groups != null) groups[1]!!.value else line
+
+        message += "\n$lineValue"
+        !regex.containsMatchIn(line)
+    } //.forEach { message += "\n$it" }
+
+    return message
 }

@@ -72,6 +72,7 @@ data class GeneralConfig(
     val suiteName: String? = null,
     val excludedTests: List<String>? = null,
     val expectedWarningsPattern: Regex? = null,
+    val expectedWarningsEndPattern: Regex? = null,
     val runConfigPattern: Regex? = null,
     val timeOutMillis: Long? = null,
 ) : PluginConfig {
@@ -96,6 +97,7 @@ data class GeneralConfig(
             this.suiteName ?: other.suiteName,
             this.excludedTests ?: other.excludedTests,
             this.expectedWarningsPattern ?: other.expectedWarningsPattern,
+            this.expectedWarningsEndPattern ?: other.expectedWarningsEndPattern,
             this.runConfigPattern ?: other.runConfigPattern,
             this.timeOutMillis ?: other.timeOutMillis,
         ).also { it.configLocation = this.configLocation }
@@ -122,6 +124,7 @@ data class GeneralConfig(
             suiteName,
             excludedTests ?: emptyList(),
             expectedWarningsPattern ?: defaultExpectedWarningPattern,
+            expectedWarningsEndPattern,
             runConfigPattern ?: defaultRunConfigPattern,
             timeOutMillis ?: 10_000L,
         ).also { it.configLocation = this.configLocation }
