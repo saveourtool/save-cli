@@ -56,7 +56,7 @@ abstract class Plugin(
         if (!excludedTests.isNullOrEmpty()) {
             logDebug("Excluded tests for [${testConfig.location}] : $excludedTests")
         }
-
+        clean()
         return if (testFilesList.isNotEmpty()) {
             // fixme: remove this logging and convert `testFilesList` back to Sequence
             // or at least make `logDebug` accept lazy messages

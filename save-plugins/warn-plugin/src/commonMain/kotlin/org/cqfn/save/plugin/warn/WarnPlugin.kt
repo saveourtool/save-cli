@@ -1,7 +1,7 @@
 package org.cqfn.save.plugin.warn
 
 import org.cqfn.save.core.config.TestConfig
-import org.cqfn.save.core.files.createRelativePathToTheRoot
+import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.logging.logWarn
@@ -19,6 +19,7 @@ import org.cqfn.save.core.utils.ProcessTimeoutException
 import okio.FileNotFoundException
 import okio.FileSystem
 import okio.Path
+import kotlin.random.Random
 import org.cqfn.save.plugin.warn.utils.*
 import org.cqfn.save.plugin.warn.utils.extractWarning
 import org.cqfn.save.plugin.warn.utils.getLineNumber
@@ -81,13 +82,31 @@ class WarnPlugin(
         }
     }
 
+    private fun createTestFiles(paths: List<Path>, warnPluginConfig: WarnPluginConfig): List<Path> {
+        val dirName = "${WarnPlugin::class.simpleName!!}-${Random.nextInt()}"
+        val dirPath = constructPathForCopyOfTestFile(dirName, paths[0]).parent!!
+        createTempDir(dirPath)
+
+        val ignorePatterns = warnPluginConfig.ignoreLinesPatterns
+
+        return paths.map { path ->
+            val copyPath = constructPathForCopyOfTestFile(dirName, path)
+            fs.write(fs.createFile(copyPath)) {
+                fs.readLines(path)
+                    .filter { line -> ignorePatterns.none { it.matches(line) } }
+                    .map { write((it + "\n").encodeToByteArray()) }
+            }
+            copyPath
+        }
+    }
+
     @Suppress(
         "TOO_LONG_FUNCTION",
         "SAY_NO_TO_VAR",
         "LongMethod",
         "ReturnCount",
         "SwallowedException",
-        "TOO_MANY_LINES_IN_LAMBDA",
+        "TOO_MANY_LINES_IN_LAMBDA"
     )
     private fun handleTestFile(
         paths: List<Path>,
@@ -95,15 +114,13 @@ class WarnPlugin(
         generalConfig: GeneralConfig
     ): Sequence<TestResult> {
         // extracting all warnings from test resource files
-        val expectedWarningsMap: WarningMap = paths.associate {
+        val copyPaths: List<Path> = createTestFiles(paths, warnPluginConfig)
+        val expectedWarningsMap: WarningMap = copyPaths.associate {
             val warningsForCurrentPath = it.collectWarningsWithLineNumbers(warnPluginConfig, generalConfig)
             it.name to warningsForCurrentPath
         }
 
-        val extraFlagsList = paths.mapNotNull { path ->
-            extraFlagsExtractor.extractExtraFlagsFrom(path)
-        }
-            .distinct()
+        val extraFlagsList = copyPaths.mapNotNull { extraFlagsExtractor.extractExtraFlagsFrom(it) }.distinct()
         require(extraFlagsList.size <= 1) {
             "Extra flags for all files in a batch should be same, but you have batchSize=${warnPluginConfig.batchSize}" +
                     " and there are ${extraFlagsList.size} different sets of flags inside it, namely $extraFlagsList"
@@ -123,19 +140,13 @@ class WarnPlugin(
         // NOTE: SAVE will pass relative paths of Tests (calculated from testRootConfig dir) into the executed tool
         val fileNamesForExecCmd =
                 warnPluginConfig.wildCardInDirectoryMode?.let {
-                    val directoryPrefix = testConfig
-                        .directory
-                        .createRelativePathToTheRoot(testConfig.getRootConfig().location)
                     // a hack to put only the directory path to the execution command
                     // only in case a directory mode is enabled
-                    "$directoryPrefix$it"
-                } ?: paths.joinToString(separator = warnPluginConfig.batchSeparator!!) {
-                    it.createRelativePathToTheRoot(testConfig.getRootConfig().location)
-                }
-
+                    "${copyPaths[0].parent!!}$it"
+                } ?: copyPaths.joinToString(separator = warnPluginConfig.batchSeparator!!)
         val execFlagsAdjusted = resolvePlaceholdersFrom(warnPluginConfig.execFlags, extraFlags, fileNamesForExecCmd)
         val execCmd = "${generalConfig.execCmd} $execFlagsAdjusted"
-        val time = generalConfig.timeOutMillis!!.times(paths.size)
+        val time = generalConfig.timeOutMillis!!.times(copyPaths.size)
 
         val executionResult = try {
             pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time)
@@ -145,6 +156,7 @@ class WarnPlugin(
         } catch (ex: ProcessExecutionException) {
             return failTestResult(paths, ex, execCmd)
         }
+
         val stdout =
                 warnPluginConfig.testToolResFileOutput?.let {
                     val testToolResFilePath = testConfig.directory / warnPluginConfig.testToolResFileOutput

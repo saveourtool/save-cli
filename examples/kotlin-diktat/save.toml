@@ -5,4 +5,3 @@
     expectedWarningsPattern = "// ;warn:?(.*):(\\d*): (.+)"
     timeOutMillis = 30000
 
-

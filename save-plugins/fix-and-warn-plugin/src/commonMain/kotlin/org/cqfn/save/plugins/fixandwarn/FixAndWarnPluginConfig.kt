@@ -26,6 +26,9 @@ data class FixAndWarnPluginConfig(
     override var configLocation: Path = "undefined_toml_location".toPath()
     override val resourceNamePatternStr: String = "(${fix.resourceNamePatternStr})|(${warn.resourceNamePatternStr})"
 
+    @Transient
+    override val ignoreLinesPatterns: MutableList<Regex> = mutableListOf()
+
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as FixAndWarnPluginConfig
         val mergedFixPluginConfig = fix.mergeWith(other.fix)
@@ -33,7 +36,9 @@ data class FixAndWarnPluginConfig(
         return FixAndWarnPluginConfig(
             mergedFixPluginConfig as FixPluginConfig,
             mergedWarnPluginConfig as WarnPluginConfig
-        ).also { it.configLocation = this.configLocation }
+        ).also {
+            it.configLocation = this.configLocation
+        }
     }
 
     override fun validateAndSetDefaults(): PluginConfig {
@@ -49,6 +54,8 @@ data class FixAndWarnPluginConfig(
         return FixAndWarnPluginConfig(
             fix.validateAndSetDefaults(),
             warn.validateAndSetDefaults()
-        ).also { it.configLocation = this.configLocation }
+        ).also {
+            it.configLocation = this.configLocation
+        }
     }
 }
