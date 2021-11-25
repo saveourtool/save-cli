@@ -416,16 +416,17 @@ class WarnPluginTest {
     fun `warn-plugin test - multiline warnings`() {
         mockExecCmd(
             """
-                |Test1Test.java:2: Avoid using default package
-                |Test1Test.java:5: Variable name should be in lowerCamelCase
+                |Test1Test.java:2: Class name should be in PascalCase
+                |Test1Test.java:6: Variable name should be in lowerCamelCase
                 |""".trimMargin()
         )
         performTest(
             listOf(
                 """
-                /* ;warn: Avoid using default package */
+                /* ;warn: Class name should be in PascalCase */
                 class example {
-                    /* ;warn: Variable name should be 
+                    /* ;warn: Variable name
+                     * should be
                      * in lowerCamelCase */
                     int Foo = 42;
                 }
@@ -441,10 +442,13 @@ class WarnPluginTest {
                 lineCaptureGroupOut = 2,
                 columnCaptureGroupOut = null,
                 messageCaptureGroupOut = 3,
+                messageCaptureGroupMiddle = 1,
+                messageCaptureGroupEnd = 1,
             ),
             defaultGeneralConfig.copy(
                 expectedWarningsPattern = Regex("/\\* ;warn:?(\\d*): (.*)"),
-                expectedWarningsEndPattern = Regex("(.*) \\*/")
+                expectedWarningsMiddlePattern = Regex("\\* (.*)"),
+                expectedWarningsEndPattern = Regex("(.*) \\*/"),
             ),
         ) { results ->
             assertEquals(1, results.size)

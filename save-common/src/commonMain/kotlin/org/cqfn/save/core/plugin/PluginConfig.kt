@@ -68,6 +68,8 @@ interface PluginConfig {
  * @property expectedWarningsPattern - pattern with warnings that are expected from the test file
  * @property runConfigPattern everything from the capture group will be split by comma and then by `=`
  * @property timeOutMillis command execution time for one test
+ * @property expectedWarningsMiddlePattern
+ * @property expectedWarningsEndPattern
  */
 @Serializable
 data class GeneralConfig(
@@ -77,6 +79,7 @@ data class GeneralConfig(
     val suiteName: String? = null,
     val excludedTests: List<String>? = null,
     val expectedWarningsPattern: Regex? = null,
+    val expectedWarningsMiddlePattern: Regex? = null,
     val expectedWarningsEndPattern: Regex? = null,
     val runConfigPattern: Regex? = null,
     val timeOutMillis: Long? = null,
@@ -88,6 +91,7 @@ data class GeneralConfig(
     override var configLocation: Path = "undefined_toml_location".toPath()
     override val resourceNamePatternStr: String = ".*"
 
+    @Suppress("ComplexMethod")
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as GeneralConfig
         val mergedTag = other.tags?.let {
@@ -103,6 +107,7 @@ data class GeneralConfig(
             this.suiteName ?: other.suiteName,
             this.excludedTests ?: other.excludedTests,
             this.expectedWarningsPattern ?: other.expectedWarningsPattern,
+            this.expectedWarningsMiddlePattern ?: other.expectedWarningsMiddlePattern,
             this.expectedWarningsEndPattern ?: other.expectedWarningsEndPattern,
             this.runConfigPattern ?: other.runConfigPattern,
             this.timeOutMillis ?: other.timeOutMillis,
@@ -130,6 +135,7 @@ data class GeneralConfig(
             suiteName,
             excludedTests ?: emptyList(),
             expectedWarningsPattern ?: defaultExpectedWarningPattern,
+            expectedWarningsMiddlePattern,
             expectedWarningsEndPattern,
             runConfigPattern ?: defaultRunConfigPattern,
             timeOutMillis ?: 10_000L,
