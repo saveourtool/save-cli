@@ -44,6 +44,8 @@ class JsonReporter(
 
     private var isFirstSuite = true  // todo: use AtomicBoolean
 
+    private var isFirstPlugin = true  // todo: use AtomicBoolean
+
     override fun beforeAll() {
         out.write("[\n".encodeToByteArray())
     }
@@ -54,6 +56,7 @@ class JsonReporter(
 
     override fun onSuiteStart(suiteName: String) {
         isFirstSuite = out.appendCommaUnless(isFirstSuite)
+        isFirstPlugin = true
         out.write("{\n\"testSuite\": \"$suiteName\",\n\"pluginExecutions\":\n[\n".encodeToByteArray())
     }
 
@@ -67,6 +70,7 @@ class JsonReporter(
     }
 
     override fun onPluginInitialization(plugin: Plugin) {
+        isFirstPlugin = out.appendCommaUnless(isFirstPlugin)
         out.write("{\n\"plugin\": \"${plugin::class.simpleName}\",\n".encodeToByteArray())
     }
 
