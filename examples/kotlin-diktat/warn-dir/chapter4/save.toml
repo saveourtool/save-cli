@@ -4,7 +4,7 @@
     suiteName = "Directory: Chapter4"
     expectedWarningsPattern = "/\\* ;warn:?(.*):(\\d*): (.+)"
     expectedWarningsMiddlePattern = "\\* (.*)"
-    expectedWarningsEndPattern = "(.*) \\*/"
+    expectedWarningsEndPattern = "(.*)?\\*/"
 
 [warn]
     lineCaptureGroup = 1

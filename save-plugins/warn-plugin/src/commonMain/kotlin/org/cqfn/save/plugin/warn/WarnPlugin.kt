@@ -256,7 +256,7 @@ class WarnPlugin(
                         this@collectWarningsWithLineNumbers.name,
                         newLineAndMessage?.first,
                         newLineAndMessage?.second,
-                        columnCaptureGroup!!,
+                        columnCaptureGroup,
                     )
                 }
             }

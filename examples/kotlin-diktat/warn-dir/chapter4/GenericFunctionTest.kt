@@ -7,7 +7,8 @@ private class ClassName<T> {
             val variableName: Template
             /* ;warn:17: [VARIABLE_NAME_INCORRECT_FORMAT] variable name should
              * be in lowerCamelCase and should contain only latin (ASCII)
-             * letters or numbers and should start from lower letter: variableT */
+             * letters or numbers and should start from lower letter: variableT
+             * */
             val variableT: T
             println(variableT)
             return body!!(variableName)
@@ -16,7 +17,7 @@ private class ClassName<T> {
         }
     }
 
-    /* ;warn:19:5: [MISSING_KDOC_ON_FUNCTION] all public, internal and protected
+    /* ;warn:20:5: [MISSING_KDOC_ON_FUNCTION] all public, internal and protected
      * functions should have Kdoc with proper tags: foo */
     fun foo(var1: T, var2: ((T?) -> T?)?) {
         lock<T, T>(var2, var1)

@@ -348,7 +348,7 @@ private fun getAllMessage(
     if (onlyOneLine) {
         val groups = endRegex.find(messageValue)?.groups
         return groups?.let {
-            groups[messageGroupEndIdx]!!.value
+            groups[messageGroupEndIdx]!!.value.trim()
         }
             ?: run {
                 messageValue
@@ -377,5 +377,5 @@ private fun getAllMessage(
         !endRegex.containsMatchIn(line)
     }
 
-    return message
+    return message.trim()
 }
