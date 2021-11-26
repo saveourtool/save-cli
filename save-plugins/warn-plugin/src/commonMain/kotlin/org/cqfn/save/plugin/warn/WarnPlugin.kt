@@ -229,63 +229,86 @@ class WarnPlugin(
      * 1) reading the file
      * 2) for each line get the warning
      */
-    @Suppress("TOO_LONG_FUNCTION")
     private fun Path.collectWarningsWithLineNumbers(
         warnPluginConfig: WarnPluginConfig,
         generalConfig: GeneralConfig
     ): List<Warning> {
         val linesFile = fs.readLines(this)
         return generalConfig.expectedWarningsEndPattern?.let {
-            linesFile.mapIndexed { index, line ->
-                val newLineAndMessage = line.getLineNumberAndMessage(
-                    generalConfig.expectedWarningsPattern!!,
-                    generalConfig.expectedWarningsEndPattern!!,
-                    generalConfig.expectedWarningsMiddlePattern!!,
-                    warnPluginConfig.messageCaptureGroupMiddle!!,
-                    warnPluginConfig.messageCaptureGroupEnd!!,
-                    warnPluginConfig.lineCaptureGroup,
-                    warnPluginConfig.linePlaceholder!!,
-                    warnPluginConfig.messageCaptureGroup!!,
-                    index + 1,
-                    this,
-                    linesFile,
-                )
-                with(warnPluginConfig) {
-                    line.extractWarning(
-                        generalConfig.expectedWarningsPattern!!,
-                        this@collectWarningsWithLineNumbers.name,
-                        newLineAndMessage?.first,
-                        newLineAndMessage?.second,
-                        columnCaptureGroup,
-                    )
-                }
-            }
-                .filterNotNull()
-                .sortedBy { warn -> warn.message }
+            collectionMultilineWarnings(
+                warnPluginConfig,
+                generalConfig,
+                linesFile,
+                this,
+            )
         }
             ?: run {
-                linesFile.mapIndexed { index, line ->
-                    val newLine = line.getLineNumber(
-                        generalConfig.expectedWarningsPattern!!,
-                        warnPluginConfig.lineCaptureGroup,
-                        warnPluginConfig.linePlaceholder!!,
-                        index + 1,
-                        this,
-                        linesFile,
-                    )
-                    with(warnPluginConfig) {
-                        line.extractWarning(
-                            generalConfig.expectedWarningsPattern!!,
-                            this@collectWarningsWithLineNumbers.name,
-                            newLine,
-                            columnCaptureGroup,
-                            messageCaptureGroup!!,
-                            benchmarkMode!!,
-                        )
-                    }
-                }
-                    .filterNotNull()
-                    .sortedBy { warn -> warn.message }
+                collectionSingleWarnings(
+                    warnPluginConfig,
+                    generalConfig,
+                    linesFile,
+                    this,
+                )
             }
     }
+
+    private fun collectionMultilineWarnings(
+        warnPluginConfig: WarnPluginConfig,
+        generalConfig: GeneralConfig,
+        linesFile: List<String>,
+        file: Path,
+    ): List<Warning> = linesFile.mapIndexed { index, line ->
+        val newLineAndMessage = line.getLineNumberAndMessage(
+            generalConfig.expectedWarningsPattern!!,
+            generalConfig.expectedWarningsEndPattern!!,
+            generalConfig.expectedWarningsMiddlePattern!!,
+            warnPluginConfig.messageCaptureGroupMiddle!!,
+            warnPluginConfig.messageCaptureGroupEnd!!,
+            warnPluginConfig.lineCaptureGroup,
+            warnPluginConfig.linePlaceholder!!,
+            warnPluginConfig.messageCaptureGroup!!,
+            index + 1,
+            file,
+            linesFile,
+        )
+        with(warnPluginConfig) {
+            line.extractWarning(
+                generalConfig.expectedWarningsPattern!!,
+                file.name,
+                newLineAndMessage?.first,
+                newLineAndMessage?.second,
+                columnCaptureGroup,
+            )
+        }
+    }
+        .filterNotNull()
+        .sortedBy { warn -> warn.message }
+
+    private fun collectionSingleWarnings(
+        warnPluginConfig: WarnPluginConfig,
+        generalConfig: GeneralConfig,
+        linesFile: List<String>,
+        file: Path,
+    ): List<Warning> = linesFile.mapIndexed { index, line ->
+        val newLine = line.getLineNumber(
+            generalConfig.expectedWarningsPattern!!,
+            warnPluginConfig.lineCaptureGroup,
+            warnPluginConfig.linePlaceholder!!,
+            index + 1,
+            file,
+            linesFile,
+        )
+        with(warnPluginConfig) {
+            line.extractWarning(
+                generalConfig.expectedWarningsPattern!!,
+                file.name,
+                newLine,
+                columnCaptureGroup,
+                messageCaptureGroup!!,
+                benchmarkMode!!,
+            )
+        }
+    }
+        .filterNotNull()
+        .sortedBy { warn -> warn.message }
 }
