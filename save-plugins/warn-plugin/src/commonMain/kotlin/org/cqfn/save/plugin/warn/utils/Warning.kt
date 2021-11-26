@@ -65,7 +65,6 @@ internal fun String.extractWarning(warningRegex: Regex,
  * @param columnGroupIdx index of capture group for column number
  * @return a [Warning] or null if [this] string doesn't match [warningRegex]
  */
-@Suppress("TOO_MANY_PARAMETERS", "LongParameterList")
 internal fun String.extractWarning(warningRegex: Regex,
                                    fileName: String,
                                    line: Int?,
