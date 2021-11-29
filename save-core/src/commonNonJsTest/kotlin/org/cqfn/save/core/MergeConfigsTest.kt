@@ -39,9 +39,9 @@ class MergeConfigsTest {
     private val warningsOutputPattern1 = Regex(".*")
     private val warningsOutputPattern2 = Regex("\\w+ - (\\d+)/(\\d+) - (.*)$")
     private val warnConfig1 = WarnPluginConfig("execCmd1", warningsOutputPattern2,
-        false, false, 1, ", ", 1, 1, 1, 1, 1, 1, 1, false, null)
+        false, false, 1, ", ", 1, 1, 1, 1, 1, 1, 1, 1, 1, false, null)
     private val warnConfig2 = WarnPluginConfig("execCmd2", warningsOutputPattern1,
-        true, true, 1, ", ", 2, 2, 2, 2, 2, 2, 2, true, null)
+        true, true, 1, ", ", 2, 2, 2, 1, 1, 2, 2, 2, 2, true, null)
     private val warnConfig3 = WarnPluginConfig("execCmd3", warningsOutputPattern2,
         warningTextHasColumn = false, batchSize = 1, lineCaptureGroup = 3, columnCaptureGroup = 3, messageCaptureGroup = 3,
         fileNameCaptureGroupOut = 3, lineCaptureGroupOut = 3, columnCaptureGroupOut = 3, messageCaptureGroupOut = 3)
@@ -121,7 +121,7 @@ class MergeConfigsTest {
         val expectedGeneralConfig =
                 GeneralConfig("", listOf("Tag11", "Tag12", "Tag21"), "Description2", "suiteName2", listOf("excludedTests: test3"), runConfigPattern = extraFlagsPattern1)
         val expectedWarnConfig = WarnPluginConfig("execCmd3", warningsOutputPattern2,
-            true, false, 1, ", ", 3, 3, 3, 3, 3, 3, 3, true, null)
+            true, false, 1, ", ", 3, 3, 3, 1, 1, 3, 3, 3, 3, true, null)
         val expectedFixConfig = FixPluginConfig("fixCmd2", 1, "Suffix")
 
         val actualGeneralConfig = config2.pluginConfigs.filterIsInstance<GeneralConfig>().first()
@@ -147,7 +147,7 @@ class MergeConfigsTest {
         val expectedGeneralConfig =
                 GeneralConfig("", listOf("Tag11", "Tag12", "Tag21", "Tag31", "Tag32"), "Description2", "suiteName4", listOf("excludedTests: test7"), runConfigPattern = extraFlagsPattern2)
         val expectedWarnConfig = WarnPluginConfig("execCmd4", warningsOutputPattern2,
-            true, false, 1, ", ", 4, 4, 4, 4, 4, 4, 4, true, null)
+            true, false, 1, ", ", 4, 4, 4, 1, 1, 4, 4, 4, 4, true, null)
         val expectedFixConfig = FixPluginConfig("fixCmd4", 1, "Suffix")
 
         val actualGeneralConfig = config4.pluginConfigs.filterIsInstance<GeneralConfig>().first()
