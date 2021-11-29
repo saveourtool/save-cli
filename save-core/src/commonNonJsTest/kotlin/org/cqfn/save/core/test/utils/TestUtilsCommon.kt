@@ -66,10 +66,10 @@ fun runTestsWithDiktat(
         if (test.resources.test.name == "ThisShouldAlwaysFailTest.kt") {
             assertEquals(
                 Fail(
-                    "Some warnings were expected but not received:" +
+                    "(MISSING WARNINGS):" +
                             " [Warning(message=[DUMMY_ERROR] this error should not match, line=8, column=1," +
                             " fileName=ThisShouldAlwaysFailTest.kt)]",
-                    "Some warnings were expected but not received (1)"
+                    "(MISSING WARNINGS): (1). (MATCHED WARNINGS): (1)"
                 ), test.status
             )
         } else if (test.resources.test.toString().contains("warn${Path.DIRECTORY_SEPARATOR}chapter2")) {

@@ -200,7 +200,7 @@ class WarnPluginTest {
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
             val nameWarn =
-                    "Some warnings were unexpected: [Warning(message=Variable name should be in lowerCamelCase, line=5, column=8, fileName=Test1Test.java)]"
+                    "(UNEXPECTED WARNINGS): [Warning(message=Variable name should be in lowerCamelCase, line=5, column=8, fileName=Test1Test.java)]"
             assertEquals(nameWarn, (results.single().status as Pass).message)
         }
     }
