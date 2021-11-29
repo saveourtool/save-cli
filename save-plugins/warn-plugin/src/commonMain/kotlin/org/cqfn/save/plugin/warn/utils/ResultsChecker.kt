@@ -41,20 +41,20 @@ class ResultsChecker(
 
         return when (missingWarnings.isEmpty() to unexpectedWarnings.isEmpty()) {
             false to true -> Fail(
-                "$EXPECTED_BUT_NOT_RECEIVED $missingWarnings",
-                "$EXPECTED_BUT_NOT_RECEIVED (${missingWarnings.size}). $MATCHED ($expectedWarningsMatchedWithActual)."
+                "$MISSING $missingWarnings",
+                "$MISSING (${missingWarnings.size}). $MATCHED (${expectedWarningsMatchedWithActual.size})"
             )
             false to false -> createFailFromDoubleMiss(missingWarnings, unexpectedWarnings, expectedWarningsMatchedWithActual)
             true to true -> Pass("$ALL_EXPECTED (${expectedWarningsMatchedWithActual.size})")
             true to false -> if (warnPluginConfig.exactWarningsMatch == false) {
                 Pass(
                     "$UNEXPECTED $unexpectedWarnings",
-                    "$UNEXPECTED (${unexpectedWarnings.size}). $MATCHED (${expectedWarningsMatchedWithActual.size})."
+                    "$UNEXPECTED (${unexpectedWarnings.size}). $MATCHED (${expectedWarningsMatchedWithActual.size})"
                 )
             } else {
                 Fail(
                     "$UNEXPECTED $unexpectedWarnings",
-                    "$UNEXPECTED (${unexpectedWarnings.size}). $MATCHED ($expectedWarningsMatchedWithActual)."
+                    "$UNEXPECTED (${unexpectedWarnings.size}). $MATCHED (${expectedWarningsMatchedWithActual.size})"
                 )
             }
             else -> Fail("N/A", "N/A")
@@ -92,16 +92,16 @@ class ResultsChecker(
         unexpectedWarnings: List<Warning>,
         matchedWarnings: List<Warning>
     ) = Fail(
-        "$EXPECTED_BUT_NOT_RECEIVED $missingWarnings. $UNEXPECTED $unexpectedWarnings. $MATCHED $matchedWarnings.",
-        "$EXPECTED_BUT_NOT_RECEIVED (${missingWarnings.size}). " +
+        "$MISSING $missingWarnings. $UNEXPECTED $unexpectedWarnings.",
+        "$MISSING (${missingWarnings.size}). " +
                 "$UNEXPECTED (${unexpectedWarnings.size}). " +
-                "$MATCHED (${matchedWarnings.size})."
+                "$MATCHED (${matchedWarnings.size})"
     )
 
     companion object {
         private const val ALL_EXPECTED = "(ALL WARNINGS MATCHED):"
         private const val MATCHED = "(MATCHED WARNINGS):"
-        private const val EXPECTED_BUT_NOT_RECEIVED = "(MISSING WARNINGS):"
+        private const val MISSING = "(MISSING WARNINGS):"
         private const val UNEXPECTED = "(UNEXPECTED WARNINGS):"
     }
 }
