@@ -40,18 +40,22 @@ class ResultsChecker(
         val unexpectedWarnings = actualWarnings - actualMatchedWithExpectedWarnings
 
         return when (missingWarnings.isEmpty() to unexpectedWarnings.isEmpty()) {
-            false to true -> createFailFromSingleMiss(EXPECTED_BUT_NOT_RECEIVED, missingWarnings)
-            false to false -> createFailFromDoubleMiss(missingWarnings, unexpectedWarnings)
-            true to true -> Pass(
-                "$ALL_EXPECTED: ${expectedWarningsMatchedWithActual.size} warnings",
+            false to true -> Fail(
+                "$EXPECTED_BUT_NOT_RECEIVED $missingWarnings",
+                "$EXPECTED_BUT_NOT_RECEIVED (${missingWarnings.size}). $MATCHED ($expectedWarningsMatchedWithActual)."
             )
+            false to false -> createFailFromDoubleMiss(missingWarnings, unexpectedWarnings, expectedWarningsMatchedWithActual)
+            true to true -> Pass("$ALL_EXPECTED (${expectedWarningsMatchedWithActual.size})")
             true to false -> if (warnPluginConfig.exactWarningsMatch == false) {
                 Pass(
-                    "$UNEXPECTED: $unexpectedWarnings",
-                    "$EXPECTED: ${expectedWarningsMatchedWithActual.size} warnings, $UNEXPECTED: ${unexpectedWarnings.size} warnings"
+                    "$UNEXPECTED $unexpectedWarnings",
+                    "$UNEXPECTED (${unexpectedWarnings.size}). $MATCHED (${expectedWarningsMatchedWithActual.size})."
                 )
             } else {
-                createFailFromSingleMiss(UNEXPECTED, unexpectedWarnings)
+                Fail(
+                    "$UNEXPECTED $unexpectedWarnings",
+                    "$UNEXPECTED (${unexpectedWarnings.size}). $MATCHED ($expectedWarningsMatchedWithActual)."
+                )
             }
             else -> Fail("N/A", "N/A")
         }
@@ -83,19 +87,21 @@ class ResultsChecker(
         matchedWarning != null
     }
 
-    private fun createFailFromSingleMiss(baseText: String, warnings: List<Warning>) =
-            Fail("$baseText: $warnings", "$baseText (${warnings.size})")
-
-    private fun createFailFromDoubleMiss(missingWarnings: List<Warning>, unexpectedWarnings: List<Warning>) =
-            Fail(
-                "$EXPECTED_BUT_NOT_RECEIVED: $missingWarnings, and ${UNEXPECTED.lowercase()}: $unexpectedWarnings",
-                "$EXPECTED_BUT_NOT_RECEIVED (${missingWarnings.size}), and ${UNEXPECTED.lowercase()} (${unexpectedWarnings.size})"
-            )
+    private fun createFailFromDoubleMiss(
+        missingWarnings: List<Warning>,
+        unexpectedWarnings: List<Warning>,
+        matchedWarnings: List<Warning>
+    ) = Fail(
+        "$EXPECTED_BUT_NOT_RECEIVED $missingWarnings. $UNEXPECTED $unexpectedWarnings. $MATCHED $matchedWarnings.",
+        "$EXPECTED_BUT_NOT_RECEIVED (${missingWarnings.size}). " +
+                "$UNEXPECTED (${unexpectedWarnings.size}). " +
+                "$MATCHED (${matchedWarnings.size})."
+    )
 
     companion object {
-        private const val ALL_EXPECTED = "All warnings were expected"
-        private const val EXPECTED = "Received expected warnings"
-        private const val EXPECTED_BUT_NOT_RECEIVED = "Some warnings were expected but not received"
-        private const val UNEXPECTED = "Some warnings were unexpected"
+        private const val ALL_EXPECTED = "(ALL WARNINGS MATCHED):"
+        private const val MATCHED = "(MATCHED WARNINGS):"
+        private const val EXPECTED_BUT_NOT_RECEIVED = "(MISSING WARNINGS):"
+        private const val UNEXPECTED = "(UNEXPECTED WARNINGS):"
     }
 }
