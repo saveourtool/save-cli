@@ -7,7 +7,7 @@ kotlinx-cli = "0.3.3"
 kotlinx-datetime = "0.2.1"
 kotlinx-coroutines = "1.5.2-native-mt"
 junit = "5.8.1"
-ktoml = "0.2.7"
+ktoml = "0.2.8"
 multiplatform-diff = "0.3.0"
 kotlinpoet = "1.8.0"
 
