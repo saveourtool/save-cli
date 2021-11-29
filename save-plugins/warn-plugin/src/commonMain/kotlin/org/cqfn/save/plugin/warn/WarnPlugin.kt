@@ -278,6 +278,7 @@ class WarnPlugin(
                 newLineAndMessage?.first,
                 newLineAndMessage?.second,
                 columnCaptureGroup,
+                benchmarkMode!!,
             )
         }
     }
