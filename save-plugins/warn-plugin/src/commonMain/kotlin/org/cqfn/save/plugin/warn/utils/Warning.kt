@@ -61,18 +61,22 @@ internal fun String.extractWarning(warningRegex: Regex,
  * @param warningRegex regular expression for warning
  * @param fileName file name
  * @param line line number of warning
- * @param message waring text
+ * @param warningMessage warning message
  * @param columnGroupIdx index of capture group for column number
+ * @param benchmarkMode whether to ignore the warning messages
  * @return a [Warning] or null if [this] string doesn't match [warningRegex]
  */
+@Suppress("TOO_MANY_PARAMETERS", "LongParameterList")
 internal fun String.extractWarning(warningRegex: Regex,
                                    fileName: String,
                                    line: Int?,
-                                   message: String?,
+                                   warningMessage: String?,
                                    columnGroupIdx: Long?,
+                                   benchmarkMode: Boolean,
 ): Warning? {
     val groups = warningRegex.find(this)?.groups ?: return null
 
+    val message = if (!benchmarkMode) warningMessage else " "
     val column = getRegexGroupSafe(columnGroupIdx, groups, this, "column number")?.toIntOrNull()
     return Warning(
         message ?: "",
