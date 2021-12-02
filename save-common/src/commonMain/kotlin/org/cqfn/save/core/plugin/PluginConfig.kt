@@ -64,6 +64,7 @@ interface PluginConfig {
  * @property tags special labels that can be used for splitting tests into groups
  * @property description free text with a description
  * @property suiteName name of test suite that can be visible from save-cloud
+ * @property language to tests
  * @property excludedTests excluded tests from the run
  * @property expectedWarningsPattern - pattern with warnings that are expected from the test file
  * @property runConfigPattern everything from the capture group will be split by comma and then by `=`
@@ -77,6 +78,7 @@ data class GeneralConfig(
     val tags: List<String>? = null,
     val description: String? = null,
     val suiteName: String? = null,
+    val language: String? = null,
     val excludedTests: List<String>? = null,
     val expectedWarningsPattern: Regex? = null,
     val expectedWarningsMiddlePattern: Regex? = null,
@@ -105,6 +107,7 @@ data class GeneralConfig(
             mergedTag,
             this.description ?: other.description,
             this.suiteName ?: other.suiteName,
+            this.language ?: other.language,
             this.excludedTests ?: other.excludedTests,
             this.expectedWarningsPattern ?: other.expectedWarningsPattern,
             this.expectedWarningsMiddlePattern ?: other.expectedWarningsMiddlePattern,
@@ -133,6 +136,7 @@ data class GeneralConfig(
             tags,
             description,
             suiteName,
+            language,
             excludedTests ?: emptyList(),
             expectedWarningsPattern ?: defaultExpectedWarningPattern,
             expectedWarningsMiddlePattern,
