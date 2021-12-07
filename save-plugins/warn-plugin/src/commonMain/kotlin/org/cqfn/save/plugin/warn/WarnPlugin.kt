@@ -223,7 +223,7 @@ class WarnPlugin(
         TestResult(
             Test(it),
             Fail(ex.describe(), ex.describe()),
-            DebugInfo(execCmd, null, ex.message, null, CountWarnings(null, null)),
+            DebugInfo(execCmd, null, ex.message, null, null),
         )
     }.asSequence()
 

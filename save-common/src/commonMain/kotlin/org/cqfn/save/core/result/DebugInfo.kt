@@ -29,6 +29,6 @@ data class DebugInfo(
  */
 @Serializable
 data class CountWarnings(
-    val missing: Int? = null,
-    val match: Int? = null,
+    val missing: Int,
+    val match: Int,
 )
