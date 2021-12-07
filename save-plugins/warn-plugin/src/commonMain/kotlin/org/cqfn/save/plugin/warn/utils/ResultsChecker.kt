@@ -1,5 +1,6 @@
 package org.cqfn.save.plugin.warn.utils
 
+import org.cqfn.save.core.result.CountWarnings
 import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestStatus
@@ -26,7 +27,7 @@ class ResultsChecker(
      * @return [TestStatus]
      */
     @Suppress("TYPE_ALIAS")
-    internal fun checkResults(testFileName: String): Triple<TestStatus, Int, Int> {
+    internal fun checkResults(testFileName: String): Pair<TestStatus, CountWarnings> {
         val actualWarnings = actualWarningsMap[testFileName] ?: listOf()
         val expectedWarnings = expectedWarningsMap[testFileName] ?: listOf()
 
@@ -40,27 +41,27 @@ class ResultsChecker(
         val unexpectedWarnings = actualWarnings - actualMatchedWithExpectedWarnings
 
         val missing = missingWarnings.size
-        val match = expectedWarningsMatchedWithActual.size
+        val matched = expectedWarningsMatchedWithActual.size
 
         return when (missingWarnings.isEmpty() to unexpectedWarnings.isEmpty()) {
-            false to true -> Triple(Fail(
+            false to true -> Fail(
                 "$MISSING $missingWarnings",
-                "$MISSING (${missingWarnings.size}). $MATCHED (${expectedWarningsMatchedWithActual.size})"
-            ), missing, match)
-            false to false -> Triple(createFailFromDoubleMiss(missingWarnings, unexpectedWarnings, expectedWarningsMatchedWithActual), missing, match)
-            true to true -> Triple(Pass("$ALL_EXPECTED (${expectedWarningsMatchedWithActual.size})"), missing, match)
+                "$MISSING ($missing). $MATCHED ($matched)"
+            ) to CountWarnings(missing, matched)
+            false to false -> createFailFromDoubleMiss(missingWarnings, unexpectedWarnings, expectedWarningsMatchedWithActual) to CountWarnings(missing, matched)
+            true to true -> Pass("$ALL_EXPECTED ($matched)") to CountWarnings(missing, matched)
             true to false -> if (warnPluginConfig.exactWarningsMatch == false) {
-                Triple(Pass(
+                Pass(
                     "$UNEXPECTED $unexpectedWarnings",
-                    "$UNEXPECTED (${unexpectedWarnings.size}). $MATCHED (${expectedWarningsMatchedWithActual.size})"
-                ), missing, match)
+                    "$UNEXPECTED (${unexpectedWarnings.size}). $MATCHED ($matched)"
+                ) to CountWarnings(missing, matched)
             } else {
-                Triple(Fail(
+                Fail(
                     "$UNEXPECTED $unexpectedWarnings",
-                    "$UNEXPECTED (${unexpectedWarnings.size}). $MATCHED (${expectedWarningsMatchedWithActual.size})"
-                ), missing, match)
+                    "$UNEXPECTED (${unexpectedWarnings.size}). $MATCHED ($matched)"
+                ) to CountWarnings(missing, matched)
             }
-            else -> Triple(Fail("N/A", "N/A"), missing, match)
+            else -> Fail("N/A", "N/A") to CountWarnings(missing, matched)
         }
     }
 
