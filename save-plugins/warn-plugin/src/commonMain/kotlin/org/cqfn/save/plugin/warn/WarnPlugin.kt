@@ -10,6 +10,7 @@ import org.cqfn.save.core.plugin.ExtraFlagsExtractor
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.plugin.resolvePlaceholdersFrom
+import org.cqfn.save.core.result.CountWarnings
 import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.TestResult
@@ -207,10 +208,9 @@ class WarnPlugin(
                     execCmd,
                     stdout.filter { it.contains(path.name) }.joinToString("\n"),
                     stderr.filter { it.contains(path.name) }.joinToString("\n"),
-                    null
+                    null,
+                    CountWarnings(results.second, results.third)
                 ),
-                results.second,
-                results.third,
             )
         }.asSequence()
     }
@@ -223,9 +223,7 @@ class WarnPlugin(
         TestResult(
             Test(it),
             Fail(ex.describe(), ex.describe()),
-            DebugInfo(execCmd, null, ex.message, null),
-            null,
-            null,
+            DebugInfo(execCmd, null, ex.message, null, CountWarnings(null, null)),
         )
     }.asSequence()
 
