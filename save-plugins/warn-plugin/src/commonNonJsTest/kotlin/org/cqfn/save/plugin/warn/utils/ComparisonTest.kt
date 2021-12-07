@@ -50,7 +50,7 @@ class ComparisonTest {
 
         val results = ResultsChecker(
             expectedWarningsMap, actualWarningsMap, warnPluginConfig
-        ).checkResults("filename")
+        ).checkResults("filename").first
 
         assertTrue(results is Pass, "Actual type of status is ${results::class}")
         assertEquals(

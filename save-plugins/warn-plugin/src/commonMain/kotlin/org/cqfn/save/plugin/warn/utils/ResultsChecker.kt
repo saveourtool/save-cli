@@ -26,7 +26,7 @@ class ResultsChecker(
      * @return [TestStatus]
      */
     @Suppress("TYPE_ALIAS")
-    internal fun checkResults(testFileName: String): TestStatus {
+    internal fun checkResults(testFileName: String): Triple<TestStatus, Int, Int> {
         val actualWarnings = actualWarningsMap[testFileName] ?: listOf()
         val expectedWarnings = expectedWarningsMap[testFileName] ?: listOf()
 
@@ -39,25 +39,28 @@ class ResultsChecker(
         val missingWarnings = expectedWarnings - expectedWarningsMatchedWithActual
         val unexpectedWarnings = actualWarnings - actualMatchedWithExpectedWarnings
 
+        val missing = missingWarnings.size
+        val match = expectedWarningsMatchedWithActual.size
+
         return when (missingWarnings.isEmpty() to unexpectedWarnings.isEmpty()) {
-            false to true -> Fail(
+            false to true -> Triple(Fail(
                 "$MISSING $missingWarnings",
                 "$MISSING (${missingWarnings.size}). $MATCHED (${expectedWarningsMatchedWithActual.size})"
-            )
-            false to false -> createFailFromDoubleMiss(missingWarnings, unexpectedWarnings, expectedWarningsMatchedWithActual)
-            true to true -> Pass("$ALL_EXPECTED (${expectedWarningsMatchedWithActual.size})")
+            ), missing, match)
+            false to false -> Triple(createFailFromDoubleMiss(missingWarnings, unexpectedWarnings, expectedWarningsMatchedWithActual), missing, match)
+            true to true -> Triple(Pass("$ALL_EXPECTED (${expectedWarningsMatchedWithActual.size})"), missing, match)
             true to false -> if (warnPluginConfig.exactWarningsMatch == false) {
-                Pass(
+                Triple(Pass(
                     "$UNEXPECTED $unexpectedWarnings",
                     "$UNEXPECTED (${unexpectedWarnings.size}). $MATCHED (${expectedWarningsMatchedWithActual.size})"
-                )
+                ), missing, match)
             } else {
-                Fail(
+                Triple(Fail(
                     "$UNEXPECTED $unexpectedWarnings",
                     "$UNEXPECTED (${unexpectedWarnings.size}). $MATCHED (${expectedWarningsMatchedWithActual.size})"
-                )
+                ), missing, match)
             }
-            else -> Fail("N/A", "N/A")
+            else -> Triple(Fail("N/A", "N/A"), missing, match)
         }
     }
 
