@@ -47,22 +47,22 @@ class ResultsChecker(
             false to true -> Fail(
                 "$MISSING $missingWarnings",
                 "$MISSING ($missing). $MATCHED ($matched)"
-            ) to CountWarnings(missing, matched)
-            false to false -> createFailFromDoubleMiss(missingWarnings, unexpectedWarnings, expectedWarningsMatchedWithActual) to CountWarnings(missing, matched)
-            true to true -> Pass("$ALL_EXPECTED ($matched)") to CountWarnings(missing, matched)
+            )
+            false to false -> createFailFromDoubleMiss(missingWarnings, unexpectedWarnings, expectedWarningsMatchedWithActual)
+            true to true -> Pass("$ALL_EXPECTED ($matched)")
             true to false -> if (warnPluginConfig.exactWarningsMatch == false) {
                 Pass(
                     "$UNEXPECTED $unexpectedWarnings",
                     "$UNEXPECTED (${unexpectedWarnings.size}). $MATCHED ($matched)"
-                ) to CountWarnings(missing, matched)
+                )
             } else {
                 Fail(
                     "$UNEXPECTED $unexpectedWarnings",
                     "$UNEXPECTED (${unexpectedWarnings.size}). $MATCHED ($matched)"
-                ) to CountWarnings(missing, matched)
+                )
             }
-            else -> Fail("N/A", "N/A") to CountWarnings(missing, matched)
-        }
+            else -> Fail("N/A", "N/A")
+        } to CountWarnings(missing, matched)
     }
 
     private fun List<Warning>.matchWithActualWarnings(
