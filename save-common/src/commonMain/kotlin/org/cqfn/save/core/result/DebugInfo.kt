@@ -1,3 +1,5 @@
+@file:Suppress("HEADER_MISSING_IN_NON_SINGLE_CLASS_FILE")
+
 package org.cqfn.save.core.result
 
 import kotlinx.serialization.Serializable
@@ -10,6 +12,7 @@ import kotlinx.serialization.Serializable
  * @property stdout output of the program under test from OUT stream
  * @property stderr output of the program under test from ERR stream
  * @property durationMillis duration of execution in milliseconds
+ * @property countWarnings number of missing and match warnings
  */
 @Serializable
 data class DebugInfo(
@@ -17,4 +20,15 @@ data class DebugInfo(
     val stdout: String?,
     val stderr: String?,
     val durationMillis: Long?,
+    val countWarnings: CountWarnings? = null,
+)
+
+/**
+ * @property missing number of missing warnings
+ * @property match number of match warnings
+ */
+@Serializable
+data class CountWarnings(
+    val missing: Int,
+    val match: Int,
 )

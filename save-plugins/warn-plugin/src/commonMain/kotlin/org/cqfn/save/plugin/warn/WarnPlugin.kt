@@ -199,15 +199,17 @@ class WarnPlugin(
         )
 
         return paths.map { path ->
+            val results = resultsChecker.checkResults(path.name)
             TestResult(
                 Test(path),
-                resultsChecker.checkResults(path.name),
+                results.first,
                 DebugInfo(
                     execCmd,
                     stdout.filter { it.contains(path.name) }.joinToString("\n"),
                     stderr.filter { it.contains(path.name) }.joinToString("\n"),
-                    null
-                )
+                    null,
+                    results.second,
+                ),
             )
         }.asSequence()
     }
@@ -220,7 +222,7 @@ class WarnPlugin(
         TestResult(
             Test(it),
             Fail(ex.describe(), ex.describe()),
-            DebugInfo(execCmd, null, ex.message, null)
+            DebugInfo(execCmd, null, ex.message, null, null),
         )
     }.asSequence()
 

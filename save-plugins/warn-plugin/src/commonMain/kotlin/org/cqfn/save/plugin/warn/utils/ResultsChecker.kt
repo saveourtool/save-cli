@@ -1,5 +1,6 @@
 package org.cqfn.save.plugin.warn.utils
 
+import org.cqfn.save.core.result.CountWarnings
 import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestStatus
@@ -26,7 +27,7 @@ class ResultsChecker(
      * @return [TestStatus]
      */
     @Suppress("TYPE_ALIAS")
-    internal fun checkResults(testFileName: String): TestStatus {
+    internal fun checkResults(testFileName: String): Pair<TestStatus, CountWarnings> {
         val actualWarnings = actualWarningsMap[testFileName] ?: listOf()
         val expectedWarnings = expectedWarningsMap[testFileName] ?: listOf()
 
@@ -39,26 +40,29 @@ class ResultsChecker(
         val missingWarnings = expectedWarnings - expectedWarningsMatchedWithActual
         val unexpectedWarnings = actualWarnings - actualMatchedWithExpectedWarnings
 
+        val missing = missingWarnings.size
+        val matched = expectedWarningsMatchedWithActual.size
+
         return when (missingWarnings.isEmpty() to unexpectedWarnings.isEmpty()) {
             false to true -> Fail(
                 "$MISSING $missingWarnings",
-                "$MISSING (${missingWarnings.size}). $MATCHED (${expectedWarningsMatchedWithActual.size})"
+                "$MISSING ($missing). $MATCHED ($matched)"
             )
             false to false -> createFailFromDoubleMiss(missingWarnings, unexpectedWarnings, expectedWarningsMatchedWithActual)
-            true to true -> Pass("$ALL_EXPECTED (${expectedWarningsMatchedWithActual.size})")
+            true to true -> Pass("$ALL_EXPECTED ($matched)")
             true to false -> if (warnPluginConfig.exactWarningsMatch == false) {
                 Pass(
                     "$UNEXPECTED $unexpectedWarnings",
-                    "$UNEXPECTED (${unexpectedWarnings.size}). $MATCHED (${expectedWarningsMatchedWithActual.size})"
+                    "$UNEXPECTED (${unexpectedWarnings.size}). $MATCHED ($matched)"
                 )
             } else {
                 Fail(
                     "$UNEXPECTED $unexpectedWarnings",
-                    "$UNEXPECTED (${unexpectedWarnings.size}). $MATCHED (${expectedWarningsMatchedWithActual.size})"
+                    "$UNEXPECTED (${unexpectedWarnings.size}). $MATCHED ($matched)"
                 )
             }
             else -> Fail("N/A", "N/A")
-        }
+        } to CountWarnings(missing, matched)
     }
 
     private fun List<Warning>.matchWithActualWarnings(
