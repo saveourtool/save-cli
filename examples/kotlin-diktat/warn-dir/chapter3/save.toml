@@ -1,7 +1,0 @@
-[general]
-    tags = ["tag1"]
-    description = "Chapter 3 tests: with placeholder"
-    suiteName = "Directory: Chapter3"
-
-[warn]
-    linePlaceholder = "$line"
