@@ -17,8 +17,10 @@ fun Project.configureDiktat() {
     apply<DiktatGradlePlugin>()
     configure<DiktatExtension> {
         diktatConfigFile = rootProject.file("diktat-analysis.yml")
-        inputs = files("src/**/*.kt", "*.kts", "src/**/*.kts")
-        excludes = files("$projectDir/build")
+        inputs {
+            include("src/**/*.kt", "*.kts", "src/**/*.kts")
+            exclude("$projectDir/build/**")
+        }
     }
 }
 
