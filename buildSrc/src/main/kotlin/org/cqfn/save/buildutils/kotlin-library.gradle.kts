@@ -62,7 +62,6 @@ kotlin {
     sourceSets {
         all {
             languageSettings.optIn("kotlin.RequiresOptIn")
-            languageSettings.optIn("okio.ExperimentalFileSystem")
         }
         val commonMain by getting
         val commonTest by getting

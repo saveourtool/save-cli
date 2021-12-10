@@ -7,7 +7,6 @@ import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.plugin.MockPlugin
 import org.cqfn.save.reporter.Report
 
-import okio.ExperimentalFileSystem
 import okio.FileSystem
 import okio.buffer
 
@@ -17,7 +16,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.serialization.decodeFromString
 
-@OptIn(ExperimentalFileSystem::class)
 class JsonReporterTest {
     private val fs = FileSystem.SYSTEM
     private val tmpDir = FileSystem.SYSTEM_TEMPORARY_DIRECTORY / JsonReporterTest::class.simpleName!!
