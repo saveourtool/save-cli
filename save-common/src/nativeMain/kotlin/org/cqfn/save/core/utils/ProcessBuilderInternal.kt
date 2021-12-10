@@ -38,7 +38,7 @@ actual class ProcessBuilderInternal actual constructor(
             val timeOut = async(newSingleThreadContext("timeOut")) {
                 delay(timeOutMillis)
                 destroy(cmd)
-                throw ProcessTimeoutException(timeOutMillis, "Timeout is reached")
+                throw ProcessTimeoutException(timeOutMillis, "Timeout is reached: $timeOutMillis")
             }
 
             val command = async {

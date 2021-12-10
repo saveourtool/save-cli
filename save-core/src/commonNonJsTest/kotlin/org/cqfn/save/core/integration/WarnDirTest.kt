@@ -19,4 +19,9 @@ class WarnDirTest {
     fun `execute warn plugin on the directory chapter3`() {
         runTestsWithDiktat(listOf("warn-dir/chapter3"), 1)
     }
+
+    @Test
+    fun `execute warn plugin on the directory chapter4`() {
+        runTestsWithDiktat(listOf("warn-dir/chapter4"), 1)
+    }
 }

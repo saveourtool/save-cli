@@ -1,8 +1,8 @@
 [general]
     execCmd = "java -jar ktlint -R diktat.jar"
     description = "Test for diktat - linter and formatter for Kotlin"
+    language = "Kotlin"
     # this is the default value, you don't need to add it explicitly, but can be useful, if you have different pattern:
     expectedWarningsPattern = "// ;warn:?(.*):(\\d*): (.+)"
     timeOutMillis = 30000
-
 

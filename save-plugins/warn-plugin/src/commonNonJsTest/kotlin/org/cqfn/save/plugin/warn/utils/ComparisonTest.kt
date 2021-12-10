@@ -50,11 +50,11 @@ class ComparisonTest {
 
         val results = ResultsChecker(
             expectedWarningsMap, actualWarningsMap, warnPluginConfig
-        ).checkResults("filename")
+        ).checkResults("filename").first
 
         assertTrue(results is Pass, "Actual type of status is ${results::class}")
         assertEquals(
-            "Some warnings were unexpected: ${actualWarningsMap.values.single().dropLast(1)}",
+            "(UNEXPECTED WARNINGS): ${actualWarningsMap.values.single().dropLast(1)}",
             results.message)
     }
 }

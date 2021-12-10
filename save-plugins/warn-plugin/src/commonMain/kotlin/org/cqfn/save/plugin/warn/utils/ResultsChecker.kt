@@ -1,5 +1,6 @@
 package org.cqfn.save.plugin.warn.utils
 
+import org.cqfn.save.core.result.CountWarnings
 import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.result.TestStatus
@@ -26,7 +27,7 @@ class ResultsChecker(
      * @return [TestStatus]
      */
     @Suppress("TYPE_ALIAS")
-    internal fun checkResults(testFileName: String): TestStatus {
+    internal fun checkResults(testFileName: String): Pair<TestStatus, CountWarnings> {
         val actualWarnings = actualWarningsMap[testFileName] ?: listOf()
         val expectedWarnings = expectedWarningsMap[testFileName] ?: listOf()
 
@@ -39,22 +40,29 @@ class ResultsChecker(
         val missingWarnings = expectedWarnings - expectedWarningsMatchedWithActual
         val unexpectedWarnings = actualWarnings - actualMatchedWithExpectedWarnings
 
+        val missing = missingWarnings.size
+        val matched = expectedWarningsMatchedWithActual.size
+
         return when (missingWarnings.isEmpty() to unexpectedWarnings.isEmpty()) {
-            false to true -> createFailFromSingleMiss(EXPECTED_BUT_NOT_RECEIVED, missingWarnings)
-            false to false -> createFailFromDoubleMiss(missingWarnings, unexpectedWarnings)
-            true to true -> Pass(
-                "$ALL_EXPECTED: ${expectedWarningsMatchedWithActual.size} warnings",
+            false to true -> Fail(
+                "$MISSING $missingWarnings",
+                "$MISSING ($missing). $MATCHED ($matched)"
             )
+            false to false -> createFailFromDoubleMiss(missingWarnings, unexpectedWarnings, expectedWarningsMatchedWithActual)
+            true to true -> Pass("$ALL_EXPECTED ($matched)")
             true to false -> if (warnPluginConfig.exactWarningsMatch == false) {
                 Pass(
-                    "$UNEXPECTED: $unexpectedWarnings",
-                    "$EXPECTED: ${expectedWarningsMatchedWithActual.size} warnings, $UNEXPECTED: ${unexpectedWarnings.size} warnings"
+                    "$UNEXPECTED $unexpectedWarnings",
+                    "$UNEXPECTED (${unexpectedWarnings.size}). $MATCHED ($matched)"
                 )
             } else {
-                createFailFromSingleMiss(UNEXPECTED, unexpectedWarnings)
+                Fail(
+                    "$UNEXPECTED $unexpectedWarnings",
+                    "$UNEXPECTED (${unexpectedWarnings.size}). $MATCHED ($matched)"
+                )
             }
             else -> Fail("N/A", "N/A")
-        }
+        } to CountWarnings(missing, matched)
     }
 
     private fun List<Warning>.matchWithActualWarnings(
@@ -83,19 +91,21 @@ class ResultsChecker(
         matchedWarning != null
     }
 
-    private fun createFailFromSingleMiss(baseText: String, warnings: List<Warning>) =
-            Fail("$baseText: $warnings", "$baseText (${warnings.size})")
-
-    private fun createFailFromDoubleMiss(missingWarnings: List<Warning>, unexpectedWarnings: List<Warning>) =
-            Fail(
-                "$EXPECTED_BUT_NOT_RECEIVED: $missingWarnings, and ${UNEXPECTED.lowercase()}: $unexpectedWarnings",
-                "$EXPECTED_BUT_NOT_RECEIVED (${missingWarnings.size}), and ${UNEXPECTED.lowercase()} (${unexpectedWarnings.size})"
-            )
+    private fun createFailFromDoubleMiss(
+        missingWarnings: List<Warning>,
+        unexpectedWarnings: List<Warning>,
+        matchedWarnings: List<Warning>
+    ) = Fail(
+        "$MISSING $missingWarnings. $UNEXPECTED $unexpectedWarnings.",
+        "$MISSING (${missingWarnings.size}). " +
+                "$UNEXPECTED (${unexpectedWarnings.size}). " +
+                "$MATCHED (${matchedWarnings.size})"
+    )
 
     companion object {
-        private const val ALL_EXPECTED = "All warnings were expected"
-        private const val EXPECTED = "Received expected warnings"
-        private const val EXPECTED_BUT_NOT_RECEIVED = "Some warnings were expected but not received"
-        private const val UNEXPECTED = "Some warnings were unexpected"
+        private const val ALL_EXPECTED = "(ALL WARNINGS MATCHED):"
+        private const val MATCHED = "(MATCHED WARNINGS):"
+        private const val MISSING = "(MISSING WARNINGS):"
+        private const val UNEXPECTED = "(UNEXPECTED WARNINGS):"
     }
 }

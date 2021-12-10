@@ -82,7 +82,9 @@ class FixPlugin(
             val extraFlags = extraFlagsList.singleOrNull() ?: ExtraFlags("", "")
 
             val pathMap = chunk.map { it.test to it.expected }
-            val pathCopyMap = pathMap.map { (test, expected) -> createTestFile(test, generalConfig) to expected }
+            val pathCopyMap = pathMap.map { (test, expected) ->
+                createTestFile(test, generalConfig, fixPluginConfig) to expected
+            }
             val testCopyNames =
                     pathCopyMap.joinToString(separator = fixPluginConfig.batchSeparator!!) { (testCopy, _) -> testCopy.toString() }
 
@@ -144,24 +146,33 @@ class FixPlugin(
                 }
             }
 
-    private fun createTestFile(path: Path, generalConfig: GeneralConfig): Path {
-        val pathCopy: Path = constructPathForCopyOfTestFile(
-            "${FixPlugin::class.simpleName!!}-${Random.nextInt()}",
-            path
-        )
+    private fun createTestFile(
+        path: Path,
+        generalConfig: GeneralConfig,
+        fixPluginConfig: FixPluginConfig): Path {
+        val pathCopy: Path = constructPathForCopyOfTestFile("${FixPlugin::class.simpleName!!}-${Random.nextInt()}", path)
         tmpDirectory = pathCopy.parent!!
         createTempDir(tmpDirectory!!)
 
-        val expectedWarningPattern = generalConfig.expectedWarningsPattern
+        val defaultIgnoreLinesPatterns: MutableList<Regex> = mutableListOf()
+        generalConfig.expectedWarningsPattern?.let { defaultIgnoreLinesPatterns.add(it) }
+        generalConfig.runConfigPattern?.let { defaultIgnoreLinesPatterns.add(it) }
 
         fs.write(fs.createFile(pathCopy)) {
-            fs.readLines(path).forEach {
-                if (expectedWarningPattern == null || !generalConfig.expectedWarningsPattern!!.matches(it)) {
+            fs.readLines(path)
+                .filter { line ->
+                    fixPluginConfig.ignoreLines?.let {
+                        fixPluginConfig.ignoreLinesPatterns.none { it.matches(line) }
+                    }
+                        ?: run {
+                            defaultIgnoreLinesPatterns.none { it.matches(line) }
+                        }
+                }
+                .forEach {
                     write(
                         (it + "\n").encodeToByteArray()
                     )
                 }
-            }
         }
         return pathCopy
     }
