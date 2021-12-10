@@ -1,3 +1,12 @@
+/**
+ * Utility methods for common operations with file system using okio.
+ */
+
+@file:Suppress(
+    "FILE_NAME_MATCH_CLASS",
+    "MatchingDeclarationName",
+    "TooManyFunctions")
+
 package org.cqfn.save.core.files
 
 import org.cqfn.save.core.config.OutputStreamType
@@ -11,7 +20,9 @@ import okio.Path
 import okio.Path.Companion.toPath
 import okio.Sink
 import okio.Timeout
+
 expect val fs: FileSystem
+
 /**
  * A simple okio [Sink] that writes it's input to stdout/stderr
  */
@@ -20,6 +31,7 @@ class StdStreamsSink(private val outputType: OutputStreamType) : Sink {
     override fun close() = Unit
     override fun flush() = Unit
     override fun timeout(): Timeout = Timeout.NONE
+
     /**
      * Writes a UTF-8 representation of [source] to stdout
      */
@@ -28,6 +40,7 @@ class StdStreamsSink(private val outputType: OutputStreamType) : Sink {
         writeToStream(msg, outputType)
     }
 }
+
 /**
  * Find all descendant files in the directory denoted by [this] [Path], that match [condition].
  * Files will appear in the returned list grouped by directories, while directories are visited in depth-first manner.
@@ -46,6 +59,7 @@ fun Path.findAllFilesMatching(condition: (Path) -> Boolean): List<List<Path>> = 
             listOf(it) + resultFromNestedDirs
         } ?: resultFromNestedDirs
     }
+
 /**
  * @param condition a condition to match
  * @return a matching child file or null
@@ -56,15 +70,18 @@ fun Path.findChildByOrNull(condition: (Path) -> Boolean): Path? {
     require(!fs.metadata(this).isRegularFile)
     return fs.list(this).firstOrNull(condition)
 }
+
 /**
  * @return a [Sequence] of file parent directories
  */
 fun Path.parents(): Sequence<Path> = generateSequence(parent) { it.parent }
+
 /**
  * @param condition a condition to match
  * @return all parent directories matching [condition]
  */
 fun Path.findAllParentsMatching(condition: (Path) -> Boolean) = parents().filter(condition)
+
 /**
  * Create file in [this] [FileSystem], denoted by path [pathString]
  *
@@ -72,6 +89,7 @@ fun Path.findAllParentsMatching(condition: (Path) -> Boolean) = parents().filter
  * @return [Path] denoting the created file
  */
 fun FileSystem.createFile(pathString: String): Path = createFile(pathString.toPath())
+
 /**
  * Create file in [this] [FileSystem], denoted by [Path] [path]
  *
@@ -82,6 +100,7 @@ fun FileSystem.createFile(path: Path): Path {
     sink(path).close()
     return path
 }
+
 /**
  * @param path a path to a file
  * @return list of strings from the file
@@ -89,6 +108,7 @@ fun FileSystem.createFile(path: Path): Path {
 fun FileSystem.readLines(path: Path): List<String> = this.read(path) {
     generateSequence { readUtf8Line() }.toList()
 }
+
 /**
  * @param path a path to a file
  * @return string from the file
@@ -96,6 +116,7 @@ fun FileSystem.readLines(path: Path): List<String> = this.read(path) {
 fun FileSystem.readFile(path: Path): String = this.read(path) {
     this.readUtf8()
 }
+
 /**
  * Copies [source] with all files and subdirectories into [target]
  *
@@ -120,6 +141,7 @@ fun FileSystem.copyRecursively(source: Path, target: Path) {
         }
     }
 }
+
 /**
  * Returns a sequence of underlying directories, filtering on every level by [directoryPredicate].
  * Example:
@@ -143,17 +165,17 @@ fun FileSystem.copyRecursively(source: Path, target: Path) {
  * @return a sequence of matching directories
  */
 fun Path.findDescendantDirectoriesBy(withSelf: Boolean = false, directoryPredicate: (Path) -> Boolean): Sequence<Path> =
-    sequence {
-        if (withSelf) {
-            yield(this@findDescendantDirectoriesBy)
+        sequence {
+            if (withSelf) {
+                yield(this@findDescendantDirectoriesBy)
+            }
+            fs.list(this@findDescendantDirectoriesBy)
+                .asSequence()
+                .filter { fs.metadata(it).isDirectory }
+                .filter(directoryPredicate)
+                .flatMap { it.findDescendantDirectoriesBy(withSelf = true, directoryPredicate) }
+                .let { yieldAll(it) }
         }
-        fs.list(this@findDescendantDirectoriesBy)
-            .asSequence()
-            .filter { fs.metadata(it).isDirectory }
-            .filter(directoryPredicate)
-            .flatMap { it.findDescendantDirectoriesBy(withSelf = true, directoryPredicate) }
-            .let { yieldAll(it) }
-    }
 
 /**
  * Wrapper function in case of incorrect usage:
@@ -181,10 +203,12 @@ fun Path.getCurrentDirectory() = if (fs.metadata(this).isRegularFile) {
 } else {
     this
 }
+
 /**
  * @return a list of parent directories including itself
  */
 fun Path.parentsWithSelf() = listOf(this) + this.parents().toList()
+
 /**
  * Delete this directory and all other files and directories in it
  *

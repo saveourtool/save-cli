@@ -2,6 +2,7 @@ package org.cqfn.save.core.plugin
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.config.isSaveTomlConfig
+import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.findDescendantDirectoriesBy
 import org.cqfn.save.core.files.parentsWithSelf
 import org.cqfn.save.core.logging.logDebug
@@ -16,7 +17,6 @@ import okio.Path
 import okio.Path.Companion.toPath
 
 import kotlinx.serialization.Serializable
-import org.cqfn.save.core.files.createRelativePathToTheRoot
 
 /**
  * Plugin that can be injected into SAVE during execution. Plugins accept contents of configuration file and then perform some work.
@@ -126,8 +126,8 @@ abstract class Plugin(
         // creating relative to root path from a test file
         // "Expected" file for Fix plugin
         val testFileRelative =
-            (testFiles.test.createRelativePathToTheRoot(testRepositoryRoot))
-                .replace('\\', '/')
+                (testFiles.test.createRelativePathToTheRoot(testRepositoryRoot))
+                    .replace('\\', '/')
 
         // excluding tests that are included in the excluded list
         return excludedTests
@@ -234,6 +234,6 @@ abstract class Plugin(
     @Serializable
     data class Test(@Serializable(with = PathSerializer::class) override val test: Path) : TestFiles {
         override fun withRelativePaths(root: Path) =
-            copy(test = test.createRelativePathToTheRoot(root).toPath())
+                copy(test = test.createRelativePathToTheRoot(root).toPath())
     }
 }
