@@ -16,6 +16,7 @@ import okio.Path
 import okio.Path.Companion.toPath
 
 import kotlinx.serialization.Serializable
+import org.cqfn.save.core.files.createRelativePathToTheRoot
 
 /**
  * Plugin that can be injected into SAVE during execution. Plugins accept contents of configuration file and then perform some work.
@@ -124,9 +125,9 @@ abstract class Plugin(
         val testRepositoryRoot = testConfig.getRootConfig().location
         // creating relative to root path from a test file
         // "Expected" file for Fix plugin
-        val testFileRelative = fs.canonicalize(
-            testFiles.test.relativeTo(testRepositoryRoot)
-        ).toString().replace('\\', '/')
+        val testFileRelative =
+            (testFiles.test.createRelativePathToTheRoot(testRepositoryRoot))
+                .replace('\\', '/')
 
         // excluding tests that are included in the excluded list
         return excludedTests
@@ -194,7 +195,7 @@ abstract class Plugin(
      */
     protected fun constructPathForCopyOfTestFile(dirName: String, path: Path): Path {
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / dirName)
-        val relativePath = path.relativeTo(testConfig.getRootConfig().location)
+        val relativePath = path.createRelativePathToTheRoot(testConfig.getRootConfig().location)
         return tmpDir / relativePath
     }
 
@@ -233,6 +234,6 @@ abstract class Plugin(
     @Serializable
     data class Test(@Serializable(with = PathSerializer::class) override val test: Path) : TestFiles {
         override fun withRelativePaths(root: Path) =
-                copy(test = test.relativeTo(root))
+            copy(test = test.createRelativePathToTheRoot(root).toPath())
     }
 }

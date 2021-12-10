@@ -87,7 +87,9 @@ class GeneralTest {
         // Report should be created after successful completion
         assertTrue(fs.exists(reportFile))
 
+        println("===============")
         val reports: List<Report> = json.decodeFromString(fs.readFile(reportFile))
+        println("===============")
         // Almost all result statuses should be Pass, except the few cases
         reports.forEach { report ->
             report.pluginExecutions.forEach { pluginExecution ->
