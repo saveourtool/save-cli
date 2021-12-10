@@ -49,6 +49,10 @@ import kotlinx.serialization.UseSerializers
  * @property partialWarnTextMatch if true - the regex created from expected warning will be wrapped with '.*': .*warn.*.
  * That can help a user to write only main information in the warning without any need to add/copy-paste technical info
  * @property testToolResFileOutput file with actual warnings
+ * @property ignoreLines mutable list of patterns that later will be ignored in test files
+ * @property benchmarkMode whether to ignore the warning messages
+ * @property messageCaptureGroupMiddle
+ * @property messageCaptureGroupEnd
  */
 @Serializable
 data class WarnPluginConfig(
@@ -61,6 +65,8 @@ data class WarnPluginConfig(
     val lineCaptureGroup: Long? = null,
     val columnCaptureGroup: Long? = null,
     val messageCaptureGroup: Long? = null,
+    val messageCaptureGroupMiddle: Long? = null,
+    val messageCaptureGroupEnd: Long? = null,
     val fileNameCaptureGroupOut: Long? = null,
     val lineCaptureGroupOut: Long? = null,
     val columnCaptureGroupOut: Long? = null,
@@ -72,12 +78,17 @@ data class WarnPluginConfig(
     val patternForRegexInWarning: List<String>? = null,
     val partialWarnTextMatch: Boolean? = null,
     val testToolResFileOutput: String? = null,
+    val ignoreLines: MutableList<String>? = null,
+    val benchmarkMode: Boolean? = null
 ) : PluginConfig {
     @Transient
     override val type = TestConfigSections.WARN
 
     @Transient
     override var configLocation: Path = "undefined_toml_location".toPath()
+
+    @Transient
+    override val ignoreLinesPatterns: MutableList<Regex> = ignoreLines?.map { it.toRegex() }?.toMutableList() ?: mutableListOf()
 
     /**
      * regex for name of the test file.
@@ -102,6 +113,8 @@ data class WarnPluginConfig(
             this.lineCaptureGroup ?: other.lineCaptureGroup,
             this.columnCaptureGroup ?: other.columnCaptureGroup,
             this.messageCaptureGroup ?: other.messageCaptureGroup,
+            this.messageCaptureGroupMiddle ?: other.messageCaptureGroupMiddle,
+            this.messageCaptureGroupEnd ?: other.messageCaptureGroupEnd,
             this.fileNameCaptureGroupOut ?: other.fileNameCaptureGroupOut,
             this.lineCaptureGroupOut ?: other.lineCaptureGroupOut,
             this.columnCaptureGroupOut ?: other.columnCaptureGroupOut,
@@ -113,7 +126,13 @@ data class WarnPluginConfig(
             this.patternForRegexInWarning ?: other.patternForRegexInWarning,
             this.partialWarnTextMatch ?: other.partialWarnTextMatch,
             this.testToolResFileOutput ?: other.testToolResFileOutput,
-        ).also { it.configLocation = this.configLocation }
+            other.ignoreLines?.let {
+                this.ignoreLines?.let { other.ignoreLines.union(this.ignoreLines) } ?: other.ignoreLines
+            }?.toMutableList() ?: this.ignoreLines,
+            this.benchmarkMode ?: other.benchmarkMode
+        ).also {
+            it.configLocation = this.configLocation
+        }
     }
 
     @Suppress(
@@ -158,6 +177,8 @@ data class WarnPluginConfig(
             newLineCaptureGroup,
             newColumnCaptureGroup,
             newMessageCaptureGroup,
+            messageCaptureGroupMiddle ?: 1,
+            messageCaptureGroupEnd ?: 1,
             newFileNameCaptureGroupOut,
             newLineCaptureGroupOut,
             newColumnCaptureGroupOut,
@@ -169,7 +190,11 @@ data class WarnPluginConfig(
             patternForRegexInWarning ?: defaultPatternForRegexInWarning,
             partialWarnTextMatch ?: false,
             testToolResFileOutput,
-        ).also { it.configLocation = this.configLocation }
+            ignoreLines,
+            benchmarkMode ?: false
+        ).also {
+            it.configLocation = this.configLocation
+        }
     }
 
     private fun requirePositiveIfNotNull(value: Long?) {

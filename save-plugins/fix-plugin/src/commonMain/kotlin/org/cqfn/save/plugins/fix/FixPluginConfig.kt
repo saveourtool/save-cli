@@ -23,6 +23,7 @@ import kotlinx.serialization.UseSerializers
  * @property resourceNameTestSuffix suffix name of the test file.
  * @property resourceNameExpectedSuffix suffix name of the expected file.
  * @property batchSeparator
+ * @property ignoreLines mutable list of patterns that later will be used to filter lines in test file
  */
 @Serializable
 data class FixPluginConfig(
@@ -31,11 +32,15 @@ data class FixPluginConfig(
     val batchSeparator: String? = null,
     val resourceNameTestSuffix: String? = null,
     val resourceNameExpectedSuffix: String? = null,
+    val ignoreLines: MutableList<String>? = null
 ) : PluginConfig {
     override val type = TestConfigSections.FIX
 
     @Transient
     override var configLocation: Path = "undefined_toml_location".toPath()
+
+    @Transient
+    override val ignoreLinesPatterns: MutableList<Regex> = ignoreLines?.map { it.toRegex() }?.toMutableList() ?: mutableListOf()
 
     /**
      *  @property resourceNameTest
@@ -61,14 +66,23 @@ data class FixPluginConfig(
             this.batchSeparator ?: other.batchSeparator,
             this.resourceNameTestSuffix ?: other.resourceNameTestSuffix,
             this.resourceNameExpectedSuffix ?: other.resourceNameExpectedSuffix,
-        ).also { it.configLocation = this.configLocation }
+            other.ignoreLines?.let {
+                this.ignoreLines?.let { other.ignoreLines.union(this.ignoreLines) } ?: other.ignoreLines
+            }?.toMutableList() ?: this.ignoreLines
+        ).also {
+            it.configLocation = this.configLocation
+        }
     }
 
+    // due to probable bug in ktoml, ignoreLines = [] and no ignoreLines is ktoml are parsed to be mutableListOf("null")
     override fun validateAndSetDefaults() = FixPluginConfig(
         execFlags ?: "",
         batchSize ?: 1,
         batchSeparator ?: ", ",
         resourceNameTest,
-        resourceNameExpected
-    ).also { it.configLocation = this.configLocation }
+        resourceNameExpected,
+        ignoreLines
+    ).also {
+        it.configLocation = this.configLocation
+    }
 }

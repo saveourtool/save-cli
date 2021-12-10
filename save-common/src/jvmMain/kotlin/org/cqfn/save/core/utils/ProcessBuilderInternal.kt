@@ -52,7 +52,7 @@ actual class ProcessBuilderInternal actual constructor(
                 val timeOut = launch {
                     delay(timeOutMillis)
                     process?.destroy()
-                    throw ProcessTimeoutException(timeOutMillis, "Timeout is reached")
+                    throw ProcessTimeoutException(timeOutMillis, "Timeout is reached: $timeOutMillis")
                 }
                 launch {
                     process = runTime.exec(cmd.split(", ").toTypedArray())

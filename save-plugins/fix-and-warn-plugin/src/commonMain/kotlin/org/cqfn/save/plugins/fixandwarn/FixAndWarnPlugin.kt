@@ -138,7 +138,6 @@ class FixAndWarnPlugin(
         files.forEach { file ->
             val fileData = fs.readLines(file)
             filesAndTheirWarningsMap[file] = mutableListOf()
-
             val fileDataWithoutWarnings = fileData.filterIndexed { index, line ->
                 val isLineWithWarning = (generalConfig.expectedWarningsPattern!!.find(line)?.groups != null)
                 if (isLineWithWarning) {

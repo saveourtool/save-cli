@@ -26,6 +26,11 @@ interface PluginConfig {
     val type: TestConfigSections
 
     /**
+     * list of regexes to be ignored
+     */
+    val ignoreLinesPatterns: MutableList<Regex>
+
+    /**
      * Location of the toml config
      */
     var configLocation: Path
@@ -59,10 +64,13 @@ interface PluginConfig {
  * @property tags special labels that can be used for splitting tests into groups
  * @property description free text with a description
  * @property suiteName name of test suite that can be visible from save-cloud
+ * @property language to tests
  * @property excludedTests excluded tests from the run
  * @property expectedWarningsPattern - pattern with warnings that are expected from the test file
  * @property runConfigPattern everything from the capture group will be split by comma and then by `=`
  * @property timeOutMillis command execution time for one test
+ * @property expectedWarningsMiddlePattern
+ * @property expectedWarningsEndPattern
  */
 @Serializable
 data class GeneralConfig(
@@ -70,17 +78,22 @@ data class GeneralConfig(
     val tags: List<String>? = null,
     val description: String? = null,
     val suiteName: String? = null,
+    val language: String? = null,
     val excludedTests: List<String>? = null,
     val expectedWarningsPattern: Regex? = null,
+    val expectedWarningsMiddlePattern: Regex? = null,
+    val expectedWarningsEndPattern: Regex? = null,
     val runConfigPattern: Regex? = null,
     val timeOutMillis: Long? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.GENERAL
+    override val ignoreLinesPatterns: MutableList<Regex> = mutableListOf()
 
     @Transient
     override var configLocation: Path = "undefined_toml_location".toPath()
     override val resourceNamePatternStr: String = ".*"
 
+    @Suppress("ComplexMethod")
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as GeneralConfig
         val mergedTag = other.tags?.let {
@@ -94,8 +107,11 @@ data class GeneralConfig(
             mergedTag,
             this.description ?: other.description,
             this.suiteName ?: other.suiteName,
+            this.language ?: other.language,
             this.excludedTests ?: other.excludedTests,
             this.expectedWarningsPattern ?: other.expectedWarningsPattern,
+            this.expectedWarningsMiddlePattern ?: other.expectedWarningsMiddlePattern,
+            this.expectedWarningsEndPattern ?: other.expectedWarningsEndPattern,
             this.runConfigPattern ?: other.runConfigPattern,
             this.timeOutMillis ?: other.timeOutMillis,
         ).also { it.configLocation = this.configLocation }
@@ -120,8 +136,11 @@ data class GeneralConfig(
             tags,
             description,
             suiteName,
+            language,
             excludedTests ?: emptyList(),
             expectedWarningsPattern ?: defaultExpectedWarningPattern,
+            expectedWarningsMiddlePattern,
+            expectedWarningsEndPattern,
             runConfigPattern ?: defaultRunConfigPattern,
             timeOutMillis ?: 10_000L,
         ).also { it.configLocation = this.configLocation }

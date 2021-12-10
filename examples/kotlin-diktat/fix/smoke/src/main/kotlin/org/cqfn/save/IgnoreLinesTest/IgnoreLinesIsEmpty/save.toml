@@ -1,0 +1,7 @@
+[general]
+    tags = ["smoke"]
+    description = "Smoke tests for diktat"
+    suiteName = "Autofix: Smoke Tests"
+
+[fix]
+    ignoreLines = []

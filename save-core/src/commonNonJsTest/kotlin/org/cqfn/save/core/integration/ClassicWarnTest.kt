@@ -26,8 +26,9 @@ class ClassicWarnTest {
         runTestsWithDiktat(
             listOf(
                 "warn/chapter1/EnumValueSnakeCaseTest.kt",
+                "warn/chapter1/TestMatchOnlyByLineColumn/EnumValueSnakeCaseTest.kt",
                 "warn/chapter1/GenericFunctionTest.kt"
-            ), 2
+            ), 3
         )
     }
 
@@ -46,7 +47,7 @@ class ClassicWarnTest {
         runTestsWithDiktat(
             listOf(
                 "warn/chapter1"
-            ), 6
+            ), 8
         )
     }
 
@@ -55,6 +56,15 @@ class ClassicWarnTest {
         runTestsWithDiktat(
             listOf(
                 "warn/chapter1/TestsWithRegex"
+            ), 1
+        )
+    }
+
+    @Test
+    fun `lines that match ignoreLines should be ignored`() {
+        runTestsWithDiktat(
+            listOf(
+                "warn/chapter1/IgnoreLinesTest"
             ), 1
         )
     }
@@ -85,7 +95,7 @@ class ClassicWarnTest {
         runTestsWithDiktat(
             listOf(
                 "warn/save.toml"
-            ), 8
+            ), 10
         )
     }
 
@@ -94,7 +104,7 @@ class ClassicWarnTest {
         runTestsWithDiktat(
             listOf(
                 "warn/chapter1/save.toml"
-            ), 6
+            ), 8
         )
     }
 

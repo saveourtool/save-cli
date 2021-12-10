@@ -1,22 +1,26 @@
 package org.cqfn.save.cli
 
+import org.cqfn.save.core.config.OutputStreamType
+import org.cqfn.save.core.files.StdStreamsSink
 import org.cqfn.save.core.files.readFile
 import org.cqfn.save.core.result.Pass
 import org.cqfn.save.core.utils.CurrentOs
 import org.cqfn.save.core.utils.ProcessBuilder
 import org.cqfn.save.core.utils.getCurrentOs
 import org.cqfn.save.core.utils.isCurrentOsWindows
+import org.cqfn.save.plugins.fix.FixPlugin
 import org.cqfn.save.reporter.Report
+import org.cqfn.save.reporter.json.JsonReporter
 
 import okio.FileSystem
+import okio.Path
 import okio.Path.Companion.toPath
+import okio.buffer
 
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 
 @Suppress(
     "TOO_LONG_FUNCTION",
@@ -28,8 +32,12 @@ import kotlinx.serialization.json.Json
 class GeneralTest {
     private val fs = FileSystem.SYSTEM
 
+    // The `out` property for reporter is basically the stub, just need to create an instance in aim to use json formatter
+    private val json = JsonReporter(StdStreamsSink(OutputStreamType.STDOUT).buffer()) {
+        FixPlugin.FixTestFiles.register(this)
+    }.json
+
     @Test
-    @Ignore
     fun `examples test`() {
         val binDir = "../save-cli/build/bin/" + when (getCurrentOs()) {
             CurrentOs.LINUX -> "linuxX64"
@@ -67,26 +75,28 @@ class GeneralTest {
         val saveFlags = " . --result-output FILE --report-type JSON"
         // Execute the script from examples
         val execCmd = "$runCmd$saveBinName $saveFlags"
-        val pb = ProcessBuilder(true, fs).exec(execCmd, examplesDir, null, 10_000L)
+        val pb = ProcessBuilder(true, fs).exec(execCmd, examplesDir, null, 200_000L)
         println("SAVE execution output:\n${pb.stdout.joinToString("\n")}")
         if (pb.stderr.isNotEmpty()) {
             println("Warning and errors during SAVE execution:\n${pb.stderr.joinToString("\n")}")
         }
 
         // We need some time, before the report will be completely filled
-        Thread.sleep(100_000)
+        Thread.sleep(30_000)
 
         // Report should be created after successful completion
         assertTrue(fs.exists(reportFile))
 
-        val json: List<Report> = Json.decodeFromString(fs.readFile(reportFile))
-
-        // All result statuses should be Pass
-        json.forEach { report ->
+        val reports: List<Report> = json.decodeFromString(fs.readFile(reportFile))
+        // Almost all result statuses should be Pass, except the few cases
+        reports.forEach { report ->
             report.pluginExecutions.forEach { pluginExecution ->
                 pluginExecution.testResults.find { result ->
                     println(result.status)
-                    result.resources.test.name != "ThisShouldAlwaysFailTest.kt"
+                    // FixMe: if we will have other failing tests - we will make the logic less hardcoded
+                    result.resources.test.name != "GarbageTest.kt" &&
+                            result.resources.test.name != "ThisShouldAlwaysFailTest.kt" &&
+                            !result.resources.test.toString().contains("warn${Path.DIRECTORY_SEPARATOR}chapter2")
                 }?.let {
                     assertTrue(it.status is Pass)
                 }
