@@ -7,11 +7,6 @@ package org.cqfn.save.core.logging
 
 import org.cqfn.save.core.config.LogType
 import org.cqfn.save.core.config.OutputStreamType
-import org.cqfn.save.core.utils.writeToStream
-
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 
 /**
  *  Logging mode
