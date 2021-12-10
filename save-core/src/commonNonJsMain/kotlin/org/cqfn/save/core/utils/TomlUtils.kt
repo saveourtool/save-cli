@@ -86,7 +86,7 @@ fun createPluginConfigListFromToml(testConfigPath: Path, fs: FileSystem): List<P
  * @return all top level table nodes
  */
 fun getTopLevelTomlTables(testConfigPath: Path, fs: FileSystem): List<TomlTable> = TomlParser(KtomlConf())
-    .parseStringsToTomlTree(fs.readLines(testConfigPath))
+    .parseStringsToTomlTree(fs.readLines(testConfigPath), KtomlConf())
     .children
     .filterIsInstance<TomlTable>()
     .filter { !it.isSynthetic }
