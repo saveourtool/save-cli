@@ -16,12 +16,12 @@ import kotlinx.datetime.toLocalDateTime
 /**
  *  Logging mode
  */
-expect var logType: LogType
+actual var logType: LogType = LogType.WARN
 
 /**
  * Whether to add time stamps to log messages
  */
-expect var isTimeStampsEnabled: Boolean
+actual var isTimeStampsEnabled: Boolean = false
 
 /**
  * Log a message to the [stream] with timestamp and specific [level]
@@ -30,43 +30,55 @@ expect var isTimeStampsEnabled: Boolean
  * @param msg a message string
  * @param stream output stream (file, stdout, stderr)
  */
-expect fun logMessage(
+actual fun logMessage(
     level: String,
     msg: String,
     stream: OutputStreamType
-)
+) {
+    error("Not implemented yet")
+}
 
 /**
  * Log a message with info level
  *
  * @param msg a message string
  */
-expect fun logInfo(msg: String)
+actual fun logInfo(msg: String) {
+    error("Not implemented yet")
+}
 
 /**
  * Log a message with error level
  *
  * @param msg a message string
  */
-expect fun logError(msg: String)
+actual fun logError(msg: String) {
+    error("Not implemented yet")
+}
 
 /**
  * Log a message with warn level
  *
  * @param msg a message string
  */
-expect fun logWarn(msg: String)
+actual fun logWarn(msg: String) {
+    error("Not implemented yet")
+}
 
 /**
  * Log a message with debug level
  *
  * @param msg a message string
  */
-expect fun logDebug(msg: String)
+actual fun logDebug(msg: String) {
+    error("Not implemented yet")
+}
 
 /**
  * Log a message with trace level
  *
  * @param msg a message string
  */
-expect fun logTrace(msg: String)
+actual fun logTrace(msg: String) {
+    error("Not implemented yet")
+}
