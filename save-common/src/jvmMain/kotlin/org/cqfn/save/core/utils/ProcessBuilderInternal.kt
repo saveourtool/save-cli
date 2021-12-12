@@ -70,7 +70,8 @@ actual class ProcessBuilderInternal actual constructor(
     private fun writeDataFromBufferToFile(
         process: Process,
         stream: String,
-        file: Path) {
+        file: Path,
+    ) {
         if (!useInternalRedirections) {
             return
         }

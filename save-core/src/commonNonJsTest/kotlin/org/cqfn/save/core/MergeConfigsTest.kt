@@ -28,7 +28,8 @@ internal val toml4 = nestedDir2 / "nestedDir3" / "nestedDir4" / "save.toml"
 @Suppress(
     "TOO_LONG_FUNCTION",
     "LOCAL_VARIABLE_EARLY_DECLARATION",
-    "LONG_LINE")
+    "LONG_LINE",
+)
 class MergeConfigsTest {
     private val extraFlagsPattern1 = Regex("// RUN: (.*)")
     private val extraFlagsPattern2 = Regex("## RUN: (.*)")

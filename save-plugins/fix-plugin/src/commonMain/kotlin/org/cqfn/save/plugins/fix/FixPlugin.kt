@@ -48,7 +48,8 @@ class FixPlugin(
     testFiles,
     fileSystem,
     useInternalRedirections,
-    redirectTo) {
+    redirectTo,
+) {
     private val diffGenerator = DiffRowGenerator.create()
         .showInlineDiffs(true)
         .mergeOriginalRevised(false)
@@ -149,7 +150,8 @@ class FixPlugin(
     private fun createTestFile(
         path: Path,
         generalConfig: GeneralConfig,
-        fixPluginConfig: FixPluginConfig): Path {
+        fixPluginConfig: FixPluginConfig,
+    ): Path {
         val pathCopy: Path = constructPathForCopyOfTestFile("${FixPlugin::class.simpleName!!}-${Random.nextInt()}", path)
         tmpDirectory = pathCopy.parent!!
         createTempDir(tmpDirectory!!)

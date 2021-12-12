@@ -92,7 +92,8 @@ jobs:
             enabledExecutables=debug
       - name: Upload gradle reports
         if: ${{ always() }}
-        uses: actions/upload-artifact@v2
+        # https://github.com/actions/upload-artifact/issues/281
+        uses: actions/upload-artifact@v2.2.4
         with:
           name: gradle-reports-windows-latest
           path: '**/build/reports/'
