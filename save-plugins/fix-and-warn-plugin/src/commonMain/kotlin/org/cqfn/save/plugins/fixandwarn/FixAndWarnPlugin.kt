@@ -33,7 +33,8 @@ class FixAndWarnPlugin(
     testFiles,
     fileSystem,
     useInternalRedirections,
-    redirectTo) {
+    redirectTo,
+) {
     private val fixPluginConfig: FixPluginConfig =
             testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().fix
     private val warnPluginConfig: WarnPluginConfig =

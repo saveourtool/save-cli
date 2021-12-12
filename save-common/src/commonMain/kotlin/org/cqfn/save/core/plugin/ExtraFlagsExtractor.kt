@@ -81,7 +81,8 @@ internal fun List<String>.filterAndJoinBy(regex: Regex, ending: Char): List<Stri
 fun resolvePlaceholdersFrom(
     execFlags: String?,
     extraFlags: ExtraFlags,
-    fileNames: String): String {
+    fileNames: String,
+): String {
     requireNotNull(execFlags) {
         "Error: Couldn't find `execFlags`"
     }

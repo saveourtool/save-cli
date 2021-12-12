@@ -5,7 +5,8 @@
 @file:Suppress(
     "FILE_NAME_MATCH_CLASS",
     "MatchingDeclarationName",
-    "TooManyFunctions")
+    "TooManyFunctions",
+)
 
 package org.cqfn.save.core.files
 
