@@ -93,7 +93,7 @@ jobs:
       - name: Upload gradle reports
         if: ${{ always() }}
         # https://github.com/actions/upload-artifact/issues/281
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v2.3.0
         with:
           name: gradle-reports-windows-latest
           path: '**/build/reports/'
