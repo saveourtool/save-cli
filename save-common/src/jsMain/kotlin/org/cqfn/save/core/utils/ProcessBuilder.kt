@@ -14,7 +14,8 @@ import okio.Path
 actual class ProcessBuilderInternal actual constructor(
     stdoutFile: Path,
     stderrFile: Path,
-    useInternalRedirections: Boolean) {
+    useInternalRedirections: Boolean,
+) {
     actual fun prepareCmd(command: String): String = error("Not implemented for JS")
 
     actual fun exec(cmd: String, timeOutMillis: Long): Int = error("Not implemented for JS")
