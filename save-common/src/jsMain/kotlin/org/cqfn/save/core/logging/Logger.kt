@@ -3,77 +3,19 @@
  * FixMe: Use proper logging solution once it's available for kotlin/native.
  */
 
+@file:Suppress("FILE_NAME_MATCH_CLASS")
+
 package org.cqfn.save.core.logging
 
 import org.cqfn.save.core.config.LogType
-import org.cqfn.save.core.config.OutputStreamType
 
 /**
  *  Logging mode
  */
-actual var logType: LogType = LogType.WARN
+actual var logType: GenericAtomicReference<LogType> = GenericAtomicReference()
 
-/**
- * Whether to add time stamps to log messages
- */
-actual var isTimeStampsEnabled: Boolean = false
-
-/**
- * Log a message to the [stream] with timestamp and specific [level]
- *
- * @param level log level
- * @param msg a message string
- * @param stream output stream (file, stdout, stderr)
- */
-actual fun logMessage(
-    level: String,
-    msg: String,
-    stream: OutputStreamType
-) {
-    error("Not implemented yet")
-}
-
-/**
- * Log a message with info level
- *
- * @param msg a message string
- */
-actual fun logInfo(msg: String) {
-    error("Not implemented yet")
-}
-
-/**
- * Log a message with error level
- *
- * @param msg a message string
- */
-actual fun logError(msg: String) {
-    error("Not implemented yet")
-}
-
-/**
- * Log a message with warn level
- *
- * @param msg a message string
- */
-actual fun logWarn(msg: String) {
-    error("Not implemented yet")
-}
-
-/**
- * Log a message with debug level
- *
- * @param msg a message string
- */
-actual fun logDebug(msg: String) {
-    error("Not implemented yet")
-}
-
-/**
- * Log a message with trace level
- *
- * @param msg a message string
- */
-actual fun logTrace(msg: String) {
-    error("Not implemented yet")
+@Suppress("USE_DATA_CLASS", "CUSTOM_GETTERS_SETTERS")
+actual class GenericAtomicReference<T> {
+    actual val value: T
+        get() = error("Not implemented yet")
 }
