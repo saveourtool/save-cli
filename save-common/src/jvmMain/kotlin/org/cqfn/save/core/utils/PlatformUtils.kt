@@ -15,10 +15,10 @@ actual typealias AtomicBoolean = java.util.concurrent.atomic.AtomicBoolean
 
 @Suppress("USE_DATA_CLASS")
 actual class GenericAtomicReference<T> actual constructor(valueToStore: T) {
-    private var value: T = valueToStore
-    actual fun get(): T = value
+    private val holder: java.util.concurrent.atomic.AtomicReference<T> = java.util.concurrent.atomic.AtomicReference(valueToStore)
+    actual fun get(): T = holder.get()
     actual fun set(newValue: T) {
-        value = newValue
+        holder.set(newValue)
     }
 }
 

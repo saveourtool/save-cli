@@ -12,6 +12,7 @@ import org.cqfn.save.core.config.OutputStreamType
 import org.cqfn.save.core.utils.GenericAtomicReference
 import org.cqfn.save.core.utils.writeToStream
 
+import kotlin.native.concurrent.SharedImmutable
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -19,7 +20,8 @@ import kotlinx.datetime.toLocalDateTime
 /**
  *  Logging mode
  */
-var logType: GenericAtomicReference<LogType> = GenericAtomicReference(LogType.WARN)
+@SharedImmutable
+val logType: GenericAtomicReference<LogType> = GenericAtomicReference(LogType.WARN)
 
 /**
  * Whether to add time stamps to log messages
