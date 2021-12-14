@@ -49,6 +49,15 @@ actual class AtomicBoolean actual constructor(value: Boolean) {
     actual fun compareAndSet(expect: Boolean, update: Boolean): Boolean = atomicBoolean.compareAndSet(expect, update)
 }
 
+@Suppress("USE_DATA_CLASS")
+actual class GenericAtomicReference<T> actual constructor(valueToStore: T) {
+    private val holder: kotlin.native.concurrent.AtomicReference<T> = kotlin.native.concurrent.AtomicReference(valueToStore)
+    actual fun get(): T = holder.value
+    actual fun set(newValue: T) {
+        holder.value = newValue
+    }
+}
+
 /**
  * Escaping percent symbol in the string in case it is not escaped already
  *

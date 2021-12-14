@@ -7,7 +7,6 @@ package org.cqfn.save.cli
 import org.cqfn.save.cli.logging.logErrorAndExit
 import org.cqfn.save.core.config.LogType
 import org.cqfn.save.core.config.SaveProperties
-import org.cqfn.save.core.logging.GenericAtomicReference
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logTrace
 import org.cqfn.save.core.logging.logType
@@ -127,13 +126,12 @@ fun readPropertiesFile(propertiesFileName: String?): SaveProperties {
             "Failed to read properties file $propertiesFileName: ${e.message}"
         )
     }
-
     logDebug("Found properties: $properties")
     return Properties.decodeFromStringMap(serializer(), properties)
 }
 
 private fun tryToUpdateDebugLevel(properties: SaveProperties) {
-    logType = GenericAtomicReference(properties.logType ?: LogType.WARN)
+    logType.set(properties.logType ?: LogType.WARN)
 }
 
 private fun errorAndExitNotFoundDir() {

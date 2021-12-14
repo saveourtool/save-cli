@@ -9,6 +9,7 @@ package org.cqfn.save.core.logging
 
 import org.cqfn.save.core.config.LogType
 import org.cqfn.save.core.config.OutputStreamType
+import org.cqfn.save.core.utils.GenericAtomicReference
 import org.cqfn.save.core.utils.writeToStream
 
 import kotlinx.datetime.Clock
@@ -18,23 +19,12 @@ import kotlinx.datetime.toLocalDateTime
 /**
  *  Logging mode
  */
-expect var logType: GenericAtomicReference<LogType>
+var logType: GenericAtomicReference<LogType> = GenericAtomicReference(LogType.WARN)
 
 /**
  * Whether to add time stamps to log messages
  */
 var isTimeStampsEnabled: Boolean = false
-
-/**
- *  Class that holds value and shares atomic reference to the value (native only)
- */
-@Suppress("USE_DATA_CLASS")
-expect class GenericAtomicReference<T> {
-    /**
-     * Stored value
-     */
-    val value: T
-}
 
 /**
  * Log a message to the [stream] with timestamp and specific [level]
@@ -81,7 +71,7 @@ fun logError(msg: String) {
  * @param msg a message string
  */
 fun logWarn(msg: String) {
-    if (logType.value == LogType.WARN || logType.value == LogType.DEBUG || logType.value == LogType.ALL) {
+    if (logType.get() == LogType.WARN || logType.get() == LogType.DEBUG || logType.get() == LogType.ALL) {
         logMessage("WARN", msg, OutputStreamType.STDERR)
     }
 }
@@ -92,7 +82,7 @@ fun logWarn(msg: String) {
  * @param msg a message string
  */
 fun logDebug(msg: String) {
-    if (logType.value == LogType.DEBUG || logType.value == LogType.ALL) {
+    if (logType.get() == LogType.DEBUG || logType.get() == LogType.ALL) {
         logMessage("DEBUG", msg, OutputStreamType.STDOUT)
     }
 }
@@ -103,7 +93,7 @@ fun logDebug(msg: String) {
  * @param msg a message string
  */
 fun logTrace(msg: String) {
-    if (logType.value == LogType.ALL) {
+    if (logType.get() == LogType.ALL) {
         logMessage("TRACE", msg, OutputStreamType.STDOUT)
     }
 }

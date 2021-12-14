@@ -109,7 +109,6 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
         val status = try {
             processBuilderInternal.exec(cmd, timeOutMillis)
         } catch (ex: ProcessTimeoutException) {
-            logWarn("Timeout reached!")
             fs.deleteRecursively(tmpDir)
             throw ex
         } catch (ex: Exception) {

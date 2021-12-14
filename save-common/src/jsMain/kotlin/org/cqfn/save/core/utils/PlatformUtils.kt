@@ -23,6 +23,15 @@ actual class AtomicBoolean actual constructor(value: Boolean) {
     actual fun compareAndSet(expect: Boolean, update: Boolean): Boolean = error("Not implemented for JS")
 }
 
+@Suppress("USE_DATA_CLASS")
+actual class GenericAtomicReference<T> actual constructor(valueToStore: T) {
+    private var value: T = valueToStore
+    actual fun get(): T = value
+    actual fun set(newValue: T) {
+        value = newValue
+    }
+}
+
 actual fun getCurrentOs(): CurrentOs = error("Not implemented for JS")
 
 actual fun writeToConsole(msg: String, outputType: OutputStreamType) {
