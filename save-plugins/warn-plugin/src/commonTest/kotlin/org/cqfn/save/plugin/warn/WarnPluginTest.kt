@@ -263,7 +263,7 @@ class WarnPluginTest {
     @Test
     @Ignore  // this logic is todo
     @Suppress("TOO_LONG_FUNCTION")
-    fun `warn-plugin test - multiple warnings & ignore technical comments`() {
+    fun `warn-plugin test - multiple warnings and ignore technical comments`() {
         mockExecCmd(
             """Test1Test.java:1:1: Avoid using default package
                     |Test1Test.java:3:6: Class name should be in PascalCase
@@ -293,7 +293,7 @@ class WarnPluginTest {
 
     @Test
     @Suppress("TOO_LONG_FUNCTION")
-    fun `warn-plugin test - multiple warnings, no line-col`() {
+    fun `warn-plugin test - multiple warnings and no line-col`() {
         mockExecCmd(
             """Test1Test.java: Avoid using default package
                     |Test1Test.java: Class name should be in PascalCase

@@ -32,7 +32,6 @@ kotlin {
     sourceSets {
         all {
             languageSettings.optIn("kotlin.RequiresOptIn")
-            languageSettings.optIn("okio.ExperimentalFileSystem")
         }
         val jvmMain by getting
 

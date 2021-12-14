@@ -2,7 +2,6 @@ package org.cqfn.save.plugins.fix
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
-import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.myDeleteRecursively
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
@@ -28,7 +27,6 @@ import io.github.petertrr.diffutils.patch.Patch
 import io.github.petertrr.diffutils.text.DiffRowGenerator
 import okio.FileSystem
 import okio.Path
-import okio.Path.Companion.toPath
 
 import kotlin.random.Random
 import kotlinx.serialization.Serializable
@@ -50,7 +48,8 @@ class FixPlugin(
     testFiles,
     fileSystem,
     useInternalRedirections,
-    redirectTo) {
+    redirectTo,
+) {
     private val diffGenerator = DiffRowGenerator.create()
         .showInlineDiffs(true)
         .mergeOriginalRevised(false)
@@ -151,7 +150,8 @@ class FixPlugin(
     private fun createTestFile(
         path: Path,
         generalConfig: GeneralConfig,
-        fixPluginConfig: FixPluginConfig): Path {
+        fixPluginConfig: FixPluginConfig,
+    ): Path {
         val pathCopy: Path = constructPathForCopyOfTestFile("${FixPlugin::class.simpleName!!}-${Random.nextInt()}", path)
         tmpDirectory = pathCopy.parent!!
         createTempDir(tmpDirectory!!)
@@ -243,8 +243,8 @@ class FixPlugin(
         @Serializable(with = PathSerializer::class) val expected: Path
     ) : TestFiles {
         override fun withRelativePaths(root: Path) = copy(
-            test = test.createRelativePathToTheRoot(root).toPath(),
-            expected = expected.createRelativePathToTheRoot(root).toPath(),
+            test = test.relativeTo(root),
+            expected = expected.relativeTo(root),
         )
 
         companion object {

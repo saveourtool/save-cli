@@ -5,7 +5,8 @@
 @file:Suppress(
     "FILE_NAME_MATCH_CLASS",
     "MatchingDeclarationName",
-    "TooManyFunctions")
+    "TooManyFunctions",
+)
 
 package org.cqfn.save.core.files
 
@@ -29,9 +30,7 @@ expect val fs: FileSystem
 @Suppress("INLINE_CLASS_CAN_BE_USED")
 class StdStreamsSink(private val outputType: OutputStreamType) : Sink {
     override fun close() = Unit
-
     override fun flush() = Unit
-
     override fun timeout(): Timeout = Timeout.NONE
 
     /**

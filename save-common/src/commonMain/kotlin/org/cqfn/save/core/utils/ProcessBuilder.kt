@@ -24,7 +24,8 @@ import kotlinx.datetime.Clock
 expect class ProcessBuilderInternal(
     stdoutFile: Path,
     stderrFile: Path,
-    useInternalRedirections: Boolean) {
+    useInternalRedirections: Boolean,
+) {
     /**
      * Modify execution command according behavior of different OS,
      * also stdout and stderr will be redirected to tmp files
@@ -134,7 +135,8 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
     private fun modifyCmd(
         command: String,
         directory: String,
-        processBuilderInternal: ProcessBuilderInternal): String {
+        processBuilderInternal: ProcessBuilderInternal,
+    ): String {
         // If we need to step out into some directory before execution
         val cdCmd = if (directory.isNotBlank()) {
             if (isCurrentOsWindows()) {
