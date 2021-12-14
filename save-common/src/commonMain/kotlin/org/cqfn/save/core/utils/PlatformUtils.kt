@@ -50,6 +50,24 @@ expect class AtomicBoolean(value: Boolean) {
 }
 
 /**
+ *  Class that holds value and shares atomic reference to the value (native only)
+ *
+ *  @param valueToStore value to store
+ */
+@Suppress("USE_DATA_CLASS")
+expect class GenericAtomicReference<T>(valueToStore: T) {
+    /**
+     * @return stored value
+     */
+    fun get(): T
+
+    /**
+     * @param newValue new value to store
+     */
+    fun set(newValue: T)
+}
+
+/**
  * Get type of current OS
  *
  * @return type of current OS

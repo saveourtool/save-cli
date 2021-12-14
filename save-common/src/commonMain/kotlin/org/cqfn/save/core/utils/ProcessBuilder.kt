@@ -89,10 +89,13 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
         // Temporary directory for stderr and stdout (posix `system()` can't separate streams, so we do it ourselves)
         val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY /
                 ("ProcessBuilder_" + Clock.System.now().toEpochMilliseconds()).toPath())
+        logTrace("Creating temp directory: $tmpDir")
         // Path to stdout file
         val stdoutFile = tmpDir / "stdout.txt"
+        logTrace("Creating stdout file of ProcessBuilder: $stdoutFile")
         // Path to stderr file
         val stderrFile = tmpDir / "stderr.txt"
+        logTrace("Creating stderr file of ProcessBuilder: $stderrFile")
         // Instance, containing platform-dependent realization of command execution
         val processBuilderInternal = ProcessBuilderInternal(stdoutFile, stderrFile, useInternalRedirections)
         fs.createDirectories(tmpDir)
@@ -102,7 +105,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
 
         val cmd = modifyCmd(command, directory, processBuilderInternal)
 
-        logDebug("Executing: $cmd")
+        logDebug("Executing: $cmd with timeout $timeOutMillis")
         val status = try {
             processBuilderInternal.exec(cmd, timeOutMillis)
         } catch (ex: ProcessTimeoutException) {
@@ -149,6 +152,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
         } else {
             command
         }
+        logTrace("Modifying cmd: $cdCmd")
         // Finally, make platform dependent adaptations
         return processBuilderInternal.prepareCmd(commandWithEcho)
     }

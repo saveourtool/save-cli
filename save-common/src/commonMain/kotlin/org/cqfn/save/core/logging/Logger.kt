@@ -3,12 +3,16 @@
  * FixMe: Use proper logging solution once it's available for kotlin/native.
  */
 
+@file:Suppress("FILE_NAME_MATCH_CLASS")
+
 package org.cqfn.save.core.logging
 
 import org.cqfn.save.core.config.LogType
 import org.cqfn.save.core.config.OutputStreamType
+import org.cqfn.save.core.utils.GenericAtomicReference
 import org.cqfn.save.core.utils.writeToStream
 
+import kotlin.native.concurrent.SharedImmutable
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -16,7 +20,8 @@ import kotlinx.datetime.toLocalDateTime
 /**
  *  Logging mode
  */
-var logType: LogType = LogType.WARN
+@SharedImmutable
+val logType: GenericAtomicReference<LogType> = GenericAtomicReference(LogType.WARN)
 
 /**
  * Whether to add time stamps to log messages
@@ -33,7 +38,7 @@ var isTimeStampsEnabled: Boolean = false
 fun logMessage(
     level: String,
     msg: String,
-    stream: OutputStreamType = OutputStreamType.STDOUT
+    stream: OutputStreamType
 ) {
     val currentTime = if (isTimeStampsEnabled) {
         val currentTimeInstance = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
@@ -50,7 +55,7 @@ fun logMessage(
  * @param msg a message string
  */
 fun logInfo(msg: String) {
-    logMessage("INFO", msg)
+    logMessage("INFO", msg, OutputStreamType.STDOUT)
 }
 
 /**
@@ -68,7 +73,7 @@ fun logError(msg: String) {
  * @param msg a message string
  */
 fun logWarn(msg: String) {
-    if (logType == LogType.WARN || logType == LogType.DEBUG || logType == LogType.ALL) {
+    if (logType.get() == LogType.WARN || logType.get() == LogType.DEBUG || logType.get() == LogType.ALL) {
         logMessage("WARN", msg, OutputStreamType.STDERR)
     }
 }
@@ -79,8 +84,8 @@ fun logWarn(msg: String) {
  * @param msg a message string
  */
 fun logDebug(msg: String) {
-    if (logType == LogType.DEBUG || logType == LogType.ALL) {
-        logMessage("DEBUG", msg)
+    if (logType.get() == LogType.DEBUG || logType.get() == LogType.ALL) {
+        logMessage("DEBUG", msg, OutputStreamType.STDOUT)
     }
 }
 
@@ -90,7 +95,7 @@ fun logDebug(msg: String) {
  * @param msg a message string
  */
 fun logTrace(msg: String) {
-    if (logType == LogType.ALL) {
-        logMessage("TRACE", msg)
+    if (logType.get() == LogType.ALL) {
+        logMessage("TRACE", msg, OutputStreamType.STDOUT)
     }
 }
