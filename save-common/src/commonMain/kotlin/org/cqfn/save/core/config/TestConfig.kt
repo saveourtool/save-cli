@@ -168,18 +168,22 @@ data class TestConfig(
         logDebug("Start merging configs for ${this.location}")
 
         this.parentConfigs().toList().forEach { parentConfig ->
+            logTrace("Processing config ${parentConfig.location} for merging with ${this.location}")
             // return from the function if we stay at the root element of the plugin tree
             val parentalPlugins = parentConfig.pluginConfigs
-            parentalPlugins.forEach { currentConfig ->
-                val childConfigs = this.pluginConfigs.filter { it.type == currentConfig.type }
+            parentalPlugins.forEach { parentalPluginConfig ->
+                val childConfigs = this.pluginConfigs.filter { it.type == parentalPluginConfig.type }
                 if (childConfigs.isEmpty()) {
                     // if we haven't found a plugin from parent in a current list of plugins - we will simply copy it
-                    this.pluginConfigs.add(currentConfig)
+                    this.pluginConfigs.add(parentalPluginConfig)
                 } else {
                     // else, we will merge plugin with a corresponding plugin from a parent config
                     // we expect that there is only one plugin of such type, otherwise we will throw an exception
-                    val mergedConfig = childConfigs.single().mergeWith(currentConfig)
+                    logTrace("Starting actual merge of ${parentalPluginConfig.type} from ${parentConfig.location} into $location")
+                    val mergedConfig = childConfigs.single().mergeWith(parentalPluginConfig)
+                    logTrace("Finished actual merge of ${parentalPluginConfig.type} from ${parentConfig.location} into $location")
                     this.pluginConfigs.set(this.pluginConfigs.indexOf(childConfigs.single()), mergedConfig)
+                    logTrace("Added merged config ${parentalPluginConfig.type} from ${parentConfig.location} into $location")
                 }
             }
         }
