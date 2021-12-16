@@ -28,8 +28,10 @@ Warning messages are very flexible and can be described in very different ways:
 // ;warn:3:1: Warning with an explicit set of a line number and column number
 ```
 ```
-/* ;warn:1: Multiline warning.
- * Requires you to specify a value of `expectedWarningsEndPattern` (and `expectedWarningsMiddlePattern` if there is)
+/* ;warn:1: Multiline warning. This line should match `expectedWariningsPattern`
+ * To match other lines, you need to specify a value of `expectedWarningsEndPattern` (and `expectedWarningsMiddlePattern` if there is any).
+ * This line should match `expectedWarningsMiddlePattern`
+ * And the next line should match `expectedWarningsEndPattern`
  */
 ```
 ### Regular expressions in warnings
