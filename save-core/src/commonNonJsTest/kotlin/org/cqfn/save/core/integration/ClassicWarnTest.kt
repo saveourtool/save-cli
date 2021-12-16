@@ -33,6 +33,7 @@ class ClassicWarnTest {
     }
 
     @Test
+    @Ignore  // https://github.com/diktat-static-analysis/save/issues/333
     fun `execute warn plugin with timeout`() {
         runTestsWithDiktat(
             listOf(
