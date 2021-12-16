@@ -4,6 +4,7 @@ import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.config.isSaveTomlConfig
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logError
+import org.cqfn.save.core.logging.logTrace
 
 import okio.FileSystem
 import okio.Path
@@ -20,6 +21,7 @@ class ConfigDetector(private val fs: FileSystem) {
      * @throws IllegalArgumentException - in case of invalid testConfig file
      */
     fun configFromFile(testConfig: Path): TestConfig {
+        logTrace("Discovering parent configs of $testConfig")
         // testConfig is validated in the beginning and cannot be null
         return discoverConfigWithParents(testConfig)
             // After `discoverConfigWithParents` we successfully created TestConfig instances for all save.toml files
@@ -28,10 +30,12 @@ class ConfigDetector(private val fs: FileSystem) {
             ?.also { config ->
                 // Go down through the file tree and
                 // discover all descendant configs of [config]
+                logTrace("Discovering all descendant `save.toml`s of $testConfig")
                 val descendantConfigLocations = config
                     .directory
                     .findAllFilesMatching { it.isSaveTomlConfig() }
                     .flatten()
+                logTrace("Discovered ${descendantConfigLocations.size} files")
 
                 createTestConfigs(descendantConfigLocations, mutableListOf(config))
             }
