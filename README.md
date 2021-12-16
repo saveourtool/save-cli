@@ -69,7 +69,7 @@ In case you would like to have several plugins to work in your directory with sa
 
 ## Save warnings DSL 
 ![save-cli](https://user-images.githubusercontent.com/58667063/146390474-71e4921d-416b-4922-b2ea-894f71e491c3.jpg)
-You can read more about the `warn plugin` plugin [here](save-plugins/warn-plugin/README.md)
+You can read more about the `warn plugin` [here](save-plugins/warn-plugin/README.md)
 
 
 ## How to configure 
