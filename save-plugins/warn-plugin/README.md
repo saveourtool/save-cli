@@ -27,7 +27,11 @@ Warning messages are very flexible and can be described in very different ways:
 ```
 // ;warn:3:1: Warning with an explicit set of a line number and column number
 ```
-
+```
+/* ;warn:1: Multiline warning.
+ * Requires you to specify a value of `expectedWarningsEndPattern` (and `expectedWarningsMiddlePattern` if there is)
+ */
+```
 ### Regular expressions in warnings
 Regular expressions can be used in warning messages.
 To configure delimiters, use `patternForRegexInWarning` option (default: `"{{", "}}"`):
@@ -74,9 +78,12 @@ you will need the following SAVE configuration:
 execCmd = "./detekt"
 description = "My suite description"
 suiteName = "DocsCheck"
+language = "Kotlin"
 # warning is set inside the comment in code, `//` marks comment start in Java
 expectedWarningsPattern = "// ;warn:(\\d+):(\\d+): (.*)" # (default value)
-
+# for multiline warning
+expectedWarningsMiddlePattern = "\\* (.*)"
+expectedWarningsEndPattern = "(.*)?\\*/"
 
 [warn]
 execFlags = "--build-upon-default-config -i"
@@ -94,6 +101,10 @@ columnCaptureGroup = 3 # (default value)
 
 # index of regex capture group for message text
 messageCaptureGroup = 4 # (default value)
+
+# for multiline warning
+messageCaptureGroupMiddle = 1 # (default value)
+messageCaptureGroupEnd = 1 # (default value)
 
 warningTextHasColumn = true # (default value)
 warningTextHasLine = true # (default value)
@@ -115,7 +126,7 @@ parsed from the same `$testFile` using `warningsInputPattern`. `batchSeparator` 
 If line number is not present in the comment, it's assumed to be `current line + 1` in regex group with lineCaptureGroupIdx. 
 `linePlaceholder` is an optional placeholder for the line number that is recognized as the current line and supports addition and subtraction.
 
-`warningsInputPattern` and `warningsOutputPattern` must include some mandatory capture groups: for line number (if `warningTextHasLine` is true),
+`expectedWarningsPattern` and `actualWarningsPattern` must include some mandatory capture groups: for line number (if `warningTextHasLine` is true),
 for column number (if `warningTextHasColumn` is true) and for warning text. Their indices can be customized
 with `lineCaptureGroup`, `columnCaptureGroup` and `messageCaptureGroup` parameters. These parameters are shared between input and output pattern;
 usually you'll want them to be consistent to make testing easier, i.e. if input has line number, then so should output.

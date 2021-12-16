@@ -151,6 +151,9 @@ excludedTests = ["warn/chapter1/GarbageTest.kt", "warn/otherDir/NewTest.kt"], e.
 
 # command execution time for one test (milliseconds)
 timeOutMillis = 10000
+
+# language for tests
+language = "Kotlin"
 ```
 
 ## Executing specific tests
