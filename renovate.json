@@ -31,6 +31,13 @@
       ],
       "groupName": "Kotlin core dependencies",
       "groupSlug": "core-kotlin"
+    },
+    {
+      "managers": ["gradle"],
+      "matchPackagePatterns": [
+        "^org\\.jetbrains\\.kotlinx:kotlinx-coroutines.*"
+      ],
+      "versioning": "docker"
     }
   ]
 }

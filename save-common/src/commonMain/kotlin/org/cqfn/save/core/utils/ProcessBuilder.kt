@@ -120,7 +120,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
         fs.myDeleteRecursively(tmpDir)
         logTrace("Removed temp directory $tmpDir")
         if (stderr.isNotEmpty()) {
-            logDebug("The following errors occurred after executing of `$command`:\t${stderr.joinToString("\t")}")
+            logDebug("stderr of `$command`:\t${stderr.joinToString("\t")}")
         }
         redirectTo?.let {
             fs.write(redirectTo) {
