@@ -92,16 +92,21 @@ abstract class Plugin(
     @Suppress(
         "TOO_LONG_FUNCTION",
         "TOO_MANY_LINES_IN_LAMBDA",
+        "AVOID_NULL_CHECKS",
         "SwallowedException",
     )
     fun discoverTestFiles(root: Path): Sequence<TestFiles> {
         val rawTestFiles = rawDiscoverTestFiles(root.resourceDirectories())
             .filterNot { fs.metadata(it.test).isDirectory }
 
+        // fixme: move this filtering on higher level under https://github.com/diktat-static-analysis/save/issues/336
+        val existingTestFiles = testFiles.map {
+            it.takeIf { fs.exists(it.toPath()) }
+        }
         return if (testFiles.isNotEmpty()) {
             val foundTests = rawTestFiles.filter { rawTestFile ->
-                testFiles.any { testFile ->
-                    if (fs.exists(testFile.toPath())) {
+                existingTestFiles.any { testFile ->
+                    if (testFile != null) {
                         (rawTestFile.test.parentsWithSelf()).any { rawTestFileDir ->
                             testFile == rawTestFileDir.toString()
                         }
@@ -110,7 +115,7 @@ abstract class Plugin(
                         false
                     }
                 }
-            }
+            }.toList()
             val notFoundTests = testFiles.filter { it !in foundTests.map { foundTest -> foundTest.test.toString() } }
             if (notFoundTests.isNotEmpty()) {
                 logDebug("The following tests were not found: $notFoundTests. Try to make sure you have specified the correct relative path to the files.")
@@ -202,14 +207,14 @@ abstract class Plugin(
 
     /**
      * Returns a sequence of directories, where resources for this plugin may be located.
-     * This takes into account, that if underlying directory contains it's own SAVE config,
+     * This takes into account, that if underlying directory contains its own SAVE config,
      * then this plugin shouldn't touch these resources; it should be done by plugins from that config.
      *
      * @return a sequence of directories possibly containing this plugin's test resources
      */
     private fun Path.resourceDirectories(): Sequence<Path> = findDescendantDirectoriesBy(true) { file ->
         // this matches directories which contain their own SAVE config
-        fs.metadata(file).isRegularFile || fs.list(file).none { it.isSaveTomlConfig() }
+        fs.metadata(file).isDirectory && fs.list(file).none { it.isSaveTomlConfig() }
     }
 
     /**

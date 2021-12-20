@@ -78,10 +78,13 @@ class Save(
             testConfig
                 // fully process this config's configuration sections
                 .processInPlace()
+                .takeIf {
+                    it.isFromEnabledSuite(includeSuites, excludeSuites)
+                }
                 // create plugins and choose only active (with test resources) ones
-                .buildActivePlugins(requestedTests)
-                .takeIf { plugins ->
-                    plugins.isNotEmpty() && plugins.first().isFromEnabledSuite(includeSuites, excludeSuites)
+                ?.buildActivePlugins(requestedTests)
+                ?.takeIf { plugins ->
+                    plugins.isNotEmpty()
                 }
                 ?.also {
                     // configuration has been already validated by this point, and if there are active plugins, then suiteName is not null
@@ -131,8 +134,8 @@ class Save(
         .distinct()
         .joinToString(", ")
 
-    private fun Plugin.isFromEnabledSuite(includeSuites: List<String>, excludeSuites: List<String>): Boolean {
-        val suiteName = testConfig.getGeneralConfig()?.suiteName
+    private fun TestConfig.isFromEnabledSuite(includeSuites: List<String>, excludeSuites: List<String>): Boolean {
+        val suiteName = getGeneralConfig()?.suiteName
         // either no specific includes, or current suite is included
         return (includeSuites.isEmpty() || includeSuites.contains(suiteName)) &&
                 // either no specific excludes, or current suite is not excluded
