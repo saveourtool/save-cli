@@ -13,6 +13,7 @@ import okio.Path.Companion.toPath
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.UseSerializers
+import org.cqfn.save.core.config.ToolOutputType
 
 /**
  * Some fields by default are null, instead of some natural value, because of the fact, that in stage of merging
@@ -79,7 +80,8 @@ data class WarnPluginConfig(
     val partialWarnTextMatch: Boolean? = null,
     val testToolResFileOutput: String? = null,
     val ignoreLines: MutableList<String>? = null,
-    val benchmarkMode: Boolean? = null
+    val benchmarkMode: Boolean? = null,
+    val toolOutputType: ToolOutputType = ToolOutputType.STDOUT,
 ) : PluginConfig {
     @Transient
     override val type = TestConfigSections.WARN
