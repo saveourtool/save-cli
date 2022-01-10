@@ -50,13 +50,13 @@ class FixPlugin(
     useInternalRedirections,
     redirectTo,
 ) {
-    private val diffGenerator = DiffRowGenerator.create()
-        .showInlineDiffs(true)
-        .mergeOriginalRevised(false)
-        .inlineDiffByWord(false)
-        .oldTag { start -> if (start) "[" else "]" }
-        .newTag { start -> if (start) "<" else ">" }
-        .build()
+    private val diffGenerator = DiffRowGenerator(
+        showInlineDiffs = true,
+        mergeOriginalRevised = false,
+        inlineDiffByWord = false,
+        oldTag = { _, start -> if (start) "[" else "]" },
+        newTag = { _, start -> if (start) "<" else ">" },
+    )
 
     // fixme: consider refactoring under https://github.com/diktat-static-analysis/save/issues/156
     // fixme: should not be common for a class instance during https://github.com/diktat-static-analysis/save/issues/28
