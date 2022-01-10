@@ -126,13 +126,12 @@ fun readPropertiesFile(propertiesFileName: String?): SaveProperties {
             "Failed to read properties file $propertiesFileName: ${e.message}"
         )
     }
-
     logDebug("Found properties: $properties")
     return Properties.decodeFromStringMap(serializer(), properties)
 }
 
 private fun tryToUpdateDebugLevel(properties: SaveProperties) {
-    logType = properties.logType ?: LogType.WARN
+    logType.set(properties.logType ?: LogType.WARN)
 }
 
 private fun errorAndExitNotFoundDir() {

@@ -2,6 +2,8 @@
 
 package org.cqfn.save.core.utils
 
+import org.cqfn.save.core.logging.logTrace
+
 import okio.Path
 import platform.posix.system
 
@@ -61,5 +63,6 @@ actual class ProcessBuilderInternal actual constructor(
             "pkill \"$cmd\""
         }
         system(killCmd)
+        logTrace("Executed kill command: $killCmd")
     }
 }
