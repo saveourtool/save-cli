@@ -1,14 +1,14 @@
 [versions]
-kotlin = "1.6.0"
+kotlin = "1.6.10"
 okio = "3.0.0"
-serialization = "1.3.1"
-diktat = "1.0.0"
+serialization = "1.3.2"
+diktat = "1.0.1"
 kotlinx-cli = "0.3.4"
 kotlinx-datetime = "0.3.1"
-kotlinx-coroutines = "1.5.2-native-mt"
+kotlinx-coroutines = "1.6.0-native-mt"
 junit = "5.8.2"
 ktoml = "0.2.9"
-multiplatform-diff = "0.3.0"
+multiplatform-diff = "0.4.0"
 kotlinpoet = "1.10.2"
 
 [plugins]
