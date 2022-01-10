@@ -2,7 +2,7 @@
 @file:Suppress("HEADER_MISSING_IN_NON_SINGLE_CLASS_FILE",
     "MISSING_KDOC_TOP_LEVEL",
     "MISSING_KDOC_ON_FUNCTION",
-    "FILE_NAME_MATCH_CLASS"
+    "FILE_NAME_MATCH_CLASS",
 )
 
 package org.cqfn.save.core.utils

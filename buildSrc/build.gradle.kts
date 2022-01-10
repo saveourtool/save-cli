@@ -10,7 +10,7 @@ repositories {
 dependencies {
     // workaround https://github.com/gradle/gradle/issues/15383
     implementation(files(project.libs.javaClass.superclass.protectionDomain.codeSource.location))
-    implementation("org.cqfn.diktat:diktat-gradle-plugin:1.0.0")
+    implementation("org.cqfn.diktat:diktat-gradle-plugin:1.0.1")
     implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.19.0")
     implementation(libs.kotlin.gradle.plugin)
     implementation(libs.kotlin.plugin.serialization)
