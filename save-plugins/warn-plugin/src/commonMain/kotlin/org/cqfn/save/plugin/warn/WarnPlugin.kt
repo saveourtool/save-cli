@@ -24,6 +24,8 @@ import org.cqfn.save.plugin.warn.utils.getLineNumberAndMessage
 import okio.FileNotFoundException
 import okio.FileSystem
 import okio.Path
+import org.cqfn.save.core.files.createRelativePathToTheRoot
+import org.cqfn.save.core.logging.logDebug
 
 import kotlin.random.Random
 
@@ -86,7 +88,9 @@ class WarnPlugin(
     }
 
     private fun createTestFiles(paths: List<Path>, warnPluginConfig: WarnPluginConfig): List<Path> {
+        logDebug("Trying to create temp files for: $paths")
         val dirName = "${WarnPlugin::class.simpleName!!}-${Random.nextInt()}"
+        // don't think that it is really needed now
         val dirPath = constructPathForCopyOfTestFile(dirName, paths[0]).parent!!
         createTempDir(dirPath)
 
@@ -94,6 +98,8 @@ class WarnPlugin(
 
         return paths.map { path ->
             val copyPath = constructPathForCopyOfTestFile(dirName, path)
+            // creating the hierarchy for all files
+            fs.createDirectories(copyPath.parent!!)
             fs.write(fs.createFile(copyPath)) {
                 fs.readLines(path)
                     .filter { line -> ignorePatterns.none { it.matches(line) } }
@@ -143,6 +149,11 @@ class WarnPlugin(
         // NOTE: SAVE will pass relative paths of Tests (calculated from testRootConfig dir) into the executed tool
         val fileNamesForExecCmd =
                 warnPluginConfig.wildCardInDirectoryMode?.let {
+                    val directoryPrefix = testConfig
+                        .directory
+                        .createRelativePathToTheRoot(testConfig.getRootConfig().location)
+
+                    logDebug(directoryPrefix)
                     // a hack to put only the directory path to the execution command
                     // only in case a directory mode is enabled
                     "${copyPaths[0].parent!!}$it"
