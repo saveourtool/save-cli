@@ -51,8 +51,7 @@ jobs:
           name: gradle-reports-${{ matrix.os }}
           path: '**/build/reports/'
       - name: Code coverage report
-        #if: ${{ runner.os == 'Linux' }}
-        if: ${{ false }}
+        if: ${{ runner.os == 'Linux' }}
         uses: codecov/codecov-action@v2
         with:
           flags: unittests
