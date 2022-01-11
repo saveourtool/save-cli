@@ -30,8 +30,10 @@ import org.cqfn.save.core.config.ExpectedWarningsFormat
 import org.cqfn.save.core.files.readFile
 import org.cqfn.save.core.logging.logTrace
 import org.cqfn.save.core.utils.ExecutionResult
+import org.cqfn.save.plugin.warn.sarif.adjustToCommonRoot
 import org.cqfn.save.plugin.warn.sarif.findSarifUpper
 import org.cqfn.save.plugin.warn.sarif.toWarnings
+import org.cqfn.save.plugin.warn.sarif.topmostTestDirectory
 import org.cqfn.save.plugin.warn.utils.collectionMultilineWarnings
 import org.cqfn.save.plugin.warn.utils.collectionSingleWarnings
 
@@ -129,7 +131,7 @@ class WarnPlugin(
         // extracting all warnings from test resource files
         val copyPaths: List<Path> = createTestFiles(paths, warnPluginConfig)
         val expectedWarningsMap: WarningMap = copyPaths.associate {
-            val warningsForCurrentPath = it.collectWarningsWithLineNumbers(warnPluginConfig, generalConfig)
+            val warningsForCurrentPath = it.collectWarningsWithLineNumbers(warnPluginConfig, generalConfig, copyPaths)
             it.name to warningsForCurrentPath
         }
 
@@ -247,7 +249,8 @@ class WarnPlugin(
      */
     private fun Path.collectWarningsWithLineNumbers(
         warnPluginConfig: WarnPluginConfig,
-        generalConfig: GeneralConfig
+        generalConfig: GeneralConfig,
+        testFiles: List<Path>,
     ): List<Warning> {
         return if (warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.SARIF) {
             val sarifFileName = warnPluginConfig.expectedWarningsFileName!!
@@ -256,10 +259,11 @@ class WarnPlugin(
                     "Could not find SARIF file with expected warnings for file $this. " +
                             "Please check if correct `expectedWarningsFormat` is set and if the file is present and called `$sarifFileName`."
                 )
+            val topmostTestDirectory = fs.topmostTestDirectory(this)
             Json.decodeFromString<SarifSchema210>(
                 fs.readFile(sarif)
             )
-                .toWarnings()
+                .toWarnings(topmostTestDirectory, testFiles.adjustToCommonRoot(topmostTestDirectory))
         } else if (generalConfig.expectedWarningsEndPattern != null) {
             collectionMultilineWarnings(
                 warnPluginConfig,

@@ -1,8 +1,18 @@
 package org.cqfn.save.plugin.warn.sarif
 
+import io.github.detekt.sarif4k.ArtifactLocation
+import io.github.detekt.sarif4k.Location
+import io.github.detekt.sarif4k.Message
+import io.github.detekt.sarif4k.PhysicalLocation
+import io.github.detekt.sarif4k.Result
+import io.github.detekt.sarif4k.Run
 import io.github.detekt.sarif4k.SarifSchema210
+import io.github.detekt.sarif4k.Tool
+import io.github.detekt.sarif4k.ToolComponent
+import io.github.detekt.sarif4k.Version
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import okio.Path.Companion.toPath
 import org.cqfn.save.plugin.warn.utils.Warning
 
 import kotlin.test.Test
@@ -69,7 +79,7 @@ class SarifWarningAdapterTest {
         """.trimIndent()
         val sarifSchema210 = Json.decodeFromString<SarifSchema210>(sarif)
 
-        val warnings = sarifSchema210.toWarnings()
+        val warnings = sarifSchema210.toWarnings(null, emptyList())
 
         println(warnings)
         assertEquals(1, warnings.size)
@@ -78,4 +88,43 @@ class SarifWarningAdapterTest {
             warnings.first()
         )
     }
+
+    @Test
+    fun `should filter out warnings from other files`() {
+        val sarifSchema210 = SarifSchema210(
+            version = Version.The210,
+            runs = listOf(
+                runOf(uri = "file:///workspace/tests/suite1/foo.test"),
+                runOf(uri = "file:///workspace/tests/suite1/bar.test"),
+                runOf(uri = "file:///workspace/tests/suite2/foo.test"),
+            )
+        )
+
+        val testRoot = "/workspace/tests".toPath()
+        val warnings = sarifSchema210.toWarnings(
+            testRoot,
+            listOf("/workspace/tests/suite2/foo.test".toPath()).adjustToCommonRoot(testRoot)
+        )
+
+        println(warnings)
+        assertEquals(1, warnings.size)
+    }
 }
+
+private fun runOf(message: Message = Message(), uri: String) = Run(
+    tool = Tool(driver = ToolComponent(name = "unit-test")),
+    results = listOf(
+        Result(
+            locations = listOf(
+                Location(
+                    physicalLocation = PhysicalLocation(
+                        artifactLocation = ArtifactLocation(
+                            uri = uri
+                        )
+                    )
+                )
+            ),
+            message = message,
+        )
+    )
+)

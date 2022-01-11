@@ -11,3 +11,13 @@ fun FileSystem.findSarifUpper(path: Path, sarifFileName: String): Path? {
         }
     }
 }
+
+fun List<Path>.adjustToCommonRoot(root: Path) = map {
+    it.relativeTo(root).normalized()
+}
+
+internal fun FileSystem.topmostTestDirectory(path: Path): Path {
+    return path.parents().last { parent ->
+        list(parent).any { it.name == "save.toml" }
+    }
+}
