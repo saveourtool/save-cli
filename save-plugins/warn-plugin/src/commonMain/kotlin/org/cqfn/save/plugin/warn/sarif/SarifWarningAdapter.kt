@@ -1,7 +1,8 @@
-package org.cqfn.save.plugin.warn.utils
+package org.cqfn.save.plugin.warn.sarif
 
 import io.github.detekt.sarif4k.Run
 import io.github.detekt.sarif4k.SarifSchema210
+import org.cqfn.save.plugin.warn.utils.Warning
 
 fun SarifSchema210.toWarnings(): List<Warning> {
     // "Each run represents a single invocation of a single analysis tool, and the run has to describe the tool that produced it."

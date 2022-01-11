@@ -1,5 +1,8 @@
 package org.cqfn.save.plugin.warn
 
+import io.github.detekt.sarif4k.SarifSchema210
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
@@ -24,6 +27,10 @@ import org.cqfn.save.plugin.warn.utils.getLineNumberAndMessage
 import okio.FileNotFoundException
 import okio.FileSystem
 import okio.Path
+import org.cqfn.save.core.config.ExpectedWarningsFormat
+import org.cqfn.save.core.files.readFile
+import org.cqfn.save.plugin.warn.sarif.findSarifUpper
+import org.cqfn.save.plugin.warn.sarif.toWarnings
 
 import kotlin.random.Random
 
@@ -235,83 +242,88 @@ class WarnPlugin(
         warnPluginConfig: WarnPluginConfig,
         generalConfig: GeneralConfig
     ): List<Warning> {
-        val linesFile = fs.readLines(this)
-        return generalConfig.expectedWarningsEndPattern?.let {
+        return if (warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.SARIF) {
+            val sarif = fs.findSarifUpper(this) ?: error("Could not find SARIF file with expected warnings for file $this. " +
+                    "Please check if correct `expectedWarningsFormat` is set and if the file is present and called `save-warnings.sarif`.")
+            Json.decodeFromString<SarifSchema210>(
+                fs.readFile(sarif)
+            )
+                .toWarnings()
+        } else if (generalConfig.expectedWarningsEndPattern != null) {
             collectionMultilineWarnings(
                 warnPluginConfig,
                 generalConfig,
-                linesFile,
+                fs.readLines(this),
+                this,
+            )
+        } else {
+            collectionSingleWarnings(
+                warnPluginConfig,
+                generalConfig,
+                fs.readLines(this),
                 this,
             )
         }
-            ?: run {
-                collectionSingleWarnings(
-                    warnPluginConfig,
-                    generalConfig,
-                    linesFile,
-                    this,
-                )
-            }
     }
-
-    private fun collectionMultilineWarnings(
-        warnPluginConfig: WarnPluginConfig,
-        generalConfig: GeneralConfig,
-        linesFile: List<String>,
-        file: Path,
-    ): List<Warning> = linesFile.mapIndexed { index, line ->
-        val newLineAndMessage = line.getLineNumberAndMessage(
-            generalConfig.expectedWarningsPattern!!,
-            generalConfig.expectedWarningsEndPattern!!,
-            generalConfig.expectedWarningsMiddlePattern!!,
-            warnPluginConfig.messageCaptureGroupMiddle!!,
-            warnPluginConfig.messageCaptureGroupEnd!!,
-            warnPluginConfig.lineCaptureGroup,
-            warnPluginConfig.linePlaceholder!!,
-            warnPluginConfig.messageCaptureGroup!!,
-            index + 1,
-            file,
-            linesFile,
-        )
-        with(warnPluginConfig) {
-            line.extractWarning(
-                generalConfig.expectedWarningsPattern!!,
-                file.name,
-                newLineAndMessage?.first,
-                newLineAndMessage?.second,
-                columnCaptureGroup,
-                benchmarkMode!!,
-            )
-        }
-    }
-        .filterNotNull()
-        .sortedBy { warn -> warn.message }
-
-    private fun collectionSingleWarnings(
-        warnPluginConfig: WarnPluginConfig,
-        generalConfig: GeneralConfig,
-        linesFile: List<String>,
-        file: Path,
-    ): List<Warning> = linesFile.mapIndexed { index, line ->
-        val newLine = line.getLineNumber(
-            generalConfig.expectedWarningsPattern!!,
-            warnPluginConfig.lineCaptureGroup,
-            warnPluginConfig.linePlaceholder!!,
-            index + 1,
-            file,
-            linesFile,
-        )
-        with(warnPluginConfig) {
-            line.extractWarning(
-                generalConfig.expectedWarningsPattern!!,
-                file.name,
-                newLine,
-                columnCaptureGroup,
-                messageCaptureGroup!!,
-                benchmarkMode!!,
-            )
-        }
-    }
-        .filterNotNull()
-        .sortedBy { warn -> warn.message }
 }
+
+private fun collectionMultilineWarnings(
+    warnPluginConfig: WarnPluginConfig,
+    generalConfig: GeneralConfig,
+    linesFile: List<String>,
+    file: Path,
+): List<Warning> = linesFile.mapIndexed { index, line ->
+    val newLineAndMessage = line.getLineNumberAndMessage(
+        generalConfig.expectedWarningsPattern!!,
+        generalConfig.expectedWarningsEndPattern!!,
+        generalConfig.expectedWarningsMiddlePattern!!,
+        warnPluginConfig.messageCaptureGroupMiddle!!,
+        warnPluginConfig.messageCaptureGroupEnd!!,
+        warnPluginConfig.lineCaptureGroup,
+        warnPluginConfig.linePlaceholder!!,
+        warnPluginConfig.messageCaptureGroup!!,
+        index + 1,
+        file,
+        linesFile,
+    )
+    with(warnPluginConfig) {
+        line.extractWarning(
+            generalConfig.expectedWarningsPattern!!,
+            file.name,
+            newLineAndMessage?.first,
+            newLineAndMessage?.second,
+            columnCaptureGroup,
+            benchmarkMode!!,
+        )
+    }
+}
+    .filterNotNull()
+    .sortedBy { warn -> warn.message }
+
+private fun collectionSingleWarnings(
+    warnPluginConfig: WarnPluginConfig,
+    generalConfig: GeneralConfig,
+    linesFile: List<String>,
+    file: Path,
+): List<Warning> = linesFile.mapIndexed { index, line ->
+    val newLine = line.getLineNumber(
+        generalConfig.expectedWarningsPattern!!,
+        warnPluginConfig.lineCaptureGroup,
+        warnPluginConfig.linePlaceholder!!,
+        index + 1,
+        file,
+        linesFile,
+    )
+    with(warnPluginConfig) {
+        line.extractWarning(
+            generalConfig.expectedWarningsPattern!!,
+            file.name,
+            newLine,
+            columnCaptureGroup,
+            messageCaptureGroup!!,
+            benchmarkMode!!,
+        )
+    }
+}
+    .filterNotNull()
+    .sortedBy { warn -> warn.message }

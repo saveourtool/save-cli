@@ -13,7 +13,8 @@ import okio.Path.Companion.toPath
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.UseSerializers
-import org.cqfn.save.core.config.ToolOutputType
+import org.cqfn.save.core.config.ActualWarningsFormat
+import org.cqfn.save.core.config.ExpectedWarningsFormat
 
 /**
  * Some fields by default are null, instead of some natural value, because of the fact, that in stage of merging
@@ -81,7 +82,8 @@ data class WarnPluginConfig(
     val testToolResFileOutput: String? = null,
     val ignoreLines: MutableList<String>? = null,
     val benchmarkMode: Boolean? = null,
-    val toolOutputType: ToolOutputType = ToolOutputType.STDOUT,
+    val expectedWarningsFormat: ExpectedWarningsFormat? = null,
+    val actualWarningsFormat: ActualWarningsFormat? = null,
 ) : PluginConfig {
     @Transient
     override val type = TestConfigSections.WARN
@@ -154,6 +156,9 @@ data class WarnPluginConfig(
         requirePositiveIfNotNull(batchSize)
         requireValidPatternForRegexInWarning()
 
+        val expectedWarningsFormat = expectedWarningsFormat ?: ExpectedWarningsFormat.IN_PLACE
+        val actualWarningsFormat = actualWarningsFormat ?: ActualWarningsFormat.PLAIN
+
         val newWarningTextHasLine = warningTextHasLine ?: true
         val newWarningTextHasColumn = warningTextHasColumn ?: true
 
@@ -193,7 +198,9 @@ data class WarnPluginConfig(
             partialWarnTextMatch ?: false,
             testToolResFileOutput,
             ignoreLines,
-            benchmarkMode ?: false
+            benchmarkMode ?: false,
+            expectedWarningsFormat = expectedWarningsFormat,
+            actualWarningsFormat = actualWarningsFormat,
         ).also {
             it.configLocation = this.configLocation
         }
