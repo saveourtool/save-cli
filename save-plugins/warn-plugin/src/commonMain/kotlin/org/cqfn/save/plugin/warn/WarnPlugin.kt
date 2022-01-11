@@ -115,7 +115,8 @@ class WarnPlugin(
         "LongMethod",
         "ReturnCount",
         "SwallowedException",
-        "TOO_MANY_LINES_IN_LAMBDA"
+        "TOO_MANY_LINES_IN_LAMBDA",
+        "ComplexMethod"
     )
     private fun handleTestFile(
         paths: List<Path>,
