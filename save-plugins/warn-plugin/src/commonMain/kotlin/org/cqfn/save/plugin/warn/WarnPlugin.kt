@@ -4,6 +4,7 @@ import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
+import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.plugin.ExtraFlags
 import org.cqfn.save.core.plugin.ExtraFlagsExtractor
@@ -24,8 +25,7 @@ import org.cqfn.save.plugin.warn.utils.getLineNumberAndMessage
 import okio.FileNotFoundException
 import okio.FileSystem
 import okio.Path
-import org.cqfn.save.core.files.createRelativePathToTheRoot
-import org.cqfn.save.core.logging.logDebug
+import okio.Path.Companion.toPath
 
 import kotlin.random.Random
 
@@ -149,15 +149,16 @@ class WarnPlugin(
         // NOTE: SAVE will pass relative paths of Tests (calculated from testRootConfig dir) into the executed tool
         val fileNamesForExecCmd =
                 warnPluginConfig.wildCardInDirectoryMode?.let {
-                    val directoryPrefix = testConfig
-                        .directory
-                        .createRelativePathToTheRoot(testConfig.getRootConfig().location)
-
-                    logDebug(directoryPrefix)
-                    // a hack to put only the directory path to the execution command
+                    // a hack to put only the root directory path to the execution command
                     // only in case a directory mode is enabled
-                    "${copyPaths[0].parent!!}$it"
+                    var testRootPath = testConfig.directory.parent ?: testConfig.directory
+                    while (testRootPath.parent != null && testRootPath.parent != ".".toPath()) {
+                        testRootPath = testRootPath.parent!!
+                    }
+                    "$testRootPath$it"
                 } ?: copyPaths.joinToString(separator = warnPluginConfig.batchSeparator!!)
+
+        logDebug("Constructed file name for execution for warn plugin: $fileNamesForExecCmd")
         val execFlagsAdjusted = resolvePlaceholdersFrom(warnPluginConfig.execFlags, extraFlags, fileNamesForExecCmd)
         val execCmd = "${generalConfig.execCmd} $execFlagsAdjusted"
         val time = generalConfig.timeOutMillis!!.times(copyPaths.size)
