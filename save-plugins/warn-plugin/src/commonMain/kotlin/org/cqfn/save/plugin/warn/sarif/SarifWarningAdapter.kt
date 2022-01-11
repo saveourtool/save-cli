@@ -2,6 +2,7 @@ package org.cqfn.save.plugin.warn.sarif
 
 import io.github.detekt.sarif4k.Run
 import io.github.detekt.sarif4k.SarifSchema210
+import okio.Path.Companion.toPath
 import org.cqfn.save.plugin.warn.utils.Warning
 
 fun SarifSchema210.toWarnings(): List<Warning> {
@@ -27,13 +28,22 @@ fun Run.toWarning(): List<Warning> {
             }
             ?.singleOrNull()
             ?: (null to null)
+        val fileName = result.locations
+            ?.singleOrNull()
+            ?.physicalLocation
+            ?.artifactLocation
+            ?.uri
+            // assuming that all URIs for SAVE correspond to files
+            ?.substringAfter("file:///")
+            ?.toPath()
+            ?.name
+            ?: ""
         Warning(
             // in the simplest case, Message will only contain `text`
             message = result.message.text ?: "",
             line = line?.toInt(),
             column = column?.toInt(),
-            // todo: convert it to filename only?
-            fileName = result.locations?.singleOrNull()?.physicalLocation?.artifactLocation?.uri ?: "",
+            fileName = fileName,
         )
     } ?: emptyList()
 }

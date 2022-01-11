@@ -243,8 +243,11 @@ class WarnPlugin(
         generalConfig: GeneralConfig
     ): List<Warning> {
         return if (warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.SARIF) {
-            val sarif = fs.findSarifUpper(this) ?: error("Could not find SARIF file with expected warnings for file $this. " +
-                    "Please check if correct `expectedWarningsFormat` is set and if the file is present and called `save-warnings.sarif`.")
+            // todo: make this filename configurable
+            val sarif = fs.findSarifUpper(this, "save-warnings.sarif")
+                ?: error("Could not find SARIF file with expected warnings for file $this. " +
+                        "Please check if correct `expectedWarningsFormat` is set and if the file is present and called `save-warnings.sarif`."
+                )
             Json.decodeFromString<SarifSchema210>(
                 fs.readFile(sarif)
             )
