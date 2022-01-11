@@ -22,15 +22,17 @@ import org.cqfn.save.plugin.warn.utils.ResultsChecker
 import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.extractWarning
 import org.cqfn.save.plugin.warn.utils.getLineNumber
-import org.cqfn.save.plugin.warn.utils.getLineNumberAndMessage
 
 import okio.FileNotFoundException
 import okio.FileSystem
 import okio.Path
 import org.cqfn.save.core.config.ExpectedWarningsFormat
 import org.cqfn.save.core.files.readFile
+import org.cqfn.save.core.utils.ExecutionResult
 import org.cqfn.save.plugin.warn.sarif.findSarifUpper
 import org.cqfn.save.plugin.warn.sarif.toWarnings
+import org.cqfn.save.plugin.warn.utils.collectionMultilineWarnings
+import org.cqfn.save.plugin.warn.utils.collectionSingleWarnings
 
 import kotlin.random.Random
 
@@ -167,20 +169,7 @@ class WarnPlugin(
             return failTestResult(paths, ex, execCmd)
         }
 
-        val stdout =
-                warnPluginConfig.testToolResFileOutput?.let {
-                    val testToolResFilePath = testConfig.directory / warnPluginConfig.testToolResFileOutput
-                    try {
-                        fs.readLines(testToolResFilePath)
-                    } catch (ex: FileNotFoundException) {
-                        logWarn("Trying to read file \"${warnPluginConfig.testToolResFileOutput}\" that was set as an output for a tested tool with testToolResFileOutput," +
-                                " but no such file found. Will use the stdout as an input.")
-                        executionResult.stdout
-                    }
-                }
-                    ?: run {
-                        executionResult.stdout
-                    }
+        val stdout = getToolStdout(warnPluginConfig, executionResult)
         val stderr = executionResult.stderr
 
         val actualWarningsMap = stdout.mapNotNull {
@@ -220,6 +209,23 @@ class WarnPlugin(
             )
         }.asSequence()
     }
+
+    private fun getToolStdout(
+        warnPluginConfig: WarnPluginConfig,
+        executionResult: ExecutionResult,
+    ) = warnPluginConfig.testToolResFileOutput?.let {
+        val testToolResFilePath = testConfig.directory / warnPluginConfig.testToolResFileOutput
+        try {
+            fs.readLines(testToolResFilePath)
+        } catch (ex: FileNotFoundException) {
+            logWarn(
+                "Trying to read file \"${warnPluginConfig.testToolResFileOutput}\" that was set as an output for a tested tool with testToolResFileOutput," +
+                        " but no such file found. Will use the stdout as an input."
+            )
+            executionResult.stdout
+        }
+    }
+        ?: executionResult.stdout
 
     private fun failTestResult(
         paths: List<Path>,
@@ -269,64 +275,3 @@ class WarnPlugin(
         }
     }
 }
-
-private fun collectionMultilineWarnings(
-    warnPluginConfig: WarnPluginConfig,
-    generalConfig: GeneralConfig,
-    linesFile: List<String>,
-    file: Path,
-): List<Warning> = linesFile.mapIndexed { index, line ->
-    val newLineAndMessage = line.getLineNumberAndMessage(
-        generalConfig.expectedWarningsPattern!!,
-        generalConfig.expectedWarningsEndPattern!!,
-        generalConfig.expectedWarningsMiddlePattern!!,
-        warnPluginConfig.messageCaptureGroupMiddle!!,
-        warnPluginConfig.messageCaptureGroupEnd!!,
-        warnPluginConfig.lineCaptureGroup,
-        warnPluginConfig.linePlaceholder!!,
-        warnPluginConfig.messageCaptureGroup!!,
-        index + 1,
-        file,
-        linesFile,
-    )
-    with(warnPluginConfig) {
-        line.extractWarning(
-            generalConfig.expectedWarningsPattern!!,
-            file.name,
-            newLineAndMessage?.first,
-            newLineAndMessage?.second,
-            columnCaptureGroup,
-            benchmarkMode!!,
-        )
-    }
-}
-    .filterNotNull()
-    .sortedBy { warn -> warn.message }
-
-private fun collectionSingleWarnings(
-    warnPluginConfig: WarnPluginConfig,
-    generalConfig: GeneralConfig,
-    linesFile: List<String>,
-    file: Path,
-): List<Warning> = linesFile.mapIndexed { index, line ->
-    val newLine = line.getLineNumber(
-        generalConfig.expectedWarningsPattern!!,
-        warnPluginConfig.lineCaptureGroup,
-        warnPluginConfig.linePlaceholder!!,
-        index + 1,
-        file,
-        linesFile,
-    )
-    with(warnPluginConfig) {
-        line.extractWarning(
-            generalConfig.expectedWarningsPattern!!,
-            file.name,
-            newLine,
-            columnCaptureGroup,
-            messageCaptureGroup!!,
-            benchmarkMode!!,
-        )
-    }
-}
-    .filterNotNull()
-    .sortedBy { warn -> warn.message }
