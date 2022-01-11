@@ -1,16 +1,24 @@
+/**
+ * Methods for conversion from SARIF model to [Warning]s
+ */
+
 package org.cqfn.save.plugin.warn.sarif
+
+import org.cqfn.save.plugin.warn.utils.Warning
 
 import io.github.detekt.sarif4k.Run
 import io.github.detekt.sarif4k.SarifSchema210
 import okio.Path
 import okio.Path.Companion.toPath
-import org.cqfn.save.plugin.warn.utils.Warning
 
 /**
  * Convert this SARIF report to a list of [Warning]s.
  *
  * @param testFiles if this list is not empty, then results from SARIF will be filtered to match paths from [testFiles].
  * [testFiles] should be relative to test root, then URIs from SARIF will be trimmed too and matched against [testFiles].
+ * Regarding relative paths in SARIF see [this comment](https://github.com/microsoft/sarif-vscode-extension/issues/294#issuecomment-657753955).
+ * @param testRoot a root directory of test suite
+ * @return a list of [Warning]s
  */
 fun SarifSchema210.toWarnings(testRoot: Path?, testFiles: List<Path>): List<Warning> {
     // "Each run represents a single invocation of a single analysis tool, and the run has to describe the tool that produced it."
@@ -20,6 +28,12 @@ fun SarifSchema210.toWarnings(testRoot: Path?, testFiles: List<Path>): List<Warn
     }
 }
 
+/**
+ * @param testRoot a root directory of test suite
+ * @param testFiles if this list is not empty, then results from SARIF will be filtered to match paths from [testFiles].
+ * @return a list of [Warning]s
+ */
+@Suppress("TOO_LONG_FUNCTION", "AVOID_NULL_CHECKS")
 fun Run.toWarning(testRoot: Path?, testFiles: List<Path>): List<Warning> {
     // "A result is an observation about the code."
     return results?.map { result ->
@@ -42,22 +56,22 @@ fun Run.toWarning(testRoot: Path?, testFiles: List<Path>): List<Warning> {
             testFiles.isEmpty() || filePath in testFiles
         }
         ?.map { (result, filePath) ->
-        val (line, column) = result.locations?.map {
-            // "The most common case is for a tool to report a physical location, and to specify the location by line and column number."
-            it.physicalLocation?.region
-        }
-            ?.map {
-                it?.startLine to it?.startColumn
+            val (line, column) = result.locations?.map {
+                // "The most common case is for a tool to report a physical location, and to specify the location by line and column number."
+                it.physicalLocation?.region
             }
-            ?.singleOrNull()
-            ?: (null to null)
-        val fileName = filePath?.name ?: ""
-        Warning(
-            // in the simplest case, Message will only contain `text`
-            message = result.message.text ?: "",
-            line = line?.toInt(),
-            column = column?.toInt(),
-            fileName = fileName,
-        )
-    } ?: emptyList()
+                ?.map {
+                    it?.startLine to it?.startColumn
+                }
+                ?.singleOrNull()
+                ?: (null to null)
+            val fileName = filePath?.name ?: ""
+            Warning(
+                // in the simplest case, Message will only contain `text`
+                message = result.message.text ?: "",
+                line = line?.toInt(),
+                column = column?.toInt(),
+                fileName = fileName,
+            )
+        } ?: emptyList()
 }

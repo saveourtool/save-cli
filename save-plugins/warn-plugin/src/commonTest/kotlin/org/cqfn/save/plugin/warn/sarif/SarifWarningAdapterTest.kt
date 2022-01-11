@@ -1,5 +1,7 @@
 package org.cqfn.save.plugin.warn.sarif
 
+import org.cqfn.save.plugin.warn.utils.Warning
+
 import io.github.detekt.sarif4k.ArtifactLocation
 import io.github.detekt.sarif4k.Location
 import io.github.detekt.sarif4k.Message
@@ -10,16 +12,16 @@ import io.github.detekt.sarif4k.SarifSchema210
 import io.github.detekt.sarif4k.Tool
 import io.github.detekt.sarif4k.ToolComponent
 import io.github.detekt.sarif4k.Version
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 import okio.Path.Companion.toPath
-import org.cqfn.save.plugin.warn.utils.Warning
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
 class SarifWarningAdapterTest {
     @Test
+    @Suppress("TOO_LONG_FUNCTION")
     fun test() {
         val sarif = """
             {
@@ -77,7 +79,7 @@ class SarifWarningAdapterTest {
               ]
             }
         """.trimIndent()
-        val sarifSchema210 = Json.decodeFromString<SarifSchema210>(sarif)
+        val sarifSchema210: SarifSchema210 = Json.decodeFromString(sarif)
 
         val warnings = sarifSchema210.toWarnings(null, emptyList())
 

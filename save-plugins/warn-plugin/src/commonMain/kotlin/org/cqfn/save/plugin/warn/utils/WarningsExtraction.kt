@@ -5,10 +5,18 @@
 
 package org.cqfn.save.plugin.warn.utils
 
-import okio.Path
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.plugin.warn.WarnPluginConfig
 
+import okio.Path
+
+/**
+ * @param warnPluginConfig
+ * @param generalConfig
+ * @param linesFile
+ * @param file
+ * @return a list of warnings extracted from [linesFile]
+ */
 internal fun collectionMultilineWarnings(
     warnPluginConfig: WarnPluginConfig,
     generalConfig: GeneralConfig,
@@ -42,6 +50,13 @@ internal fun collectionMultilineWarnings(
     .filterNotNull()
     .sortedBy { warn -> warn.message }
 
+/**
+ * @param warnPluginConfig
+ * @param generalConfig
+ * @param linesFile
+ * @param file
+ * @return a list of warnings extracted from [linesFile]
+ */
 internal fun collectionSingleWarnings(
     warnPluginConfig: WarnPluginConfig,
     generalConfig: GeneralConfig,

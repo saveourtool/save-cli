@@ -1,10 +1,9 @@
 package org.cqfn.save.plugin.warn
 
-import io.github.detekt.sarif4k.SarifSchema210
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
+import org.cqfn.save.core.config.ExpectedWarningsFormat
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.files.readFile
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.logging.logWarn
@@ -12,32 +11,33 @@ import org.cqfn.save.core.plugin.ExtraFlags
 import org.cqfn.save.core.plugin.ExtraFlagsExtractor
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.Plugin
+import org.cqfn.save.core.plugin.PluginException
 import org.cqfn.save.core.plugin.resolvePlaceholdersFrom
 import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.TestResult
+import org.cqfn.save.core.utils.ExecutionResult
 import org.cqfn.save.core.utils.ProcessExecutionException
 import org.cqfn.save.core.utils.ProcessTimeoutException
+import org.cqfn.save.plugin.warn.sarif.adjustToCommonRoot
+import org.cqfn.save.plugin.warn.sarif.findAncestorDirContainingFile
+import org.cqfn.save.plugin.warn.sarif.toWarnings
+import org.cqfn.save.plugin.warn.sarif.topmostTestDirectory
 import org.cqfn.save.plugin.warn.utils.ResultsChecker
 import org.cqfn.save.plugin.warn.utils.Warning
+import org.cqfn.save.plugin.warn.utils.collectionMultilineWarnings
+import org.cqfn.save.plugin.warn.utils.collectionSingleWarnings
 import org.cqfn.save.plugin.warn.utils.extractWarning
 import org.cqfn.save.plugin.warn.utils.getLineNumber
 
+import io.github.detekt.sarif4k.SarifSchema210
 import okio.FileNotFoundException
 import okio.FileSystem
 import okio.Path
-import org.cqfn.save.core.config.ExpectedWarningsFormat
-import org.cqfn.save.core.files.readFile
-import org.cqfn.save.core.logging.logTrace
-import org.cqfn.save.core.utils.ExecutionResult
-import org.cqfn.save.plugin.warn.sarif.adjustToCommonRoot
-import org.cqfn.save.plugin.warn.sarif.findSarifUpper
-import org.cqfn.save.plugin.warn.sarif.toWarnings
-import org.cqfn.save.plugin.warn.sarif.topmostTestDirectory
-import org.cqfn.save.plugin.warn.utils.collectionMultilineWarnings
-import org.cqfn.save.plugin.warn.utils.collectionSingleWarnings
 
 import kotlin.random.Random
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
 private typealias WarningMap = Map<String, List<Warning>>
 
@@ -120,7 +120,6 @@ class WarnPlugin(
         "SAY_NO_TO_VAR",
         "LongMethod",
         "ReturnCount",
-        "SwallowedException",
         "TOO_MANY_LINES_IN_LAMBDA"
     )
     private fun handleTestFile(
@@ -213,6 +212,7 @@ class WarnPlugin(
         }.asSequence()
     }
 
+    @Suppress("SwallowedException")
     private fun getToolStdout(
         warnPluginConfig: WarnPluginConfig,
         executionResult: ExecutionResult,
@@ -247,37 +247,36 @@ class WarnPlugin(
      * 1) reading the file
      * 2) for each line get the warning
      */
+    @Suppress("AVOID_NULL_CHECKS")
     private fun Path.collectWarningsWithLineNumbers(
         warnPluginConfig: WarnPluginConfig,
         generalConfig: GeneralConfig,
         testFiles: List<Path>,
-    ): List<Warning> {
-        return if (warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.SARIF) {
-            val sarifFileName = warnPluginConfig.expectedWarningsFileName!!
-            val sarif = fs.findSarifUpper(this, sarifFileName)
-                ?: error(
-                    "Could not find SARIF file with expected warnings for file $this. " +
-                            "Please check if correct `expectedWarningsFormat` is set and if the file is present and called `$sarifFileName`."
-                )
-            val topmostTestDirectory = fs.topmostTestDirectory(this)
-            Json.decodeFromString<SarifSchema210>(
-                fs.readFile(sarif)
+    ): List<Warning> = if (warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.SARIF) {
+        val sarifFileName = warnPluginConfig.expectedWarningsFileName!!
+        val sarif = fs.findAncestorDirContainingFile(this, sarifFileName)?.let { it / sarifFileName }
+            ?: throw PluginException(
+                "Could not find SARIF file with expected warnings for file $this. " +
+                        "Please check if correct `expectedWarningsFormat` is set and if the file is present and called `$sarifFileName`."
             )
-                .toWarnings(topmostTestDirectory, testFiles.adjustToCommonRoot(topmostTestDirectory))
-        } else if (generalConfig.expectedWarningsEndPattern != null) {
-            collectionMultilineWarnings(
-                warnPluginConfig,
-                generalConfig,
-                fs.readLines(this),
-                this,
-            )
-        } else {
-            collectionSingleWarnings(
-                warnPluginConfig,
-                generalConfig,
-                fs.readLines(this),
-                this,
-            )
-        }
+        val topmostTestDirectory = fs.topmostTestDirectory(this)
+        Json.decodeFromString<SarifSchema210>(
+            fs.readFile(sarif)
+        )
+            .toWarnings(topmostTestDirectory, testFiles.adjustToCommonRoot(topmostTestDirectory))
+    } else if (generalConfig.expectedWarningsEndPattern != null) {
+        collectionMultilineWarnings(
+            warnPluginConfig,
+            generalConfig,
+            fs.readLines(this),
+            this,
+        )
+    } else {
+        collectionSingleWarnings(
+            warnPluginConfig,
+            generalConfig,
+            fs.readLines(this),
+            this,
+        )
     }
 }

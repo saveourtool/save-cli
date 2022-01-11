@@ -3,6 +3,8 @@
 
 package org.cqfn.save.plugin.warn
 
+import org.cqfn.save.core.config.ActualWarningsFormat
+import org.cqfn.save.core.config.ExpectedWarningsFormat
 import org.cqfn.save.core.config.TestConfigSections
 import org.cqfn.save.core.plugin.PluginConfig
 import org.cqfn.save.core.utils.RegexSerializer
@@ -13,8 +15,6 @@ import okio.Path.Companion.toPath
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.UseSerializers
-import org.cqfn.save.core.config.ActualWarningsFormat
-import org.cqfn.save.core.config.ExpectedWarningsFormat
 
 /**
  * Some fields by default are null, instead of some natural value, because of the fact, that in stage of merging
@@ -55,6 +55,9 @@ import org.cqfn.save.core.config.ExpectedWarningsFormat
  * @property benchmarkMode whether to ignore the warning messages
  * @property messageCaptureGroupMiddle
  * @property messageCaptureGroupEnd
+ * @property expectedWarningsFormat
+ * @property actualWarningsFormat
+ * @property expectedWarningsFileName
  */
 @Serializable
 data class WarnPluginConfig(
@@ -105,7 +108,7 @@ data class WarnPluginConfig(
      */
     val resourceNamePattern: Regex = Regex(resourceNamePatternStr)
 
-    @Suppress("ComplexMethod")
+    @Suppress("ComplexMethod", "TOO_LONG_FUNCTION")
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as WarnPluginConfig
         return WarnPluginConfig(
