@@ -28,6 +28,7 @@ import okio.FileSystem
 import okio.Path
 import org.cqfn.save.core.config.ExpectedWarningsFormat
 import org.cqfn.save.core.files.readFile
+import org.cqfn.save.core.logging.logTrace
 import org.cqfn.save.core.utils.ExecutionResult
 import org.cqfn.save.plugin.warn.sarif.findSarifUpper
 import org.cqfn.save.plugin.warn.sarif.toWarnings
@@ -249,10 +250,11 @@ class WarnPlugin(
         generalConfig: GeneralConfig
     ): List<Warning> {
         return if (warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.SARIF) {
-            // todo: make this filename configurable
-            val sarif = fs.findSarifUpper(this, "save-warnings.sarif")
-                ?: error("Could not find SARIF file with expected warnings for file $this. " +
-                        "Please check if correct `expectedWarningsFormat` is set and if the file is present and called `save-warnings.sarif`."
+            val sarifFileName = warnPluginConfig.expectedWarningsFileName!!
+            val sarif = fs.findSarifUpper(this, sarifFileName)
+                ?: error(
+                    "Could not find SARIF file with expected warnings for file $this. " +
+                            "Please check if correct `expectedWarningsFormat` is set and if the file is present and called `$sarifFileName`."
                 )
             Json.decodeFromString<SarifSchema210>(
                 fs.readFile(sarif)
