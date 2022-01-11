@@ -49,6 +49,7 @@ class WarnPlugin(
     redirectTo
 ) {
     private lateinit var extraFlagsExtractor: ExtraFlagsExtractor
+    private lateinit var tmpDirName: String
 
     override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
         testConfig.validateAndSetDefaults()
@@ -89,15 +90,15 @@ class WarnPlugin(
 
     private fun createTestFiles(paths: List<Path>, warnPluginConfig: WarnPluginConfig): List<Path> {
         logDebug("Trying to create temp files for: $paths")
-        val dirName = "${WarnPlugin::class.simpleName!!}-${Random.nextInt()}"
+        tmpDirName = "${WarnPlugin::class.simpleName!!}-${Random.nextInt()}"
         // don't think that it is really needed now
-        val dirPath = constructPathForCopyOfTestFile(dirName, paths[0]).parent!!
+        val dirPath = constructPathForCopyOfTestFile(tmpDirName, paths[0]).parent!!
         createTempDir(dirPath)
 
         val ignorePatterns = warnPluginConfig.ignoreLinesPatterns
 
         return paths.map { path ->
-            val copyPath = constructPathForCopyOfTestFile(dirName, path)
+            val copyPath = constructPathForCopyOfTestFile(tmpDirName, path)
             // creating the hierarchy for all files
             fs.createDirectories(copyPath.parent!!)
             fs.write(fs.createFile(copyPath)) {
@@ -152,8 +153,8 @@ class WarnPlugin(
                 warnPluginConfig.wildCardInDirectoryMode?.let {
                     // a hack to put only the root directory path to the execution command
                     // only in case a directory mode is enabled
-                    var testRootPath = testConfig.directory.parent ?: testConfig.directory
-                    while (testRootPath.parent != null && testRootPath.parent != ".".toPath()) {
+                    var testRootPath = copyPaths[0].parent ?: ".".toPath()
+                    while (testRootPath.parent != null && testRootPath.parent!!.name != tmpDirName) {
                         testRootPath = testRootPath.parent!!
                     }
                     "$testRootPath$it"
