@@ -1,5 +1,6 @@
 package org.cqfn.save.plugin.warn
 
+import org.cqfn.save.core.config.ExpectedWarningsFormat
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
@@ -14,13 +15,16 @@ import org.cqfn.save.core.plugin.resolvePlaceholdersFrom
 import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.TestResult
+import org.cqfn.save.core.utils.ExecutionResult
 import org.cqfn.save.core.utils.ProcessExecutionException
 import org.cqfn.save.core.utils.ProcessTimeoutException
 import org.cqfn.save.plugin.warn.utils.ResultsChecker
 import org.cqfn.save.plugin.warn.utils.Warning
+import org.cqfn.save.plugin.warn.utils.collectWarningsFromSarif
+import org.cqfn.save.plugin.warn.utils.collectionMultilineWarnings
+import org.cqfn.save.plugin.warn.utils.collectionSingleWarnings
 import org.cqfn.save.plugin.warn.utils.extractWarning
 import org.cqfn.save.plugin.warn.utils.getLineNumber
-import org.cqfn.save.plugin.warn.utils.getLineNumberAndMessage
 
 import okio.FileNotFoundException
 import okio.FileSystem
@@ -115,7 +119,6 @@ class WarnPlugin(
         "SAY_NO_TO_VAR",
         "LongMethod",
         "ReturnCount",
-        "SwallowedException",
         "TOO_MANY_LINES_IN_LAMBDA",
         "ComplexMethod"
     )
@@ -126,9 +129,9 @@ class WarnPlugin(
     ): Sequence<TestResult> {
         // extracting all warnings from test resource files
         val copyPaths: List<Path> = createTestFiles(paths, warnPluginConfig)
-        val expectedWarningsMap: WarningMap = copyPaths.associate {
-            val warningsForCurrentPath = it.collectWarningsWithLineNumbers(warnPluginConfig, generalConfig)
-            it.name to warningsForCurrentPath
+        val expectedWarningsMap: WarningMap = copyPaths.zip(paths).associate { (copyPath, originalPath) ->
+            val warningsForCurrentPath = copyPath.collectWarningsWithLineNumbers(warnPluginConfig, generalConfig, paths, originalPath)
+            copyPath.name to warningsForCurrentPath
         }
 
         val extraFlagsList = copyPaths.mapNotNull { extraFlagsExtractor.extractExtraFlagsFrom(it) }.distinct()
@@ -138,12 +141,19 @@ class WarnPlugin(
         }
         val extraFlags = extraFlagsList.singleOrNull() ?: ExtraFlags("", "")
 
-        if (expectedWarningsMap.isEmpty()) {
+        if (expectedWarningsMap.isEmpty() && warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.IN_PLACE) {
             logWarn(
                 "No expected warnings were found using the following regex pattern:" +
                         " [${generalConfig.expectedWarningsPattern}] in the test files: $paths." +
                         " If you have expected any warnings - please check 'expectedWarningsPattern' or capture groups" +
                         " in your 'save.toml' configuration"
+            )
+        } else if (expectedWarningsMap.isEmpty() && warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.SARIF) {
+            logWarn(
+                "No expected warnings were found when inspecting files ${warnPluginConfig.expectedWarningsFileName}" +
+                        " for test files: $paths." +
+                        " If you have expected any warnings - please make sure SARIF files exist, have correct name and contain" +
+                        " relevant warnings."
             )
         }
 
@@ -174,20 +184,7 @@ class WarnPlugin(
             return failTestResult(paths, ex, execCmd)
         }
 
-        val stdout =
-                warnPluginConfig.testToolResFileOutput?.let {
-                    val testToolResFilePath = testConfig.directory / warnPluginConfig.testToolResFileOutput
-                    try {
-                        fs.readLines(testToolResFilePath)
-                    } catch (ex: FileNotFoundException) {
-                        logWarn("Trying to read file \"${warnPluginConfig.testToolResFileOutput}\" that was set as an output for a tested tool with testToolResFileOutput," +
-                                " but no such file found. Will use the stdout as an input.")
-                        executionResult.stdout
-                    }
-                }
-                    ?: run {
-                        executionResult.stdout
-                    }
+        val stdout = getToolStdout(warnPluginConfig, executionResult)
         val stderr = executionResult.stderr
 
         val actualWarningsMap = stdout.mapNotNull {
@@ -228,6 +225,24 @@ class WarnPlugin(
         }.asSequence()
     }
 
+    @Suppress("SwallowedException")
+    private fun getToolStdout(
+        warnPluginConfig: WarnPluginConfig,
+        executionResult: ExecutionResult,
+    ) = warnPluginConfig.testToolResFileOutput?.let {
+        val testToolResFilePath = testConfig.directory / warnPluginConfig.testToolResFileOutput
+        try {
+            fs.readLines(testToolResFilePath)
+        } catch (ex: FileNotFoundException) {
+            logWarn(
+                "Trying to read file \"${warnPluginConfig.testToolResFileOutput}\" that was set as an output for a tested tool with testToolResFileOutput," +
+                        " but no such file found. Will use the stdout as an input."
+            )
+            executionResult.stdout
+        }
+    }
+        ?: executionResult.stdout
+
     private fun failTestResult(
         paths: List<Path>,
         ex: ProcessExecutionException,
@@ -245,87 +260,31 @@ class WarnPlugin(
      * 1) reading the file
      * 2) for each line get the warning
      */
+    @Suppress("AVOID_NULL_CHECKS")
     private fun Path.collectWarningsWithLineNumbers(
         warnPluginConfig: WarnPluginConfig,
-        generalConfig: GeneralConfig
-    ): List<Warning> {
-        val linesFile = fs.readLines(this)
-        return generalConfig.expectedWarningsEndPattern?.let {
-            collectionMultilineWarnings(
-                warnPluginConfig,
-                generalConfig,
-                linesFile,
-                this,
-            )
-        }
-            ?: run {
-                collectionSingleWarnings(
-                    warnPluginConfig,
-                    generalConfig,
-                    linesFile,
-                    this,
-                )
-            }
-    }
-
-    private fun collectionMultilineWarnings(
-        warnPluginConfig: WarnPluginConfig,
         generalConfig: GeneralConfig,
-        linesFile: List<String>,
-        file: Path,
-    ): List<Warning> = linesFile.mapIndexed { index, line ->
-        val newLineAndMessage = line.getLineNumberAndMessage(
-            generalConfig.expectedWarningsPattern!!,
-            generalConfig.expectedWarningsEndPattern!!,
-            generalConfig.expectedWarningsMiddlePattern!!,
-            warnPluginConfig.messageCaptureGroupMiddle!!,
-            warnPluginConfig.messageCaptureGroupEnd!!,
-            warnPluginConfig.lineCaptureGroup,
-            warnPluginConfig.linePlaceholder!!,
-            warnPluginConfig.messageCaptureGroup!!,
-            index + 1,
-            file,
-            linesFile,
+        originalPaths: List<Path>,
+        originalPath: Path,
+    ): List<Warning> = when {
+        warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.SARIF -> collectWarningsFromSarif(
+            warnPluginConfig,
+            originalPath,
+            originalPaths,
+            fs,
+            this
         )
-        with(warnPluginConfig) {
-            line.extractWarning(
-                generalConfig.expectedWarningsPattern!!,
-                file.name,
-                newLineAndMessage?.first,
-                newLineAndMessage?.second,
-                columnCaptureGroup,
-                benchmarkMode!!,
-            )
-        }
-    }
-        .filterNotNull()
-        .sortedBy { warn -> warn.message }
-
-    private fun collectionSingleWarnings(
-        warnPluginConfig: WarnPluginConfig,
-        generalConfig: GeneralConfig,
-        linesFile: List<String>,
-        file: Path,
-    ): List<Warning> = linesFile.mapIndexed { index, line ->
-        val newLine = line.getLineNumber(
-            generalConfig.expectedWarningsPattern!!,
-            warnPluginConfig.lineCaptureGroup,
-            warnPluginConfig.linePlaceholder!!,
-            index + 1,
-            file,
-            linesFile,
+        generalConfig.expectedWarningsEndPattern != null -> collectionMultilineWarnings(
+            warnPluginConfig,
+            generalConfig,
+            fs.readLines(this),
+            this,
         )
-        with(warnPluginConfig) {
-            line.extractWarning(
-                generalConfig.expectedWarningsPattern!!,
-                file.name,
-                newLine,
-                columnCaptureGroup,
-                messageCaptureGroup!!,
-                benchmarkMode!!,
-            )
-        }
+        else -> collectionSingleWarnings(
+            warnPluginConfig,
+            generalConfig,
+            fs.readLines(this),
+            this,
+        )
     }
-        .filterNotNull()
-        .sortedBy { warn -> warn.message }
 }

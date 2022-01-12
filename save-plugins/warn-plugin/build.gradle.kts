@@ -8,6 +8,7 @@ kotlin {
             dependencies {
                 implementation(projects.saveCommon)
                 implementation(libs.kotlinx.serialization.core)
+                implementation("io.github.detekt.sarif4k:sarif4k")
             }
         }
     }

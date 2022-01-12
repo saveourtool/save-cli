@@ -7,6 +7,7 @@ include("save-plugins:fix-plugin")
 include("save-plugins:warn-plugin")
 include("save-reporters")
 include("save-common-test")
+includeBuild("sarif4k")
 
 dependencyResolutionManagement {
     repositories {

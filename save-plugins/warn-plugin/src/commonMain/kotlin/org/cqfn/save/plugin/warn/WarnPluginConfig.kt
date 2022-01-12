@@ -3,6 +3,8 @@
 
 package org.cqfn.save.plugin.warn
 
+import org.cqfn.save.core.config.ActualWarningsFormat
+import org.cqfn.save.core.config.ExpectedWarningsFormat
 import org.cqfn.save.core.config.TestConfigSections
 import org.cqfn.save.core.plugin.PluginConfig
 import org.cqfn.save.core.utils.RegexSerializer
@@ -53,6 +55,9 @@ import kotlinx.serialization.UseSerializers
  * @property benchmarkMode whether to ignore the warning messages
  * @property messageCaptureGroupMiddle
  * @property messageCaptureGroupEnd
+ * @property expectedWarningsFormat
+ * @property actualWarningsFormat
+ * @property expectedWarningsFileName
  */
 @Serializable
 data class WarnPluginConfig(
@@ -79,7 +84,10 @@ data class WarnPluginConfig(
     val partialWarnTextMatch: Boolean? = null,
     val testToolResFileOutput: String? = null,
     val ignoreLines: MutableList<String>? = null,
-    val benchmarkMode: Boolean? = null
+    val benchmarkMode: Boolean? = null,
+    val expectedWarningsFormat: ExpectedWarningsFormat? = null,
+    val actualWarningsFormat: ActualWarningsFormat? = null,
+    val expectedWarningsFileName: String? = null,
 ) : PluginConfig {
     @Transient
     override val type = TestConfigSections.WARN
@@ -100,7 +108,7 @@ data class WarnPluginConfig(
      */
     val resourceNamePattern: Regex = Regex(resourceNamePatternStr)
 
-    @Suppress("ComplexMethod")
+    @Suppress("ComplexMethod", "TOO_LONG_FUNCTION")
     override fun mergeWith(otherConfig: PluginConfig): PluginConfig {
         val other = otherConfig as WarnPluginConfig
         return WarnPluginConfig(
@@ -129,7 +137,10 @@ data class WarnPluginConfig(
             other.ignoreLines?.let {
                 this.ignoreLines?.let { other.ignoreLines.union(this.ignoreLines) } ?: other.ignoreLines
             }?.toMutableList() ?: this.ignoreLines,
-            this.benchmarkMode ?: other.benchmarkMode
+            this.benchmarkMode ?: other.benchmarkMode,
+            expectedWarningsFormat = expectedWarningsFormat ?: other.expectedWarningsFormat,
+            actualWarningsFormat = actualWarningsFormat ?: other.actualWarningsFormat,
+            expectedWarningsFileName = expectedWarningsFileName ?: other.expectedWarningsFileName,
         ).also {
             it.configLocation = this.configLocation
         }
@@ -151,6 +162,10 @@ data class WarnPluginConfig(
         requirePositiveIfNotNull(messageCaptureGroupOut)
         requirePositiveIfNotNull(batchSize)
         requireValidPatternForRegexInWarning()
+
+        val expectedWarningsFormat = expectedWarningsFormat ?: ExpectedWarningsFormat.IN_PLACE
+        val actualWarningsFormat = actualWarningsFormat ?: ActualWarningsFormat.PLAIN
+        val expectedWarningsFileName = expectedWarningsFileName ?: "save-warnings.sarif"
 
         val newWarningTextHasLine = warningTextHasLine ?: true
         val newWarningTextHasColumn = warningTextHasColumn ?: true
@@ -191,7 +206,10 @@ data class WarnPluginConfig(
             partialWarnTextMatch ?: false,
             testToolResFileOutput,
             ignoreLines,
-            benchmarkMode ?: false
+            benchmarkMode ?: false,
+            expectedWarningsFormat = expectedWarningsFormat,
+            actualWarningsFormat = actualWarningsFormat,
+            expectedWarningsFileName = expectedWarningsFileName,
         ).also {
             it.configLocation = this.configLocation
         }
