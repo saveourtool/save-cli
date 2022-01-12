@@ -1,5 +1,6 @@
 package org.cqfn.save.plugin.warn.sarif
 
+import org.cqfn.save.core.logging.logInfo
 import org.cqfn.save.plugin.warn.utils.Warning
 
 import io.github.detekt.sarif4k.ArtifactLocation
@@ -83,7 +84,7 @@ class SarifWarningAdapterTest {
 
         val warnings = sarifSchema210.toWarnings("C:/dev/sarif".toPath(), emptyList())
 
-        println(warnings)
+        logInfo("Converted warnings: $warnings")
         assertEquals(1, warnings.size)
         assertEquals(
             Warning("'x' is assigned a value but never used.", 1, 5, "simple-example.js"),
@@ -108,7 +109,7 @@ class SarifWarningAdapterTest {
             listOf("/workspace/tests/suite2/foo.test".toPath()).adjustToCommonRoot(testRoot)
         )
 
-        println(warnings)
+        logInfo("Converted warnings: $warnings")
         assertEquals(1, warnings.size)
     }
 
@@ -129,7 +130,7 @@ class SarifWarningAdapterTest {
             listOf("/workspace/tests/suite2/foo.test".toPath()).adjustToCommonRoot(testRoot)
         )
 
-        println(warnings)
+        logInfo("Converted warnings: $warnings")
         assertEquals(1, warnings.size)
     }
 }
