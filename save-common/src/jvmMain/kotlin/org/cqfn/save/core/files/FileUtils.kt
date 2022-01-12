@@ -6,7 +6,7 @@
 
 package org.cqfn.save.core.files
 
-import org.cqfn.save.core.logging.logDebug
+import org.cqfn.save.core.logging.logTrace
 
 import okio.FileSystem
 import okio.Path
@@ -22,7 +22,7 @@ actual val fs: FileSystem = FileSystem.SYSTEM
  */
 actual fun FileSystem.myDeleteRecursively(path: Path) {
     path.toFile().walkBottomUp().forEach {
-        logDebug("Attempt to delete file $it")
+        logTrace("Attempt to delete file $it")
         Files.delete(it.toPath())
     }
 }

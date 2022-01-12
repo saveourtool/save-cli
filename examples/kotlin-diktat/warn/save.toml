@@ -5,7 +5,6 @@
 [warn]
     # regular expression to detect tests
     testNameRegex = ".*Test.kt"
-    wildCardInDirectoryMode = "**/*"
     # diktat warnings have the following format: filename.kt:1:15: [WARN_NAME] my warning
     actualWarningsPattern="(\\w+\\..+):(\\d+):(\\d+): (\\[.*\\].*)"
     lineCaptureGroup = 1

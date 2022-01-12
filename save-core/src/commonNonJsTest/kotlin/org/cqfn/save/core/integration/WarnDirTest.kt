@@ -3,6 +3,7 @@ package org.cqfn.save.core.integration
 import org.cqfn.save.core.test.utils.runTestsWithDiktat
 
 import kotlin.test.Test
+import kotlin.test.assertTrue
 
 class WarnDirTest {
     @Test
@@ -23,5 +24,13 @@ class WarnDirTest {
     @Test
     fun `execute warn plugin on the directory chapter4`() {
         runTestsWithDiktat(listOf("warn-dir/chapter4"), 1)
+    }
+
+    @Test
+    fun `execute warn plugin on root directory`() {
+        val reporter = runTestsWithDiktat(listOf("warn-dir"), 6)
+        reporter.results.forEach { testResult ->
+            assertTrue(!testResult.debugInfo!!.execCmd!!.contains("chapter"))
+        }
     }
 }
