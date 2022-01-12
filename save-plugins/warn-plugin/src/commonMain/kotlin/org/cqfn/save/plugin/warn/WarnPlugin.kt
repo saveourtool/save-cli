@@ -4,6 +4,7 @@ import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
+import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.plugin.ExtraFlags
 import org.cqfn.save.core.plugin.ExtraFlagsExtractor
@@ -24,6 +25,7 @@ import org.cqfn.save.plugin.warn.utils.getLineNumberAndMessage
 import okio.FileNotFoundException
 import okio.FileSystem
 import okio.Path
+import okio.Path.Companion.toPath
 
 import kotlin.random.Random
 
@@ -47,6 +49,7 @@ class WarnPlugin(
     redirectTo
 ) {
     private lateinit var extraFlagsExtractor: ExtraFlagsExtractor
+    private lateinit var tmpDirName: String
 
     override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
         testConfig.validateAndSetDefaults()
@@ -86,14 +89,18 @@ class WarnPlugin(
     }
 
     private fun createTestFiles(paths: List<Path>, warnPluginConfig: WarnPluginConfig): List<Path> {
-        val dirName = "${WarnPlugin::class.simpleName!!}-${Random.nextInt()}"
-        val dirPath = constructPathForCopyOfTestFile(dirName, paths[0]).parent!!
+        logDebug("Trying to create temp files for: $paths")
+        tmpDirName = "${WarnPlugin::class.simpleName!!}-${Random.nextInt()}"
+        // don't think that it is really needed now
+        val dirPath = constructPathForCopyOfTestFile(tmpDirName, paths[0]).parent!!
         createTempDir(dirPath)
 
         val ignorePatterns = warnPluginConfig.ignoreLinesPatterns
 
         return paths.map { path ->
-            val copyPath = constructPathForCopyOfTestFile(dirName, path)
+            val copyPath = constructPathForCopyOfTestFile(tmpDirName, path)
+            // creating the hierarchy for all files
+            fs.createDirectories(copyPath.parent!!)
             fs.write(fs.createFile(copyPath)) {
                 fs.readLines(path)
                     .filter { line -> ignorePatterns.none { it.matches(line) } }
@@ -109,7 +116,8 @@ class WarnPlugin(
         "LongMethod",
         "ReturnCount",
         "SwallowedException",
-        "TOO_MANY_LINES_IN_LAMBDA"
+        "TOO_MANY_LINES_IN_LAMBDA",
+        "ComplexMethod"
     )
     private fun handleTestFile(
         paths: List<Path>,
@@ -143,10 +151,16 @@ class WarnPlugin(
         // NOTE: SAVE will pass relative paths of Tests (calculated from testRootConfig dir) into the executed tool
         val fileNamesForExecCmd =
                 warnPluginConfig.wildCardInDirectoryMode?.let {
-                    // a hack to put only the directory path to the execution command
+                    // a hack to put only the root directory path to the execution command
                     // only in case a directory mode is enabled
-                    "${copyPaths[0].parent!!}$it"
+                    var testRootPath = copyPaths[0].parent ?: ".".toPath()
+                    while (testRootPath.parent != null && testRootPath.parent!!.name != tmpDirName) {
+                        testRootPath = testRootPath.parent!!
+                    }
+                    "$testRootPath$it"
                 } ?: copyPaths.joinToString(separator = warnPluginConfig.batchSeparator!!)
+
+        logDebug("Constructed file name for execution for warn plugin: $fileNamesForExecCmd")
         val execFlagsAdjusted = resolvePlaceholdersFrom(warnPluginConfig.execFlags, extraFlags, fileNamesForExecCmd)
         val execCmd = "${generalConfig.execCmd} $execFlagsAdjusted"
         val time = generalConfig.timeOutMillis!!.times(copyPaths.size)
