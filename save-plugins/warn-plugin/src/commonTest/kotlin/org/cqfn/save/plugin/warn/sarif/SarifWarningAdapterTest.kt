@@ -22,7 +22,7 @@ import kotlinx.serialization.json.Json
 class SarifWarningAdapterTest {
     @Test
     @Suppress("TOO_LONG_FUNCTION")
-    fun test() {
+    fun `should convert SARIF report to SAVE warnings`() {
         val sarif = """
             {
               "version": "2.1.0",
@@ -81,7 +81,7 @@ class SarifWarningAdapterTest {
         """.trimIndent()
         val sarifSchema210: SarifSchema210 = Json.decodeFromString(sarif)
 
-        val warnings = sarifSchema210.toWarnings(null, emptyList())
+        val warnings = sarifSchema210.toWarnings("C:/dev/sarif".toPath(), emptyList())
 
         println(warnings)
         assertEquals(1, warnings.size)
@@ -99,6 +99,27 @@ class SarifWarningAdapterTest {
                 runOf(uri = "file:///workspace/tests/suite1/foo.test"),
                 runOf(uri = "file:///workspace/tests/suite1/bar.test"),
                 runOf(uri = "file:///workspace/tests/suite2/foo.test"),
+            )
+        )
+
+        val testRoot = "/workspace/tests".toPath()
+        val warnings = sarifSchema210.toWarnings(
+            testRoot,
+            listOf("/workspace/tests/suite2/foo.test".toPath()).adjustToCommonRoot(testRoot)
+        )
+
+        println(warnings)
+        assertEquals(1, warnings.size)
+    }
+
+    @Test
+    fun `should filter out warnings from other files - relative paths`() {
+        val sarifSchema210 = SarifSchema210(
+            version = Version.The210,
+            runs = listOf(
+                runOf(uri = "suite1/foo.test"),
+                runOf(uri = "suite1/bar.test"),
+                runOf(uri = "suite2/foo.test"),
             )
         )
 

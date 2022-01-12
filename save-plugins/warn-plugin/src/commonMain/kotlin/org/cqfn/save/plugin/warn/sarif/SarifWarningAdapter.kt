@@ -48,8 +48,18 @@ fun Run.toWarning(testRoot: Path?, testFiles: List<Path>): List<Warning> {
             ?.uri
             // assuming that all URIs for SAVE correspond to files
             ?.substringAfter("file://")
+            ?.let {
+                // It is a valid format for Windows paths to look like `file:///C:/stuff`
+                if (it[0] == '/' && it[2] == ':') it.drop(1) else it
+            }
             ?.toPath()
-            ?.let { if (testRoot != null) testRoot / it else it }
+            ?.let {
+                require(!(it.isAbsolute && testRoot == null)) {
+                    "If paths in SARIF report are absolute, testRoot is required to resolve them: " +
+                            "couldn't convert path $it to relative"
+                }
+                if (it.isAbsolute) it.relativeTo(testRoot!!) else it
+            }
         result to filePath
     }
         ?.filter { (_, filePath) ->
