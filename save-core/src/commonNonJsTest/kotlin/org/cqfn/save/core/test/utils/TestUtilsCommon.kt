@@ -73,7 +73,7 @@ fun runTestsWithDiktat(
                 ), test.status
             )
         } else if (test.resources.test.toString().contains("warn${Path.DIRECTORY_SEPARATOR}chapter2")) {
-            assertEquals(Fail("ProcessTimeoutException: Timeout is reached: 2", "ProcessTimeoutException: Timeout is reached: 2"), test.status)
+            assertEquals(Fail("ProcessTimeoutException: Timeout is reached: 1", "ProcessTimeoutException: Timeout is reached: 1"), test.status)
         } else {
             assertTrue("test.status is actually ${test.status::class.simpleName}: $test") {
                 test.status is Pass || test.status is Ignored
