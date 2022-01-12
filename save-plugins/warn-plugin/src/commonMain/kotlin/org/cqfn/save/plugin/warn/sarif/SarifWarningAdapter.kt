@@ -49,7 +49,7 @@ fun Run.toWarning(testRoot: Path?, testFiles: List<Path>): List<Warning> {
             // assuming that all URIs for SAVE correspond to files
             ?.substringAfter("file://")
             ?.toPath()
-            ?.let { if (testRoot != null) it.relativeTo(testRoot) else it }
+            ?.let { if (testRoot != null) testRoot / it else it }
         result to filePath
     }
         ?.filter { (_, filePath) ->

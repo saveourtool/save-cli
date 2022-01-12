@@ -129,9 +129,9 @@ class WarnPlugin(
     ): Sequence<TestResult> {
         // extracting all warnings from test resource files
         val copyPaths: List<Path> = createTestFiles(paths, warnPluginConfig)
-        val expectedWarningsMap: WarningMap = copyPaths.associate {
-            val warningsForCurrentPath = it.collectWarningsWithLineNumbers(warnPluginConfig, generalConfig, copyPaths)
-            it.name to warningsForCurrentPath
+        val expectedWarningsMap: WarningMap = copyPaths.zip(paths).associate { (copyPath, originalPath) ->
+            val warningsForCurrentPath = copyPath.collectWarningsWithLineNumbers(warnPluginConfig, generalConfig, paths, originalPath)
+            copyPath.name to warningsForCurrentPath
         }
 
         val extraFlagsList = copyPaths.mapNotNull { extraFlagsExtractor.extractExtraFlagsFrom(it) }.distinct()
@@ -251,19 +251,20 @@ class WarnPlugin(
     private fun Path.collectWarningsWithLineNumbers(
         warnPluginConfig: WarnPluginConfig,
         generalConfig: GeneralConfig,
-        testFiles: List<Path>,
+        originalPaths: List<Path>,
+        originalPath: Path,
     ): List<Warning> = if (warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.SARIF) {
         val sarifFileName = warnPluginConfig.expectedWarningsFileName!!
-        val sarif = fs.findAncestorDirContainingFile(this, sarifFileName)?.let { it / sarifFileName }
+        val sarif = fs.findAncestorDirContainingFile(originalPath, sarifFileName)?.let { it / sarifFileName }
             ?: throw PluginException(
                 "Could not find SARIF file with expected warnings for file $this. " +
                         "Please check if correct `expectedWarningsFormat` is set and if the file is present and called `$sarifFileName`."
             )
-        val topmostTestDirectory = fs.topmostTestDirectory(this)
+        val topmostTestDirectory = fs.topmostTestDirectory(originalPath)
         Json.decodeFromString<SarifSchema210>(
             fs.readFile(sarif)
         )
-            .toWarnings(topmostTestDirectory, testFiles.adjustToCommonRoot(topmostTestDirectory))
+            .toWarnings(topmostTestDirectory, originalPaths.adjustToCommonRoot(topmostTestDirectory))
     } else if (generalConfig.expectedWarningsEndPattern != null) {
         collectionMultilineWarnings(
             warnPluginConfig,
