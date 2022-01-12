@@ -141,12 +141,19 @@ class WarnPlugin(
         }
         val extraFlags = extraFlagsList.singleOrNull() ?: ExtraFlags("", "")
 
-        if (expectedWarningsMap.isEmpty()) {
+        if (expectedWarningsMap.isEmpty() && warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.IN_PLACE) {
             logWarn(
                 "No expected warnings were found using the following regex pattern:" +
                         " [${generalConfig.expectedWarningsPattern}] in the test files: $paths." +
                         " If you have expected any warnings - please check 'expectedWarningsPattern' or capture groups" +
                         " in your 'save.toml' configuration"
+            )
+        } else if (expectedWarningsMap.isEmpty() && warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.SARIF) {
+            logWarn(
+                "No expected warnings were found when inspecting files ${warnPluginConfig.expectedWarningsFileName}" +
+                        " for test files: $paths." +
+                        " If you have expected any warnings - please make sure SARIF files exist, have correct name and contain" +
+                        " relevant warnings."
             )
         }
 
