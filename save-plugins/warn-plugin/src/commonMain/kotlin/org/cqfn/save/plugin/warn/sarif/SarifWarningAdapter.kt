@@ -6,6 +6,7 @@ package org.cqfn.save.plugin.warn.sarif
 
 import org.cqfn.save.plugin.warn.utils.Warning
 
+import io.github.detekt.sarif4k.Location
 import io.github.detekt.sarif4k.Run
 import io.github.detekt.sarif4k.SarifSchema210
 import okio.Path
@@ -40,26 +41,9 @@ fun Run.toWarning(testRoot: Path?, testFiles: List<Path>): List<Warning> {
         // "array of location objects which almost always contains exactly one element"
         // Location is empty for warnings that, e.g., refer to the whole project instead of individual files.
         // Location can have >1 elements, e.g., if the warning suggests a refactoring, that affects multiple files.
-
         val filePath = result.locations
             ?.singleOrNull()
-            ?.physicalLocation
-            ?.artifactLocation
-            ?.uri
-            // assuming that all URIs for SAVE correspond to files
-            ?.substringAfter("file://")
-            ?.let {
-                // It is a valid format for Windows paths to look like `file:///C:/stuff`
-                if (it[0] == '/' && it[2] == ':') it.drop(1) else it
-            }
-            ?.toPath()
-            ?.let {
-                require(!(it.isAbsolute && testRoot == null)) {
-                    "If paths in SARIF report are absolute, testRoot is required to resolve them: " +
-                            "couldn't convert path $it to relative"
-                }
-                if (it.isAbsolute) it.relativeTo(testRoot!!) else it
-            }
+            ?.extractFilePath(testRoot)
         result to filePath
     }
         ?.filter { (_, filePath) ->
@@ -68,11 +52,8 @@ fun Run.toWarning(testRoot: Path?, testFiles: List<Path>): List<Warning> {
         ?.map { (result, filePath) ->
             val (line, column) = result.locations?.map {
                 // "The most common case is for a tool to report a physical location, and to specify the location by line and column number."
-                it.physicalLocation?.region
+                it.extractLineColumn()
             }
-                ?.map {
-                    it?.startLine to it?.startColumn
-                }
                 ?.singleOrNull()
                 ?: (null to null)
             val fileName = filePath?.name ?: ""
@@ -83,5 +64,25 @@ fun Run.toWarning(testRoot: Path?, testFiles: List<Path>): List<Warning> {
                 column = column?.toInt(),
                 fileName = fileName,
             )
-        } ?: emptyList()
+        }
+        ?: emptyList()
 }
+
+private fun Location.extractLineColumn(): Pair<Long?, Long?>? = physicalLocation?.region
+    ?.let {
+        it.startLine to it.startColumn
+    }
+
+private fun Location.extractFilePath(testRoot: Path?) = physicalLocation
+    ?.artifactLocation
+    ?.uri
+    // assuming that all URIs for SAVE correspond to files
+    ?.dropFileProtocol()
+    ?.toPath()
+    ?.let {
+        require(!(it.isAbsolute && testRoot == null)) {
+            "If paths in SARIF report are absolute, testRoot is required to resolve them: " +
+                    "couldn't convert path $it to relative"
+        }
+        if (it.isAbsolute) it.relativeTo(testRoot!!) else it
+    }

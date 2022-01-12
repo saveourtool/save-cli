@@ -10,6 +10,15 @@ import okio.FileSystem
 import okio.Path
 
 /**
+ * @return string with trimmed `file://` or `file:///`
+ */
+fun String.dropFileProtocol() = substringAfter("file://")
+    .let {
+        // It is a valid format for Windows paths to look like `file:///C:/stuff`
+        if (it[0] == '/' && it[2] == ':') it.drop(1) else it
+    }
+
+/**
  * Find a file in any of parent directories and return this directory
  *
  * @param path path for which ancestors should be checked
