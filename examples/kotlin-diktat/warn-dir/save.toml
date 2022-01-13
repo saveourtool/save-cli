@@ -1,0 +1,19 @@
+[general]
+    execCmd = "java -jar ktlint --disabled_rules=standard -R diktat.jar"
+    tags = ["warn"]
+    description = "Test for directory mode"
+
+[warn]
+    # suffix to detect tests
+    testNameRegex = "(.*)(Test.kt)"
+    # enabling directory mode
+    wildCardInDirectoryMode = "/**/*.kt"
+    # diktat warnings have the following format: filename.kt:1:15: [WARN_NAME] my waring
+    actualWarningsPattern="(\\w+\\..+):(\\d+):(\\d+): (\\[.*\\].*)$"
+    fileNameCaptureGroupOut = 1
+    lineCaptureGroupOut = 2
+    columnCaptureGroupOut = 3
+    messageCaptureGroupOut = 4
+    exactWarningsMatch = false
+    warningTextHasColumn = true
+    warningTextHasLine = true

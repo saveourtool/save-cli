@@ -1,0 +1,6 @@
+[general]
+    tags = ["fix"]
+    description = "Test autofixing of issues discovered by diKTat"
+
+[fix]
+    execFlags = "-F"

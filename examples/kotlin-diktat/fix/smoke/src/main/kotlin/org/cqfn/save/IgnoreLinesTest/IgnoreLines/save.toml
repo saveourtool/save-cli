@@ -1,0 +1,7 @@
+[general]
+    tags = ["FixIgnoreLines"]
+    description = "Test for ignoreLines option in Fix"
+    suiteName = "Autofix: Smoke Tests"
+
+[fix]
+    ignoreLines = ["^// IGNORE.*", "^#.*"]
