@@ -7,16 +7,13 @@ package org.cqfn.save.core.utils
 import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.myDeleteRecursively
 import org.cqfn.save.core.files.readLines
-import org.cqfn.save.core.logging.logDebug
-import org.cqfn.save.core.logging.logError
-import org.cqfn.save.core.logging.logTrace
-import org.cqfn.save.core.logging.logWarn
 
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
 
 import kotlinx.datetime.Clock
+import org.cqfn.save.core.logging.*
 
 /**
  * A class that is capable of executing processes, specific to different OS and returning their output.
@@ -105,7 +102,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
 
         val cmd = modifyCmd(command, directory, processBuilderInternal)
 
-        logDebug("Executing: $cmd with timeout $timeOutMillis")
+        logInfo("Executing: $cmd with timeout $timeOutMillis")
         val status = try {
             processBuilderInternal.exec(cmd, timeOutMillis)
         } catch (ex: ProcessTimeoutException) {

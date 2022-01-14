@@ -2,23 +2,23 @@ package org.cqfn.save.core.utils
 
 import okio.Path
 import okio.Path.Companion.toPath
-import org.cqfn.save.core.logging.describe
+import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.plugin.*
-import org.cqfn.save.core.result.DebugInfo
-import org.cqfn.save.core.result.Fail
-import org.cqfn.save.core.result.TestResult
 
 // FixMe: all plugins should use it for executing of command in the future
-abstract class ExecCmdBase(
+abstract class CmdExecutorBase(
     val execCmd: String,
-    val timeOutMillis: Long,
-    val testPaths: List<Path>,
-    val extraFlagsExtractor: ExtraFlagsExtractor,
-    val processBuilder: ProcessBuilder
+    private val timeOutMillis: Long,
+    private val paths: List<Path>,
+    private val extraFlagsExtractor: ExtraFlagsExtractor,
+    private val pb: ProcessBuilder,
+    private val testConfig: TestConfig,
 ) {
-    fun extractExtraFlags(): ExtraFlags {
-        val extraFlagsList = testPaths.mapNotNull { extraFlagsExtractor.extractExtraFlagsFrom(it) }.distinct()
+    lateinit var constructedExecCmd: String
+
+    private fun extractExtraFlags(): ExtraFlags {
+        val extraFlagsList = paths.mapNotNull { extraFlagsExtractor.extractExtraFlagsFrom(it) }.distinct()
         require(extraFlagsList.size <= 1) {
             "Extra flags for all files in a batch should be same, but you have" +
                     " ${extraFlagsList.size} different sets of flags inside it, namely $extraFlagsList"
@@ -27,13 +27,26 @@ abstract class ExecCmdBase(
         return extraFlagsList.singleOrNull() ?: ExtraFlags("", "")
     }
 
-    fun executeCommandAndGetTestResults(tmpDirName: String, redirectTo: Path?, rootConfigDirectory:): Std {
+    fun executeCommandAndGetTestResults(redirectTo: Path?): Std {
+        val time = timeOutMillis.times(paths.size)
+        val execResult = pb.exec(constructedExecCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time)
+
+        return Std(getStdout(execResult), execResult.stderr)
+    }
+
+    fun constructExecCmd(tmpDirName: String): String {
+        val execFlagsAdjusted = resolvePlaceholdersFrom(execFlags(), extractExtraFlags(), constructFileNamesForExecCmd(tmpDirName))
+        constructedExecCmd = "$execCmd $execFlagsAdjusted"
+        return constructedExecCmd
+    }
+
+    private fun constructFileNamesForExecCmd(tmpDirName: String): String {
         // joining test files to string with a batchSeparator if the tested tool supports processing of file batches
         // NOTE: SAVE will pass relative paths of Tests (calculated from testRootConfig dir) into the executed tool
         val fileNamesForExecCmd = when(wildCardInDirectoryMode()) {
-            null -> testPaths.joinToString(separator = warnPluginConfig.batchSeparator!!)
+            null -> paths.joinToString(separator = batchSeparator())
             else -> {
-                var testRootPath = testPaths[0].parent ?: ".".toPath()
+                var testRootPath = paths[0].parent ?: ".".toPath()
                 while (testRootPath.parent != null && testRootPath.parent!!.name != tmpDirName) {
                     testRootPath = testRootPath.parent!!
                 }
@@ -42,25 +55,17 @@ abstract class ExecCmdBase(
         }
 
         logDebug("Constructed file name for execution for warn plugin: $fileNamesForExecCmd")
-        val execFlagsAdjusted = resolvePlaceholdersFrom(execFlags(), extractExtraFlags(), fileNamesForExecCmd)
-        val execCmd = "$execCmd $execFlagsAdjusted"
-        val time = timeOutMillis.times(testPaths.size)
 
-        val execResult = processBuilder.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time)
-
-        val stdout = getStdout(execResult)
-        val stderr = execResult.stderr
-
-        return Std(stdout, stderr)
+        return fileNamesForExecCmd
     }
 
     abstract fun wildCardInDirectoryMode(): String?
     abstract fun execFlags(): String?
     abstract fun getStdout(execResult: ExecutionResult): List<String>
+    abstract fun batchSeparator(): String
 }
 
-
 class Std(
-    out: List<String>,
-    err: List<String>
+    val out: List<String>,
+    val err: List<String>,
 )
