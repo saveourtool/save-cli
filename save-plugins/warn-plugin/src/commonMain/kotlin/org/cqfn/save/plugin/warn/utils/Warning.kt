@@ -93,7 +93,7 @@ internal fun String.extractWarning(warningRegex: Regex,
  * @param columnGroupIdx index of capture group for column number
  * @param messageGroupIdx index of capture group for waring text
  * @param fileNameGroupIdx index of capture group for file name
- * @param line line number of warning
+ * @param lineNum line number of warning
  * @param benchmarkMode whether to ignore the warning messages
  * @return a [Warning] or null if [this] string doesn't match [warningRegex]
  * @throws ResourceFormatException when parsing a file
@@ -106,7 +106,7 @@ internal fun String.extractWarning(warningRegex: Regex,
 )
 internal fun String.extractWarning(warningRegex: Regex,
                                    fileNameGroupIdx: Long,
-                                   line: Int?,
+                                   lineNum: Int?,
                                    columnGroupIdx: Long?,
                                    messageGroupIdx: Long,
                                    benchmarkMode: Boolean,
@@ -114,7 +114,7 @@ internal fun String.extractWarning(warningRegex: Regex,
     val groups = warningRegex.find(this)?.groups ?: return null
     val fileName = getRegexGroupSafe(fileNameGroupIdx, groups, this, "file name")!!
 
-    return extractWarning(warningRegex, fileName, line, columnGroupIdx, messageGroupIdx, benchmarkMode)
+    return extractWarning(warningRegex, fileName, lineNum, columnGroupIdx, messageGroupIdx, benchmarkMode)
 }
 
 /**

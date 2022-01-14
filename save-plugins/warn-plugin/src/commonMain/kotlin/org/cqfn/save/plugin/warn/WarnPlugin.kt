@@ -22,14 +22,7 @@ import org.cqfn.save.core.utils.ProcessExecutionException
 import org.cqfn.save.core.utils.ProcessTimeoutException
 import org.cqfn.save.plugin.warn.sarif.adjustToCommonRoot
 import org.cqfn.save.plugin.warn.sarif.findAncestorDirContainingFile
-import org.cqfn.save.plugin.warn.sarif.toWarnings
 import org.cqfn.save.plugin.warn.sarif.topmostTestDirectory
-import org.cqfn.save.plugin.warn.utils.ResultsChecker
-import org.cqfn.save.plugin.warn.utils.Warning
-import org.cqfn.save.plugin.warn.utils.collectionMultilineWarnings
-import org.cqfn.save.plugin.warn.utils.collectionSingleWarnings
-import org.cqfn.save.plugin.warn.utils.extractWarning
-import org.cqfn.save.plugin.warn.utils.getLineNumber
 
 import io.github.detekt.sarif4k.SarifSchema210
 import okio.FileNotFoundException
@@ -38,8 +31,13 @@ import okio.Path
 import okio.Path.Companion.toPath
 
 import kotlin.random.Random
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import org.cqfn.save.core.config.ActualWarningsFormat
+import org.cqfn.save.plugin.warn.utils.*
+import org.cqfn.save.plugin.warn.utils.collectionMultilineWarnings
+import org.cqfn.save.plugin.warn.utils.collectionSingleWarnings
+import org.cqfn.save.plugin.warn.utils.extractWarning
+import org.cqfn.save.plugin.warn.utils.getLineNumber
 
 private typealias WarningMap = Map<String, List<Warning>>
 
@@ -135,19 +133,12 @@ class WarnPlugin(
         warnPluginConfig: WarnPluginConfig,
         generalConfig: GeneralConfig
     ): Sequence<TestResult> {
-        // extracting all warnings from test resource files
+        // ======= extracting all EXPECTED warnings from test resource files =======
         val copyPaths: List<Path> = createTestFiles(paths, warnPluginConfig)
         val expectedWarningsMap: WarningMap = copyPaths.zip(paths).associate { (copyPath, originalPath) ->
-            val warningsForCurrentPath = copyPath.collectWarningsWithLineNumbers(warnPluginConfig, generalConfig, paths, originalPath)
+            val warningsForCurrentPath = copyPath.collectExpectedWarningsWithLineNumbers(warnPluginConfig, generalConfig, paths, originalPath)
             copyPath.name to warningsForCurrentPath
         }
-
-        val extraFlagsList = copyPaths.mapNotNull { extraFlagsExtractor.extractExtraFlagsFrom(it) }.distinct()
-        require(extraFlagsList.size <= 1) {
-            "Extra flags for all files in a batch should be same, but you have batchSize=${warnPluginConfig.batchSize}" +
-                    " and there are ${extraFlagsList.size} different sets of flags inside it, namely $extraFlagsList"
-        }
-        val extraFlags = extraFlagsList.singleOrNull() ?: ExtraFlags("", "")
 
         if (expectedWarningsMap.isEmpty()) {
             logWarn(
@@ -157,10 +148,18 @@ class WarnPlugin(
                         " in your 'save.toml' configuration"
             )
         }
+        try {
+            val extraFlagsList = copyPaths.mapNotNull { extraFlagsExtractor.extractExtraFlagsFrom(it) }.distinct()
+            require(extraFlagsList.size <= 1) {
+                "Extra flags for all files in a batch should be same, but you have batchSize=${warnPluginConfig.batchSize}" +
+                        " and there are ${extraFlagsList.size} different sets of flags inside it, namely $extraFlagsList"
+            }
+            val extraFlags = extraFlagsList.singleOrNull() ?: ExtraFlags("", "")
 
-        // joining test files to string with a batchSeparator if the tested tool supports processing of file batches
-        // NOTE: SAVE will pass relative paths of Tests (calculated from testRootConfig dir) into the executed tool
-        val fileNamesForExecCmd =
+
+            // joining test files to string with a batchSeparator if the tested tool supports processing of file batches
+            // NOTE: SAVE will pass relative paths of Tests (calculated from testRootConfig dir) into the executed tool
+            val fileNamesForExecCmd =
                 warnPluginConfig.wildCardInDirectoryMode?.let {
                     // a hack to put only the root directory path to the execution command
                     // only in case a directory mode is enabled
@@ -171,60 +170,59 @@ class WarnPlugin(
                     "$testRootPath$it"
                 } ?: copyPaths.joinToString(separator = warnPluginConfig.batchSeparator!!)
 
-        logDebug("Constructed file name for execution for warn plugin: $fileNamesForExecCmd")
-        val execFlagsAdjusted = resolvePlaceholdersFrom(warnPluginConfig.execFlags, extraFlags, fileNamesForExecCmd)
-        val execCmd = "${generalConfig.execCmd} $execFlagsAdjusted"
-        val time = generalConfig.timeOutMillis!!.times(copyPaths.size)
+            logDebug("Constructed file name for execution for warn plugin: $fileNamesForExecCmd")
+            val execFlagsAdjusted = resolvePlaceholdersFrom(warnPluginConfig.execFlags, extraFlags, fileNamesForExecCmd)
+            val execCmd = "${generalConfig.execCmd} $execFlagsAdjusted"
+            val time = generalConfig.timeOutMillis!!.times(copyPaths.size)
 
-        val executionResult = try {
-            pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time)
+            val executionResult =
+                pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time)
+
+            val stdout = getToolStdout(warnPluginConfig, executionResult)
+            val stderr = executionResult.stderr
+
+            val actualWarningsMap = stdout.collectActualWarningsWithLineNumbers(warnPluginConfig)
+
+            val resultsChecker = ResultsChecker(
+                expectedWarningsMap,
+                actualWarningsMap,
+                warnPluginConfig,
+            )
+
+            return paths.map { path ->
+                val results = resultsChecker.checkResults(path.name)
+                TestResult(
+                    Test(path),
+                    results.first,
+                    DebugInfo(
+                        execCmd,
+                        stdout.filter { it.contains(path.name) }.joinToString("\n"),
+                        stderr.filter { it.contains(path.name) }.joinToString("\n"),
+                        null,
+                        results.second,
+                    ),
+                )
+            }.asSequence()
         } catch (ex: ProcessTimeoutException) {
             logWarn("The following tests took too long to run and were stopped: $paths, timeout for single test: ${ex.timeoutMillis}")
-            return failTestResult(paths, ex, execCmd)
+            return paths.failTestResult(ex, execCmd)
         } catch (ex: ProcessExecutionException) {
-            return failTestResult(paths, ex, execCmd)
+            return paths.failTestResult(ex, execCmd)
         }
-
-        val stdout = getToolStdout(warnPluginConfig, executionResult)
-        val stderr = executionResult.stderr
-
-        val actualWarningsMap = stdout.mapNotNull {
-            with(warnPluginConfig) {
-                val line = it.getLineNumber(actualWarningsPattern!!, lineCaptureGroupOut)
-                it.extractWarning(
-                    actualWarningsPattern,
-                    fileNameCaptureGroupOut!!,
-                    line,
-                    columnCaptureGroupOut,
-                    messageCaptureGroupOut!!,
-                    benchmarkMode!!,
-                )
-            }
-        }
-            .groupBy { it.fileName }
-            .mapValues { (_, warning) -> warning.sortedBy { it.message } }
-
-        val resultsChecker = ResultsChecker(
-            expectedWarningsMap,
-            actualWarningsMap,
-            warnPluginConfig,
-        )
-
-        return paths.map { path ->
-            val results = resultsChecker.checkResults(path.name)
-            TestResult(
-                Test(path),
-                results.first,
-                DebugInfo(
-                    execCmd,
-                    stdout.filter { it.contains(path.name) }.joinToString("\n"),
-                    stderr.filter { it.contains(path.name) }.joinToString("\n"),
-                    null,
-                    results.second,
-                ),
-            )
-        }.asSequence()
     }
+
+    private fun List<Path>.failTestResult(
+        ex: ProcessExecutionException,
+        execCmd: String
+    ) = this.map {
+        TestResult(
+            Plugin.Test(it),
+            Fail(ex.describe(), ex.describe()),
+            DebugInfo(execCmd, null, ex.message, null, null),
+        )
+    }.asSequence()
+
+
 
     @Suppress("SwallowedException")
     private fun getToolStdout(
@@ -244,17 +242,7 @@ class WarnPlugin(
     }
         ?: executionResult.stdout
 
-    private fun failTestResult(
-        paths: List<Path>,
-        ex: ProcessExecutionException,
-        execCmd: String
-    ) = paths.map {
-        TestResult(
-            Test(it),
-            Fail(ex.describe(), ex.describe()),
-            DebugInfo(execCmd, null, ex.message, null, null),
-        )
-    }.asSequence()
+
 
     /**
      * method for getting warnings from test files:
@@ -262,7 +250,7 @@ class WarnPlugin(
      * 2) for each line get the warning
      */
     @Suppress("AVOID_NULL_CHECKS")
-    private fun Path.collectWarningsWithLineNumbers(
+    private fun Path.collectExpectedWarningsWithLineNumbers(
         warnPluginConfig: WarnPluginConfig,
         generalConfig: GeneralConfig,
         originalPaths: List<Path>,
@@ -293,5 +281,32 @@ class WarnPlugin(
             fs.readLines(this),
             this,
         )
+    }
+
+    private fun List<String>.collectActualWarningsWithLineNumbers(
+        warnPluginConfig: WarnPluginConfig
+    ): FileToWarningsMap = when (warnPluginConfig.actualWarningsFormat!!) {
+        ActualWarningsFormat.SARIF -> {
+            val topmostTestDirectory = fs.topmostTestDirectory(originalPath)
+            Json.decodeFromString<SarifSchema210>(
+                this
+            ).toWarnings(topmostTestDirectory, originalPaths.adjustToCommonRoot(topmostTestDirectory))
+        }
+        ActualWarningsFormat.PLAIN ->
+            this.mapNotNull {
+                with(warnPluginConfig) {
+                    val lineNum = it.getLineNumber(actualWarningsPattern!!, lineCaptureGroupOut)
+                    it.extractWarning(
+                        actualWarningsPattern,
+                        fileNameCaptureGroupOut!!,
+                        lineNum,
+                        columnCaptureGroupOut,
+                        messageCaptureGroupOut!!,
+                        benchmarkMode!!,
+                    )
+                }
+            }
+                .groupBy { it.fileName }
+                .mapValues { (_, warning) -> warning.sortedBy { it.message } }
     }
 }
