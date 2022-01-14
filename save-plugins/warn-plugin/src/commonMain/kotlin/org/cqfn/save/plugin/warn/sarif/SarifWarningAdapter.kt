@@ -11,6 +11,17 @@ import io.github.detekt.sarif4k.Run
 import io.github.detekt.sarif4k.SarifSchema210
 import okio.Path
 import okio.Path.Companion.toPath
+import org.cqfn.save.plugin.warn.adapter.AdapterContext
+import org.cqfn.save.plugin.warn.adapter.WarningAdapter
+
+class SarifWarningAdapter : WarningAdapter<SarifSchema210> {
+    override fun toWarnings(report: SarifSchema210, ctx: AdapterContext): List<Warning> {
+        return report.toWarnings(
+            ctx.testRoot,
+            ctx.testFiles,
+        )
+    }
+}
 
 /**
  * Convert this SARIF report to a list of [Warning]s.

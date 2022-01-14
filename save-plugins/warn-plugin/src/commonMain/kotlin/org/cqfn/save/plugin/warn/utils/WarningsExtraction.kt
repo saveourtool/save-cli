@@ -20,6 +20,10 @@ import okio.Path
 
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import org.cqfn.save.plugin.warn.adapter.AdapterContext
+import org.cqfn.save.plugin.warn.adapter.WarningAdapter
+import org.cqfn.save.plugin.warn.adapter.jsonStringToWarnings
+import org.cqfn.save.plugin.warn.sarif.SarifWarningAdapter
 
 /**
  * @param warnPluginConfig
@@ -119,8 +123,9 @@ internal fun collectWarningsFromSarif(
                     "Please check if correct `expectedWarningsFormat` is set and if the file is present and called `$sarifFileName`."
         )
     val topmostTestDirectory = fs.topmostTestDirectory(originalPath)
-    return Json.decodeFromString<SarifSchema210>(
-        fs.readFile(sarif)
+    val sarifWarningAdapter = SarifWarningAdapter()
+    return sarifWarningAdapter.jsonStringToWarnings(
+        fs.readFile(sarif),
+        AdapterContext(topmostTestDirectory, originalPaths.adjustToCommonRoot(topmostTestDirectory))
     )
-        .toWarnings(topmostTestDirectory, originalPaths.adjustToCommonRoot(topmostTestDirectory))
 }
