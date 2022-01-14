@@ -20,9 +20,13 @@ import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.ExecutionResult
 import org.cqfn.save.core.utils.ProcessExecutionException
 import org.cqfn.save.core.utils.ProcessTimeoutException
-import org.cqfn.save.plugin.warn.sarif.adjustToCommonRoot
-import org.cqfn.save.plugin.warn.sarif.findAncestorDirContainingFile
-import org.cqfn.save.plugin.warn.sarif.topmostTestDirectory
+import org.cqfn.save.plugin.warn.utils.ResultsChecker
+import org.cqfn.save.plugin.warn.utils.Warning
+import org.cqfn.save.plugin.warn.utils.collectWarningsFromSarif
+import org.cqfn.save.plugin.warn.utils.collectionMultilineWarnings
+import org.cqfn.save.plugin.warn.utils.collectionSingleWarnings
+import org.cqfn.save.plugin.warn.utils.extractWarning
+import org.cqfn.save.plugin.warn.utils.getLineNumber
 
 import io.github.detekt.sarif4k.SarifSchema210
 import okio.FileNotFoundException
@@ -136,16 +140,23 @@ class WarnPlugin(
         // ======= extracting all EXPECTED warnings from test resource files =======
         val copyPaths: List<Path> = createTestFiles(paths, warnPluginConfig)
         val expectedWarningsMap: WarningMap = copyPaths.zip(paths).associate { (copyPath, originalPath) ->
-            val warningsForCurrentPath = copyPath.collectExpectedWarningsWithLineNumbers(warnPluginConfig, generalConfig, paths, originalPath)
+            val warningsForCurrentPath = copyPath.collectWarningsWithLineNumbers(warnPluginConfig, generalConfig, paths, originalPath)
             copyPath.name to warningsForCurrentPath
         }
 
-        if (expectedWarningsMap.isEmpty()) {
+        if (expectedWarningsMap.isEmpty() && warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.IN_PLACE) {
             logWarn(
                 "No expected warnings were found using the following regex pattern:" +
                         " [${generalConfig.expectedWarningsPattern}] in the test files: $paths." +
                         " If you have expected any warnings - please check 'expectedWarningsPattern' or capture groups" +
                         " in your 'save.toml' configuration"
+            )
+        } else if (expectedWarningsMap.isEmpty() && warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.SARIF) {
+            logWarn(
+                "No expected warnings were found when inspecting files ${warnPluginConfig.expectedWarningsFileName}" +
+                        " for test files: $paths." +
+                        " If you have expected any warnings - please make sure SARIF files exist, have correct name and contain" +
+                        " relevant warnings."
             )
         }
         try {
@@ -209,9 +220,68 @@ class WarnPlugin(
         } catch (ex: ProcessExecutionException) {
             return paths.failTestResult(ex, execCmd)
         }
+
+        val stdout = getToolStdout(warnPluginConfig, executionResult)
+        val stderr = executionResult.stderr
+
+        val actualWarningsMap = stdout.mapNotNull {
+            with(warnPluginConfig) {
+                val line = it.getLineNumber(actualWarningsPattern!!, lineCaptureGroupOut)
+                it.extractWarning(
+                    actualWarningsPattern,
+                    fileNameCaptureGroupOut!!,
+                    line,
+                    columnCaptureGroupOut,
+                    messageCaptureGroupOut!!,
+                    benchmarkMode!!,
+                )
+            }
+        }
+            .groupBy { it.fileName }
+            .mapValues { (_, warning) -> warning.sortedBy { it.message } }
+
+        val resultsChecker = ResultsChecker(
+            expectedWarningsMap,
+            actualWarningsMap,
+            warnPluginConfig,
+        )
+
+        return paths.map { path ->
+            val results = resultsChecker.checkResults(path.name)
+            TestResult(
+                Test(path),
+                results.first,
+                DebugInfo(
+                    execCmd,
+                    stdout.filter { it.contains(path.name) }.joinToString("\n"),
+                    stderr.filter { it.contains(path.name) }.joinToString("\n"),
+                    null,
+                    results.second,
+                ),
+            )
+        }.asSequence()
     }
 
-    private fun List<Path>.failTestResult(
+    @Suppress("SwallowedException")
+    private fun getToolStdout(
+        warnPluginConfig: WarnPluginConfig,
+        executionResult: ExecutionResult,
+    ) = warnPluginConfig.testToolResFileOutput?.let {
+        val testToolResFilePath = testConfig.directory / warnPluginConfig.testToolResFileOutput
+        try {
+            fs.readLines(testToolResFilePath)
+        } catch (ex: FileNotFoundException) {
+            logWarn(
+                "Trying to read file \"${warnPluginConfig.testToolResFileOutput}\" that was set as an output for a tested tool with testToolResFileOutput," +
+                        " but no such file found. Will use the stdout as an input."
+            )
+            executionResult.stdout
+        }
+    }
+        ?: executionResult.stdout
+
+    private fun failTestResult(
+        paths: List<Path>,
         ex: ProcessExecutionException,
         execCmd: String
     ) = this.map {
@@ -250,48 +320,31 @@ class WarnPlugin(
      * 2) for each line get the warning
      */
     @Suppress("AVOID_NULL_CHECKS")
-    private fun Path.collectExpectedWarningsWithLineNumbers(
+    private fun Path.collectWarningsWithLineNumbers(
         warnPluginConfig: WarnPluginConfig,
         generalConfig: GeneralConfig,
         originalPaths: List<Path>,
         originalPath: Path,
-    ): List<Warning> = if (warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.SARIF) {
-        val sarifFileName = warnPluginConfig.expectedWarningsFileName!!
-        val sarif = fs.findAncestorDirContainingFile(originalPath, sarifFileName)?.let { it / sarifFileName }
-            ?: throw PluginException(
-                "Could not find SARIF file with expected warnings for file $this. " +
-                        "Please check if correct `expectedWarningsFormat` is set and if the file is present and called `$sarifFileName`."
-            )
-        val topmostTestDirectory = fs.topmostTestDirectory(originalPath)
-        Json.decodeFromString<SarifSchema210>(
-            fs.readFile(sarif)
+    ): List<Warning> = when {
+        warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.SARIF -> collectWarningsFromSarif(
+            warnPluginConfig,
+            originalPath,
+            originalPaths,
+            fs,
+            this
         )
-            .toWarnings(topmostTestDirectory, originalPaths.adjustToCommonRoot(topmostTestDirectory))
-    } else if (generalConfig.expectedWarningsEndPattern != null) {
-        collectionMultilineWarnings(
+        generalConfig.expectedWarningsEndPattern != null -> collectionMultilineWarnings(
             warnPluginConfig,
             generalConfig,
             fs.readLines(this),
             this,
         )
-    } else {
-        collectionSingleWarnings(
+        else -> collectionSingleWarnings(
             warnPluginConfig,
             generalConfig,
             fs.readLines(this),
             this,
         )
-    }
-
-    private fun List<String>.collectActualWarningsWithLineNumbers(
-        warnPluginConfig: WarnPluginConfig
-    ): FileToWarningsMap = when (warnPluginConfig.actualWarningsFormat!!) {
-        ActualWarningsFormat.SARIF -> {
-            val topmostTestDirectory = fs.topmostTestDirectory(originalPath)
-            Json.decodeFromString<SarifSchema210>(
-                this
-            ).toWarnings(topmostTestDirectory, originalPaths.adjustToCommonRoot(topmostTestDirectory))
-        }
         ActualWarningsFormat.PLAIN ->
             this.mapNotNull {
                 with(warnPluginConfig) {
