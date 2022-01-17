@@ -1,6 +1,7 @@
 package org.cqfn.save.plugin.warn.sarif
 
 import org.cqfn.save.core.logging.logInfo
+import org.cqfn.save.plugin.warn.adapter.AdapterContext
 import org.cqfn.save.plugin.warn.utils.Warning
 
 import io.github.detekt.sarif4k.ArtifactLocation
@@ -19,7 +20,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.cqfn.save.plugin.warn.adapter.AdapterContext
 
 class SarifWarningAdapterTest {
     private val sarifWarningAdapter = SarifWarningAdapter()
