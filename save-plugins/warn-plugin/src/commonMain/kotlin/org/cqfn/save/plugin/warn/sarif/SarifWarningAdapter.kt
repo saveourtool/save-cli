@@ -4,6 +4,8 @@
 
 package org.cqfn.save.plugin.warn.sarif
 
+import org.cqfn.save.plugin.warn.adapter.AdapterContext
+import org.cqfn.save.plugin.warn.adapter.WarningAdapter
 import org.cqfn.save.plugin.warn.utils.Warning
 
 import io.github.detekt.sarif4k.Location
@@ -11,9 +13,10 @@ import io.github.detekt.sarif4k.Run
 import io.github.detekt.sarif4k.SarifSchema210
 import okio.Path
 import okio.Path.Companion.toPath
-import org.cqfn.save.plugin.warn.adapter.AdapterContext
-import org.cqfn.save.plugin.warn.adapter.WarningAdapter
 
+/**
+ * A [WarningAdapter] that converts [SarifSchema210] report into a ist of [Warning]s.
+ */
 class SarifWarningAdapter : WarningAdapter<SarifSchema210> {
     /**
      * Convert this SARIF report to a list of [Warning]s.
@@ -28,7 +31,7 @@ class SarifWarningAdapter : WarningAdapter<SarifSchema210> {
         // "Each run represents a single invocation of a single analysis tool, and the run has to describe the tool that produced it."
         // In case of SAVE this array will probably always have a single element.
         return report.runs.flatMap {
-            it.toWarning(ctx.testRoot, ctx.testFiles,)
+            it.toWarning(ctx.testRoot, ctx.testFiles)
         }
     }
 }

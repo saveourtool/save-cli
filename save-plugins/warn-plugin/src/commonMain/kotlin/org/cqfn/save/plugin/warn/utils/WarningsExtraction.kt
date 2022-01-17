@@ -9,21 +9,15 @@ import org.cqfn.save.core.files.readFile
 import org.cqfn.save.core.plugin.GeneralConfig
 import org.cqfn.save.core.plugin.PluginException
 import org.cqfn.save.plugin.warn.WarnPluginConfig
-import org.cqfn.save.plugin.warn.sarif.adjustToCommonRoot
-import org.cqfn.save.plugin.warn.sarif.findAncestorDirContainingFile
-import org.cqfn.save.plugin.warn.sarif.toWarnings
-import org.cqfn.save.plugin.warn.sarif.topmostTestDirectory
-
-import io.github.detekt.sarif4k.SarifSchema210
-import okio.FileSystem
-import okio.Path
-
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 import org.cqfn.save.plugin.warn.adapter.AdapterContext
-import org.cqfn.save.plugin.warn.adapter.WarningAdapter
 import org.cqfn.save.plugin.warn.adapter.jsonStringToWarnings
 import org.cqfn.save.plugin.warn.sarif.SarifWarningAdapter
+import org.cqfn.save.plugin.warn.sarif.adjustToCommonRoot
+import org.cqfn.save.plugin.warn.sarif.findAncestorDirContainingFile
+import org.cqfn.save.plugin.warn.sarif.topmostTestDirectory
+
+import okio.FileSystem
+import okio.Path
 
 /**
  * @param warnPluginConfig
