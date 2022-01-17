@@ -19,8 +19,11 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import org.cqfn.save.plugin.warn.adapter.AdapterContext
 
 class SarifWarningAdapterTest {
+    private val sarifWarningAdapter = SarifWarningAdapter()
+
     @Test
     @Suppress("TOO_LONG_FUNCTION")
     fun `should convert SARIF report to SAVE warnings`() {
@@ -82,7 +85,10 @@ class SarifWarningAdapterTest {
         """.trimIndent()
         val sarifSchema210: SarifSchema210 = Json.decodeFromString(sarif)
 
-        val warnings = sarifSchema210.toWarnings("C:/dev/sarif".toPath(), emptyList())
+        val warnings = sarifWarningAdapter.toWarnings(
+            sarifSchema210,
+            AdapterContext("C:/dev/sarif".toPath(), emptyList())
+        )
 
         logInfo("Converted warnings: $warnings")
         assertEquals(1, warnings.size)
@@ -104,9 +110,12 @@ class SarifWarningAdapterTest {
         )
 
         val testRoot = "/workspace/tests".toPath()
-        val warnings = sarifSchema210.toWarnings(
-            testRoot,
-            listOf("/workspace/tests/suite2/foo.test".toPath()).adjustToCommonRoot(testRoot)
+        val warnings = sarifWarningAdapter.toWarnings(
+            sarifSchema210,
+            AdapterContext(
+                testRoot,
+                listOf("/workspace/tests/suite2/foo.test".toPath()).adjustToCommonRoot(testRoot),
+            )
         )
 
         logInfo("Converted warnings: $warnings")
@@ -125,9 +134,12 @@ class SarifWarningAdapterTest {
         )
 
         val testRoot = "/workspace/tests".toPath()
-        val warnings = sarifSchema210.toWarnings(
-            testRoot,
-            listOf("/workspace/tests/suite2/foo.test".toPath()).adjustToCommonRoot(testRoot)
+        val warnings = sarifWarningAdapter.toWarnings(
+            sarifSchema210,
+            AdapterContext(
+                testRoot,
+                listOf("/workspace/tests/suite2/foo.test".toPath()).adjustToCommonRoot(testRoot),
+            )
         )
 
         logInfo("Converted warnings: $warnings")
