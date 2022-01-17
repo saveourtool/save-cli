@@ -15,28 +15,21 @@ import org.cqfn.save.plugin.warn.adapter.AdapterContext
 import org.cqfn.save.plugin.warn.adapter.WarningAdapter
 
 class SarifWarningAdapter : WarningAdapter<SarifSchema210> {
+    /**
+     * Convert this SARIF report to a list of [Warning]s.
+     *
+     * @param ctx: if `testFiles` is not empty, then results from SARIF will be filtered to match paths from [ctx.testFiles].
+     * [ctx.testFiles] should be relative to test root, then URIs from SARIF will be trimmed too and matched against [ctx.testFiles].
+     * Regarding relative paths in SARIF see [this comment](https://github.com/microsoft/sarif-vscode-extension/issues/294#issuecomment-657753955).
+     * [ctx.testRoot] is a root directory of test suite
+     * @return a list of [Warning]s
+     */
     override fun toWarnings(report: SarifSchema210, ctx: AdapterContext): List<Warning> {
-        return report.toWarnings(
-            ctx.testRoot,
-            ctx.testFiles,
-        )
-    }
-}
-
-/**
- * Convert this SARIF report to a list of [Warning]s.
- *
- * @param testFiles if this list is not empty, then results from SARIF will be filtered to match paths from [testFiles].
- * [testFiles] should be relative to test root, then URIs from SARIF will be trimmed too and matched against [testFiles].
- * Regarding relative paths in SARIF see [this comment](https://github.com/microsoft/sarif-vscode-extension/issues/294#issuecomment-657753955).
- * @param testRoot a root directory of test suite
- * @return a list of [Warning]s
- */
-fun SarifSchema210.toWarnings(testRoot: Path?, testFiles: List<Path>): List<Warning> {
-    // "Each run represents a single invocation of a single analysis tool, and the run has to describe the tool that produced it."
-    // In case of SAVE this array will probably always have a single element.
-    return runs.flatMap {
-        it.toWarning(testRoot, testFiles)
+        // "Each run represents a single invocation of a single analysis tool, and the run has to describe the tool that produced it."
+        // In case of SAVE this array will probably always have a single element.
+        return report.runs.flatMap {
+            it.toWarning(ctx.testRoot, ctx.testFiles,)
+        }
     }
 }
 
