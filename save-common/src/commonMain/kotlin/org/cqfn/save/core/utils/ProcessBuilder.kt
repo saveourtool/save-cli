@@ -102,7 +102,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
 
         val cmd = modifyCmd(command, directory, processBuilderInternal)
 
-        logInfo("Executing: $cmd with timeout $timeOutMillis")
+        logDebug("Executing: $cmd with timeout $timeOutMillis")
         val status = try {
             processBuilderInternal.exec(cmd, timeOutMillis)
         } catch (ex: ProcessTimeoutException) {
