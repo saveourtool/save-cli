@@ -1,12 +1,19 @@
 package org.cqfn.save.core.utils
 
-import okio.Path
-import okio.Path.Companion.toPath
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.logging.logDebug
-import org.cqfn.save.core.plugin.*
+import org.cqfn.save.core.plugin.ExtraFlags
+import org.cqfn.save.core.plugin.ExtraFlagsExtractor
+import org.cqfn.save.core.plugin.resolvePlaceholdersFrom
 
-// FixMe: all plugins should use it for executing of command in the future
+import okio.Path
+import okio.Path.Companion.toPath
+
+/**
+ * FixMe: All plugins should use it for executing of commands in the future
+ *
+ * @property execCmd - execution command. Will be modified with extra flags and test files
+ */
 abstract class CmdExecutorBase(
     val execCmd: String,
     private val timeOutMillis: Long,
@@ -15,8 +22,11 @@ abstract class CmdExecutorBase(
     private val pb: ProcessBuilder,
     private val testConfig: TestConfig,
 ) {
-    lateinit var constructedExecCmd: String
+    private lateinit var constructedExecCmd: String
 
+    /**
+     * Simple method for extracting of extra flags, that will be used later in execCmd
+     */
     private fun extractExtraFlags(): ExtraFlags {
         val extraFlagsList = copyPaths.mapNotNull { extraFlagsExtractor.extractExtraFlagsFrom(it) }.distinct()
         require(extraFlagsList.size <= 1) {
@@ -27,13 +37,22 @@ abstract class CmdExecutorBase(
         return extraFlagsList.singleOrNull() ?: ExtraFlags("", "")
     }
 
-    fun executeCommandAndGetTestResults(redirectTo: Path?): Std {
+    /**
+     * @param redirectTo a file where process output and errors should be redirected.
+     * If null, output will be returned as [ExecutionResult.stdout] and [ExecutionResult.stderr].
+     * @return the result after the execution of [constructedExecCmd]
+     */
+    fun executeCommandAndGetTestResults(redirectTo: Path?): ExecutionResult {
         val time = timeOutMillis.times(copyPaths.size)
         val execResult = pb.exec(constructedExecCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time)
 
-        return Std(getStdout(execResult), execResult.stderr)
+        return ExecutionResult(execResult.code, execResult.getStdout(), execResult.stderr)
     }
 
+    /**
+     * @param tmpDirName - the name of test file in the temporary directory
+     * @return constructed command for the execution. At the same time updates [constructedExecCmd]
+     */
     fun constructExecCmd(tmpDirName: String): String {
         val execFlagsAdjusted = resolvePlaceholdersFrom(execFlags(), extractExtraFlags(), constructFileNamesForExecCmd(tmpDirName))
         constructedExecCmd = "$execCmd $execFlagsAdjusted"
@@ -43,7 +62,7 @@ abstract class CmdExecutorBase(
     private fun constructFileNamesForExecCmd(tmpDirName: String): String {
         // joining test files to string with a batchSeparator if the tested tool supports processing of file batches
         // NOTE: SAVE will pass relative paths of Tests (calculated from testRootConfig dir) into the executed tool
-        val fileNamesForExecCmd = when(wildCardInDirectoryMode()) {
+        val fileNamesForExecCmd = when (wildCardInDirectoryMode()) {
             null -> copyPaths.joinToString(separator = batchSeparator())
             else -> {
                 var testRootPath = copyPaths[0].parent ?: ".".toPath()
@@ -59,13 +78,26 @@ abstract class CmdExecutorBase(
         return fileNamesForExecCmd
     }
 
+    /**
+     * This method should return a wildCard if the tool is run on the directory in the directory mode.
+     *
+     * @return a string with a wildcard OR null if the tool is not run in the directory mode
+     */
     abstract fun wildCardInDirectoryMode(): String?
+
+    /**
+     * @return string with extra flags that are used to construct exec cmd (flags that are added to your tool console)
+     */
     abstract fun execFlags(): String?
-    abstract fun getStdout(execResult: ExecutionResult): List<String>
+
+    /**
+     * @return stdout from the execution result. Can be simply taken from ExecutionResult.stdout or modified
+     */
+    abstract fun ExecutionResult.getStdout(): List<String>
+
+    /**
+     * @return separator for test names that are passed to the tool in case when batch mode is used. For example:
+     * if barchSeparator = ";" -> tool file1FromBatch,file2FromBatch
+     */
     abstract fun batchSeparator(): String
 }
-
-class Std(
-    val out: List<String>,
-    val err: List<String>,
-)

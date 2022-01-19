@@ -15,13 +15,17 @@ import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.ProcessExecutionException
 import org.cqfn.save.core.utils.ProcessTimeoutException
-
-import okio.FileSystem
-import okio.Path
-import org.cqfn.save.plugin.warn.utils.*
+import org.cqfn.save.plugin.warn.utils.CmdExecutorWarn
+import org.cqfn.save.plugin.warn.utils.ResultsChecker
+import org.cqfn.save.plugin.warn.utils.Warning
 import org.cqfn.save.plugin.warn.utils.collectWarningsFromSarif
 import org.cqfn.save.plugin.warn.utils.collectionMultilineWarnings
 import org.cqfn.save.plugin.warn.utils.collectionSingleWarnings
+import org.cqfn.save.plugin.warn.utils.extractWarning
+import org.cqfn.save.plugin.warn.utils.getLineNumber
+
+import okio.FileSystem
+import okio.Path
 
 import kotlin.random.Random
 
@@ -55,7 +59,7 @@ class WarnPlugin(
 
         // Special trick to handle cases when tested tool is able to process directories.
         // In this case instead of executing the tool with file names, we execute the tool with directories.
-        //
+        // 
         // In case, when user doesn't want to use directory mode, he needs simply not to pass [wildCardInDirectoryMode] and it will be null
         return warnPluginConfig.wildCardInDirectoryMode?.let {
             handleTestFile(files.map { it.test }.toList(), warnPluginConfig, generalConfig).asSequence()
@@ -99,30 +103,14 @@ class WarnPlugin(
     ): Sequence<TestResult> {
         // extracting all warnings from test resource files
         val copyPaths: List<Path> = createTestFiles(originalPaths, warnPluginConfig)
+
         val expectedWarningsMap: WarningMap = copyPaths.zip(originalPaths).associate { (copyPath, originalPath) ->
             val warningsForCurrentPath =
-                copyPath.collectWarningsWithLineNumbers(warnPluginConfig, generalConfig, originalPaths, originalPath)
+                    copyPath.collectWarningsWithLineNumbers(warnPluginConfig, generalConfig, originalPaths, originalPath)
             copyPath.name to warningsForCurrentPath
         }
 
-        if (expectedWarningsMap.isEmpty()) {
-            when (warnPluginConfig.expectedWarningsFormat!!) {
-                ExpectedWarningsFormat.IN_PLACE ->
-                    logWarn(
-                        "No expected warnings were found using the following regex pattern:" +
-                                " [${generalConfig.expectedWarningsPattern}] in the test files: $originalPaths." +
-                                " If you have expected any warnings - please check 'expectedWarningsPattern' or capture groups" +
-                                " in your 'save.toml' configuration"
-                    )
-                ExpectedWarningsFormat.SARIF ->
-                    logWarn(
-                        "No expected warnings were found when inspecting files ${warnPluginConfig.expectedWarningsFileName}" +
-                                " for test files: $originalPaths." +
-                                " If you have expected any warnings - please make sure SARIF files exist, have correct name and contain" +
-                                " relevant warnings."
-                    )
-            }
-        }
+        if (expectedWarningsMap.isEmpty()) warnMissingExpectedWarnings(warnPluginConfig, generalConfig, originalPaths)
 
         val cmdExecutor = CmdExecutorWarn(
             generalConfig,
@@ -137,11 +125,9 @@ class WarnPlugin(
         val execCmd = cmdExecutor.constructExecCmd(tmpDirName)
 
         try {
-            val std = cmdExecutor.executeCommandAndGetTestResults(redirectTo)
-            val stdout = std.out
-            val stderr = std.err
+            val result = cmdExecutor.executeCommandAndGetTestResults(redirectTo)
 
-            val actualWarningsMap = stdout.mapNotNull {
+            val actualWarningsMap = result.stdout.mapNotNull {
                 with(warnPluginConfig) {
                     val line = it.getLineNumber(actualWarningsPattern!!, lineCaptureGroupOut)
                     it.extractWarning(
@@ -164,16 +150,16 @@ class WarnPlugin(
             )
 
             return originalPaths.map { path ->
-                val results = resultsChecker.checkResults(path.name)
+                val resultsStatus = resultsChecker.checkResults(path.name)
                 TestResult(
                     Test(path),
-                    results.first,
+                    resultsStatus.first,
                     DebugInfo(
                         execCmd,
-                        stdout.filter { it.contains(path.name) }.joinToString("\n"),
-                        stderr.filter { it.contains(path.name) }.joinToString("\n"),
+                        result.stdout.filter { it.contains(path.name) }.joinToString("\n"),
+                        result.stderr.filter { it.contains(path.name) }.joinToString("\n"),
                         null,
-                        results.second,
+                        resultsStatus.second,
                     ),
                 )
             }.asSequence()
@@ -250,5 +236,31 @@ class WarnPlugin(
             fs.readLines(this),
             this,
         )
+    }
+
+    private fun warnMissingExpectedWarnings(
+        warnPluginConfig: WarnPluginConfig,
+        generalConfig: GeneralConfig,
+        originalPaths: List<Path>,
+    ) {
+        when (warnPluginConfig.expectedWarningsFormat) {
+            ExpectedWarningsFormat.IN_PLACE ->
+                logWarn(
+                    "No expected warnings were found using the following regex pattern:" +
+                            " [${generalConfig.expectedWarningsPattern}] in the test files: $originalPaths." +
+                            " If you have expected any warnings - please check 'expectedWarningsPattern' or capture groups" +
+                            " in your 'save.toml' configuration"
+                )
+            ExpectedWarningsFormat.SARIF ->
+                logWarn(
+                    "No expected warnings were found when inspecting files ${warnPluginConfig.expectedWarningsFileName}" +
+                            " for test files: $originalPaths." +
+                            " If you have expected any warnings - please make sure SARIF files exist, have correct name and contain" +
+                            " relevant warnings."
+                )
+            else -> {
+                // this is a generated else block
+            }
+        }
     }
 }
