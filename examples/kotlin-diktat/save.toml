@@ -1,5 +1,5 @@
 [general]
-    description = "222 Test for diktat - linter and formatter for Kotlin"
+    description = "22 Test for diktat - linter and formatter for Kotlin"
     language = "Kotlin"
     # this is the default value, you don't need to add it explicitly, but can be useful, if you have different pattern:
     expectedWarningsPattern = "// ;warn:?(.*):(\\d*): (.+)"
