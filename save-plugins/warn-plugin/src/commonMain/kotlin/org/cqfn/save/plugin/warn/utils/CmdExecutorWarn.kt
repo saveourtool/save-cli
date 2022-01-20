@@ -34,9 +34,9 @@ class CmdExecutorWarn(
     pb,
     testConfig
 ) {
-    override fun wildCardInDirectoryMode(): String? = warnPluginConfig.wildCardInDirectoryMode
+    override fun getWildCardInDirectoryMode(): String? = warnPluginConfig.wildCardInDirectoryMode
 
-    override fun execFlags(): String? = warnPluginConfig.execFlags
+    override fun getExecFlags(): String? = warnPluginConfig.execFlags
 
     @Suppress("SwallowedException")
     override fun ExecutionResult.getStdout(): List<String> = warnPluginConfig.testToolResFileOutput?.let {
@@ -55,5 +55,5 @@ class CmdExecutorWarn(
     }
         ?: this.stdout
 
-    override fun batchSeparator(): String = warnPluginConfig.batchSeparator!!
+    override fun getBatchSeparator(): String = warnPluginConfig.batchSeparator!!
 }

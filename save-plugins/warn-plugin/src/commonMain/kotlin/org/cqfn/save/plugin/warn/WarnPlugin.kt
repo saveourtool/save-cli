@@ -1,5 +1,6 @@
 package org.cqfn.save.plugin.warn
 
+import org.cqfn.save.core.config.ActualWarningsFormat
 import org.cqfn.save.core.config.ExpectedWarningsFormat
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
@@ -13,6 +14,7 @@ import org.cqfn.save.core.plugin.Plugin
 import org.cqfn.save.core.result.DebugInfo
 import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.TestResult
+import org.cqfn.save.core.utils.ExecutionResult
 import org.cqfn.save.core.utils.ProcessExecutionException
 import org.cqfn.save.core.utils.ProcessTimeoutException
 import org.cqfn.save.plugin.warn.utils.CmdExecutorWarn
@@ -106,11 +108,13 @@ class WarnPlugin(
 
         val expectedWarningsMap: WarningMap = copyPaths.zip(originalPaths).associate { (copyPath, originalPath) ->
             val warningsForCurrentPath =
-                    copyPath.collectWarningsWithLineNumbers(warnPluginConfig, generalConfig, originalPaths, originalPath)
+                    copyPath.collectExpectedWarningsWithLineNumbers(warnPluginConfig, generalConfig, originalPaths, originalPath)
             copyPath.name to warningsForCurrentPath
         }
 
-        if (expectedWarningsMap.isEmpty()) warnMissingExpectedWarnings(warnPluginConfig, generalConfig, originalPaths)
+        if (expectedWarningsMap.isEmpty()) {
+            warnMissingExpectedWarnings(warnPluginConfig, generalConfig, originalPaths)
+        }
 
         val cmdExecutor = CmdExecutorWarn(
             generalConfig,
@@ -124,51 +128,37 @@ class WarnPlugin(
 
         val execCmd = cmdExecutor.constructExecCmd(tmpDirName)
 
-        try {
-            val result = cmdExecutor.executeCommandAndGetTestResults(redirectTo)
-
-            val actualWarningsMap = result.stdout.mapNotNull {
-                with(warnPluginConfig) {
-                    val line = it.getLineNumber(actualWarningsPattern!!, lineCaptureGroupOut)
-                    it.extractWarning(
-                        actualWarningsPattern,
-                        fileNameCaptureGroupOut!!,
-                        line,
-                        columnCaptureGroupOut,
-                        messageCaptureGroupOut!!,
-                        benchmarkMode!!,
-                    )
-                }
-            }
-                .groupBy { it.fileName }
-                .mapValues { (_, warning) -> warning.sortedBy { it.message } }
-
-            val resultsChecker = ResultsChecker(
-                expectedWarningsMap,
-                actualWarningsMap,
-                warnPluginConfig,
-            )
-
-            return originalPaths.map { path ->
-                val resultsStatus = resultsChecker.checkResults(path.name)
-                TestResult(
-                    Test(path),
-                    resultsStatus.first,
-                    DebugInfo(
-                        execCmd,
-                        result.stdout.filter { it.contains(path.name) }.joinToString("\n"),
-                        result.stderr.filter { it.contains(path.name) }.joinToString("\n"),
-                        null,
-                        resultsStatus.second,
-                    ),
-                )
-            }.asSequence()
+        val result = try {
+            cmdExecutor.execCmdAndGetExecutionResults(redirectTo)
         } catch (ex: ProcessTimeoutException) {
             logWarn("The following tests took too long to run and were stopped: $originalPaths, timeout for single test: ${ex.timeoutMillis}")
             return failTestResult(originalPaths, ex, execCmd)
         } catch (ex: ProcessExecutionException) {
             return failTestResult(originalPaths, ex, execCmd)
         }
+
+        val actualWarningsMap = collectActualWarningsWithLineNumbers(result, warnPluginConfig)
+
+        val resultsChecker = ResultsChecker(
+            expectedWarningsMap,
+            actualWarningsMap,
+            warnPluginConfig,
+        )
+
+        return originalPaths.map { path ->
+            val resultsStatus = resultsChecker.checkResults(path.name)
+            TestResult(
+                Test(path),
+                resultsStatus.first,
+                DebugInfo(
+                    execCmd,
+                    result.stdout.filter { it.contains(path.name) }.joinToString("\n"),
+                    result.stderr.filter { it.contains(path.name) }.joinToString("\n"),
+                    null,
+                    resultsStatus.second,
+                ),
+            )
+        }.asSequence()
     }
 
     private fun createTestFiles(paths: List<Path>, warnPluginConfig: WarnPluginConfig): List<Path> {
@@ -206,12 +196,12 @@ class WarnPlugin(
     }.asSequence()
 
     /**
-     * method for getting warnings from test files:
+     * method for getting expected warnings from test files:
      * 1) reading the file
      * 2) for each line get the warning
      */
     @Suppress("AVOID_NULL_CHECKS")
-    private fun Path.collectWarningsWithLineNumbers(
+    private fun Path.collectExpectedWarningsWithLineNumbers(
         warnPluginConfig: WarnPluginConfig,
         generalConfig: GeneralConfig,
         originalPaths: List<Path>,
@@ -236,6 +226,34 @@ class WarnPlugin(
             fs.readLines(this),
             this,
         )
+    }
+
+    /**
+     * method for getting actual warnings from test files:
+     * 1) reading the file
+     * 2) for each line get the warning
+     */
+    @Suppress("AVOID_NULL_CHECKS")
+    private fun collectActualWarningsWithLineNumbers(
+        result: ExecutionResult,
+        warnPluginConfig: WarnPluginConfig
+    ): WarningMap = when (warnPluginConfig.actualWarningsFormat) {
+        ActualWarningsFormat.SARIF -> throw NotImplementedError()
+        else -> result.stdout.mapNotNull {
+            with(warnPluginConfig) {
+                it.extractWarning(
+                    actualWarningsPattern!!,
+                    fileNameCaptureGroupOut!!,
+                    it.getLineNumber(actualWarningsPattern, lineCaptureGroupOut),
+                    columnCaptureGroupOut,
+                    messageCaptureGroupOut!!,
+                    benchmarkMode!!
+                )
+            }
+        }
+            .groupBy { it.fileName }
+            .mapValues { (_, warning) -> warning.sortedBy { it.message } }
+
     }
 
     private fun warnMissingExpectedWarnings(

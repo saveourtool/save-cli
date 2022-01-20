@@ -42,7 +42,7 @@ abstract class CmdExecutorBase(
      * If null, output will be returned as [ExecutionResult.stdout] and [ExecutionResult.stderr].
      * @return the result after the execution of [constructedExecCmd]
      */
-    fun executeCommandAndGetTestResults(redirectTo: Path?): ExecutionResult {
+    fun execCmdAndGetExecutionResults(redirectTo: Path?): ExecutionResult {
         val time = timeOutMillis.times(copyPaths.size)
         val execResult = pb.exec(constructedExecCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time)
 
@@ -50,28 +50,33 @@ abstract class CmdExecutorBase(
     }
 
     /**
+     * Method does the construction of execution cmd and assigns it to [constructedExecCmd]
+     * In fact, it does the following: execCmd + execFlags + fileNames + extraFlags
+     *
      * @param tmpDirName - the name of test file in the temporary directory
      * @return constructed command for the execution. At the same time updates [constructedExecCmd]
      */
-    fun constructExecCmd(tmpDirName: String): String {
-        val execFlagsAdjusted = resolvePlaceholdersFrom(execFlags(), extractExtraFlags(), constructFileNamesForExecCmd(tmpDirName))
-        constructedExecCmd = "$execCmd $execFlagsAdjusted"
-        return constructedExecCmd
-    }
+    fun constructExecCmd(tmpDirName: String): String = "$execCmd ${
+        resolvePlaceholdersFrom(
+            getExecFlags(),
+            extractExtraFlags(),
+            constructFileNamesForExecCmd(tmpDirName)
+        )
+    }"
+        .also {
+            constructedExecCmd = it
+        }
 
     private fun constructFileNamesForExecCmd(tmpDirName: String): String {
         // joining test files to string with a batchSeparator if the tested tool supports processing of file batches
         // NOTE: SAVE will pass relative paths of Tests (calculated from testRootConfig dir) into the executed tool
-        val fileNamesForExecCmd = when (wildCardInDirectoryMode()) {
-            null -> copyPaths.joinToString(separator = batchSeparator())
-            else -> {
-                var testRootPath = copyPaths[0].parent ?: ".".toPath()
-                while (testRootPath.parent != null && testRootPath.parent!!.name != tmpDirName) {
-                    testRootPath = testRootPath.parent!!
-                }
-                "$testRootPath${wildCardInDirectoryMode()}"
+        val fileNamesForExecCmd = getWildCardInDirectoryMode()?.let {
+            var testRootPath = copyPaths[0].parent ?: ".".toPath()
+            while (testRootPath.parent != null && testRootPath.parent!!.name != tmpDirName) {
+                testRootPath = testRootPath.parent!!
             }
-        }
+            "$testRootPath${getWildCardInDirectoryMode()}"
+        } ?: copyPaths.joinToString(separator = getBatchSeparator())
 
         logDebug("Constructed file name for execution for warn plugin: $fileNamesForExecCmd")
 
@@ -83,12 +88,12 @@ abstract class CmdExecutorBase(
      *
      * @return a string with a wildcard OR null if the tool is not run in the directory mode
      */
-    abstract fun wildCardInDirectoryMode(): String?
+    abstract fun getWildCardInDirectoryMode(): String?
 
     /**
      * @return string with extra flags that are used to construct exec cmd (flags that are added to your tool console)
      */
-    abstract fun execFlags(): String?
+    abstract fun getExecFlags(): String?
 
     /**
      * @return stdout from the execution result. Can be simply taken from ExecutionResult.stdout or modified
@@ -99,5 +104,5 @@ abstract class CmdExecutorBase(
      * @return separator for test names that are passed to the tool in case when batch mode is used. For example:
      * if barchSeparator = ";" -> tool file1FromBatch,file2FromBatch
      */
-    abstract fun batchSeparator(): String
+    abstract fun getBatchSeparator(): String
 }
