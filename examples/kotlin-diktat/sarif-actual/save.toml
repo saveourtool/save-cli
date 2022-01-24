@@ -1,0 +1,19 @@
+[general]
+    tags = ["warn", "sarif"]
+    description = "Test warnings discovered by diKTat, reading expected warnings from SARIF file"
+    suiteName = "Only Warnings: with SARIF format"
+    expectedWarningsPattern = "// ;warn:?(.*):(\\d+):? ?(.+)?"
+
+
+[warn]
+    execFlags = "--reporter=sarif"
+    # regular expression to detect tests
+    testNameRegex = ".*Test.kt"
+    actualWarningsFormat = "SARIF"
+    fileNameCaptureGroupOut = 1
+    lineCaptureGroupOut = 2
+    columnCaptureGroupOut = 3
+    messageCaptureGroupOut = 4
+    exactWarningsMatch = false
+    warningTextHasColumn = true
+    warningTextHasLine = true
