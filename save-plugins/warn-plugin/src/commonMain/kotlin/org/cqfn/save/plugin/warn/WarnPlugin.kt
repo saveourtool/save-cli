@@ -226,7 +226,7 @@ class WarnPlugin(
         generalConfig.expectedWarningsEndPattern != null -> collectionMultilineWarnings(
             warnPluginConfig,
             generalConfig,
-                 fs.readLines(this),
+            fs.readLines(this),
             this,
         )
         else -> collectionSingleWarnings(
