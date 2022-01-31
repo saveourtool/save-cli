@@ -23,7 +23,7 @@
 - name: FILE_IS_TOO_LONG
   enabled: true
   configuration:
-    maxSize: 2000
+    maxSize: 450
     ignoreFolders: ''
 - name: FILE_UNORDERED_IMPORTS
   enabled: true
