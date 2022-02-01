@@ -103,6 +103,7 @@ kotlin {
     }
 }
 
+configureJacoco()
 configurePublishing()
 configureDiktat()
 configureDetekt()
