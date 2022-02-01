@@ -37,7 +37,9 @@ fun Project.configureJacoco() {
         executionData(jvmTestTask.extensions.getByType(JacocoTaskExtension::class.java).destinationFile)
         // todo: include platform-specific source sets
         additionalSourceDirs(kotlin.sourceSets["commonMain"].kotlin.sourceDirectories)
-        classDirectories.setFrom(file("$buildDir/classes/kotlin/jvm/main"))
+        classDirectories.setFrom(fileTree("$buildDir/classes/kotlin/jvm/main").apply {
+            exclude("**/*\$\$serializer.class")
+        })
         reports {
             xml.required.set(true)
             html.required.set(true)
