@@ -1,4 +1,5 @@
 [general]
+    execCmd = "java -jar ktlint -R diktat.jar"
     description = "22 Test for diktat - linter and formatter for Kotlin"
     language = "Kotlin"
     # this is the default value, you don't need to add it explicitly, but can be useful, if you have different pattern:
