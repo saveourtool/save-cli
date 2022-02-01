@@ -1,4 +1,4 @@
-[DDSDSgeneral]
+[general]
     execCmd = "java -jar ktlint -R diktat.jar"
     description = "22 Test for diktat - linter and formatter for Kotlin"
     language = "Kotlin"
