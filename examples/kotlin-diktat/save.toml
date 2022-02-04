@@ -1,5 +1,5 @@
 [general]
-    execCmd = "java -jar ktlint --disabled_rules=standard -R diktat.jar"
+    execCmd = "java -jar ktlint-old --disabled_rules=standard -R diktat-old.jar"
     description = "Test for diktat - linter and formatter for Kotlin"
     language = "Kotlin"
     # this is the default value, you don't need to add it explicitly, but can be useful, if you have different pattern:

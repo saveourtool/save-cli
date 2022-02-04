@@ -3,6 +3,8 @@
     description = "Test warnings discovered by diKTat, reading expected warnings from SARIF file"
     suiteName = "Only Warnings: with SARIF format"
     expectedWarningsPattern = "// ;warn:?(.*):(\\d+):? ?(.+)?"
+    execCmd = "java -jar ktlint --disabled_rules=standard -R diktat.jar"
+
 
 
 [warn]
