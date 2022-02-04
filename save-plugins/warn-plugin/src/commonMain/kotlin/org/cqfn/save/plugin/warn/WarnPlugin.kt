@@ -17,6 +17,7 @@ import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.ExecutionResult
 import org.cqfn.save.core.utils.ProcessExecutionException
 import org.cqfn.save.core.utils.ProcessTimeoutException
+import org.cqfn.save.plugin.warn.sarif.toWarnings
 import org.cqfn.save.plugin.warn.utils.CmdExecutorWarn
 import org.cqfn.save.plugin.warn.utils.ResultsChecker
 import org.cqfn.save.plugin.warn.utils.Warning
@@ -26,10 +27,13 @@ import org.cqfn.save.plugin.warn.utils.collectionSingleWarnings
 import org.cqfn.save.plugin.warn.utils.extractWarning
 import org.cqfn.save.plugin.warn.utils.getLineNumber
 
+import io.github.detekt.sarif4k.SarifSchema210
 import okio.FileSystem
 import okio.Path
 
 import kotlin.random.Random
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
 private typealias WarningMap = Map<String, List<Warning>>
 
@@ -108,7 +112,12 @@ class WarnPlugin(
 
         val expectedWarningsMap: WarningMap = copyPaths.zip(originalPaths).associate { (copyPath, originalPath) ->
             val warningsForCurrentPath =
-                    copyPath.collectExpectedWarningsWithLineNumbers(warnPluginConfig, generalConfig, originalPaths, originalPath)
+                    copyPath.collectExpectedWarningsWithLineNumbers(
+                        warnPluginConfig,
+                        generalConfig,
+                        originalPaths,
+                        originalPath
+                    )
             copyPath.name to warningsForCurrentPath
         }
 
@@ -236,9 +245,16 @@ class WarnPlugin(
     @Suppress("AVOID_NULL_CHECKS")
     private fun collectActualWarningsWithLineNumbers(
         result: ExecutionResult,
-        warnPluginConfig: WarnPluginConfig
+        warnPluginConfig: WarnPluginConfig,
     ): WarningMap = when (warnPluginConfig.actualWarningsFormat) {
-        ActualWarningsFormat.SARIF -> throw NotImplementedError()
+        ActualWarningsFormat.SARIF -> Json.decodeFromString<SarifSchema210>(
+            result.stdout.joinToString("\n")
+        )
+            // setting emptyList() here instead of originalPaths to avoid invalid mapping
+            .toWarnings(testConfig.getRootConfig().directory, emptyList())
+            .groupBy { it.fileName }
+            .mapValues { (_, warning) -> warning.sortedBy { it.message } }
+
         else -> result.stdout.mapNotNull {
             with(warnPluginConfig) {
                 it.extractWarning(
@@ -253,7 +269,6 @@ class WarnPlugin(
         }
             .groupBy { it.fileName }
             .mapValues { (_, warning) -> warning.sortedBy { it.message } }
-
     }
 
     private fun warnMissingExpectedWarnings(
