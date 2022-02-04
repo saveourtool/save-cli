@@ -33,6 +33,8 @@ fun Project.createDiktatTask() {
         apply<DiktatGradlePlugin>()
         configure<DiktatExtension> {
             diktatConfigFile = rootProject.file("diktat-analysis.yml")
+            // FixMe: temporary before the release 1.0.3 of diktat
+            // reporterType = "sarif"
             inputs {
                 include(
                     "$rootDir/buildSrc/src/**/*.kt",
@@ -54,4 +56,9 @@ fun Project.createDiktatTask() {
             tasks.findByName("diktatFix")?.let { this@register.dependsOn(it) }
         }
     }
+
+    // FixMe: temporary before the release 1.0.3 of diktat
+    /* this.configurations.getByName("diktat").dependencies.add(
+        this.dependencies.create("com.pinterest.ktlint:ktlint-reporter-sarif:0.43.2")
+    ) */
 }

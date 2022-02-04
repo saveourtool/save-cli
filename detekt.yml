@@ -19,3 +19,7 @@ style:
     excludePackageStatements: true
     excludeImportStatements: true
     excludeCommentStatements: false
+  ForbiddenMethodCall:
+    excludes: ['**/resources/**', '**/src/test/**', '**/src/jvmTest/**']
+    active: true
+    methods: ['kotlin.io.println', 'kotlin.io.print']

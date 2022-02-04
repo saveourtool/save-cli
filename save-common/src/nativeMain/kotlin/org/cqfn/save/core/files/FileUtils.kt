@@ -4,7 +4,7 @@
 
 package org.cqfn.save.core.files
 
-import org.cqfn.save.core.logging.logDebug
+import org.cqfn.save.core.logging.logTrace
 
 import okio.FileSystem
 import okio.Path
@@ -30,7 +30,7 @@ actual val fs: FileSystem = FileSystem.SYSTEM
 actual fun FileSystem.myDeleteRecursively(path: Path) {
     nftw(path.toString(), staticCFunction<CPointer<ByteVar>?, CPointer<stat>?, Int, CPointer<FTW>?, Int> { pathName, _, _, _ ->
         val fileName = pathName!!.toKString()
-        logDebug("Attempt to delete file $fileName")
+        logTrace("Attempt to delete file $fileName")
         remove(fileName)
     }, 64, FTW_DEPTH)
 }

@@ -30,6 +30,11 @@ kotlin {
         // additionally, save-common should be available for JS too
         // fixme: shouldn't rely on hardcoded project name here
         js(BOTH).browser()
+
+        // store yarn.lock in the root directory
+        rootProject.extensions.configure<org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension> {
+            lockFileDirectory = rootProject.projectDir
+        }
     }
 
     if (hasProperty("disableRedundantTargets") && (property("disableRedundantTargets") as String?) != "false") {
@@ -98,6 +103,7 @@ kotlin {
     }
 }
 
+configureJacoco()
 configurePublishing()
 configureDiktat()
 configureDetekt()

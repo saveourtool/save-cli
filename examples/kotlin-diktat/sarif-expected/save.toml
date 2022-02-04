@@ -1,15 +1,15 @@
 [general]
-    tags = ["warn"]
-    description = "Test warnings discovered by diKTat"
+    tags = ["warn", "sarif"]
+    description = "Test warnings discovered by diKTat, reading expected warnings from SARIF file"
+    suiteName = "Only Warnings: with SARIF format"
 
 [warn]
     # regular expression to detect tests
     testNameRegex = ".*Test.kt"
+    expectedWarningsFormat = "SARIF"
+    expectedWarningsFileName = "save-warnings.sarif"
     # diktat warnings have the following format: filename.kt:1:15: [WARN_NAME] my warning
     actualWarningsPattern="(\\w+\\..+):(\\d+):(\\d+): (\\[.*\\].*)"
-    lineCaptureGroup = 1
-    columnCaptureGroup = 2
-    messageCaptureGroup = 3
     fileNameCaptureGroupOut = 1
     lineCaptureGroupOut = 2
     columnCaptureGroupOut = 3

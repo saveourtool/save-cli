@@ -2,6 +2,7 @@ package org.cqfn.save.plugins.fix
 
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.myDeleteRecursively
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
@@ -27,6 +28,7 @@ import io.github.petertrr.diffutils.patch.Patch
 import io.github.petertrr.diffutils.text.DiffRowGenerator
 import okio.FileSystem
 import okio.Path
+import okio.Path.Companion.toPath
 
 import kotlin.random.Random
 import kotlinx.serialization.Serializable
@@ -50,13 +52,13 @@ class FixPlugin(
     useInternalRedirections,
     redirectTo,
 ) {
-    private val diffGenerator = DiffRowGenerator.create()
-        .showInlineDiffs(true)
-        .mergeOriginalRevised(false)
-        .inlineDiffByWord(false)
-        .oldTag { start -> if (start) "[" else "]" }
-        .newTag { start -> if (start) "<" else ">" }
-        .build()
+    private val diffGenerator = DiffRowGenerator(
+        showInlineDiffs = true,
+        mergeOriginalRevised = false,
+        inlineDiffByWord = false,
+        oldTag = { _, start -> if (start) "[" else "]" },
+        newTag = { _, start -> if (start) "<" else ">" },
+    )
 
     // fixme: consider refactoring under https://github.com/diktat-static-analysis/save/issues/156
     // fixme: should not be common for a class instance during https://github.com/diktat-static-analysis/save/issues/28
@@ -243,8 +245,8 @@ class FixPlugin(
         @Serializable(with = PathSerializer::class) val expected: Path
     ) : TestFiles {
         override fun withRelativePaths(root: Path) = copy(
-            test = test.relativeTo(root),
-            expected = expected.relativeTo(root),
+            test = test.createRelativePathToTheRoot(root).toPath(),
+            expected = expected.createRelativePathToTheRoot(root).toPath(),
         )
 
         companion object {
