@@ -67,6 +67,11 @@ In case you would like to have several plugins to work in your directory with sa
 ...
 ```
 
+## Save warnings DSL 
+![save-cli](https://user-images.githubusercontent.com/58667063/146390474-71e4921d-416b-4922-b2ea-894f71e491c3.jpg)
+You can read more about the `warn plugin` [here](save-plugins/warn-plugin/README.md)
+
+
 ## How to configure 
 SAVE has a command line interface that runs the framework and your executable. What you need is simply to configure the output of your static analyzer so SAVE will be able to
 check if the proper error was raised on the proper line of test code.
@@ -151,6 +156,9 @@ excludedTests = ["warn/chapter1/GarbageTest.kt", "warn/otherDir/NewTest.kt"], e.
 
 # command execution time for one test (milliseconds)
 timeOutMillis = 10000
+
+# language for tests
+language = "Kotlin"
 ```
 
 ## Executing specific tests
