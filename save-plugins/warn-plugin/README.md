@@ -3,7 +3,8 @@ Plugin that runs the provided executable and compares emitted warnings with expe
 Please note, that it is important for test resources to have specific keywords. For test file it should be `Test`.
 
 ### Examples
-If you don't like to read long readme file, you can simply check [examples](/examples/kotlin-diktat/warn).
+If you don't like to read long readme file, you can simply check [examples](/examples/kotlin-diktat/warn). 
+There are all available configurations that you need.
 
 ### Source files
 Test source files (input for SAVE) should have a comment line (use single-line commenting syntax of the target programming language for it)
@@ -81,14 +82,25 @@ execCmd = "./detekt"
 description = "My suite description"
 suiteName = "DocsCheck"
 language = "Kotlin"
-# warning is set inside the comment in code, `//` marks comment start in Java
+# if you are using IN_PLACE mode, this flag will be used to extract EXPECTED warnings from the file 
 expectedWarningsPattern = "// ;warn:(\\d+):(\\d+): (.*)" # (default value)
-# for multiline warning
+# for multiline warnings ONLY (if you are using IN_PLACE mode and multiline warnings)
 expectedWarningsMiddlePattern = "\\* (.*)"
 expectedWarningsEndPattern = "(.*)?\\*/"
 
 [warn]
+# extra execution flags that are added to the exec cmd
 execFlags = "--build-upon-default-config -i"
+
+# the format and place, where EXPECTED warnings should be put, for example:
+# SARIF: means that you put ALL your expected warnings into the special file with the name 'save-warnings.sarif'
+# (default) IN_PLACE: means that you need to put your expected warnings into the test resource (and they will be matched by expectedWarningsPattern)
+expectedWarningsFormat = "SARIF"
+
+# the format of actual warnings 
+# (default) PLAIN: means that your tool reports warnings in plain text that. Warnings will be extracted with actualWarningsPattern
+# SARIF: means that the output of the tool will be extracted with a SARIF format
+actualWarningsFormat = "SARIF"
 
 # e.g. `WARN - 10/14 - Class name is in incorrect case`
 # expected regex may allow an empty group for line number
@@ -104,7 +116,7 @@ columnCaptureGroup = 3 # (default value)
 # index of regex capture group for message text
 messageCaptureGroup = 4 # (default value)
 
-# for multiline warning
+# options that control the capture group for patterns of warnings to extract multiline warning
 messageCaptureGroupMiddle = 1 # (default value)
 messageCaptureGroupEnd = 1 # (default value)
 
