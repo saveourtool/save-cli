@@ -17,6 +17,7 @@ import okio.Path
 import okio.Path.Companion.toPath
 
 import kotlinx.serialization.Serializable
+import org.cqfn.save.core.logging.logWarn
 
 /**
  * Plugin that can be injected into SAVE during execution. Plugins accept contents of configuration file and then perform some work.
@@ -111,14 +112,14 @@ abstract class Plugin(
                             testFile == rawTestFileDir.toString()
                         }
                     } else {
-                        logDebug("Could not find the next test or directory: $testFile, check the path is correct.")
+                        logWarn("Could not find the next test or directory: $testFile, check the path is correct.")
                         false
                     }
                 }
             }.toList()
             val notFoundTests = testFiles.filter { it !in foundTests.map { foundTest -> foundTest.test.toString() } }
             if (notFoundTests.isNotEmpty()) {
-                logDebug("The following tests were not found: $notFoundTests. Try to make sure you have specified the correct relative path to the files.")
+                logWarn("The following tests were not found: $notFoundTests. Try to make sure you have specified the correct relative path to the files.")
             }
             return foundTests.asSequence()
         } else {

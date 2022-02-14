@@ -6,6 +6,7 @@ import org.cqfn.save.core.utils.runIf
 
 import okio.FileSystem
 import okio.Path
+import org.cqfn.save.core.logging.logWarn
 
 /**
  * Class that is capable of extracting [ExtraFlags] from a text line
@@ -40,7 +41,7 @@ class ExtraFlagsExtractor(private val generalConfig: GeneralConfig,
         .let(ExtraFlags::from)
         .also {
             if (it == ExtraFlags("", "")) {
-                logDebug("Line <$line> is matched by extraFlagsPattern <${generalConfig.runConfigPattern}>, but no flags have been extracted")
+                logWarn("Line <$line> is matched by extraFlagsPattern <${generalConfig.runConfigPattern}>, but no flags have been extracted")
             }
         }
 }

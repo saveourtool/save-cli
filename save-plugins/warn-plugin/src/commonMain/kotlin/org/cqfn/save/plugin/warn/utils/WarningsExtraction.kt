@@ -107,18 +107,19 @@ internal fun collectionSingleWarnings(
  */
 internal fun collectWarningsFromSarif(
     warnPluginConfig: WarnPluginConfig,
-    originalPath: Path,
     originalPaths: List<Path>,
     fs: FileSystem,
-    file: Path,
 ): List<Warning> {
     val sarifFileName = warnPluginConfig.expectedWarningsFileName!!
-    val sarif = fs.findAncestorDirContainingFile(originalPath, sarifFileName)?.let { it / sarifFileName }
+
+    // Since we have one .sarif file for all tests, just take the first of them as anchor for calculation of paths
+    val anchorTestFilePath = originalPaths.first()
+    val sarif = fs.findAncestorDirContainingFile(anchorTestFilePath, sarifFileName)?.let { it / sarifFileName }
         ?: throw PluginException(
-            "Could not find SARIF file with expected warnings for file $file. " +
+            "Could not find SARIF file with expected warnings for file $anchorTestFilePath. " +
                     "Please check if correct `expectedWarningsFormat` is set and if the file is present and called `$sarifFileName`."
         )
-    val topmostTestDirectory = fs.topmostTestDirectory(originalPath)
+    val topmostTestDirectory = fs.topmostTestDirectory(anchorTestFilePath)
     return Json.decodeFromString<SarifSchema210>(
         fs.readFile(sarif)
     )
