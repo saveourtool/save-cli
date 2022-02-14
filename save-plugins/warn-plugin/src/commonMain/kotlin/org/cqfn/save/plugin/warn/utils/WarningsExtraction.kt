@@ -98,10 +98,8 @@ internal fun collectionSingleWarnings(
 
 /**
  * @param warnPluginConfig
- * @param originalPath
  * @param originalPaths
  * @param fs
- * @param file
  * @return a list of warnings extracted from SARIF file for test [file]
  * @throws PluginException
  */

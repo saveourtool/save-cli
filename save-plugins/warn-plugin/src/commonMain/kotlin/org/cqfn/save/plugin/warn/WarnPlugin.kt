@@ -7,6 +7,7 @@ import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.logging.logDebug
+import org.cqfn.save.core.logging.logTrace
 import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.plugin.ExtraFlagsExtractor
 import org.cqfn.save.core.plugin.GeneralConfig
@@ -34,7 +35,6 @@ import okio.Path
 import kotlin.random.Random
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.cqfn.save.core.logging.logTrace
 
 private typealias WarningMap = Map<String, List<Warning>>
 
@@ -202,21 +202,19 @@ class WarnPlugin(
         warnPluginConfig: WarnPluginConfig,
         originalPaths: List<Path>,
         copyPaths: List<Path>
-    ): WarningMap {
-        return if (warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.SARIF) {
-            val sarifWarnings = collectWarningsFromSarif(warnPluginConfig, originalPaths, fs)
-            copyPaths.associate { copyPath ->
-                copyPath.name to sarifWarnings.filter { it.fileName == copyPath.name }
-            }
-        } else {
-            copyPaths.associate { copyPath ->
-                val warningsForCurrentPath =
+    ): WarningMap = if (warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.SARIF) {
+        val sarifWarnings = collectWarningsFromSarif(warnPluginConfig, originalPaths, fs)
+        copyPaths.associate { copyPath ->
+            copyPath.name to sarifWarnings.filter { it.fileName == copyPath.name }
+        }
+    } else {
+        copyPaths.associate { copyPath ->
+            val warningsForCurrentPath =
                     copyPath.collectExpectedWarningsWithLineNumbers(
                         warnPluginConfig,
                         generalConfig
                     )
-                copyPath.name to warningsForCurrentPath
-            }
+            copyPath.name to warningsForCurrentPath
         }
     }
 

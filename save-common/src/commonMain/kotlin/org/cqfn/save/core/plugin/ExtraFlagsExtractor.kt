@@ -1,12 +1,11 @@
 package org.cqfn.save.core.plugin
 
 import org.cqfn.save.core.files.readLines
-import org.cqfn.save.core.logging.logDebug
+import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.utils.runIf
 
 import okio.FileSystem
 import okio.Path
-import org.cqfn.save.core.logging.logWarn
 
 /**
  * Class that is capable of extracting [ExtraFlags] from a text line

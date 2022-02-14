@@ -1,14 +1,13 @@
 package org.cqfn.save.core.utils
 
 import org.cqfn.save.core.config.TestConfig
-import org.cqfn.save.core.logging.logDebug
+import org.cqfn.save.core.logging.logTrace
 import org.cqfn.save.core.plugin.ExtraFlags
 import org.cqfn.save.core.plugin.ExtraFlagsExtractor
 import org.cqfn.save.core.plugin.resolvePlaceholdersFrom
 
 import okio.Path
 import okio.Path.Companion.toPath
-import org.cqfn.save.core.logging.logTrace
 
 /**
  * FixMe: All plugins should use it for executing of commands in the future

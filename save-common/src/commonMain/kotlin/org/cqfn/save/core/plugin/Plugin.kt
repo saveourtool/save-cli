@@ -7,6 +7,7 @@ import org.cqfn.save.core.files.findDescendantDirectoriesBy
 import org.cqfn.save.core.files.parentsWithSelf
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logTrace
+import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.result.Ignored
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.PathSerializer
@@ -17,7 +18,6 @@ import okio.Path
 import okio.Path.Companion.toPath
 
 import kotlinx.serialization.Serializable
-import org.cqfn.save.core.logging.logWarn
 
 /**
  * Plugin that can be injected into SAVE during execution. Plugins accept contents of configuration file and then perform some work.
