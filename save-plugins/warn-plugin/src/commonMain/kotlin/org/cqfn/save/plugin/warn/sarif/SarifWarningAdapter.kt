@@ -11,6 +11,8 @@ import io.github.detekt.sarif4k.Run
 import io.github.detekt.sarif4k.SarifSchema210
 import okio.Path
 import okio.Path.Companion.toPath
+import org.cqfn.save.core.files.createRelativePathToTheRoot
+import org.cqfn.save.core.files.getCurrentDirectory
 
 /**
  * Convert this SARIF report to a list of [Warning]s.
@@ -84,5 +86,12 @@ private fun Location.extractFilePath(testRoot: Path?) = physicalLocation
             "If paths in SARIF report are absolute, testRoot is required to resolve them: " +
                     "couldn't convert path $it to relative"
         }
-        if (it.isAbsolute) it.relativeTo(testRoot!!) else it
+
+        if (it.isAbsolute) {
+            println("\n\n\n")
+            println("it ${it}\ntestRootPath ${testRoot!!}")
+            val res = it.createRelativePathToTheRoot(testRoot!!)
+            println("ABSOLUTE:\n ${res}")
+            res.toPath()
+        } else it
     }
