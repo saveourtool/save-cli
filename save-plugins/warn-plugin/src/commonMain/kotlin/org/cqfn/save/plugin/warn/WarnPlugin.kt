@@ -147,12 +147,10 @@ class WarnPlugin(
             return failTestResult(originalPaths, ex, execCmd)
         }
 
-        val actualWarningsMap = if (warnPluginConfig.actualWarningsFileName != null) {
+        val actualWarningsMap = warnPluginConfig.actualWarningsFileName?.let {
             val execResult = ExecutionResult(result.code, fs.readLines(warnPluginConfig.actualWarningsFileName.toPath()), result.stderr)
             collectActualWarningsWithLineNumbers(execResult, warnPluginConfig)
-        } else {
-            collectActualWarningsWithLineNumbers(result, warnPluginConfig)
-        }
+        } ?: collectActualWarningsWithLineNumbers(result, warnPluginConfig)
 
         val resultsChecker = ResultsChecker(
             expectedWarningsMap,
