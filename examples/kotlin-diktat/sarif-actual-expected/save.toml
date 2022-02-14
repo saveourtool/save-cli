@@ -1,0 +1,21 @@
+[general]
+    tags = ["warn", "sarif"]
+    description = "Test warnings discovered by diKTat, reading expected warnings from SARIF file"
+    suiteName = "Only Warnings: with SARIF format"
+
+[warn]
+    # regular expression to detect tests
+    testNameRegex = ".*Test.kt"
+    expectedWarningsFormat = "SARIF"
+    expectedWarningsFileName = "save-warnings-expected.sarif"
+    actualWarningsFormat = "SARIF"
+    actualWarningsFileName = "/Users/vladislav/IdeaProjects/save/examples/kotlin-diktat/sarif-actual-expected/save-warnings-actual.sarif"
+    # diktat warnings have the following format: filename.kt:1:15: [WARN_NAME] my warning
+    actualWarningsPattern="(\\w+\\..+):(\\d+):(\\d+): (\\[.*\\].*)"
+    fileNameCaptureGroupOut = 1
+    lineCaptureGroupOut = 2
+    columnCaptureGroupOut = 3
+    messageCaptureGroupOut = 4
+    exactWarningsMatch = false
+    warningTextHasColumn = true
+    warningTextHasLine = true
