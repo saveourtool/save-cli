@@ -218,6 +218,11 @@ fun Path.parentsWithSelf() = listOf(this) + this.parents().toList()
 expect fun FileSystem.myDeleteRecursively(path: Path)
 
 /**
+ * @return current working directory
+ */
+expect fun getWorkingDirectory(): Path
+
+/**
  * Create relative path from the current path to the root
  *
  * @param currentPath current path
@@ -240,5 +245,3 @@ private fun createRelativePathFromThisToTheRoot(currentPath: Path, rootPath: Pat
     }
     return relativePath + currentPath.name
 }
-
-expect fun getWorkingDirectory(): Path

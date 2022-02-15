@@ -9,20 +9,19 @@ import org.cqfn.save.core.logging.logTrace
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
-
 import platform.posix.FTW
 import platform.posix.FTW_DEPTH
+import platform.posix.PATH_MAX
+import platform.posix.getcwd
 import platform.posix.nftw
 import platform.posix.remove
 import platform.posix.stat
-import platform.posix.getcwd
-import platform.posix.PATH_MAX
 
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.allocArray
-import kotlinx.cinterop.staticCFunction
 import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.staticCFunction
 import kotlinx.cinterop.toKString
 
 actual val fs: FileSystem = FileSystem.SYSTEM
@@ -41,13 +40,12 @@ actual fun FileSystem.myDeleteRecursively(path: Path) {
     }, 64, FTW_DEPTH)
 }
 
-actual fun getWorkingDirectory(): Path {
-    return memScoped {
-        val cwd = allocArray<ByteVar>(PATH_MAX)
-        if (getcwd(cwd, PATH_MAX) != null) {
-            cwd.toKString().toPath()
-        } else {
-            throw IllegalArgumentException("Could not get current working directory")
-        }
+@Suppress("GENERIC_VARIABLE_WRONG_DECLARATION")
+actual fun getWorkingDirectory(): Path = memScoped {
+    val cwd = allocArray<ByteVar>(PATH_MAX)
+    if (getcwd(cwd, PATH_MAX) != null) {
+        cwd.toKString().toPath()
+    } else {
+        throw IllegalArgumentException("Could not get current working directory")
     }
 }

@@ -4,6 +4,7 @@
 
 package org.cqfn.save.plugin.warn.sarif
 
+import org.cqfn.save.core.files.getWorkingDirectory
 import org.cqfn.save.plugin.warn.utils.Warning
 
 import io.github.detekt.sarif4k.Location
@@ -11,9 +12,6 @@ import io.github.detekt.sarif4k.Run
 import io.github.detekt.sarif4k.SarifSchema210
 import okio.Path
 import okio.Path.Companion.toPath
-import org.cqfn.save.core.files.createRelativePathToTheRoot
-import org.cqfn.save.core.files.getCurrentDirectory
-import org.cqfn.save.core.files.getWorkingDirectory
 
 /**
  * Convert this SARIF report to a list of [Warning]s.
@@ -46,7 +44,7 @@ fun Run.toWarning(testRoot: Path?, testFiles: List<Path>): List<Warning> {
         // Location can have >1 elements, e.g., if the warning suggests a refactoring, that affects multiple files.
         val filePath = result.locations
             ?.singleOrNull()
-            ?.extractFilePath(testRoot).also { println("================================\nfilePath ${it}") }
+            ?.extractFilePath(testRoot).also { println("================================\nfilePath $it") }
         result to filePath
     }
         ?.filter { (_, filePath) ->
@@ -89,15 +87,18 @@ private fun Location.extractFilePath(testRoot: Path?) = physicalLocation
         }
 
         println("\n\n\n")
-        println("it ${it}\ntestRootPath ${testRoot!!}")
+        println("it $it\ntestRootPath ${testRoot!!}")
         println("getWorkingDirectory: ${getWorkingDirectory()}")
 
         if (it.isAbsolute) {
             // relativeTo method requires absolute paths for proper comparison
             val absoluteTestRootPath = if (!testRoot!!.isAbsolute) {
                 getWorkingDirectory().resolve(testRoot)
-            } else testRoot
-
+            } else {
+                testRoot
+            }
             it.relativeTo(absoluteTestRootPath)
-        } else it
+        } else {
+            it
+        }
     }

@@ -29,6 +29,4 @@ actual fun FileSystem.myDeleteRecursively(path: Path) {
     }
 }
 
-actual fun getWorkingDirectory(): Path {
-    return File("").absolutePath.toPath()
-}
+actual fun getWorkingDirectory(): Path = File("").absolutePath.toPath()
