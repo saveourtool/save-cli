@@ -112,7 +112,7 @@ abstract class Plugin(
                             testFile == rawTestFileDir.toString()
                         }
                     } else {
-                        logWarn("Could not find the next test or directory: $testFile, check the path is correct.")
+                        logDebug("Could not find the next test or directory: $testFile, check the path is correct.")
                         false
                     }
                 }

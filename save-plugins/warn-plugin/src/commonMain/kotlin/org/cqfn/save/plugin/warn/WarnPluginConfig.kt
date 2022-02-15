@@ -58,6 +58,7 @@ import kotlinx.serialization.UseSerializers
  * @property expectedWarningsFormat
  * @property actualWarningsFormat
  * @property expectedWarningsFileName
+ * @property actualWarningsFileName
  */
 @Serializable
 data class WarnPluginConfig(
@@ -88,6 +89,7 @@ data class WarnPluginConfig(
     val expectedWarningsFormat: ExpectedWarningsFormat? = null,
     val actualWarningsFormat: ActualWarningsFormat? = null,
     val expectedWarningsFileName: String? = null,
+    val actualWarningsFileName: String? = null,
 ) : PluginConfig {
     @Transient
     override val type = TestConfigSections.WARN
@@ -141,6 +143,7 @@ data class WarnPluginConfig(
             expectedWarningsFormat = expectedWarningsFormat ?: other.expectedWarningsFormat,
             actualWarningsFormat = actualWarningsFormat ?: other.actualWarningsFormat,
             expectedWarningsFileName = expectedWarningsFileName ?: other.expectedWarningsFileName,
+            actualWarningsFileName = actualWarningsFileName ?: other.actualWarningsFileName,
         ).also {
             it.configLocation = this.configLocation
         }
@@ -210,6 +213,7 @@ data class WarnPluginConfig(
             expectedWarningsFormat = expectedWarningsFormat,
             actualWarningsFormat = actualWarningsFormat,
             expectedWarningsFileName = expectedWarningsFileName,
+            actualWarningsFileName = actualWarningsFileName,
         ).also {
             it.configLocation = this.configLocation
         }
