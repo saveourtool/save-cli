@@ -107,6 +107,7 @@ internal fun collectWarningsFromSarif(
     warnPluginConfig: WarnPluginConfig,
     originalPaths: List<Path>,
     fs: FileSystem,
+    workingDirectory: Path,
 ): List<Warning> {
     val sarifFileName = warnPluginConfig.expectedWarningsFileName!!
 
@@ -121,5 +122,5 @@ internal fun collectWarningsFromSarif(
     return Json.decodeFromString<SarifSchema210>(
         fs.readFile(sarif)
     )
-        .toWarnings(topmostTestDirectory, originalPaths.adjustToCommonRoot(topmostTestDirectory))
+        .toWarnings(topmostTestDirectory, originalPaths.adjustToCommonRoot(topmostTestDirectory), workingDirectory)
 }

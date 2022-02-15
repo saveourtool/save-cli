@@ -22,11 +22,11 @@ import okio.Path.Companion.toPath
  * @param testRoot a root directory of test suite
  * @return a list of [Warning]s
  */
-fun SarifSchema210.toWarnings(testRoot: Path?, testFiles: List<Path>): List<Warning> {
+fun SarifSchema210.toWarnings(testRoot: Path?, testFiles: List<Path>, workingDirectory: Path): List<Warning> {
     // "Each run represents a single invocation of a single analysis tool, and the run has to describe the tool that produced it."
     // In case of SAVE this array will probably always have a single element.
     return runs.flatMap {
-        it.toWarning(testRoot, testFiles)
+        it.toWarning(testRoot, testFiles, workingDirectory)
     }
 }
 
@@ -36,7 +36,7 @@ fun SarifSchema210.toWarnings(testRoot: Path?, testFiles: List<Path>): List<Warn
  * @return a list of [Warning]s
  */
 @Suppress("TOO_LONG_FUNCTION", "AVOID_NULL_CHECKS")
-fun Run.toWarning(testRoot: Path?, testFiles: List<Path>): List<Warning> {
+fun Run.toWarning(testRoot: Path?, testFiles: List<Path>, workingDirectory: Path): List<Warning> {
     // "A result is an observation about the code."
     return results?.map { result ->
         // "array of location objects which almost always contains exactly one element"
@@ -44,7 +44,7 @@ fun Run.toWarning(testRoot: Path?, testFiles: List<Path>): List<Warning> {
         // Location can have >1 elements, e.g., if the warning suggests a refactoring, that affects multiple files.
         val filePath = result.locations
             ?.singleOrNull()
-            ?.extractFilePath(testRoot).also { println("================================\nfilePath $it") }
+            ?.extractFilePath(testRoot, workingDirectory).also { println("================================\nfilePath $it") }
         result to filePath
     }
         ?.filter { (_, filePath) ->
@@ -74,7 +74,7 @@ private fun Location.extractLineColumn(): Pair<Long?, Long?>? = physicalLocation
         it.startLine to it.startColumn
     }
 
-private fun Location.extractFilePath(testRoot: Path?) = physicalLocation
+private fun Location.extractFilePath(testRoot: Path?, workingDirectory: Path) = physicalLocation
     ?.artifactLocation
     ?.uri
     // assuming that all URIs for SAVE correspond to files
@@ -88,12 +88,12 @@ private fun Location.extractFilePath(testRoot: Path?) = physicalLocation
 
         println("\n\n\n")
         println("it $it\ntestRootPath ${testRoot!!}")
-        println("getWorkingDirectory: ${getWorkingDirectory()}")
+        println("workingDirectory: ${workingDirectory}")
 
         if (it.isAbsolute) {
             // relativeTo method requires absolute paths for proper comparison
             val absoluteTestRootPath = if (!testRoot!!.isAbsolute) {
-                getWorkingDirectory().resolve(testRoot)
+                workingDirectory.resolve(testRoot).normalized()
             } else {
                 testRoot
             }
