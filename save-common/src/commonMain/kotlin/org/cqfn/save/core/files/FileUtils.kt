@@ -240,3 +240,5 @@ private fun createRelativePathFromThisToTheRoot(currentPath: Path, rootPath: Pat
     }
     return relativePath + currentPath.name
 }
+
+expect fun getWorkingDirectory(): Path

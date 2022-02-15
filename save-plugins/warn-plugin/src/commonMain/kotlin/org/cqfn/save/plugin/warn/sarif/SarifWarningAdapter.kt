@@ -13,6 +13,7 @@ import okio.Path
 import okio.Path.Companion.toPath
 import org.cqfn.save.core.files.createRelativePathToTheRoot
 import org.cqfn.save.core.files.getCurrentDirectory
+import org.cqfn.save.core.files.getWorkingDirectory
 
 /**
  * Convert this SARIF report to a list of [Warning]s.
@@ -45,7 +46,7 @@ fun Run.toWarning(testRoot: Path?, testFiles: List<Path>): List<Warning> {
         // Location can have >1 elements, e.g., if the warning suggests a refactoring, that affects multiple files.
         val filePath = result.locations
             ?.singleOrNull()
-            ?.extractFilePath(testRoot)
+            ?.extractFilePath(testRoot).also { println("================================\nfilePath ${it}") }
         result to filePath
     }
         ?.filter { (_, filePath) ->
@@ -87,11 +88,16 @@ private fun Location.extractFilePath(testRoot: Path?) = physicalLocation
                     "couldn't convert path $it to relative"
         }
 
+        println("\n\n\n")
+        println("it ${it}\ntestRootPath ${testRoot!!}")
+        println("getWorkingDirectory: ${getWorkingDirectory()}")
+
         if (it.isAbsolute) {
-            println("\n\n\n")
-            println("it ${it}\ntestRootPath ${testRoot!!}")
-            val res = it.createRelativePathToTheRoot(testRoot!!)
-            println("ABSOLUTE:\n ${res}")
-            res.toPath()
+            // relativeTo method requires absolute paths for proper comparison
+            val absoluteTestRootPath = if (!testRoot!!.isAbsolute) {
+                getWorkingDirectory().resolve(testRoot)
+            } else testRoot
+
+            it.relativeTo(absoluteTestRootPath)
         } else it
     }

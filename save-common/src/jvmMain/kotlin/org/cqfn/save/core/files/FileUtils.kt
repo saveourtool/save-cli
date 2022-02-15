@@ -10,6 +10,8 @@ import org.cqfn.save.core.logging.logTrace
 
 import okio.FileSystem
 import okio.Path
+import okio.Path.Companion.toPath
+import java.io.File
 
 import java.nio.file.Files
 
@@ -25,4 +27,8 @@ actual fun FileSystem.myDeleteRecursively(path: Path) {
         logTrace("Attempt to delete file $it")
         Files.delete(it.toPath())
     }
+}
+
+actual fun getWorkingDirectory(): Path {
+    return File("").absolutePath.toPath()
 }
