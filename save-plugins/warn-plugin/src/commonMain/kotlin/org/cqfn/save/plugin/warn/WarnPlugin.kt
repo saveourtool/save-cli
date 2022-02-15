@@ -31,6 +31,7 @@ import org.cqfn.save.plugin.warn.utils.getLineNumber
 import io.github.detekt.sarif4k.SarifSchema210
 import okio.FileSystem
 import okio.Path
+import okio.Path.Companion.toPath
 
 import kotlin.random.Random
 import kotlinx.serialization.decodeFromString
@@ -138,7 +139,10 @@ class WarnPlugin(
             return failTestResult(originalPaths, ex, execCmd)
         }
 
-        val actualWarningsMap = collectActualWarningsWithLineNumbers(result, warnPluginConfig)
+        val actualWarningsMap = warnPluginConfig.actualWarningsFileName?.let {
+            val execResult = ExecutionResult(result.code, fs.readLines(warnPluginConfig.actualWarningsFileName.toPath()), result.stderr)
+            collectActualWarningsWithLineNumbers(execResult, warnPluginConfig)
+        } ?: collectActualWarningsWithLineNumbers(result, warnPluginConfig)
 
         val resultsChecker = ResultsChecker(
             expectedWarningsMap,
