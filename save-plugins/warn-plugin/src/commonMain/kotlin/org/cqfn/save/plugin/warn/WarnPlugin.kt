@@ -203,9 +203,9 @@ class WarnPlugin(
         originalPaths: List<Path>,
         copyPaths: List<Path>
     ): WarningMap = if (warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.SARIF) {
-        val sarifWarnings = collectWarningsFromSarif(warnPluginConfig, originalPaths, fs)
+        val warningsFromSarif = collectWarningsFromSarif(warnPluginConfig, originalPaths, fs)
         copyPaths.associate { copyPath ->
-            copyPath.name to sarifWarnings.filter { it.fileName == copyPath.name }
+            copyPath.name to warningsFromSarif.filter { it.fileName == copyPath.name }
         }
     } else {
         copyPaths.associate { copyPath ->

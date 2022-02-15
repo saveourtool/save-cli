@@ -26,7 +26,7 @@ val logType: GenericAtomicReference<LogType> = GenericAtomicReference(LogType.WA
 /**
  * Whether to add time stamps to log messages
  */
-var isTimeStampsEnabled: Boolean = true
+var isTimeStampsEnabled: Boolean = false
 
 /**
  * Log a message to the [stream] with timestamp and specific [level]
