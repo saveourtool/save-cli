@@ -1,7 +1,7 @@
 package org.cqfn.save.core.plugin
 
 import org.cqfn.save.core.files.readLines
-import org.cqfn.save.core.logging.logDebug
+import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.utils.runIf
 
 import okio.FileSystem
@@ -40,7 +40,7 @@ class ExtraFlagsExtractor(private val generalConfig: GeneralConfig,
         .let(ExtraFlags::from)
         .also {
             if (it == ExtraFlags("", "")) {
-                logDebug("Line <$line> is matched by extraFlagsPattern <${generalConfig.runConfigPattern}>, but no flags have been extracted")
+                logWarn("Line <$line> is matched by extraFlagsPattern <${generalConfig.runConfigPattern}>, but no flags have been extracted")
             }
         }
 }

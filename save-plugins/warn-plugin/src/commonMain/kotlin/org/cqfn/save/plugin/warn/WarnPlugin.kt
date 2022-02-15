@@ -7,6 +7,7 @@ import org.cqfn.save.core.files.createFile
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.logging.logDebug
+import org.cqfn.save.core.logging.logTrace
 import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.plugin.ExtraFlagsExtractor
 import org.cqfn.save.core.plugin.GeneralConfig
@@ -111,16 +112,7 @@ class WarnPlugin(
         // extracting all warnings from test resource files
         val copyPaths: List<Path> = createTestFiles(originalPaths, warnPluginConfig)
 
-        val expectedWarningsMap: WarningMap = copyPaths.zip(originalPaths).associate { (copyPath, originalPath) ->
-            val warningsForCurrentPath =
-                    copyPath.collectExpectedWarningsWithLineNumbers(
-                        warnPluginConfig,
-                        generalConfig,
-                        originalPaths,
-                        originalPath
-                    )
-            copyPath.name to warningsForCurrentPath
-        }
+        val expectedWarningsMap = collectExpectedWarnings(generalConfig, warnPluginConfig, originalPaths, copyPaths)
 
         if (expectedWarningsMap.isEmpty()) {
             warnMissingExpectedWarnings(warnPluginConfig, generalConfig, originalPaths)
@@ -175,7 +167,8 @@ class WarnPlugin(
     }
 
     private fun createTestFiles(paths: List<Path>, warnPluginConfig: WarnPluginConfig): List<Path> {
-        logDebug("Trying to create temp files for: $paths")
+        logDebug("Creating temp copy files of resources for WarnPlugin...")
+        logTrace("Trying to create temp files for: $paths")
         tmpDirName = "${WarnPlugin::class.simpleName!!}-${Random.nextInt()}"
         // don't think that it is really needed now
         val dirPath = constructPathForCopyOfTestFile(tmpDirName, paths[0]).parent!!
@@ -208,6 +201,27 @@ class WarnPlugin(
         )
     }.asSequence()
 
+    private fun collectExpectedWarnings(
+        generalConfig: GeneralConfig,
+        warnPluginConfig: WarnPluginConfig,
+        originalPaths: List<Path>,
+        copyPaths: List<Path>
+    ): WarningMap = if (warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.SARIF) {
+        val warningsFromSarif = collectWarningsFromSarif(warnPluginConfig, originalPaths, fs)
+        copyPaths.associate { copyPath ->
+            copyPath.name to warningsFromSarif.filter { it.fileName == copyPath.name }
+        }
+    } else {
+        copyPaths.associate { copyPath ->
+            val warningsForCurrentPath =
+                    copyPath.collectExpectedWarningsWithLineNumbers(
+                        warnPluginConfig,
+                        generalConfig
+                    )
+            copyPath.name to warningsForCurrentPath
+        }
+    }
+
     /**
      * method for getting expected warnings from test files:
      * 1) reading the file
@@ -217,16 +231,7 @@ class WarnPlugin(
     private fun Path.collectExpectedWarningsWithLineNumbers(
         warnPluginConfig: WarnPluginConfig,
         generalConfig: GeneralConfig,
-        originalPaths: List<Path>,
-        originalPath: Path,
     ): List<Warning> = when {
-        warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.SARIF -> collectWarningsFromSarif(
-            warnPluginConfig,
-            originalPath,
-            originalPaths,
-            fs,
-            this
-        )
         generalConfig.expectedWarningsEndPattern != null -> collectionMultilineWarnings(
             warnPluginConfig,
             generalConfig,
