@@ -19,6 +19,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import org.cqfn.save.core.files.getWorkingDirectory
 
 class SarifWarningAdapterTest {
     @Test
@@ -82,7 +83,7 @@ class SarifWarningAdapterTest {
         """.trimIndent()
         val sarifSchema210: SarifSchema210 = Json.decodeFromString(sarif)
 
-        val warnings = sarifSchema210.toWarnings("C:/dev/sarif".toPath(), emptyList())
+        val warnings = sarifSchema210.toWarnings("C:/dev/sarif".toPath(), emptyList(), getWorkingDirectory())
 
         logInfo("Converted warnings: $warnings")
         assertEquals(1, warnings.size)
@@ -106,7 +107,8 @@ class SarifWarningAdapterTest {
         val testRoot = "/workspace/tests".toPath()
         val warnings = sarifSchema210.toWarnings(
             testRoot,
-            listOf("/workspace/tests/suite2/foo.test".toPath()).adjustToCommonRoot(testRoot)
+            listOf("/workspace/tests/suite2/foo.test".toPath()).adjustToCommonRoot(testRoot),
+            getWorkingDirectory()
         )
 
         logInfo("Converted warnings: $warnings")
@@ -127,7 +129,8 @@ class SarifWarningAdapterTest {
         val testRoot = "/workspace/tests".toPath()
         val warnings = sarifSchema210.toWarnings(
             testRoot,
-            listOf("/workspace/tests/suite2/foo.test".toPath()).adjustToCommonRoot(testRoot)
+            listOf("/workspace/tests/suite2/foo.test".toPath()).adjustToCommonRoot(testRoot),
+            getWorkingDirectory()
         )
 
         logInfo("Converted warnings: $warnings")

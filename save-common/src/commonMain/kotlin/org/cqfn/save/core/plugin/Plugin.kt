@@ -119,7 +119,7 @@ abstract class Plugin(
             }.toList()
             val notFoundTests = testFiles.filter { it !in foundTests.map { foundTest -> foundTest.test.toString() } }
             if (notFoundTests.isNotEmpty()) {
-                logWarn("The following tests were not found: $notFoundTests. Try to make sure you have specified the correct relative path to the files.")
+                logDebug("The following tests were not found: $notFoundTests. Try to make sure you have specified the correct relative path to the files.")
             }
             return foundTests.asSequence()
         } else {

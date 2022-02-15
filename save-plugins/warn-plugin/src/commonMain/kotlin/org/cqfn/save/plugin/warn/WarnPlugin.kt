@@ -143,7 +143,7 @@ class WarnPlugin(
 
         val actualWarningsMap = warnPluginConfig.actualWarningsFileName?.let {
             val execResult = ExecutionResult(result.code, fs.readLines(warnPluginConfig.actualWarningsFileName.toPath()), result.stderr)
-            collectActualWarningsWithLineNumbers(execResult, warnPluginConfig)
+            collectActualWarningsWithLineNumbers(execResult, warnPluginConfig, workingDirectory)
         } ?: collectActualWarningsWithLineNumbers(result, warnPluginConfig, workingDirectory)
 
         val resultsChecker = ResultsChecker(
@@ -258,13 +258,13 @@ class WarnPlugin(
     private fun collectActualWarningsWithLineNumbers(
         result: ExecutionResult,
         warnPluginConfig: WarnPluginConfig,
-        workingDirectory: Path? = null,
+        workingDirectory: Path,
     ): WarningMap = when (warnPluginConfig.actualWarningsFormat) {
         ActualWarningsFormat.SARIF -> Json.decodeFromString<SarifSchema210>(
             result.stdout.joinToString("\n")
         )
             // setting emptyList() here instead of originalPaths to avoid invalid mapping
-            .toWarnings(testConfig.getRootConfig().directory, emptyList(), workingDirectory!!)
+            .toWarnings(testConfig.getRootConfig().directory, emptyList(), workingDirectory)
             .groupBy { it.fileName }
             .mapValues { (_, warning) -> warning.sortedBy { it.message } }
 
