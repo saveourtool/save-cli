@@ -7,6 +7,7 @@ import org.cqfn.save.core.files.findDescendantDirectoriesBy
 import org.cqfn.save.core.files.parentsWithSelf
 import org.cqfn.save.core.logging.logDebug
 import org.cqfn.save.core.logging.logTrace
+import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.result.Ignored
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.PathSerializer
@@ -118,7 +119,7 @@ abstract class Plugin(
             }.toList()
             val notFoundTests = testFiles.filter { it !in foundTests.map { foundTest -> foundTest.test.toString() } }
             if (notFoundTests.isNotEmpty()) {
-                logDebug("The following tests were not found: $notFoundTests. Try to make sure you have specified the correct relative path to the files.")
+                logWarn("The following tests were not found: $notFoundTests. Try to make sure you have specified the correct relative path to the files.")
             }
             return foundTests.asSequence()
         } else {

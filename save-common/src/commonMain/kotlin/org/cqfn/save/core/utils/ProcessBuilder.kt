@@ -105,7 +105,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
 
         val cmd = modifyCmd(command, directory, processBuilderInternal)
 
-        logDebug("Executing: $cmd with timeout $timeOutMillis")
+        logDebug("Executing: $cmd with timeout $timeOutMillis ms")
         val status = try {
             processBuilderInternal.exec(cmd, timeOutMillis)
         } catch (ex: ProcessTimeoutException) {
@@ -152,7 +152,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
         } else {
             command
         }
-        logTrace("Modifying cmd: $cdCmd")
+        logTrace("Modified cmd: $commandWithEcho")
         // Finally, make platform dependent adaptations
         return processBuilderInternal.prepareCmd(commandWithEcho)
     }
@@ -218,7 +218,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
                 }
             }
             val modifiedCommand = listOfCommands.joinToString(separator).trim(' ')
-            logTrace("Modify command:`$command` to `$modifiedCommand` because of `echo` on Windows add extra newlines")
+            logTrace("Additionally modify command:`$command` to `$modifiedCommand` because of `echo` on Windows add extra newlines")
             return modifiedCommand
         }
     }
