@@ -100,6 +100,7 @@ internal fun collectionSingleWarnings(
  * @param warnPluginConfig
  * @param originalPaths
  * @param fs
+ * @param workingDirectory initial working directory, when SAVE started
  * @return a list of warnings extracted from SARIF file for test [file]
  * @throws PluginException
  */
@@ -107,6 +108,7 @@ internal fun collectWarningsFromSarif(
     warnPluginConfig: WarnPluginConfig,
     originalPaths: List<Path>,
     fs: FileSystem,
+    workingDirectory: Path,
 ): List<Warning> {
     val sarifFileName = warnPluginConfig.expectedWarningsFileName!!
 
@@ -121,5 +123,5 @@ internal fun collectWarningsFromSarif(
     return Json.decodeFromString<SarifSchema210>(
         fs.readFile(sarif)
     )
-        .toWarnings(topmostTestDirectory, originalPaths.adjustToCommonRoot(topmostTestDirectory))
+        .toWarnings(topmostTestDirectory, originalPaths.adjustToCommonRoot(topmostTestDirectory), workingDirectory)
 }
