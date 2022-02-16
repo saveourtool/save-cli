@@ -1,5 +1,6 @@
 package org.cqfn.save.plugin.warn.sarif
 
+import org.cqfn.save.core.files.getWorkingDirectory
 import org.cqfn.save.core.logging.logInfo
 import org.cqfn.save.plugin.warn.utils.Warning
 
@@ -13,13 +14,13 @@ import io.github.detekt.sarif4k.SarifSchema210
 import io.github.detekt.sarif4k.Tool
 import io.github.detekt.sarif4k.ToolComponent
 import io.github.detekt.sarif4k.Version
+import okio.Path
 import okio.Path.Companion.toPath
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.cqfn.save.core.files.getWorkingDirectory
 
 class SarifWarningAdapterTest {
     @Test
@@ -136,6 +137,36 @@ class SarifWarningAdapterTest {
         logInfo("Converted warnings: $warnings")
         assertEquals(1, warnings.size)
     }
+
+    @Test
+    fun `should filter out warnings from other files - absolute paths, testRoot relative`() {
+        val warnings = extractWarningsWithAbsolutePathsFromSarif("tests".toPath())
+        assertEquals(1, warnings.size)
+    }
+
+    @Test
+    fun `should filter out warnings from other files - absolute paths, testRoot absolute`() {
+        val warnings = extractWarningsWithAbsolutePathsFromSarif("${getWorkingDirectory()}${Path.DIRECTORY_SEPARATOR}tests".toPath())
+        assertEquals(1, warnings.size)
+    }
+}
+
+private fun extractWarningsWithAbsolutePathsFromSarif(testRoot: Path): List<Warning> {
+    val workingDir = getWorkingDirectory()
+    val sp = Path.DIRECTORY_SEPARATOR
+    val sarifSchema210 = SarifSchema210(
+        version = Version.The210,
+        runs = listOf(
+            runOf(uri = "$workingDir${sp}tests${sp}suite1${sp}foo.test"),
+            runOf(uri = "$workingDir${sp}tests${sp}suite2${sp}foo.test"),
+        )
+    )
+
+    return sarifSchema210.toWarnings(
+        testRoot,
+        listOf("suite2${sp}foo.test".toPath()),
+        workingDir
+    ).also { logInfo("Converted warnings: $it") }
 }
 
 private fun runOf(message: Message = Message(), uri: String) = Run(

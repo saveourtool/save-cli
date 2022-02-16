@@ -46,6 +46,6 @@ actual fun getWorkingDirectory(): Path = memScoped {
     if (getcwd(cwd, PATH_MAX) != null) {
         cwd.toKString().toPath()
     } else {
-        throw IllegalArgumentException("Could not get current working directory")
+        throw IllegalStateException("Could not get current working directory")
     }
 }

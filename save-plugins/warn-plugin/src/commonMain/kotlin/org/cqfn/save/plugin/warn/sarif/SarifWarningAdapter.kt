@@ -4,7 +4,6 @@
 
 package org.cqfn.save.plugin.warn.sarif
 
-import org.cqfn.save.core.files.getWorkingDirectory
 import org.cqfn.save.plugin.warn.utils.Warning
 
 import io.github.detekt.sarif4k.Location
@@ -20,9 +19,14 @@ import okio.Path.Companion.toPath
  * [testFiles] should be relative to test root, then URIs from SARIF will be trimmed too and matched against [testFiles].
  * Regarding relative paths in SARIF see [this comment](https://github.com/microsoft/sarif-vscode-extension/issues/294#issuecomment-657753955).
  * @param testRoot a root directory of test suite
+ * @param workingDirectory initial working directory, when SAVE started
  * @return a list of [Warning]s
  */
-fun SarifSchema210.toWarnings(testRoot: Path?, testFiles: List<Path>, workingDirectory: Path): List<Warning> {
+fun SarifSchema210.toWarnings(
+    testRoot: Path?,
+    testFiles: List<Path>,
+    workingDirectory: Path
+): List<Warning> {
     // "Each run represents a single invocation of a single analysis tool, and the run has to describe the tool that produced it."
     // In case of SAVE this array will probably always have a single element.
     return runs.flatMap {
@@ -33,10 +37,15 @@ fun SarifSchema210.toWarnings(testRoot: Path?, testFiles: List<Path>, workingDir
 /**
  * @param testRoot a root directory of test suite
  * @param testFiles if this list is not empty, then results from SARIF will be filtered to match paths from [testFiles].
+ * @param workingDirectory initial working directory, when SAVE started
  * @return a list of [Warning]s
  */
 @Suppress("TOO_LONG_FUNCTION", "AVOID_NULL_CHECKS")
-fun Run.toWarning(testRoot: Path?, testFiles: List<Path>, workingDirectory: Path): List<Warning> {
+fun Run.toWarning(
+    testRoot: Path?,
+    testFiles: List<Path>,
+    workingDirectory: Path
+): List<Warning> {
     // "A result is an observation about the code."
     return results?.map { result ->
         // "array of location objects which almost always contains exactly one element"
@@ -74,6 +83,7 @@ private fun Location.extractLineColumn(): Pair<Long?, Long?>? = physicalLocation
         it.startLine to it.startColumn
     }
 
+@Suppress("TOO_MANY_LINES_IN_LAMBDA")
 private fun Location.extractFilePath(testRoot: Path?, workingDirectory: Path) = physicalLocation
     ?.artifactLocation
     ?.uri
@@ -88,11 +98,13 @@ private fun Location.extractFilePath(testRoot: Path?, workingDirectory: Path) = 
 
         println("\n\n\n")
         println("it $it\ntestRootPath ${testRoot!!}")
-        println("workingDirectory: ${workingDirectory}")
+        println("workingDirectory: $workingDirectory")
 
         if (it.isAbsolute) {
-            // relativeTo method requires absolute paths for proper comparison
             val absoluteTestRootPath = if (!testRoot!!.isAbsolute) {
+                // relativeTo method requires absolute paths for proper comparison,
+                // so we use such trick, to calculate absolute path of testRoot:
+                // get initial working directory + resolve it regarding relative path to the testRoot = absolute path of the testRoot
                 workingDirectory.resolve(testRoot).normalized()
             } else {
                 testRoot

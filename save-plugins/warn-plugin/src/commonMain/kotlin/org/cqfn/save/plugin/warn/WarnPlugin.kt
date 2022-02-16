@@ -4,6 +4,7 @@ import org.cqfn.save.core.config.ActualWarningsFormat
 import org.cqfn.save.core.config.ExpectedWarningsFormat
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.files.getWorkingDirectory
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.logging.logDebug
@@ -36,7 +37,6 @@ import okio.Path.Companion.toPath
 import kotlin.random.Random
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.cqfn.save.core.files.getWorkingDirectory
 
 private typealias WarningMap = Map<String, List<Warning>>
 
@@ -112,7 +112,10 @@ class WarnPlugin(
     ): Sequence<TestResult> {
         // extracting all warnings from test resource files
         val copyPaths: List<Path> = createTestFiles(originalPaths, warnPluginConfig)
-        // calculate current work dir, which will be needed for SARIF mode
+
+        // calculate current working dir now, which will be used in SARIF mode later,
+        // because during command execution in PB we step out to the different directories,
+        // and current directory will be lost
         val workingDirectory = getWorkingDirectory()
         val expectedWarningsMap = collectExpectedWarnings(generalConfig, warnPluginConfig, originalPaths, copyPaths, workingDirectory)
 

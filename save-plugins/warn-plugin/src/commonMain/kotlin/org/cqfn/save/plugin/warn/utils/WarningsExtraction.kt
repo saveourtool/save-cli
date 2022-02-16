@@ -100,6 +100,7 @@ internal fun collectionSingleWarnings(
  * @param warnPluginConfig
  * @param originalPaths
  * @param fs
+ * @param workingDirectory initial working directory, when SAVE started
  * @return a list of warnings extracted from SARIF file for test [file]
  * @throws PluginException
  */
