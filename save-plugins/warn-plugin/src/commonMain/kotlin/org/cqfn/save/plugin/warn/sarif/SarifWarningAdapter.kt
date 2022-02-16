@@ -97,8 +97,9 @@ private fun Location.extractFilePath(testRoot: Path?, workingDirectory: Path) = 
         }
         if (it.isAbsolute) {
             val absoluteTestRootPath = if (!testRoot!!.isAbsolute) {
-                // relativeTo method requires absolute paths for proper comparison,
-                // so we use such trick, to calculate absolute path of testRoot:
+                // relativeTo method requires paths, which contains some root for proper comparison,
+                // i.e. simple name couldn't be compared with path: `/some/nested/path` and `path`
+                // so we use following trick, to calculate absolute path of testRoot:
                 // get initial working directory + resolve it regarding relative path to the testRoot = absolute path of the testRoot
                 workingDirectory.resolve(testRoot).normalized()
             } else {
