@@ -53,7 +53,7 @@ fun Run.toWarning(
         // Location can have >1 elements, e.g., if the warning suggests a refactoring, that affects multiple files.
         val filePath = result.locations
             ?.singleOrNull()
-            ?.extractFilePath(testRoot, workingDirectory).also { println("================================\nfilePath $it") }
+            ?.extractFilePath(testRoot, workingDirectory)
         result to filePath
     }
         ?.filter { (_, filePath) ->
@@ -95,11 +95,6 @@ private fun Location.extractFilePath(testRoot: Path?, workingDirectory: Path) = 
             "If paths in SARIF report are absolute, testRoot is required to resolve them: " +
                     "couldn't convert path $it to relative"
         }
-
-        println("\n\n\n")
-        println("it $it\ntestRootPath ${testRoot!!}")
-        println("workingDirectory: $workingDirectory")
-
         if (it.isAbsolute) {
             val absoluteTestRootPath = if (!testRoot!!.isAbsolute) {
                 // relativeTo method requires absolute paths for proper comparison,
