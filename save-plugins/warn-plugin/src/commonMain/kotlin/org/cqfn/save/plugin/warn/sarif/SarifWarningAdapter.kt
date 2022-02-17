@@ -103,15 +103,18 @@ private fun Location.extractFilePath(testRoot: Path?, workingDirectory: Path) = 
             "If paths in SARIF report are absolute, testRoot is required to resolve them: " +
                     "couldn't convert path $it to relative"
         }
+        val adjustedTestRoot = if (isCurrentOsWindows()) {
+            testRoot!!.toString().replace("/", "\\").toPath()
+        } else testRoot!!
         if (it.isAbsolute) {
-            val absoluteTestRootPath = if (!testRoot!!.isAbsolute) {
+            val absoluteTestRootPath = if (!adjustedTestRoot.isAbsolute) {
                 // relativeTo method requires paths, which contains some root for proper comparison,
                 // i.e. simple name couldn't be compared with path: `/some/nested/path` and `path`
                 // so we use following trick, to calculate absolute path of testRoot:
                 // get initial working directory + resolve it regarding relative path to the testRoot = absolute path of the testRoot
-                workingDirectory.resolve(testRoot).normalized()
+                workingDirectory.resolve(adjustedTestRoot).normalized()
             } else {
-                testRoot
+                adjustedTestRoot
             }
             it.relativeTo(absoluteTestRootPath)
         } else {
