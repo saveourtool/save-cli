@@ -22,6 +22,8 @@ import kotlin.test.assertEquals
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
+private val sp = Path.DIRECTORY_SEPARATOR
+
 class SarifWarningAdapterTest {
     @Test
     @Suppress("TOO_LONG_FUNCTION")
@@ -105,10 +107,10 @@ class SarifWarningAdapterTest {
             )
         )
 
-        val testRoot = "/workspace/tests".toPath()
+        val testRoot = "${sp}workspace${sp}tests".toPath()
         val warnings = sarifSchema210.toWarnings(
             testRoot,
-            listOf("/workspace/tests/suite2/foo.test".toPath()).adjustToCommonRoot(testRoot),
+            listOf("${sp}workspace${sp}tests${sp}suite2${sp}foo.test".toPath()).adjustToCommonRoot(testRoot),
             getWorkingDirectory()
         )
 
@@ -127,10 +129,10 @@ class SarifWarningAdapterTest {
             )
         )
 
-        val testRoot = "/workspace/tests".toPath()
+        val testRoot = "${sp}workspace${sp}tests".toPath()
         val warnings = sarifSchema210.toWarnings(
             testRoot,
-            listOf("/workspace/tests/suite2/foo.test".toPath()).adjustToCommonRoot(testRoot),
+            listOf("${sp}workspace${sp}tests${sp}suite2${sp}foo.test".toPath()).adjustToCommonRoot(testRoot),
             getWorkingDirectory()
         )
 
@@ -146,14 +148,13 @@ class SarifWarningAdapterTest {
 
     @Test
     fun `should filter out warnings from other files - absolute paths, testRoot absolute`() {
-        val warnings = extractWarningsWithAbsolutePathsFromSarif("${getWorkingDirectory()}${Path.DIRECTORY_SEPARATOR}tests".toPath())
+        val warnings = extractWarningsWithAbsolutePathsFromSarif("${getWorkingDirectory()}${sp}tests".toPath())
         assertEquals(1, warnings.size)
     }
 }
 
 private fun extractWarningsWithAbsolutePathsFromSarif(testRoot: Path): List<Warning> {
     val workingDir = getWorkingDirectory()
-    val sp = Path.DIRECTORY_SEPARATOR
     val sarifSchema210 = SarifSchema210(
         version = Version.The210,
         runs = listOf(
