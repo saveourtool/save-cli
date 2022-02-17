@@ -4,6 +4,7 @@
 
 package org.cqfn.save.plugin.warn.sarif
 
+import org.cqfn.save.core.utils.isCurrentOsWindows
 import org.cqfn.save.plugin.warn.utils.Warning
 
 import io.github.detekt.sarif4k.Location
@@ -89,6 +90,13 @@ private fun Location.extractFilePath(testRoot: Path?, workingDirectory: Path) = 
     ?.uri
     // assuming that all URIs for SAVE correspond to files
     ?.dropFileProtocol()
+    ?.let {
+        if (isCurrentOsWindows()) {
+            it.replace("/", "\\")
+        } else {
+            it
+        }
+    }
     ?.toPath()
     ?.let {
         require(!(it.isAbsolute && testRoot == null)) {
