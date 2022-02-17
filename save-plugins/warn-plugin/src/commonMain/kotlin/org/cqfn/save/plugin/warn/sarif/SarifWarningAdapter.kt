@@ -105,7 +105,9 @@ private fun Location.extractFilePath(testRoot: Path?, workingDirectory: Path) = 
         }
         val adjustedTestRoot = if (isCurrentOsWindows()) {
             testRoot!!.toString().replace("/", "\\").toPath()
-        } else testRoot!!
+        } else {
+            testRoot!!
+        }
         if (it.isAbsolute) {
             val absoluteTestRootPath = if (!adjustedTestRoot.isAbsolute) {
                 // relativeTo method requires paths, which contains some root for proper comparison,
