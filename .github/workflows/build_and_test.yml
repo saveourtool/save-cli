@@ -15,7 +15,7 @@ jobs:
         os: [ ubuntu-latest, macos-latest ]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: true
       - name: Set up JDK 11
@@ -48,7 +48,7 @@ jobs:
 
       - name: Upload gradle reports
         if: ${{ always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: gradle-reports-${{ matrix.os }}
           path: '**/build/reports/'
@@ -63,7 +63,7 @@ jobs:
     name: Build and test on Win
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: true
       - name: Set up JDK 11
@@ -95,7 +95,7 @@ jobs:
             enabledExecutables=debug
       - name: Upload gradle reports
         if: ${{ always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: gradle-reports-windows-latest
           path: '**/build/reports/'
