@@ -57,7 +57,7 @@ jobs:
         uses: codecov/codecov-action@v2
         with:
           flags: unittests
-          fail_ci_if_error: true # optional (default = false)
+          fail_ci_if_error: false # optional (default = false)
 
   build_and_test_win:
     name: Build and test on Win
