@@ -1,7 +1,7 @@
 package org.cqfn.save.core.utils
 
 import org.cqfn.save.core.config.TestConfig
-import org.cqfn.save.core.logging.logDebug
+import org.cqfn.save.core.logging.logTrace
 import org.cqfn.save.core.plugin.ExtraFlags
 import org.cqfn.save.core.plugin.ExtraFlagsExtractor
 import org.cqfn.save.core.plugin.resolvePlaceholdersFrom
@@ -78,7 +78,7 @@ abstract class CmdExecutorBase(
             "$testRootPath${getWildCardInDirectoryMode()}"
         } ?: copyPaths.joinToString(separator = getBatchSeparator())
 
-        logDebug("Constructed file name for execution for warn plugin: $fileNamesForExecCmd")
+        logTrace("Constructed file names for execution for warn plugin: $fileNamesForExecCmd")
 
         return fileNamesForExecCmd
     }

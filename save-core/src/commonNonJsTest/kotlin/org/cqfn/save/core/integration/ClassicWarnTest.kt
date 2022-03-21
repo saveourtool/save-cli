@@ -92,6 +92,7 @@ class ClassicWarnTest {
     }
 
     @Test
+    @Ignore  // https://github.com/analysis-dev/save/issues/333
     fun `executing warn plugin on save-toml file in directory`() {
         runTestsWithDiktat(
             listOf(

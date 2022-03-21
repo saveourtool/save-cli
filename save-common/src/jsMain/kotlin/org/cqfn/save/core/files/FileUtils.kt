@@ -20,3 +20,5 @@ actual val fs: FileSystem by lazy {
 }
 
 actual fun FileSystem.myDeleteRecursively(path: Path): Unit = error("Not implemented for JS")
+
+actual fun getWorkingDirectory(): Path = error("Not implemented for JS")

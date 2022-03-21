@@ -14,11 +14,11 @@ import org.cqfn.save.plugin.warn.WarnPluginConfig
 import org.cqfn.save.plugins.fix.FixPluginConfig
 import org.cqfn.save.plugins.fixandwarn.FixAndWarnPluginConfig
 
-import com.akuleshov7.ktoml.KtomlConf
-import com.akuleshov7.ktoml.exceptions.KtomlException
+import com.akuleshov7.ktoml.TomlConfig
+import com.akuleshov7.ktoml.exceptions.TomlDecodingException
 import com.akuleshov7.ktoml.file.TomlFileReader
 import com.akuleshov7.ktoml.parsers.TomlParser
-import com.akuleshov7.ktoml.parsers.node.TomlTable
+import com.akuleshov7.ktoml.tree.TomlTable
 import okio.FileSystem
 import okio.Path
 
@@ -58,7 +58,7 @@ private inline fun <reified T : PluginConfig> Path.createPluginConfig(
         .apply {
             configLocation = this@createPluginConfig
         }
-} catch (e: KtomlException) {
+} catch (e: TomlDecodingException) {
     logError(
         "Plugin extraction failed for $this and [$pluginSectionName] section." +
                 " This file has incorrect toml format or missing section [$pluginSectionName]." +
@@ -85,8 +85,8 @@ fun createPluginConfigListFromToml(testConfigPath: Path, fs: FileSystem): List<P
  * @param fs FileSystem for file reading
  * @return all top level table nodes
  */
-fun getTopLevelTomlTables(testConfigPath: Path, fs: FileSystem): List<TomlTable> = TomlParser(KtomlConf())
-    .parseStringsToTomlTree(fs.readLines(testConfigPath), KtomlConf())
+fun getTopLevelTomlTables(testConfigPath: Path, fs: FileSystem): List<TomlTable> = TomlParser(TomlConfig())
+    .parseStringsToTomlTree(fs.readLines(testConfigPath), TomlConfig())
     .children
     .filterIsInstance<TomlTable>()
     .filter { !it.isSynthetic }

@@ -74,7 +74,7 @@ fun createConfigFromArgs(args: Array<String>): SaveProperties {
     }
     val configFromCli = SaveProperties(args)
     tryToUpdateDebugLevel(configFromCli)
-    logTrace("Properties after parsed command line args:\n${configFromCli.getFields()}")
+    logTrace("Properties after parsed command line arguments:\n${configFromCli.getFields()}")
     // reading configuration from the properties file
     val testFiles = configFromCli.testFiles
     if (!testFiles.isNullOrEmpty() && !fs.exists(testFiles.first().toPath())) {
