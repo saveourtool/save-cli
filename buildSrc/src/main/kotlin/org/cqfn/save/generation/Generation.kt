@@ -147,7 +147,7 @@ fun Project.generateConfigOptions(destination: File) {
  */
 fun generateSaveProperties(jsonObject: Map<String, Option>, destination: File) {
     val builder = FileSpec.builder("org.cqfn.save.core.config", "SaveProperties")
-    builder.addComment(autoGenerationComment)
+    builder.addFileComment(autoGenerationComment)
     builder.addImport("kotlinx.cli", "ArgParser")
     builder.addImport("kotlinx.cli", "ArgType")
     builder.addImport("kotlinx.cli", "optional")
