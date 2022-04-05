@@ -27,9 +27,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.konan
-          key: ${{ runner.os }}-gradle-konan
+          key: ${{ runner.os }}-gradle-konan-1.6.20
           restore-keys: |
-            ${{ runner.os }}-gradle-konan
+            ${{ runner.os }}-gradle-konan-1.6.20
       - uses: burrunan/gradle-cache-action@v1
         with:
           gradle-version: wrapper
