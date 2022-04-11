@@ -7,9 +7,7 @@ on:
 
 jobs:
   detekt_check:
-    runs-on: ubuntu-20.04
-    env:
-      GRADLE_OPTS: -Dorg.gradle.daemon=false
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
@@ -20,11 +18,11 @@ jobs:
         with:
           java-version: 11
           distribution: zulu
-      - uses: burrunan/gradle-cache-action@v1
+      - uses: gradle/gradle-build-action@v2
         with:
           gradle-version: wrapper
-          # additional files to calculate key for dependency cache
-          gradle-dependencies-cache-key: |
-            buildSrc/**/Versions.kt
-      - name: Run gradle command
-        run: ./gradlew detektAll --build-cache
+          arguments: |
+            detektAll
+            --build-cache
+            -PgprUser=${{ github.actor }}
+            -PgprKey=${{ secrets.GITHUB_TOKEN }}
