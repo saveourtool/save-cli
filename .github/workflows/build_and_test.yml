@@ -45,8 +45,8 @@ jobs:
             detekt.multiplatform.disabled=true
             disableRedundantTargets=true
             enabledExecutables=debug
-            gpr.user=${{ github.actor }}
-            gpr.key=${{ secrets.GITHUB_TOKEN }}
+            gprUser=${{ github.actor }}
+            gprKey=${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload gradle reports
         if: ${{ always() }}
