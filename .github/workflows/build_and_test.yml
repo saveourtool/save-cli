@@ -54,7 +54,7 @@ jobs:
           path: '**/build/reports/'
       - name: Code coverage report
         if: ${{ runner.os == 'Linux' }}
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
           flags: unittests
           fail_ci_if_error: false # optional (default = false)
