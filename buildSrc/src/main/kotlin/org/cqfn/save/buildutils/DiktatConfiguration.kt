@@ -19,6 +19,7 @@ fun Project.configureDiktat() {
     apply<DiktatGradlePlugin>()
     configure<DiktatExtension> {
         diktatConfigFile = rootProject.file("diktat-analysis.yml")
+        githubActions = findProperty("diktat.githubActions")?.toString()?.toBoolean() ?: false
         inputs {
             if (path == rootProject.path) {
                 include(
