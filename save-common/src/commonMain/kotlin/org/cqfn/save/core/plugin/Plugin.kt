@@ -100,8 +100,8 @@ abstract class Plugin(
             .filterNot { fs.metadata(it.test).isDirectory }
 
         // fixme: move this filtering on higher level under https://github.com/diktat-static-analysis/save/issues/336
-        val existingTestFiles = testFiles.map {
-            it.takeIf { fs.exists(it.toPath()) }
+        val existingTestFiles = testFiles.map { file ->
+            file.takeIf { fs.exists(it.toPath()) }
         }
         return if (testFiles.isNotEmpty()) {
             val foundTests = rawTestFiles.filter { rawTestFile ->
@@ -116,7 +116,7 @@ abstract class Plugin(
                     }
                 }
             }.toList()
-            val notFoundTests = testFiles.filter { it !in foundTests.map { foundTest -> foundTest.test.toString() } }
+            val notFoundTests = testFiles.filter { testFile -> testFile !in foundTests.map { foundTest -> foundTest.test.toString() } }
             if (notFoundTests.isNotEmpty()) {
                 logDebug("The following tests were not found: $notFoundTests. Try to make sure you have specified the correct relative path to the files.")
             }

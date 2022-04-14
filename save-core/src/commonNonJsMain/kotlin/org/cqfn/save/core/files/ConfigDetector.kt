@@ -84,7 +84,7 @@ class ConfigDetector(private val fs: FileSystem) {
 
     private fun getTestConfigFromSingleTestFile(file: Path) = file
         .parents()
-        .mapNotNull { it.findChildByOrNull { it.isSaveTomlConfig() } }
+        .mapNotNull { directory -> directory.findChildByOrNull { it.isSaveTomlConfig() } }
         .firstOrNull()
         ?.let { discoverConfigWithParents(it) }
         .also { logDebug("Processing test config for a single test file: $file") }

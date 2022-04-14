@@ -79,10 +79,10 @@ private fun Location.extractFilePath(testRoot: Path?) = physicalLocation
     // assuming that all URIs for SAVE correspond to files
     ?.dropFileProtocol()
     ?.toPath()
-    ?.let {
-        require(!(it.isAbsolute && testRoot == null)) {
+    ?.let { path ->
+        require(!(path.isAbsolute && testRoot == null)) {
             "If paths in SARIF report are absolute, testRoot is required to resolve them: " +
-                    "couldn't convert path $it to relative"
+                    "couldn't convert path $path to relative"
         }
-        if (it.isAbsolute) it.relativeTo(testRoot!!) else it
+        if (path.isAbsolute) path.relativeTo(testRoot!!) else path
     }

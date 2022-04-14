@@ -28,11 +28,10 @@ class ExtraFlagsExtractor(private val generalConfig: GeneralConfig,
      * @param line line from which [ExtraFlags] should be extracted
      * @return [ExtraFlags] or null if no match occurred
      */
-    @Suppress("COMPACT_OBJECT_INITIALIZATION")  // https://github.com/cqfn/diKTat/issues/1043
     internal fun extractExtraFlagsFrom(line: String) = line
         .split(",", ", ")
-        .associate {
-            val pair = it.split("=", limit = 2).map {
+        .associate { part ->
+            val pair = part.split("=", limit = 2).map {
                 it.replace("\\=", "=")
             }
             pair.first() to pair.last()

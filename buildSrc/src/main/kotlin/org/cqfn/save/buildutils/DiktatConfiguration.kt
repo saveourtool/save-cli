@@ -6,9 +6,11 @@ package org.cqfn.save.buildutils
 
 import org.cqfn.diktat.plugin.gradle.DiktatExtension
 import org.cqfn.diktat.plugin.gradle.DiktatGradlePlugin
+import org.cqfn.diktat.plugin.gradle.DiktatJavaExecTaskBase
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.withType
 
 /**
  * Applies diktat gradle plugin and configures diktat for [this] project
@@ -18,40 +20,24 @@ fun Project.configureDiktat() {
     configure<DiktatExtension> {
         diktatConfigFile = rootProject.file("diktat-analysis.yml")
         inputs {
-            include("src/**/*.kt", "*.kts", "src/**/*.kts")
-            exclude("$projectDir/build/**")
+            if (path == rootProject.path) {
+                include(
+                    "$rootDir/buildSrc/src/**/*.kt",
+                    "$rootDir/buildSrc/**/*.kts",
+                    "$rootDir/*.kts"
+                )
+                exclude("$rootDir/build", "$rootDir/buildSrc/build")
+            } else {
+                include("src/**/*.kt", "*.kts", "src/**/*.kts")
+                exclude("$projectDir/build/**")
+            }
         }
     }
 }
 
-/**
- * Creates unified tasks to run diktat on all projects
- */
-fun Project.createDiktatTask() {
-    if (this == rootProject) {
-        // apply diktat to buildSrc
-        apply<DiktatGradlePlugin>()
-        configure<DiktatExtension> {
-            diktatConfigFile = rootProject.file("diktat-analysis.yml")
-            inputs {
-                include(
-                    "$rootDir/buildSrc/src/**/*.kt",
-                    "$rootDir/buildSrc/src/**/*.kts",
-                    "$rootDir/*.kts",
-                    "$rootDir/buildSrc/*.kts"
-                )
-                exclude("$rootDir/build", "$rootDir/buildSrc/build")
-            }
-        }
-    }
-    tasks.register("diktatCheckAll") {
-        allprojects {
-            tasks.findByName("diktatCheck")?.let { this@register.dependsOn(it) }
-        }
-    }
-    tasks.register("diktatFixAll") {
-        allprojects {
-            tasks.findByName("diktatFix")?.let { this@register.dependsOn(it) }
-        }
+private fun Project.fixDiktatTask() {
+    tasks.withType<DiktatJavaExecTaskBase>().configureEach {
+        // https://github.com/analysis-dev/diktat/issues/1269
+        systemProperty("user.home", rootDir.toString())
     }
 }

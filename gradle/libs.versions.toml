@@ -2,7 +2,7 @@
 kotlin = "1.6.10"
 okio = "3.0.0"
 serialization = "1.3.2"
-diktat = "1.0.2"
+diktat = "1.1.0"
 kotlinx-cli = "0.3.4"
 kotlinx-datetime = "0.3.2"
 kotlinx-coroutines = "1.6.0-native-mt"
@@ -32,3 +32,4 @@ ktoml-core = { module = "com.akuleshov7:ktoml-core", version.ref = "ktoml" }
 ktoml-file = { module = "com.akuleshov7:ktoml-file", version.ref = "ktoml" }
 multiplatform-diff = { module = "io.github.petertrr:kotlin-multiplatform-diff", version.ref = "multiplatform-diff" }
 square-kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
+diktat-gradle-plugin = { module = "org.cqfn.diktat:diktat-gradle-plugin", version.ref = "diktat" }
