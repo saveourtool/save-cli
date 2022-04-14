@@ -84,6 +84,7 @@ kotlin {
 
     tasks.withType<Test>().configureEach {
         dependsOn(":save-core:downloadTestResources")
+        dependsOn(":save-core:downloadOldTestResources")
     }
 
     // disable building of some binaries to speed up build

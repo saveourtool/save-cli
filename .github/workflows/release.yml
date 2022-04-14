@@ -21,13 +21,13 @@ jobs:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           # release workflow should have access to all tags
           fetch-depth: 0
           submodules: true
       - name: Set up JDK 11
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: 11
           distribution: zulu
@@ -51,7 +51,7 @@ jobs:
         run: git status
       - name: Upload artifact
         id: upload_artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: save-cli-${{ runner.os }}
           path: save-cli/build/bin/**/releaseExecutable/*
@@ -65,7 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           path: tmpFolder
       - name: Create Github Release

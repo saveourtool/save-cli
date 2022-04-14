@@ -4,9 +4,11 @@ import org.cqfn.save.core.config.ActualWarningsFormat
 import org.cqfn.save.core.config.ExpectedWarningsFormat
 import org.cqfn.save.core.config.TestConfig
 import org.cqfn.save.core.files.createFile
+import org.cqfn.save.core.files.getWorkingDirectory
 import org.cqfn.save.core.files.readLines
 import org.cqfn.save.core.logging.describe
 import org.cqfn.save.core.logging.logDebug
+import org.cqfn.save.core.logging.logTrace
 import org.cqfn.save.core.logging.logWarn
 import org.cqfn.save.core.plugin.ExtraFlagsExtractor
 import org.cqfn.save.core.plugin.GeneralConfig
@@ -17,6 +19,7 @@ import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.ExecutionResult
 import org.cqfn.save.core.utils.ProcessExecutionException
 import org.cqfn.save.core.utils.ProcessTimeoutException
+import org.cqfn.save.plugin.warn.sarif.toWarnings
 import org.cqfn.save.plugin.warn.utils.CmdExecutorWarn
 import org.cqfn.save.plugin.warn.utils.ResultsChecker
 import org.cqfn.save.plugin.warn.utils.Warning
@@ -26,10 +29,14 @@ import org.cqfn.save.plugin.warn.utils.collectionSingleWarnings
 import org.cqfn.save.plugin.warn.utils.extractWarning
 import org.cqfn.save.plugin.warn.utils.getLineNumber
 
+import io.github.detekt.sarif4k.SarifSchema210
 import okio.FileSystem
 import okio.Path
+import okio.Path.Companion.toPath
 
 import kotlin.random.Random
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
 private typealias WarningMap = Map<String, List<Warning>>
 
@@ -106,11 +113,11 @@ class WarnPlugin(
         // extracting all warnings from test resource files
         val copyPaths: List<Path> = createTestFiles(originalPaths, warnPluginConfig)
 
-        val expectedWarningsMap: WarningMap = copyPaths.zip(originalPaths).associate { (copyPath, originalPath) ->
-            val warningsForCurrentPath =
-                    copyPath.collectExpectedWarningsWithLineNumbers(warnPluginConfig, generalConfig, originalPaths, originalPath)
-            copyPath.name to warningsForCurrentPath
-        }
+        // calculate current working dir now, which will be used in SARIF mode later,
+        // because during command execution in PB we step out to the different directories,
+        // and current directory will be lost
+        val workingDirectory = getWorkingDirectory()
+        val expectedWarningsMap = collectExpectedWarnings(generalConfig, warnPluginConfig, originalPaths, copyPaths, workingDirectory)
 
         if (expectedWarningsMap.isEmpty()) {
             warnMissingExpectedWarnings(warnPluginConfig, generalConfig, originalPaths)
@@ -137,7 +144,10 @@ class WarnPlugin(
             return failTestResult(originalPaths, ex, execCmd)
         }
 
-        val actualWarningsMap = collectActualWarningsWithLineNumbers(result, warnPluginConfig)
+        val actualWarningsMap = warnPluginConfig.actualWarningsFileName?.let {
+            val execResult = ExecutionResult(result.code, fs.readLines(warnPluginConfig.actualWarningsFileName.toPath()), result.stderr)
+            collectActualWarningsWithLineNumbers(execResult, warnPluginConfig, workingDirectory)
+        } ?: collectActualWarningsWithLineNumbers(result, warnPluginConfig, workingDirectory)
 
         val resultsChecker = ResultsChecker(
             expectedWarningsMap,
@@ -162,7 +172,8 @@ class WarnPlugin(
     }
 
     private fun createTestFiles(paths: List<Path>, warnPluginConfig: WarnPluginConfig): List<Path> {
-        logDebug("Trying to create temp files for: $paths")
+        logDebug("Creating temp copy files of resources for WarnPlugin...")
+        logTrace("Trying to create temp files for: $paths")
         tmpDirName = "${WarnPlugin::class.simpleName!!}-${Random.nextInt()}"
         // don't think that it is really needed now
         val dirPath = constructPathForCopyOfTestFile(tmpDirName, paths[0]).parent!!
@@ -195,6 +206,28 @@ class WarnPlugin(
         )
     }.asSequence()
 
+    private fun collectExpectedWarnings(
+        generalConfig: GeneralConfig,
+        warnPluginConfig: WarnPluginConfig,
+        originalPaths: List<Path>,
+        copyPaths: List<Path>,
+        workingDirectory: Path,
+    ): WarningMap = if (warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.SARIF) {
+        val warningsFromSarif = collectWarningsFromSarif(warnPluginConfig, originalPaths, fs, workingDirectory)
+        copyPaths.associate { copyPath ->
+            copyPath.name to warningsFromSarif.filter { it.fileName == copyPath.name }
+        }
+    } else {
+        copyPaths.associate { copyPath ->
+            val warningsForCurrentPath =
+                    copyPath.collectExpectedWarningsWithLineNumbers(
+                        warnPluginConfig,
+                        generalConfig
+                    )
+            copyPath.name to warningsForCurrentPath
+        }
+    }
+
     /**
      * method for getting expected warnings from test files:
      * 1) reading the file
@@ -204,16 +237,7 @@ class WarnPlugin(
     private fun Path.collectExpectedWarningsWithLineNumbers(
         warnPluginConfig: WarnPluginConfig,
         generalConfig: GeneralConfig,
-        originalPaths: List<Path>,
-        originalPath: Path,
     ): List<Warning> = when {
-        warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.SARIF -> collectWarningsFromSarif(
-            warnPluginConfig,
-            originalPath,
-            originalPaths,
-            fs,
-            this
-        )
         generalConfig.expectedWarningsEndPattern != null -> collectionMultilineWarnings(
             warnPluginConfig,
             generalConfig,
@@ -236,9 +260,17 @@ class WarnPlugin(
     @Suppress("AVOID_NULL_CHECKS")
     private fun collectActualWarningsWithLineNumbers(
         result: ExecutionResult,
-        warnPluginConfig: WarnPluginConfig
+        warnPluginConfig: WarnPluginConfig,
+        workingDirectory: Path,
     ): WarningMap = when (warnPluginConfig.actualWarningsFormat) {
-        ActualWarningsFormat.SARIF -> throw NotImplementedError()
+        ActualWarningsFormat.SARIF -> Json.decodeFromString<SarifSchema210>(
+            result.stdout.joinToString("\n")
+        )
+            // setting emptyList() here instead of originalPaths to avoid invalid mapping
+            .toWarnings(testConfig.getRootConfig().directory, emptyList(), workingDirectory)
+            .groupBy { it.fileName }
+            .mapValues { (_, warning) -> warning.sortedBy { it.message } }
+
         else -> result.stdout.mapNotNull {
             with(warnPluginConfig) {
                 it.extractWarning(
@@ -253,7 +285,6 @@ class WarnPlugin(
         }
             .groupBy { it.fileName }
             .mapValues { (_, warning) -> warning.sortedBy { it.message } }
-
     }
 
     private fun warnMissingExpectedWarnings(
