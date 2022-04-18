@@ -218,6 +218,13 @@ or using [PMD rules](https://pmd.github.io/). But in all cases a lot of time wil
 The project uses gradle as a build system and can be built with the command `./gradlew build`.
 To compile native artifacts, you will need to install prerequisites as described in Kotlin/Native documentation.
 
+To access dependencies hosted on Github Package Registry, you need to add the foolowing into `gradle.properties` or `~/.gradle/gradle.properties`:
+```properties
+gprUser=<GH username>
+gprKey=<GH personal access token>
+```
+Personal Access Token should be generated via https://github.com/settings/tokens/new with the scope at least containing `read:packages`.
+
 Because of generated code, you will need to run the build once to correctly import project in IDE with resolved imports.
 
 ## Contribution

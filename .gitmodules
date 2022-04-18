@@ -1,3 +1,0 @@
-[submodule "sarif4k"]
-	path = sarif4k
-	url = https://github.com/analysis-dev/sarif4k.git

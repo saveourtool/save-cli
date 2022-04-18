@@ -232,7 +232,7 @@ data class WarnPluginConfig(
 
     private fun requireValidPatternForRegexInWarning() {
         patternForRegexInWarning?.let {
-            require(it.size == 2) {
+            require(patternForRegexInWarning.size == 2) {
                 """
                     [Configuration Error]: Invalid pattern was provided for the configuration 'patternForRegexInWarning' in [warn] section of `$configLocation` config.
                     Opening and closing symbols that you expect to use as delimiters of regex should be placed in array and split with a comma.

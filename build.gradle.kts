@@ -1,8 +1,8 @@
 
+import org.cqfn.save.buildutils.configureDiktat
 import org.cqfn.save.buildutils.configurePublishing
 import org.cqfn.save.buildutils.configureVersioning
 import org.cqfn.save.buildutils.createDetektTask
-import org.cqfn.save.buildutils.createDiktatTask
 import org.cqfn.save.buildutils.installGitHooks
 
 plugins {
@@ -11,7 +11,7 @@ plugins {
 
 configureVersioning()
 
-createDiktatTask()
+configureDiktat()
 createDetektTask()
 installGitHooks()
 
