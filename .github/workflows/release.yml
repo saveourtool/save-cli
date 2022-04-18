@@ -43,7 +43,7 @@ jobs:
       - name: gradle snapshot from branch
         # if workflow is triggered after push to a branch, deploy snapshot
         if: ${{ startsWith(github.ref, 'refs/heads/') }}
-        run: ./gradlew --build-cache -Prelease -Preckon.stage=snapshot linkReleaseExecutableMultiplatform publishToSonatype
+        run: ./gradlew --build-cache -Prelease -PgprUser=${{ github.actor }} -PgprKey=${{ secrets.GITHUB_TOKEN }} -Preckon.stage=snapshot linkReleaseExecutableMultiplatform publishToSonatype
         shell: bash
       - name: Status git after
         if: ${{ always() }}
