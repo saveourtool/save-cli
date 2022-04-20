@@ -70,9 +70,11 @@ kotlin {
         }
         val commonMain by getting
         val commonTest by getting
-        val commonNonJsMain by creating
+        val commonNonJsMain by creating {
+            dependsOn(commonMain)
+        }
         val commonNonJsTest by creating {
-            dependsOn(commonNonJsMain)
+            dependsOn(commonTest)
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
