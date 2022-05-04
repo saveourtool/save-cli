@@ -36,5 +36,4 @@ actual fun FileSystem.myDeleteRecursively(path: Path) {
     }, 64, FTW_DEPTH)
 }
 
-@Suppress("GENERIC_VARIABLE_WRONG_DECLARATION")
 actual fun getWorkingDirectory(): Path = fs.canonicalize(".".toPath())
