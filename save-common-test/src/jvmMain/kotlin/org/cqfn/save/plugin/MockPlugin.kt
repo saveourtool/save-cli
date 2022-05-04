@@ -1,3 +1,7 @@
+/**
+ * Platform-specific declarations
+ */
+
 package org.cqfn.save.plugin
 
 import okio.FileSystem
