@@ -8,7 +8,7 @@ import org.cqfn.save.core.result.TestResult
 import okio.FileSystem
 import okio.Path
 
-private val fs: FileSystem = FileSystem.SYSTEM
+internal expect val fs: FileSystem
 
 /**
  * No-op implementation of [Plugin] that can be used to test reporters, which expect only a class name of the plugin.
