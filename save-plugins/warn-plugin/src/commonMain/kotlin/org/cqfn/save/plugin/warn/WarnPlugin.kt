@@ -219,6 +219,7 @@ class WarnPlugin(
         )
     }.asSequence()
 
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
     private fun collectExpectedWarnings(
         generalConfig: GeneralConfig,
         warnPluginConfig: WarnPluginConfig,
@@ -274,7 +275,11 @@ class WarnPlugin(
      * 1) reading the file
      * 2) for each line get the warning
      */
-    @Suppress("AVOID_NULL_CHECKS")
+    @Suppress(
+        "AVOID_NULL_CHECKS",
+        "TooGenericExceptionCaught",
+        "SwallowedException",
+    )
     private fun collectActualWarningsWithLineNumbers(
         result: ExecutionResult,
         warnPluginConfig: WarnPluginConfig,
