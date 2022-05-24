@@ -1,5 +1,5 @@
-// ;warn:2:9: [PACKAGE_NAME_INCORRECT_PREFIX] package name should start from company's domain: org.cqfn.save
-package org.cqfn.diktat.test.resources.test.paragraph1.naming.enum_
+// ;warn:2:9: [PACKAGE_NAME_INCORRECT_PREFIX] package name should start from company's domain: com.saveourtool.save
+package com.saveourtool.diktat.test.resources.test.paragraph1.naming.enum_
 
 // ;warn:4:1: [MISSING_KDOC_TOP_LEVEL] all public and internal top-level classes and functions should have Kdoc: EnumValueSnakeCaseTest (cannot be auto-corrected)
 // ;warn:8:35: [WRONG_DECLARATIONS_ORDER] declarations of constants and enum members should be sorted alphabetically: enum entries order is incorrect

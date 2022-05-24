@@ -1,5 +1,5 @@
 plugins {
-    id("org.cqfn.save.buildutils.kotlin-library")  // todo: disable publishing
+    id("com.saveourtool.save.buildutils.kotlin-library")  // todo: disable publishing
 }
 
 kotlin {

@@ -1,6 +1,6 @@
-// ;warn:3:9: [PACKAGE_NAME_INCORRECT_PREFIX] package name should start from company's domain: org.cqfn.save
+// ;warn:3:9: [PACKAGE_NAME_INCORRECT_PREFIX] package name should start from company's domain: com.saveourtool.save
 // ;warn:1:1: [FILE_NAME_MATCH_CLASS] file name is incorrect - it should match with the class described in it if there is the only one class declared: GenericFunctionTest.kt vs ClassName
-package org.cqfn.diktat.test.paragraph1.naming.generic
+package com.saveourtool.diktat.test.paragraph1.naming.generic
 
 private class ClassName<T> {
     private fun <Template, T> lock(body: ((Template?) -> T?)?, value: Template?): T? {

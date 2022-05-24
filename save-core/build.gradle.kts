@@ -1,12 +1,12 @@
 
-import org.cqfn.save.generation.configFilePath
-import org.cqfn.save.generation.generateConfigOptions
+import com.saveourtool.save.generation.configFilePath
+import com.saveourtool.save.generation.generateConfigOptions
 
 import de.undercouch.gradle.tasks.download.Download
 import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
 
 plugins {
-    id("org.cqfn.save.buildutils.kotlin-library")
+    id("com.saveourtool.save.buildutils.kotlin-library")
     id("de.undercouch.download")
 }
 
@@ -39,7 +39,7 @@ kotlin {
 
 val generateConfigOptionsTaskProvider = tasks.register("generateConfigOptions") {
     inputs.file(configFilePath())
-    val generatedFile = File("$buildDir/generated/src/org/cqfn/save/core/config/SaveProperties.kt")
+    val generatedFile = File("$buildDir/generated/src/com/saveourtool/save/core/config/SaveProperties.kt")
     outputs.file(generatedFile)
 
     doFirst {
@@ -48,14 +48,14 @@ val generateConfigOptionsTaskProvider = tasks.register("generateConfigOptions") 
 }
 val generateVersionFileTaskProvider = tasks.register("generateVersionsFile") {
     inputs.property("project version", version.toString())
-    val versionsFile = File("$buildDir/generated/src/org/cqfn/save/core/config/Versions.kt")
+    val versionsFile = File("$buildDir/generated/src/com/saveourtool/save/core/config/Versions.kt")
     outputs.file(versionsFile)
 
     doFirst {
         versionsFile.parentFile.mkdirs()
         versionsFile.writeText(
             """
-            package org.cqfn.save.core.config
+            package com.saveourtool.save.core.config
 
             internal const val SAVE_VERSION = "$version"
 

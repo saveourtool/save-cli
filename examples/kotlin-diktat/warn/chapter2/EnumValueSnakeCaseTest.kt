@@ -1,4 +1,4 @@
-package org.cqfn.diktat.test.resources.test.paragraph1.naming.enum_
+package com.saveourtool.diktat.test.resources.test.paragraph1.naming.enum_
 
 // ;warn:3:1: [MISSING_KDOC_TOP_LEVEL] all public and internal top-level classes and functions should have Kdoc: EnumValueSnakeCaseTest (cannot be auto-corrected)
 // ;warn:35: [WRONG_DECLARATIONS_ORDER] declarations of constants and enum members should be sorted alphabetically: enum entries order is incorrect
@@ -11,5 +11,5 @@ enum class EnumValueSnakeCaseTest {
     PascAsl_f
     // ;warn:$line-2:5: [ENUMS_SEPARATED] enum is incorrectly formatted: last enum entry must end with a comma
 
-    // ;warn:1:9: {{.*}}[PACKAGE_NAME_INCORRECT_PREFIX] package name should start from company's domain: org.cqfn.save{{.*}}
+    // ;warn:1:9: {{.*}}[PACKAGE_NAME_INCORRECT_PREFIX] package name should start from company's domain: com.saveourtool.save{{.*}}
 }

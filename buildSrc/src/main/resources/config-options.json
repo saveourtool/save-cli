@@ -17,7 +17,7 @@
     },
     "logType" : {
       "argType" : "ArgType.Choice<LogType>()",
-      "kotlinType": "org.cqfn.save.core.config.LogType",
+      "kotlinType": "com.saveourtool.save.core.config.LogType",
       "fullName" : "log",
       "shortName" : "",
       "description" : "Type of logging mode",
@@ -25,7 +25,7 @@
     },
     "reportType" : {
       "argType" : "ArgType.Choice<ReportType>()",
-      "kotlinType": "org.cqfn.save.core.config.ReportType",
+      "kotlinType": "com.saveourtool.save.core.config.ReportType",
       "fullName" : "report-type",
       "shortName" : "",
       "description" : "Type of generated report with execution results",
@@ -57,7 +57,7 @@
     },
     "language" : {
       "argType" : "ArgType.Choice<LanguageType>()",
-      "kotlinType": "org.cqfn.save.core.config.LanguageType",
+      "kotlinType": "com.saveourtool.save.core.config.LanguageType",
       "fullName" : "language",
       "shortName" : "l",
       "description" : "Language that you are developing analyzer for",
@@ -65,7 +65,7 @@
     },
     "resultOutput" : {
       "argType" : "ArgType.Choice<OutputStreamType>()",
-      "kotlinType": "org.cqfn.save.core.config.OutputStreamType",
+      "kotlinType": "com.saveourtool.save.core.config.OutputStreamType",
       "fullName" : "result-output",
       "shortName" : "out",
       "description" : "Data output stream",
