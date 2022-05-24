@@ -18,7 +18,7 @@ import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.ExecutionResult
 import org.cqfn.save.core.utils.ProcessExecutionException
-import org.cqfn.save.core.utils.ProcessParseSarifException
+import org.cqfn.save.core.utils.SarifParsingException
 import org.cqfn.save.core.utils.ProcessTimeoutException
 import org.cqfn.save.plugin.warn.sarif.toWarnings
 import org.cqfn.save.plugin.warn.utils.CmdExecutorWarn
@@ -132,7 +132,7 @@ class WarnPlugin(
 
         val expectedWarningsMap = try {
             collectExpectedWarnings(generalConfig, warnPluginConfig, originalPaths, copyPaths, workingDirectory)
-        } catch (ex: ProcessParseSarifException) {
+        } catch (ex: SarifParsingException) {
             return failTestResult(originalPaths, ex, execCmd)
         }
 
@@ -158,7 +158,7 @@ class WarnPlugin(
                 )
                 collectActualWarningsWithLineNumbers(execResult, warnPluginConfig, workingDirectory)
             } ?: collectActualWarningsWithLineNumbers(result, warnPluginConfig, workingDirectory)
-        } catch (ex: ProcessParseSarifException) {
+        } catch (ex: SarifParsingException) {
             return failTestResult(originalPaths, ex, execCmd)
         }
 
@@ -230,7 +230,7 @@ class WarnPlugin(
         val warningsFromSarif = try {
             collectWarningsFromSarif(warnPluginConfig, originalPaths, fs, workingDirectory)
         } catch (e: Exception) {
-            throw ProcessParseSarifException("We failed to parse sarif. Your tool is invalid, check the generation of sarif report")
+            throw SarifParsingException("We failed to parse sarif. Check the your tool generation of sarif report, cause: ${e.message}")
         }
         copyPaths.associate { copyPath ->
             copyPath.name to warningsFromSarif.filter { it.fileName == copyPath.name }
@@ -294,7 +294,7 @@ class WarnPlugin(
                 .groupBy { it.fileName }
                 .mapValues { (_, warning) -> warning.sortedBy { it.message } }
         } catch (e: Exception) {
-            throw ProcessParseSarifException("We failed to parse sarif. Your tool is invalid, check the generation of sarif report")
+            throw SarifParsingException("We failed to parse sarif. Check the your tool generation of sarif report, cause: ${e.message}")
         }
 
         else -> result.stdout.mapNotNull {
