@@ -18,8 +18,8 @@ import org.cqfn.save.core.result.Fail
 import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.ExecutionResult
 import org.cqfn.save.core.utils.ProcessExecutionException
-import org.cqfn.save.core.utils.SarifParsingException
 import org.cqfn.save.core.utils.ProcessTimeoutException
+import org.cqfn.save.core.utils.SarifParsingException
 import org.cqfn.save.plugin.warn.sarif.toWarnings
 import org.cqfn.save.plugin.warn.utils.CmdExecutorWarn
 import org.cqfn.save.plugin.warn.utils.ResultsChecker
