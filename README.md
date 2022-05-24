@@ -1,13 +1,13 @@
-![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/cqfn/save)
-![Maven Central](https://img.shields.io/maven-central/v/org.cqfn.save/save-core)
-![Lines of code](https://img.shields.io/tokei/lines/github.com/cqfn/save)
-![Hits-of-Code](https://hitsofcode.com/github/cqfn/save?branch=main)
-![GitHub repo size](https://img.shields.io/github/repo-size/cqfn/save)
-![Run deteKT](https://github.com/cqfn/save/actions/workflows/detekt.yml/badge.svg)
-![Run diKTat](https://github.com/cqfn/save/actions/workflows/diktat.yml/badge.svg)
-![Build and test](https://github.com/cqfn/save/workflows/Build%20and%20test/badge.svg)
-[![License](https://img.shields.io/github/license/cqfn/save)](https://github.com/cqfn/save/blob/master/LICENSE)
-[![codecov](https://codecov.io/gh/cqfn/save/branch/master/graph/badge.svg)](https://codecov.io/gh/cqfn/save)
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/saveourtool/save)
+![Maven Central](https://img.shields.io/maven-central/v/com.saveourtool.save/save-core)
+![Lines of code](https://img.shields.io/tokei/lines/github.com/saveourtool/save)
+![Hits-of-Code](https://hitsofcode.com/github/saveourtool/save?branch=main)
+![GitHub repo size](https://img.shields.io/github/repo-size/saveourtool/save)
+![Run deteKT](https://github.com/saveourtool/save/actions/workflows/detekt.yml/badge.svg)
+![Run diKTat](https://github.com/saveourtool/save/actions/workflows/diktat.yml/badge.svg)
+![Build and test](https://github.com/saveourtool/save/workflows/Build%20and%20test/badge.svg)
+[![License](https://img.shields.io/github/license/saveourtool/save)](https://github.com/saveourtool/save/blob/master/LICENSE)
+[![codecov](https://codecov.io/gh/saveourtool/save/branch/master/graph/badge.svg)](https://codecov.io/gh/saveourtool/save)
 
 <!--
 # ![codebeat badge] TO DO
@@ -25,7 +25,7 @@ especially which work with the code. Fully native and multiplatform application.
 
 
 ## What is SAVE?
-Static Analysis Verification and Evaluation (SAVE) - is an eco-system (see also [save-cloud](https://github.com/cqfn/save-cloud)) for evaluation, testing and certification of static analyzers.
+Static Analysis Verification and Evaluation (SAVE) - is an eco-system (see also [save-cloud](https://github.com/saveourtool/save-cloud)) for evaluation, testing and certification of static analyzers.
 Instead of writing your own test framework, you can use SAVE to have a command-line test application. The only thing you need is to prepare test resources in a proper format.
 
 <!-- 

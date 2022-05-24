@@ -35,4 +35,4 @@ is built, it will be added to [OptionsTable.md](OptionsTable.md) and to the gene
 ### save toml configuration options
 
 ### Code style
-Code style and code smells are checked using [diktat](https://github.com/cqfn/diktat) and [detekt](https://github.com/detekt/detekt).
+Code style and code smells are checked using [diktat](https://github.com/saveourtool/diktat) and [detekt](https://github.com/detekt/detekt).

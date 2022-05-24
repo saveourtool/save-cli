@@ -1,6 +1,6 @@
-import org.cqfn.save.buildutils.configureDetekt
-import org.cqfn.save.buildutils.configureDiktat
-import org.cqfn.save.buildutils.configurePublishing
+import com.saveourtool.save.buildutils.configureDetekt
+import com.saveourtool.save.buildutils.configureDiktat
+import com.saveourtool.save.buildutils.configurePublishing
 
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
@@ -24,7 +24,7 @@ kotlin {
             val name = "save-${project.version}-${this@configure.name}"
             executable {
                 this.baseName = name
-                entryPoint = "org.cqfn.save.cli.main"
+                entryPoint = "com.saveourtool.save.cli.main"
             }
         }
     }
