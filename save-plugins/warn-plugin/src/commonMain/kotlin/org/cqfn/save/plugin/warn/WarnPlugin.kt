@@ -230,7 +230,7 @@ class WarnPlugin(
         val warningsFromSarif = try {
             collectWarningsFromSarif(warnPluginConfig, originalPaths, fs, workingDirectory)
         } catch (e: Exception) {
-            throw SarifParsingException("We failed to parse sarif. Check the your tool generation of sarif report, cause: ${e.message}")
+            throw SarifParsingException("We failed to parse sarif. Check the your tool generation of sarif report, cause: ${e.message}", e.cause)
         }
         copyPaths.associate { copyPath ->
             copyPath.name to warningsFromSarif.filter { it.fileName == copyPath.name }
@@ -294,7 +294,7 @@ class WarnPlugin(
                 .groupBy { it.fileName }
                 .mapValues { (_, warning) -> warning.sortedBy { it.message } }
         } catch (e: Exception) {
-            throw SarifParsingException("We failed to parse sarif. Check the your tool generation of sarif report, cause: ${e.message}")
+            throw SarifParsingException("We failed to parse sarif. Check the your tool generation of sarif report, cause: ${e.message}", e.cause)
         }
 
         else -> result.stdout.mapNotNull {
