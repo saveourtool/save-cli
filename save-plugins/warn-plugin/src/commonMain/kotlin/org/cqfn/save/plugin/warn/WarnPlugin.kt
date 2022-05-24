@@ -19,6 +19,7 @@ import org.cqfn.save.core.result.TestResult
 import org.cqfn.save.core.utils.ExecutionResult
 import org.cqfn.save.core.utils.ProcessExecutionException
 import org.cqfn.save.core.utils.ProcessTimeoutException
+import org.cqfn.save.core.utils.SarifParsingException
 import org.cqfn.save.plugin.warn.sarif.toWarnings
 import org.cqfn.save.plugin.warn.utils.CmdExecutorWarn
 import org.cqfn.save.plugin.warn.utils.ResultsChecker
@@ -117,11 +118,6 @@ class WarnPlugin(
         // because during command execution in PB we step out to the different directories,
         // and current directory will be lost
         val workingDirectory = getWorkingDirectory()
-        val expectedWarningsMap = collectExpectedWarnings(generalConfig, warnPluginConfig, originalPaths, copyPaths, workingDirectory)
-
-        if (expectedWarningsMap.isEmpty()) {
-            warnMissingExpectedWarnings(warnPluginConfig, generalConfig, originalPaths)
-        }
 
         val cmdExecutor = CmdExecutorWarn(
             generalConfig,
@@ -132,8 +128,17 @@ class WarnPlugin(
             testConfig,
             fs,
         )
-
         val execCmd = cmdExecutor.constructExecCmd(tmpDirName)
+
+        val expectedWarningsMap = try {
+            collectExpectedWarnings(generalConfig, warnPluginConfig, originalPaths, copyPaths, workingDirectory)
+        } catch (ex: SarifParsingException) {
+            return failTestResult(originalPaths, ex, execCmd)
+        }
+
+        if (expectedWarningsMap.isEmpty()) {
+            warnMissingExpectedWarnings(warnPluginConfig, generalConfig, originalPaths)
+        }
 
         val result = try {
             cmdExecutor.execCmdAndGetExecutionResults(redirectTo)
@@ -144,10 +149,18 @@ class WarnPlugin(
             return failTestResult(originalPaths, ex, execCmd)
         }
 
-        val actualWarningsMap = warnPluginConfig.actualWarningsFileName?.let {
-            val execResult = ExecutionResult(result.code, fs.readLines(warnPluginConfig.actualWarningsFileName.toPath()), result.stderr)
-            collectActualWarningsWithLineNumbers(execResult, warnPluginConfig, workingDirectory)
-        } ?: collectActualWarningsWithLineNumbers(result, warnPluginConfig, workingDirectory)
+        val actualWarningsMap = try {
+            warnPluginConfig.actualWarningsFileName?.let {
+                val execResult = ExecutionResult(
+                    result.code,
+                    fs.readLines(warnPluginConfig.actualWarningsFileName.toPath()),
+                    result.stderr
+                )
+                collectActualWarningsWithLineNumbers(execResult, warnPluginConfig, workingDirectory)
+            } ?: collectActualWarningsWithLineNumbers(result, warnPluginConfig, workingDirectory)
+        } catch (ex: SarifParsingException) {
+            return failTestResult(originalPaths, ex, execCmd)
+        }
 
         val resultsChecker = ResultsChecker(
             expectedWarningsMap,
@@ -196,7 +209,7 @@ class WarnPlugin(
 
     private fun failTestResult(
         paths: List<Path>,
-        ex: ProcessExecutionException,
+        ex: Exception,
         execCmd: String
     ) = paths.map {
         TestResult(
@@ -206,6 +219,7 @@ class WarnPlugin(
         )
     }.asSequence()
 
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
     private fun collectExpectedWarnings(
         generalConfig: GeneralConfig,
         warnPluginConfig: WarnPluginConfig,
@@ -213,7 +227,11 @@ class WarnPlugin(
         copyPaths: List<Path>,
         workingDirectory: Path,
     ): WarningMap = if (warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.SARIF) {
-        val warningsFromSarif = collectWarningsFromSarif(warnPluginConfig, originalPaths, fs, workingDirectory)
+        val warningsFromSarif = try {
+            collectWarningsFromSarif(warnPluginConfig, originalPaths, fs, workingDirectory)
+        } catch (e: Exception) {
+            throw SarifParsingException("We failed to parse sarif. Check the your tool generation of sarif report, cause: ${e.message}", e.cause)
+        }
         copyPaths.associate { copyPath ->
             copyPath.name to warningsFromSarif.filter { it.fileName == copyPath.name }
         }
@@ -257,19 +275,27 @@ class WarnPlugin(
      * 1) reading the file
      * 2) for each line get the warning
      */
-    @Suppress("AVOID_NULL_CHECKS")
+    @Suppress(
+        "AVOID_NULL_CHECKS",
+        "TooGenericExceptionCaught",
+        "SwallowedException",
+    )
     private fun collectActualWarningsWithLineNumbers(
         result: ExecutionResult,
         warnPluginConfig: WarnPluginConfig,
         workingDirectory: Path,
     ): WarningMap = when (warnPluginConfig.actualWarningsFormat) {
-        ActualWarningsFormat.SARIF -> Json.decodeFromString<SarifSchema210>(
-            result.stdout.joinToString("\n")
-        )
-            // setting emptyList() here instead of originalPaths to avoid invalid mapping
-            .toWarnings(testConfig.getRootConfig().directory, emptyList(), workingDirectory)
-            .groupBy { it.fileName }
-            .mapValues { (_, warning) -> warning.sortedBy { it.message } }
+        ActualWarningsFormat.SARIF -> try {
+            Json.decodeFromString<SarifSchema210>(
+                result.stdout.joinToString("\n")
+            )
+                // setting emptyList() here instead of originalPaths to avoid invalid mapping
+                .toWarnings(testConfig.getRootConfig().directory, emptyList(), workingDirectory)
+                .groupBy { it.fileName }
+                .mapValues { (_, warning) -> warning.sortedBy { it.message } }
+        } catch (e: Exception) {
+            throw SarifParsingException("We failed to parse sarif. Check the your tool generation of sarif report, cause: ${e.message}", e.cause)
+        }
 
         else -> result.stdout.mapNotNull {
             with(warnPluginConfig) {
