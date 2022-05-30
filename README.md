@@ -69,6 +69,7 @@ In case you would like to have several plugins to work in your directory with sa
 
 ## Save warnings DSL 
 ![save-cli](https://user-images.githubusercontent.com/58667063/146390474-71e4921d-416b-4922-b2ea-894f71e491c3.jpg)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsaveourtool%2Fsave-cli.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsaveourtool%2Fsave-cli?ref=badge_shield)
 You can read more about the `warn plugin` [here](save-plugins/warn-plugin/README.md)
 
 
@@ -230,3 +231,7 @@ Because of generated code, you will need to run the build once to correctly impo
 ## Contribution
 You can always contribute to the main SAVE framework - just create a PR for it. But to contribute or change tests in categories you will need get approvals from 
 the maintainer of the test package/analysis category. Please see the list of them.  
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsaveourtool%2Fsave-cli.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsaveourtool%2Fsave-cli?ref=badge_large)
