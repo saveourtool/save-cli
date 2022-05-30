@@ -1,3 +1,7 @@
+/**
+ * Configure JaCoCo for code coverage calculation
+ */
+
 package com.saveourtool.save.buildutils
 
 import org.gradle.api.Project
@@ -7,8 +11,8 @@ import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.getValue
-import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.register
 import org.gradle.testing.jacoco.plugins.JacocoPlugin
 import org.gradle.testing.jacoco.plugins.JacocoPluginExtension
@@ -26,7 +30,7 @@ fun Project.configureJacoco() {
         toolVersion = "0.8.7"
     }
 
-    val kotlin = extensions.getByType<KotlinMultiplatformExtension>()
+    val kotlin: KotlinMultiplatformExtension = extensions.getByType()
     val jvmTestTask by tasks.named<Test>("jvmTest") {
         configure<JacocoTaskExtension> {
             // this is needed to generate jacoco/jvmTest.exec

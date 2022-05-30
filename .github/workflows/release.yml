@@ -29,7 +29,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: 11
-          distribution: zulu
+          distribution: temurin
       - name: Status git before
         run: git status
       - uses: burrunan/gradle-cache-action@v1
