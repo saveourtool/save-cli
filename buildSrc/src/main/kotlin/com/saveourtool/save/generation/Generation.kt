@@ -305,7 +305,7 @@ fun generateMergeConfigFunc(jsonObject: Map<String, Option>): FunSpec.Builder {
  */
 @Suppress("TOO_MANY_LINES_IN_LAMBDA")
 fun generateReadme(jsonObject: Map<String, Option>, destination: File) {
-    val readmeContent =
+    var readmeContent =
             """
                 |Most (except for `-h` and `-prop`) of the options below can be passed to a SAVE via `save.properties` file
                 |
@@ -313,24 +313,21 @@ fun generateReadme(jsonObject: Map<String, Option>, destination: File) {
                 ||------------|------------|---------------|---------------|
                 || h | help | Usage info | - |
             """.trimMargin()
-    Files.newBufferedWriter(destination.toPath()).use { out ->
-        out.write(readmeContent)
-        jsonObject.forEach {
-            val shortName = if (it.value.shortName.isNotEmpty()) it.value.shortName else "-"
-            val longName = it.value.fullName
-            val description = it.value.description
-            var default = it.value.default
-            // If some option have user defined type, then we will print to the README
-            // only the value (e.g. LanguageType.UNDEFINED --> UNDEFINED)
-            if (default != "null") {
-                if (it.value.kotlinType != "kotlin.String") {
-                    default = default.substringAfterLast(".")
-                }
-            } else {
-                default = "-"
+    jsonObject.forEach {
+        val shortName = if (it.value.shortName.isNotEmpty()) it.value.shortName else "-"
+        val longName = it.value.fullName
+        val description = it.value.description
+        var default = it.value.default
+        // If some option have user defined type, then we will print to the README
+        // only the value (e.g. LanguageType.UNDEFINED --> UNDEFINED)
+        if (default != "null") {
+            if (it.value.kotlinType != "kotlin.String") {
+                default = default.substringAfterLast(".")
             }
-            out.newLine()
-            out.write("| $shortName | $longName | $description | $default |")
+        } else {
+            default = "-"
         }
+        readmeContent += "\n| $shortName | $longName | $description | $default |"
     }
+    destination.writeText(readmeContent)
 }
