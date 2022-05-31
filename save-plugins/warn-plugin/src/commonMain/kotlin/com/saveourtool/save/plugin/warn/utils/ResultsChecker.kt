@@ -62,7 +62,12 @@ class ResultsChecker(
                 )
             }
             else -> Fail("N/A", "N/A")
-        } to CountWarnings(missing, matched)
+        } to CountWarnings(
+            missing = missing,
+            match = matched,
+            expected = expectedWarnings.size,
+            unexpectedMatch = unexpectedWarnings.size
+        )
     }
 
     private fun List<Warning>.matchWithActualWarnings(
