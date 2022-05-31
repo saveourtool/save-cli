@@ -22,7 +22,6 @@ import org.gradle.api.Project
 
 import java.io.BufferedReader
 import java.io.File
-import java.nio.file.Files
 
 /**
  * The comment that will be added to the generated sources file.
