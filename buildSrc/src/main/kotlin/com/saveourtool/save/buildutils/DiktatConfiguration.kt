@@ -34,6 +34,7 @@ fun Project.configureDiktat() {
             }
         }
     }
+    fixDiktatTask()
 }
 
 private fun Project.fixDiktatTask() {
