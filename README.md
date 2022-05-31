@@ -1,13 +1,14 @@
-![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/saveourtool/save)
-![Maven Central](https://img.shields.io/maven-central/v/com.saveourtool.save/save-core)
-![Lines of code](https://img.shields.io/tokei/lines/github.com/saveourtool/save)
-![Hits-of-Code](https://hitsofcode.com/github/saveourtool/save?branch=main)
-![GitHub repo size](https://img.shields.io/github/repo-size/saveourtool/save)
-![Run deteKT](https://github.com/saveourtool/save/actions/workflows/detekt.yml/badge.svg)
-![Run diKTat](https://github.com/saveourtool/save/actions/workflows/diktat.yml/badge.svg)
-![Build and test](https://github.com/saveourtool/save/workflows/Build%20and%20test/badge.svg)
-[![License](https://img.shields.io/github/license/saveourtool/save)](https://github.com/saveourtool/save/blob/master/LICENSE)
-[![codecov](https://codecov.io/gh/saveourtool/save/branch/master/graph/badge.svg)](https://codecov.io/gh/saveourtool/save)
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/saveourtool/save-cli)
+![Maven Central](https://img.shields.io/maven-central/v/com.saveourtool.save/save-common)
+![Lines of code](https://img.shields.io/tokei/lines/github.com/saveourtool/save-cli)
+[![Hits-of-Code](https://hitsofcode.com/github/saveourtool/save-cli?branch=main)](https://hitsofcode.com/github/saveourtool/save-cli/view?branch=main)
+![GitHub repo size](https://img.shields.io/github/repo-size/saveourtool/save-cli)
+[![Run deteKT](https://github.com/saveourtool/save-cli/actions/workflows/detekt.yml/badge.svg)](https://github.com/saveourtool/save-cli/actions/workflows/detekt.yml)
+[![Run diKTat](https://github.com/saveourtool/save-cli/actions/workflows/diktat.yml/badge.svg)](https://github.com/saveourtool/save-cli/actions/workflows/diktat.yml)
+[![Build and test](https://github.com/saveourtool/save-cli/actions/workflows/build_and_test.yml/badge.svg)](https://github.com/saveourtool/save-cli/actions/workflows/build_and_test.yml)
+[![License](https://img.shields.io/github/license/saveourtool/save-cli)](https://github.com/saveourtool/save-cli/blob/main/LICENSE)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsaveourtool%2Fsave-cli.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsaveourtool%2Fsave-cli?ref=badge_shield)
+[![codecov](https://codecov.io/gh/saveourtool/save-api/branch/master/graph/badge.svg)](https://codecov.io/gh/saveourtool/save-api)
 
 <!--
 # ![codebeat badge] TO DO
@@ -69,7 +70,6 @@ In case you would like to have several plugins to work in your directory with sa
 
 ## Save warnings DSL 
 ![save-cli](https://user-images.githubusercontent.com/58667063/146390474-71e4921d-416b-4922-b2ea-894f71e491c3.jpg)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsaveourtool%2Fsave-cli.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsaveourtool%2Fsave-cli?ref=badge_shield)
 You can read more about the `warn plugin` [here](save-plugins/warn-plugin/README.md)
 
 
