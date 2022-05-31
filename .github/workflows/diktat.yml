@@ -25,7 +25,6 @@ jobs:
             diktatCheck
             -Pdetekt.multiplatform.disabled=true
             -Pdiktat.githubActions=true
-            --stacktrace
       - name: Copy SARIF reports into a single directory
         if: always()
         run: |

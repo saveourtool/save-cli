@@ -40,34 +40,33 @@ class ResultsChecker(
         val missingWarnings = expectedWarnings - expectedWarningsMatchedWithActual
         val unexpectedWarnings = actualWarnings - actualMatchedWithExpectedWarnings
 
-        val missing = missingWarnings.size
-        val matched = expectedWarningsMatchedWithActual.size
+        val countWarnings = CountWarnings(
+            missing = missingWarnings.size,
+            match = expectedWarningsMatchedWithActual.size,
+            expected = expectedWarnings.size,
+            unexpectedMatch = unexpectedWarnings.size
+        )
 
         return when (missingWarnings.isEmpty() to unexpectedWarnings.isEmpty()) {
             false to true -> Fail(
                 "$MISSING $missingWarnings",
-                "$MISSING ($missing). $MATCHED ($matched)"
+                "$MISSING (${countWarnings.missing}). $MATCHED (${countWarnings.match})"
             )
             false to false -> createFailFromDoubleMiss(missingWarnings, unexpectedWarnings, expectedWarningsMatchedWithActual)
-            true to true -> Pass("$ALL_EXPECTED ($matched)")
+            true to true -> Pass("$ALL_EXPECTED (${countWarnings.match})")
             true to false -> if (warnPluginConfig.exactWarningsMatch == false) {
                 Pass(
                     "$UNEXPECTED $unexpectedWarnings",
-                    "$UNEXPECTED (${unexpectedWarnings.size}). $MATCHED ($matched)"
+                    "$UNEXPECTED (${countWarnings.unexpectedMatch}). $MATCHED (${countWarnings.match})"
                 )
             } else {
                 Fail(
                     "$UNEXPECTED $unexpectedWarnings",
-                    "$UNEXPECTED (${unexpectedWarnings.size}). $MATCHED ($matched)"
+                    "$UNEXPECTED (${countWarnings.unexpectedMatch}). $MATCHED (${countWarnings.match})"
                 )
             }
             else -> Fail("N/A", "N/A")
-        } to CountWarnings(
-            missing = missing,
-            match = matched,
-            expected = expectedWarnings.size,
-            unexpectedMatch = unexpectedWarnings.size
-        )
+        } to countWarnings
     }
 
     private fun List<Warning>.matchWithActualWarnings(
