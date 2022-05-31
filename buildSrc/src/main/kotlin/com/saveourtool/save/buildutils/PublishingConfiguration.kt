@@ -25,7 +25,8 @@ import org.gradle.plugins.signing.SigningPlugin
 @Suppress(
     "MISSING_KDOC_ON_FUNCTION",
     "MISSING_KDOC_TOP_LEVEL",
-    "TOO_LONG_FUNCTION")
+    "TOO_LONG_FUNCTION"
+)
 fun Project.configurePublishing() {
     // If present, set properties from env variables. If any are absent, release will fail.
     System.getenv("OSSRH_USERNAME")?.let {

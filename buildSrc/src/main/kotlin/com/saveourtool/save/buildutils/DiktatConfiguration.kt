@@ -23,14 +23,14 @@ fun Project.configureDiktat() {
         inputs {
             if (path == rootProject.path) {
                 include(
-                    "$rootDir/buildSrc/src/**/*.kt",
-                    "$rootDir/buildSrc/**/*.kts",
-                    "$rootDir/*.kts"
+                    "buildSrc/src/**/*.kt",
+                    "buildSrc/**/*.kts",
+                    "*.kts"
                 )
-                exclude("$rootDir/build", "$rootDir/buildSrc/build")
+                exclude("build", "buildSrc/build")
             } else {
                 include("src/**/*.kt", "*.kts", "src/**/*.kts")
-                exclude("$projectDir/build/**")
+                exclude("build/**")
             }
         }
     }

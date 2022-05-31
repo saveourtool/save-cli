@@ -46,7 +46,8 @@ private val autoGenerationComment =
 @Suppress(
     "USE_DATA_CLASS",
     "MISSING_KDOC_CLASS_ELEMENTS",
-    "KDOC_NO_CLASS_BODY_PROPERTIES_IN_HEADER")
+    "KDOC_NO_CLASS_BODY_PROPERTIES_IN_HEADER"
+)
 class Option {
     lateinit var argType: String
     lateinit var kotlinType: String
