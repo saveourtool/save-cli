@@ -44,7 +44,7 @@ class ResultsChecker(
             missing = missingWarnings.size,
             match = expectedWarningsMatchedWithActual.size,
             expected = expectedWarnings.size,
-            unexpectedMatch = unexpectedWarnings.size
+            unexpected = unexpectedWarnings.size
         )
 
         return when (missingWarnings.isEmpty() to unexpectedWarnings.isEmpty()) {
@@ -57,12 +57,12 @@ class ResultsChecker(
             true to false -> if (warnPluginConfig.exactWarningsMatch == false) {
                 Pass(
                     "$UNEXPECTED $unexpectedWarnings",
-                    "$UNEXPECTED (${countWarnings.unexpectedMatch}). $MATCHED (${countWarnings.match})"
+                    "$UNEXPECTED (${countWarnings.unexpected}). $MATCHED (${countWarnings.match})"
                 )
             } else {
                 Fail(
                     "$UNEXPECTED $unexpectedWarnings",
-                    "$UNEXPECTED (${countWarnings.unexpectedMatch}). $MATCHED (${countWarnings.match})"
+                    "$UNEXPECTED (${countWarnings.unexpected}). $MATCHED (${countWarnings.match})"
                 )
             }
             else -> Fail("N/A", "N/A")
