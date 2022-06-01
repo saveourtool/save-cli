@@ -41,8 +41,8 @@ class ResultsChecker(
         val unexpectedWarnings = actualWarnings - actualMatchedWithExpectedWarnings
 
         val countWarnings = CountWarnings(
-            missing = missingWarnings.size,
-            match = expectedWarningsMatchedWithActual.size,
+            unmatched = missingWarnings.size,
+            matched = expectedWarningsMatchedWithActual.size,
             expected = expectedWarnings.size,
             unexpected = unexpectedWarnings.size
         )
@@ -50,19 +50,19 @@ class ResultsChecker(
         return when (missingWarnings.isEmpty() to unexpectedWarnings.isEmpty()) {
             false to true -> Fail(
                 "$MISSING $missingWarnings",
-                "$MISSING (${countWarnings.missing}). $MATCHED (${countWarnings.match})"
+                "$MISSING (${countWarnings.unmatched}). $MATCHED (${countWarnings.matched})"
             )
             false to false -> createFailFromDoubleMiss(missingWarnings, unexpectedWarnings, expectedWarningsMatchedWithActual)
-            true to true -> Pass("$ALL_EXPECTED (${countWarnings.match})")
+            true to true -> Pass("$ALL_EXPECTED (${countWarnings.matched})")
             true to false -> if (warnPluginConfig.exactWarningsMatch == false) {
                 Pass(
                     "$UNEXPECTED $unexpectedWarnings",
-                    "$UNEXPECTED (${countWarnings.unexpected}). $MATCHED (${countWarnings.match})"
+                    "$UNEXPECTED (${countWarnings.unexpected}). $MATCHED (${countWarnings.matched})"
                 )
             } else {
                 Fail(
                     "$UNEXPECTED $unexpectedWarnings",
-                    "$UNEXPECTED (${countWarnings.unexpected}). $MATCHED (${countWarnings.match})"
+                    "$UNEXPECTED (${countWarnings.unexpected}). $MATCHED (${countWarnings.matched})"
                 )
             }
             else -> Fail("N/A", "N/A")
