@@ -24,15 +24,15 @@ data class DebugInfo(
 )
 
 /**
- * @property missing number of missing warnings
- * @property match number of match warnings
- * @property expected number of expected warnings
- * @property unexpected number of unexpected warnings
+ * @property unmatched number of unmatched checks/validations (warnings) in test (false negative results)
+ * @property matched number of matched checks/validations (warnings) in test (true positive results)
+ * @property expected number of al checks/validations (warnings) in test (unmatched + matched)
+ * @property unexpected number of matched, but unexpected checks/validations (warnings) in test (false positive results)
  */
 @Serializable
 data class CountWarnings(
-    val missing: Int,
-    val match: Int,
+    val unmatched: Int,
+    val matched: Int,
     val expected: Int,
     val unexpected: Int,
 )
