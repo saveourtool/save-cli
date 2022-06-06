@@ -14,7 +14,7 @@ import com.saveourtool.save.plugin.warn.WarnPluginConfig
 import com.saveourtool.save.plugins.fix.FixPluginConfig
 import com.saveourtool.save.plugins.fixandwarn.FixAndWarnPluginConfig
 
-import com.akuleshov7.ktoml.TomlConfig
+import com.akuleshov7.ktoml.TomlInputConfig
 import com.akuleshov7.ktoml.exceptions.TomlDecodingException
 import com.akuleshov7.ktoml.file.TomlFileReader
 import com.akuleshov7.ktoml.parsers.TomlParser
@@ -85,8 +85,8 @@ fun createPluginConfigListFromToml(testConfigPath: Path, fs: FileSystem): List<P
  * @param fs FileSystem for file reading
  * @return all top level table nodes
  */
-fun getTopLevelTomlTables(testConfigPath: Path, fs: FileSystem): List<TomlTable> = TomlParser(TomlConfig())
-    .parseStringsToTomlTree(fs.readLines(testConfigPath), TomlConfig())
+fun getTopLevelTomlTables(testConfigPath: Path, fs: FileSystem): List<TomlTable> = TomlParser(TomlInputConfig())
+    .parseStringsToTomlTree(fs.readLines(testConfigPath), TomlInputConfig())
     .children
     .filterIsInstance<TomlTable>()
     .filter { !it.isSynthetic }
