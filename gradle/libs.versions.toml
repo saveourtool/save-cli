@@ -8,7 +8,7 @@ kotlinx-cli = "0.3.4"
 kotlinx-datetime = { require = "0.3.2", rejects = "0.3.3" }
 kotlinx-coroutines = "1.6.1-native-mt"
 junit = "5.8.2"
-ktoml = "0.2.11"
+ktoml = "0.2.12"
 multiplatform-diff = "0.4.0"
 kotlinpoet = "1.11.0"
 
