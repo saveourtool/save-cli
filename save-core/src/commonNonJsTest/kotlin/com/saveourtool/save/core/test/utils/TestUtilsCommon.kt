@@ -11,6 +11,7 @@ import com.saveourtool.save.core.config.LogType
 import com.saveourtool.save.core.config.OutputStreamType
 import com.saveourtool.save.core.config.ReportType
 import com.saveourtool.save.core.config.SaveProperties
+import com.saveourtool.save.core.logging.logType
 import com.saveourtool.save.core.result.Fail
 import com.saveourtool.save.core.result.Ignored
 import com.saveourtool.save.core.result.Pass
@@ -50,15 +51,17 @@ fun runTestsWithDiktat(
     mutableTestDir.add(0, "../examples/kotlin-diktat/")
 
     val saveProperties = SaveProperties(
-        logType = LogType.ALL,
         testFiles = mutableTestDir,
         reportType = ReportType.TEST,
         resultOutput = OutputStreamType.STDOUT,
     ).apply { addProperties() }
+
+    // logger is not set from save properties without a config reader, need to set it explicily
+    logType.set(LogType.ALL)
     // In this test we need to merge with emulated empty save.properties file in aim to use default values,
     // since initially all fields are null
-    val testReporter = Save(saveProperties.mergeConfigWithPriorityToThis(SaveProperties()), FileSystem.SYSTEM)
-        .performAnalysis() as TestReporter
+    val save = Save(saveProperties.mergeConfigWithPriorityToThis(SaveProperties()), FileSystem.SYSTEM)
+    val testReporter = save.performAnalysis() as TestReporter
 
     assertEquals(numberOfTests, testReporter.results.size)
     testReporter.results.forEach { test ->
