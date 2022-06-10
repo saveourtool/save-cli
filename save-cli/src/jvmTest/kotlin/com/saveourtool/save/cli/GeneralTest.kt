@@ -62,8 +62,8 @@ class GeneralTest {
         assertTrue(fs.exists(destination))
 
         // Check for existence of diktat and ktlint
-        assertTrue(fs.exists((examplesDir.toPath() / "diktat-old.jar")))
-        assertTrue(fs.exists((examplesDir.toPath() / "ktlint-old")))
+        assertTrue(fs.exists((examplesDir.toPath() / "diktat.jar")))
+        assertTrue(fs.exists((examplesDir.toPath() / "ktlint")))
 
         // Make sure, that we will check report, which will be obtained after current execution; remove old report if exist
         val reportFile = examplesDir.toPath() / "save.out.json".toPath()

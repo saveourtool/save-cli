@@ -50,7 +50,7 @@ fun runTestsWithDiktat(
     mutableTestDir.add(0, "../examples/kotlin-diktat/")
 
     val saveProperties = SaveProperties(
-        logType = LogType.ALL,
+        logType = LogType.DEBUG,
         testFiles = mutableTestDir,
         reportType = ReportType.TEST,
         resultOutput = OutputStreamType.STDOUT,
