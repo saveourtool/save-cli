@@ -25,9 +25,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.konan
-          key: ${{ runner.os }}-gradle-konan-1.6.20
+          key: ${{ runner.os }}-gradle-konan-1.7.0
           restore-keys: |
-            ${{ runner.os }}-gradle-konan-1.6.20
+            ${{ runner.os }}-gradle-konan-1.7.0
       - uses: burrunan/gradle-cache-action@v1
         with:
           gradle-version: wrapper
@@ -75,9 +75,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: 'C:\Users\runneradmin\.konan'
-          key: Windows-gradle-konan
+          key: Windows-gradle-konan-1.7.0
           restore-keys: |
-            Windows-gradle-konan
+            Windows-gradle-konan-1.7.0
       - uses: burrunan/gradle-cache-action@v1
         with:
           gradle-version: wrapper
