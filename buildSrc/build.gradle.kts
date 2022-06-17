@@ -1,5 +1,5 @@
 plugins {
-    `kotlin-dsl` version "2.3.3"
+    `kotlin-dsl` version "2.2.0"
 }
 
 repositories {
