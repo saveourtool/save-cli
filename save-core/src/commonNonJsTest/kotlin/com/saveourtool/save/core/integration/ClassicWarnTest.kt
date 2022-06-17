@@ -53,7 +53,7 @@ class ClassicWarnTest {
     }
 
     @Test
-    fun `executing warn plugin on directory, files are set with regex`() {
+    fun `executing warn plugin on directory when files are set with regex`() {
         runTestsWithDiktat(
             listOf(
                 "warn/chapter1/TestsWithRegex"

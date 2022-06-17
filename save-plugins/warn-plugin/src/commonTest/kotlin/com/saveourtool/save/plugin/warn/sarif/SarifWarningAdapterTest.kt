@@ -141,13 +141,13 @@ class SarifWarningAdapterTest {
     }
 
     @Test
-    fun `should filter out warnings from other files - absolute paths, testRoot relative`() {
+    fun `should filter out warnings from other files - absolute paths with testRoot being relative`() {
         val warnings = extractWarningsWithAbsolutePathsFromSarif("tests".toPath())
         assertEquals(1, warnings.size)
     }
 
     @Test
-    fun `should filter out warnings from other files - absolute paths, testRoot absolute`() {
+    fun `should filter out warnings from other files - absolute paths with testRoot being absolute`() {
         val warnings = extractWarningsWithAbsolutePathsFromSarif("${getWorkingDirectory()}${sp}tests".toPath())
         assertEquals(1, warnings.size)
     }

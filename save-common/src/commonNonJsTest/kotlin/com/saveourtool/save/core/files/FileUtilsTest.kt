@@ -91,7 +91,7 @@ class FileUtilsTest {
     }
 
     @Test
-    fun `create relative path, when config and test resource located in the same directory`() {
+    fun `create relative path when config and test resource located in the same directory`() {
         val config = fs.createFile(tmpDir / "save.toml")
         val testFile = fs.createFile(tmpDir / "Test1Test.java")
 

@@ -95,7 +95,6 @@ class GeneralTest {
         reports.forEach { report ->
             report.pluginExecutions.forEach { pluginExecution ->
                 pluginExecution.testResults.find { result ->
-                    println(result.status)
                     // FixMe: if we will have other failing tests - we will make the logic less hardcoded
                     result.resources.test.name != "GarbageTest.kt" &&
                             result.resources.test.name != "ThisShouldAlwaysFailTest.kt" &&

@@ -107,6 +107,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
         logDebug("Executing: $cmd with timeout $timeOutMillis ms")
         val status = try {
             processBuilderInternal.exec(cmd, timeOutMillis)
+
         } catch (ex: ProcessTimeoutException) {
             fs.deleteRecursively(tmpDir)
             throw ex
@@ -114,10 +115,12 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
             fs.deleteRecursively(tmpDir)
             logErrorAndThrowProcessBuilderException(ex.message ?: "Couldn't execute $cmd")
         }
+
         val stdout = fs.readLines(stdoutFile)
 
         println("HERE $stdout")
         val stderr = fs.readLines(stderrFile)
+
         fs.myDeleteRecursively(tmpDir)
         logTrace("Removed temp directory $tmpDir")
         if (stderr.isNotEmpty()) {
