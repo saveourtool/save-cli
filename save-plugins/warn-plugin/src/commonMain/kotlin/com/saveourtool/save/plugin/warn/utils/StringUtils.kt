@@ -35,7 +35,7 @@ fun String.findDelimitedSubStringsWith(openingDelimiter: String, closingDelimite
             }
             result[offset + delimitedGroup.first] = offset + delimitedGroup.second
             // updating the offset for
-            offset += delimitedGroup.second  + closingDelimiter.length
+            offset += delimitedGroup.second + closingDelimiter.length
         }
         result
     }

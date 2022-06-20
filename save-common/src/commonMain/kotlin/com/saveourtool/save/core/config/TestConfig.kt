@@ -197,7 +197,7 @@ data class TestConfig(
             pluginConfigs[index] = config.validateAndSetDefaults()
         }
         logDebug("Validated plugin configuration for [$location] " +
-                "(${pluginConfigs.map { it.type }.filterNot {  it == TestConfigSections.GENERAL }})")
+                "(${pluginConfigs.map { it.type }.filterNot { it == TestConfigSections.GENERAL }})")
     }
 }
 

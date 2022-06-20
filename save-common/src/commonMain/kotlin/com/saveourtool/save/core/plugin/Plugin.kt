@@ -119,7 +119,7 @@ abstract class Plugin(
             val foundTestsInDir = foundTests.filter { testFile -> testFile.test.toString() in testFiles }
             if (foundTests.isNotEmpty()) {
                 logDebug("Following tests have been detected for the current plugin and directory: " +
-                        "${foundTestsInDir.map {  it.test.toString()} }. ")
+                        "${foundTestsInDir.map { it.test.toString() } }. ")
             }
             return foundTests.asSequence()
         } else {

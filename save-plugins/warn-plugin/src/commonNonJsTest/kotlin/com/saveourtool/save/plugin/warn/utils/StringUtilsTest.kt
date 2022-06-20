@@ -58,6 +58,7 @@ class StringUtilsTest {
     }
 
     @Test
+    @Suppress("SAY_NO_TO_VAR")
     fun `regression with regular expressions`() {
         var test = "aaa{{ should }}bbb{{ UPPER_CASE }}ccc{{.*}}"
         var regex = test.createRegexFromString("{{", "}}")
