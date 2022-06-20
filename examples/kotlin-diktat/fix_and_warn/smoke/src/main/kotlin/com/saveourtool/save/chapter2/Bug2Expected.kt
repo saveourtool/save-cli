@@ -32,16 +32,11 @@ internal fun createWithFile(
 private fun foo(node: ASTNode) {
     when (node.elementType) {
         CLASS, FUN, PRIMARY_CONSTRUCTOR, SECONDARY_CONSTRUCTOR -> checkAnnotation(node)
-        else -> {
-            // this is a generated else block
-        }
     }
     val qwe = a &&
-            // ;warn:41:1: [WRONG_INDENTATION] only spaces are allowed for indentation and each indentation should equal to 4 spaces (tabs are not allowed): expected 12 but was 8{{.*}}
-        b
+            b
     val qwe = a &&
-            // ;warn:44:1: [WRONG_INDENTATION] only spaces are allowed for indentation and each indentation should equal to 4 spaces (tabs are not allowed): expected 12 but was 8{{.*}}
-        b
+            b
 
     // comment
     if (x) {

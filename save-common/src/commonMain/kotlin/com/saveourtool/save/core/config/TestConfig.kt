@@ -146,8 +146,8 @@ data class TestConfig(
                 .filter { plugin ->
                     plugin.discoverTestFiles(directory).any().also { isNotEmpty ->
                         if (!isNotEmpty) {
-                            logDebug("Plugin <${plugin::class.simpleName}> in config file ${plugin.testConfig.location} has no test resources; " +
-                                    "it's config will only be used for inheritance")
+                            logDebug("Plugin <${plugin::class.simpleName}> in config file ${plugin.testConfig.location} has no test resources in the same directory; " +
+                                    "it's config will only be used for inheritance of configuration to nested test suites")
                         }
                     }
                 }
@@ -165,10 +165,10 @@ data class TestConfig(
      * @return merged test config
      */
     fun mergeConfigWithParents(): TestConfig {
-        logDebug("Start merging configs for ${this.location}")
+        logDebug("Merging configs  (with parental configs from higher directory level) for ${this.location}")
 
         this.parentConfigs().toList().forEach { parentConfig ->
-            logTrace("Processing config ${parentConfig.location} for merging with ${this.location}")
+            logTrace("Using parental config ${parentConfig.location} to merge it with child config: ${this.location}")
             // return from the function if we stay at the root element of the plugin tree
             val parentalPlugins = parentConfig.pluginConfigs
             parentalPlugins.forEach { parentalPluginConfig ->
@@ -179,11 +179,10 @@ data class TestConfig(
                 } else {
                     // else, we will merge plugin with a corresponding plugin from a parent config
                     // we expect that there is only one plugin of such type, otherwise we will throw an exception
-                    logTrace("Starting actual merge of ${parentalPluginConfig.type} from ${parentConfig.location} into $location")
+                    logTrace("Starting merging process of ${parentalPluginConfig.type} from ${parentConfig.location} into $location")
                     val mergedConfig = childConfigs.single().mergeWith(parentalPluginConfig)
-                    logTrace("Finished actual merge of ${parentalPluginConfig.type} from ${parentConfig.location} into $location")
+                    logTrace("Finished merging process of ${parentalPluginConfig.type} from ${parentConfig.location} into $location")
                     this.pluginConfigs.set(this.pluginConfigs.indexOf(childConfigs.single()), mergedConfig)
-                    logTrace("Added merged config ${parentalPluginConfig.type} from ${parentConfig.location} into $location")
                 }
             }
         }
@@ -194,10 +193,11 @@ data class TestConfig(
      * Method, which validates all plugin configs and set default values, if possible
      */
     fun validateAndSetDefaults() {
-        logDebug("Start plugin validation for $location")
         pluginConfigs.forEachIndexed { index, config ->
             pluginConfigs[index] = config.validateAndSetDefaults()
         }
+        logDebug("Validated plugin configuration for [$location] " +
+                "(${pluginConfigs.map { it.type }.filterNot {  it == TestConfigSections.GENERAL }})")
     }
 }
 
