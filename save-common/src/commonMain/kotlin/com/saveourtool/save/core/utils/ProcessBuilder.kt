@@ -87,7 +87,8 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
         }
 
         // Temporary directory for stderr and stdout (posix `system()` can't separate streams, so we do it ourselves)
-        val tmpDir = "D:/".toPath()
+        val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY /
+                ("ProcessBuilder_" + Clock.System.now().toEpochMilliseconds()).toPath())
         logTrace("Creating temp directory: $tmpDir")
         // Path to stdout file
         val stdoutFile = tmpDir / "stdout.txt"
@@ -117,8 +118,6 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
         }
 
         val stdout = fs.readLines(stdoutFile)
-
-        println("HERE $stdout")
         val stderr = fs.readLines(stderrFile)
 
         fs.myDeleteRecursively(tmpDir)

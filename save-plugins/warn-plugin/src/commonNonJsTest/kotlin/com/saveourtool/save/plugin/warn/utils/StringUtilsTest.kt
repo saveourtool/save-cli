@@ -62,11 +62,11 @@ class StringUtilsTest {
         var test = "aaa{{ should }}bbb{{ UPPER_CASE }}ccc{{.*}}"
         var regex = test.createRegexFromString("{{", "}}")
 
-        println(regex)
+        assertTrue { regex.matches("aaa should bbb UPPER_CASE ccc TESTTEST]]]") }
 
         test = "[ENUM_VALUE] enum values{{ should }}be in selected{{ UPPER_CASE }}snake/PascalCase format: PascAsl_f{{.*}}"
         regex = test.createRegexFromString("{{", "}}")
 
-        println(regex)
+        assertTrue { regex.matches("[ENUM_VALUE] enum values should be in selected UPPER_CASE snake/PascalCase format: PascAsl_f{{.*}}") }
     }
 }
