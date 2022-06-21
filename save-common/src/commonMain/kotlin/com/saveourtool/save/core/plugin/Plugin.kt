@@ -116,9 +116,10 @@ abstract class Plugin(
                     }
                 }
             }.toList()
-            val notFoundTests = testFiles.filter { testFile -> testFile !in foundTests.map { foundTest -> foundTest.test.toString() } }
-            if (notFoundTests.isNotEmpty()) {
-                logDebug("The following tests were not found: $notFoundTests. Try to make sure you have specified the correct relative path to the files.")
+            val foundTestsInDir = foundTests.filter { testFile -> testFile.test.toString() in testFiles }
+            if (foundTests.isNotEmpty()) {
+                logDebug("Following tests have been detected for the current plugin and directory: " +
+                        "${foundTestsInDir.map { it.test.toString() } }. ")
             }
             return foundTests.asSequence()
         } else {

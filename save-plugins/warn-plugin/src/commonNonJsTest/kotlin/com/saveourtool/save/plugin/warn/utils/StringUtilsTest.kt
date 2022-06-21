@@ -56,4 +56,18 @@ class StringUtilsTest {
         expected = "B BBB"
         assertTrue { regex.matches(expected) }
     }
+
+    @Test
+    @Suppress("SAY_NO_TO_VAR")
+    fun `regression with regular expressions`() {
+        var test = "aaa{{ should }}bbb{{ UPPER_CASE }}ccc{{.*}}"
+        var regex = test.createRegexFromString("{{", "}}")
+
+        assertTrue { regex.matches("aaa should bbb UPPER_CASE ccc TESTTEST]]]") }
+
+        test = "[ENUM_VALUE] enum values{{ should }}be in selected{{ UPPER_CASE }}snake/PascalCase format: PascAsl_f{{.*}}"
+        regex = test.createRegexFromString("{{", "}}")
+
+        assertTrue { regex.matches("[ENUM_VALUE] enum values should be in selected UPPER_CASE snake/PascalCase format: PascAsl_f{{.*}}") }
+    }
 }
