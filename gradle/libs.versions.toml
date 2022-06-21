@@ -9,7 +9,7 @@ kotlinx-coroutines = "1.6.1-native-mt"
 junit = "5.8.2"
 ktoml = "0.2.12"
 multiplatform-diff = "0.4.0"
-kotlinpoet = "1.11.0"
+kotlinpoet = "1.12.0"
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
