@@ -94,9 +94,9 @@ private fun Project.configurePublications() {
         repositories {
             mavenLocal()
         }
-        publications.withType<MavenPublication>().forEach { publication ->
-            publication.artifact(dokkaJar)
-            publication.pom {
+        publications.withType<MavenPublication>().configureEach {
+            this.artifact(dokkaJar)
+            this.pom {
                 name.set(project.name)
                 description.set(project.description ?: project.name)
                 url.set("https://github.com/saveourtool/save")

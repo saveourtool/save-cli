@@ -1,4 +1,5 @@
 rootProject.name = "save"
+includeBuild("build-logic")
 include("save-common")
 include("save-core")
 include("save-cli")
@@ -9,6 +10,7 @@ include("save-reporters")
 include("save-common-test")
 
 dependencyResolutionManagement {
+    // todo: build-logic-settings
     repositories {
         mavenCentral()
         maven {

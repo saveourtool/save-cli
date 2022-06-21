@@ -14,6 +14,7 @@ import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization")
+    id("com.saveourtool.save.buildutils.convention.jacoco")
 }
 
 kotlin {
@@ -105,10 +106,10 @@ kotlin {
     }
 }
 
-configureJacoco()
-configurePublishing()
-configureDiktat()
-configureDetekt()
+//configureJacoco()
+//configurePublishing()
+//configureDiktat()
+//configureDetekt()
 
 tasks.withType<KotlinJvmTest> {
     useJUnitPlatform()
