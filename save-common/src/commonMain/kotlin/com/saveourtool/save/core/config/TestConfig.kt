@@ -122,6 +122,8 @@ data class TestConfig(
      * @return an update this [TestConfig]
      */
     fun processInPlace(createPluginConfigList: (TestConfig) -> List<PluginConfig>): TestConfig {
+        // need to process parent
+        this.parentConfig?.processInPlace(createPluginConfigList)
         // discover plugins from the test configuration
         createPluginConfigList(this).forEach {
             this.pluginConfigs.add(it)

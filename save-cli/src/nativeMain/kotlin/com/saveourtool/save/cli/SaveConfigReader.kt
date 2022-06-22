@@ -15,7 +15,6 @@ import okio.FileNotFoundException
 import okio.FileSystem
 import okio.IOException
 import okio.Path
-import okio.Path.Companion.DIRECTORY_SEPARATOR
 import okio.Path.Companion.toPath
 
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -81,12 +80,7 @@ fun createConfigFromArgs(args: Array<String>): SaveProperties {
         errorAndExitNotValidDir(testFiles.first().toPath())
     }
 
-    val testRootPath = if (testFiles.isNullOrEmpty() || !FileSystem.SYSTEM.metadata(testFiles.first().toPath()).isDirectory) {
-        null
-    } else {
-        testFiles.first()
-    }
-    val propertiesFile = testRootPath + DIRECTORY_SEPARATOR + "save.properties"
+    val propertiesFile = detectPropertiesFile(testFiles)
     val configFromPropertiesFile = readPropertiesFile(propertiesFile)
     // merging two configurations into single [SaveProperties] class with a priority to command line arguments
     val mergedProperties = configFromCli.mergeConfigWithPriorityToThis(configFromPropertiesFile)
@@ -100,14 +94,14 @@ fun createConfigFromArgs(args: Array<String>): SaveProperties {
  * @return an instance of [SaveProperties] deserialized from this file
  */
 @OptIn(ExperimentalSerializationApi::class)
-fun readPropertiesFile(propertiesFileName: String?): SaveProperties {
-    if (propertiesFileName == null || !FileSystem.SYSTEM.exists(propertiesFileName.toPath())) {
+fun readPropertiesFile(propertiesFileName: Path?): SaveProperties {
+    if (propertiesFileName == null) {
         return SaveProperties()
     }
     logDebug("Reading properties from the file: $propertiesFileName")
 
     val properties: Map<String, String> = try {
-        FileSystem.SYSTEM.read(propertiesFileName.toPath()) {
+        fs.read(propertiesFileName) {
             generateSequence { readUtf8Line() }.toList()
         }
             .associate { line ->
@@ -128,6 +122,55 @@ fun readPropertiesFile(propertiesFileName: String?): SaveProperties {
     }
     logDebug("Found properties: $properties")
     return Properties.decodeFromStringMap(serializer(), properties)
+}
+
+private fun detectPropertiesFile(testRootDirectories: List<String>?): Path? {
+    if (testRootDirectories.isNullOrEmpty()) {
+        return null
+    }
+    val commonParent = testRootDirectories
+        .asSequence()
+        .map { it.toPath() }
+        .map { fs.canonicalize(it) }
+        .map { it.toString() }
+        .sortedBy { it.length }
+        .fold<String, String?>(null) { commonParent, testRootDirectory ->
+            if (commonParent == null) {
+                testRootDirectory
+            } else if (commonParent.length < testRootDirectory.length) {
+                commonParent.findCommonParent(testRootDirectory)
+            } else {
+                testRootDirectory.findCommonParent(commonParent)
+            }
+        }
+        ?.toPath()
+    logDebug("Detected common parent: $commonParent")
+    val propertiesFile = findPropertiesFile(commonParent)
+    logDebug("Found properties file: $propertiesFile")
+    return propertiesFile
+}
+
+private fun String.pathParent(): String? = this.toPath().parent?.toString()
+
+private fun String?.findCommonParent(anotherPath: String): String? = if (this == null) {
+    null
+} else if (anotherPath.startsWith(this)) {
+    this
+} else {
+    this.pathParent().findCommonParent(anotherPath)
+}
+
+private fun findPropertiesFile(commonParent: Path?): Path? {
+    return if (commonParent == null) {
+        null
+    } else {
+        val propertiesFilePath = commonParent.resolve("save.properties")
+        if (fs.exists(propertiesFilePath)) {
+            propertiesFilePath
+        } else {
+            findPropertiesFile(commonParent.parent)
+        }
+    }
 }
 
 private fun tryToUpdateDebugLevel(properties: SaveProperties) {
