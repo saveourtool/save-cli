@@ -32,8 +32,7 @@ data class ExpectedFail(val testName: String, val reason: String)
 /**
  * @param testDir `testFiles` as accepted by save-cli
  * @param numberOfTests expected number of executed tests with this configuration
- * @param expectedFail list of expected failed tests
- * @param addProperties lambda to add/override SaveProperties during test
+ * @param overrideProperties lambda to override SaveProperties during test
  * @return TestReporter
  */
 @Suppress(
@@ -43,24 +42,20 @@ data class ExpectedFail(val testName: String, val reason: String)
 fun runTestsWithDiktat(
     testDir: List<String>?,
     numberOfTests: Int,
-    expectedFail: List<ExpectedFail> = listOf(),
-    addProperties: SaveProperties.() -> Unit = {},
+    overrideProperties: (SaveProperties) -> SaveProperties = { it },
 ): TestReporter {
-    val mutableTestDir: MutableList<String> = mutableListOf()
-    testDir?.let { mutableTestDir.addAll(testDir) }
-    mutableTestDir.add(0, "../examples/kotlin-diktat/")
-
     val saveProperties = SaveProperties(
-        testFiles = mutableTestDir,
+        testRootDir = "../examples/kotlin-diktat/",
+        testFiles = testDir ?: emptyList(),
         reportType = ReportType.TEST,
         resultOutput = OutputStreamType.STDOUT,
-    ).apply { addProperties() }
+    ).let(overrideProperties)
 
-    // logger is not set from save properties without a config reader, need to set it explicily
+    // logger is not set from save properties without a config reader, need to set it explicitly
     logType.set(LogType.ALL)
     // In this test we need to merge with emulated empty save.properties file in aim to use default values,
     // since initially all fields are null
-    val save = Save(saveProperties.mergeConfigWithPriorityToThis(SaveProperties()), FileSystem.SYSTEM)
+    val save = Save(saveProperties, FileSystem.SYSTEM)
     val testReporter = save.performAnalysis() as TestReporter
 
     assertEquals(numberOfTests, testReporter.results.size)

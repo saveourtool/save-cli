@@ -1,5 +1,6 @@
 
-import com.saveourtool.save.generation.configFilePath
+import com.saveourtool.save.generation.argumentsConfigFilePath
+import com.saveourtool.save.generation.optionsConfigFilePath
 import com.saveourtool.save.generation.generateConfigOptions
 
 import de.undercouch.gradle.tasks.download.Download
@@ -40,7 +41,8 @@ kotlin {
 }
 
 val generateConfigOptionsTaskProvider = tasks.register("generateConfigOptions") {
-    inputs.file(configFilePath())
+    inputs.file(optionsConfigFilePath())
+    inputs.file(argumentsConfigFilePath())
     val generatedFile = File("$buildDir/generated/src/com/saveourtool/save/core/config/SaveProperties.kt")
     outputs.file(generatedFile)
 

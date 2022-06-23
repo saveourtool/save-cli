@@ -37,7 +37,7 @@
       "fullName" : "baseline",
       "shortName" : "b",
       "description" : "Path to the file with baseline data",
-      "default" : "null"
+      "default" : null
     },
     "excludeSuites" : {
       "argType" : "ArgType.String",
@@ -45,7 +45,7 @@
       "fullName" : "exclude-suites",
       "shortName" : "e",
       "description" : "Test suites, which won't be checked",
-      "default" : "null"
+      "default" : null
     },
     "includeSuites" : {
       "argType" : "ArgType.String",
@@ -53,7 +53,7 @@
       "fullName" : "include-suites",
       "shortName" : "i",
       "description" : "Test suites, only which ones will be checked",
-      "default" : "null"
+      "default" : null
     },
     "language" : {
       "argType" : "ArgType.Choice<LanguageType>()",

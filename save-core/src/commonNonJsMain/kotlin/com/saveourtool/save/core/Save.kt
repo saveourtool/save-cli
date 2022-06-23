@@ -6,6 +6,7 @@ import com.saveourtool.save.core.config.SAVE_VERSION
 import com.saveourtool.save.core.config.SaveProperties
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.config.isSaveTomlConfig
+import com.saveourtool.save.core.config.resolveSaveTomlConfig
 import com.saveourtool.save.core.files.ConfigDetector
 import com.saveourtool.save.core.files.StdStreamsSink
 import com.saveourtool.save.core.logging.logDebug
@@ -56,10 +57,9 @@ class Save(
     fun performAnalysis(): Reporter {
         logInfo("Welcome to SAVE version $SAVE_VERSION")
         // FixMe: now we work only with the save.toml config and it's hierarchy, but we should work properly here with directories as well
-        val testRootPath = saveProperties.testFiles!![0].toPath()
-        val rootTestConfigPath = testRootPath / "save.toml"
-        val (requestedConfigs, requestedTests) = saveProperties.testFiles!!
-            .drop(1)
+        val testRootPath = saveProperties.testRootDir.toPath()
+        val rootTestConfigPath = testRootPath.resolveSaveTomlConfig()
+        val (requestedConfigs, requestedTests) = saveProperties.testFiles
             .map { testRootPath / it }
             .map { it.toString() }
             .partition { it.toPath().isSaveTomlConfig() }
@@ -166,13 +166,13 @@ class Save(
 
     private fun getReporter(saveProperties: SaveProperties): Reporter {
         val outFileBaseName = "save.out"  // todo: make configurable
-        val outFileName = when (saveProperties.reportType!!) {
+        val outFileName = when (saveProperties.reportType) {
             ReportType.PLAIN, ReportType.PLAIN_FAILED, ReportType.TEST -> outFileBaseName
             ReportType.JSON -> "$outFileBaseName.json"
             ReportType.XML -> "$outFileBaseName.xml"
             ReportType.TOML -> "$outFileBaseName.toml"
         }
-        val out = when (val currentOutputType = saveProperties.resultOutput!!) {
+        val out = when (val currentOutputType = saveProperties.resultOutput) {
             OutputStreamType.FILE -> fs.sink(outFileName.toPath()).buffer()
             OutputStreamType.STDOUT, OutputStreamType.STDERR -> StdStreamsSink(currentOutputType).buffer()
         }
