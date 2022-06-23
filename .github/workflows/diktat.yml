@@ -2,15 +2,12 @@ name: Run diKTat
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
 
 jobs:
   diktat_check:
-    runs-on: ubuntu-20.04
-    env:
-      GRADLE_OPTS: -Dorg.gradle.daemon=false
-
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 11
