@@ -183,6 +183,7 @@ fun Project.generateConfigOptions(destination: File) {
 /**
  * Read config from provided file
  *
+ * @param T type of object in config file
  * @param configFile a path to file
  * @return map which is parsed from file [confinFile]
  */
