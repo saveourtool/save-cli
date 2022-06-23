@@ -28,23 +28,18 @@ jobs:
           key: ${{ runner.os }}-gradle-konan-1.7.0
           restore-keys: |
             ${{ runner.os }}-gradle-konan-1.7.0
-      - uses: burrunan/gradle-cache-action@v1
+      - uses: gradle/gradle-build-action@v2
         with:
           gradle-version: wrapper
-          # additional files to calculate key for dependency cache
-          gradle-dependencies-cache-key: |
-            buildSrc/**/Versions.kt
-          # Note: https://github.com/burrunan/gradle-cache-action/issues/42 can possible break this
           arguments: |
             build
             -x detekt
-          properties: |
-            org.gradle.caching=true
-            detekt.multiplatform.disabled=true
-            disableRedundantTargets=true
-            enabledExecutables=debug
-            gprUser=${{ github.actor }}
-            gprKey=${{ secrets.GITHUB_TOKEN }}
+            -Porg.gradle.caching=true
+            -Pdetekt.multiplatform.disabled=true
+            -PdisableRedundantTargets=true
+            -PenabledExecutables=debug
+            -PgprUser=${{ github.actor }}
+            -PgprKey=${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload gradle reports
         if: ${{ always() }}
@@ -78,23 +73,18 @@ jobs:
           key: Windows-gradle-konan-1.7.0
           restore-keys: |
             Windows-gradle-konan-1.7.0
-      - uses: burrunan/gradle-cache-action@v1
+      - uses: gradle/gradle-build-action@v2
         with:
           gradle-version: wrapper
-          # additional files to calculate key for dependency cache
-          gradle-dependencies-cache-key: |
-            buildSrc/**/Versions.kt
-          # Note: https://github.com/burrunan/gradle-cache-action/issues/42 can possibly break this
           arguments: |
             build
             -x detekt
-          properties: |
-            org.gradle.caching=true
-            detekt.multiplatform.disabled=true
-            disableRedundantTargets=true
-            enabledExecutables=debug
-            gprUser=${{ github.actor }}
-            gprKey=${{ secrets.GITHUB_TOKEN }}
+            -Porg.gradle.caching=true
+            -Pdetekt.multiplatform.disabled=true
+            -PdisableRedundantTargets=true
+            -PenabledExecutables=debug
+            -PgprUser=${{ github.actor }}
+            -PgprKey=${{ secrets.GITHUB_TOKEN }}
       - name: Upload gradle reports
         if: ${{ always() }}
         uses: actions/upload-artifact@v3
