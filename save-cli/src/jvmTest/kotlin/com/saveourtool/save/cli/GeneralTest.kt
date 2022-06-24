@@ -28,7 +28,6 @@ import kotlinx.serialization.decodeFromString
     "MISSING_KDOC_TOP_LEVEL",
     "MISSING_KDOC_CLASS_ELEMENTS"
 )
-@OptIn(ExperimentalSerializationApi::class)
 class GeneralTest {
     private val fs = FileSystem.SYSTEM
 
@@ -100,7 +99,10 @@ class GeneralTest {
                             result.resources.test.name != "ThisShouldAlwaysFailTest.kt" &&
                             !result.resources.test.toString().contains("warn${Path.DIRECTORY_SEPARATOR}chapter2")
                 }?.let {
-                    assertTrue(it.status is Pass)
+                    assertTrue(
+                        it.status is Pass,
+                        "Test on resources ${it.resources} was expected to pass, but actually has status ${it.status}: $it"
+                    )
                 }
             }
         }
