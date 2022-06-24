@@ -181,19 +181,6 @@ fun Project.generateConfigOptions(destination: File) {
 }
 
 /**
- * Read config from provided file
- *
- * @param configFile a path to file
- * @return map which is parsed from file [confinFile]
- */
-fun <T> readConfig(configFile: String): Map<String, T> {
-    val gson = Gson()
-    val bufferedReader: BufferedReader = File(configFile).bufferedReader()
-    val jsonString = bufferedReader.use { it.readText() }
-    return gson.fromJson(jsonString, object : TypeToken<Map<String, T>>() {}.type)
-}
-
-/**
  * Generate SaveProperties class which represents configuration properties of SAVE application
  *
  * @param options map of cli option names to [Option] objects
@@ -360,4 +347,17 @@ fun generateReadme(jsonObject: Map<String, Option>, destination: File) {
         readmeContent += "\n| $shortName | $longName | $description | $default |"
     }
     destination.writeText(readmeContent)
+}
+
+/**
+ * Read config from provided file
+ *
+ * @param configFile a path to file
+ * @return map which is parsed from file [confinFile]
+ */
+private inline fun <reified T> readConfig(configFile: String): Map<String, T> {
+    val gson = Gson()
+    val bufferedReader: BufferedReader = File(configFile).bufferedReader()
+    val jsonString = bufferedReader.use { it.readText() }
+    return gson.fromJson(jsonString, object : TypeToken<Map<String, T>>() {}.type)
 }

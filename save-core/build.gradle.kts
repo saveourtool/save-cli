@@ -1,7 +1,7 @@
 
 import com.saveourtool.save.generation.argumentsConfigFilePath
-import com.saveourtool.save.generation.optionsConfigFilePath
 import com.saveourtool.save.generation.generateConfigOptions
+import com.saveourtool.save.generation.optionsConfigFilePath
 
 import de.undercouch.gradle.tasks.download.Download
 import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
