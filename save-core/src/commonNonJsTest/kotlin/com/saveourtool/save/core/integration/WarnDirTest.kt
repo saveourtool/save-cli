@@ -2,9 +2,11 @@ package com.saveourtool.save.core.integration
 
 import com.saveourtool.save.core.test.utils.runTestsWithDiktat
 
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
+@Ignore  // https://github.com/saveourtool/save-cli/issues/402
 class WarnDirTest {
     @Test
     fun `execute warn plugin on the directory chapter1`() {
