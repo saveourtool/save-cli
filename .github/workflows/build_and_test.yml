@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-latest, macos-latest ]
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
 
     steps:
       - uses: actions/checkout@v3
@@ -24,27 +24,24 @@ jobs:
       - name: Cache konan
         uses: actions/cache@v3
         with:
+          # [@actions/glob](https://github.com/actions/toolkit/tree/main/packages/glob) is used to match paths
+          # It should correctly expand `~` on every OS.
           path: ~/.konan
           key: ${{ runner.os }}-gradle-konan-1.7.0
           restore-keys: |
             ${{ runner.os }}-gradle-konan-1.7.0
-      - uses: burrunan/gradle-cache-action@v1
+      - uses: gradle/gradle-build-action@v2
         with:
           gradle-version: wrapper
-          # additional files to calculate key for dependency cache
-          gradle-dependencies-cache-key: |
-            buildSrc/**/Versions.kt
-          # Note: https://github.com/burrunan/gradle-cache-action/issues/42 can possible break this
           arguments: |
             build
             -x detekt
-          properties: |
-            org.gradle.caching=true
-            detekt.multiplatform.disabled=true
-            disableRedundantTargets=true
-            enabledExecutables=debug
-            gprUser=${{ github.actor }}
-            gprKey=${{ secrets.GITHUB_TOKEN }}
+            -Porg.gradle.caching=true
+            -Pdetekt.multiplatform.disabled=true
+            -PdisableRedundantTargets=true
+            -PenabledExecutables=debug
+            -PgprUser=${{ github.actor }}
+            -PgprKey=${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload gradle reports
         if: ${{ always() }}
@@ -58,47 +55,3 @@ jobs:
         with:
           flags: unittests
           fail_ci_if_error: false # optional (default = false)
-
-  build_and_test_win:
-    name: Build and test on Win
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-      - name: Set up JDK 11
-        uses: actions/setup-java@v3
-        with:
-          java-version: 11
-          distribution: temurin
-      - name: Cache konan
-        uses: actions/cache@v3
-        with:
-          path: 'C:\Users\runneradmin\.konan'
-          key: Windows-gradle-konan-1.7.0
-          restore-keys: |
-            Windows-gradle-konan-1.7.0
-      - uses: burrunan/gradle-cache-action@v1
-        with:
-          gradle-version: wrapper
-          # additional files to calculate key for dependency cache
-          gradle-dependencies-cache-key: |
-            buildSrc/**/Versions.kt
-          # Note: https://github.com/burrunan/gradle-cache-action/issues/42 can possibly break this
-          arguments: |
-            build
-            -x detekt
-          properties: |
-            org.gradle.caching=true
-            detekt.multiplatform.disabled=true
-            disableRedundantTargets=true
-            enabledExecutables=debug
-            gprUser=${{ github.actor }}
-            gprKey=${{ secrets.GITHUB_TOKEN }}
-      - name: Upload gradle reports
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: gradle-reports-windows-latest
-          path: '**/build/reports/'
-          retention-days: 1
