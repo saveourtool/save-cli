@@ -3,9 +3,7 @@
     description = "Test warnings discovered by diKTat, reading expected warnings from SARIF file"
     suiteName = "Only Warnings: with SARIF format"
     expectedWarningsPattern = "// ;warn:?(.*):(\\d+):? ?(.+)?"
-    execCmd = "java -jar ktlint --disabled_rules=standard -R diktat.jar"
-
-
+    execCmd = "java -Dlogback.configurationFile=logback.xml -jar ktlint --disabled_rules=standard -R diktat.jar"
 
 [warn]
     execFlags = "--reporter=sarif"
