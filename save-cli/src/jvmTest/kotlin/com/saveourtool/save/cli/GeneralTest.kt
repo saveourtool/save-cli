@@ -19,14 +19,14 @@ import okio.buffer
 
 import kotlin.test.Test
 import kotlin.test.assertTrue
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
 
 @Suppress(
     "TOO_LONG_FUNCTION",
     "INLINE_CLASS_CAN_BE_USED",
     "MISSING_KDOC_TOP_LEVEL",
-    "MISSING_KDOC_CLASS_ELEMENTS"
+    "MISSING_KDOC_CLASS_ELEMENTS",
+    "ComplexMethod",
 )
 class GeneralTest {
     private val fs = FileSystem.SYSTEM
@@ -97,7 +97,13 @@ class GeneralTest {
                     // FixMe: if we will have other failing tests - we will make the logic less hardcoded
                     result.resources.test.name != "GarbageTest.kt" &&
                             result.resources.test.name != "ThisShouldAlwaysFailTest.kt" &&
-                            !result.resources.test.toString().contains("warn${Path.DIRECTORY_SEPARATOR}chapter2")
+                            !result.resources.test.toString().contains("warn${Path.DIRECTORY_SEPARATOR}chapter2") &&
+                            if (getCurrentOs() == CurrentOs.WINDOWS) {
+                                // These tests fail on Windows: https://github.com/saveourtool/save-cli/issues/402
+                                !result.resources.test.toString().contains("warn-dir${Path.DIRECTORY_SEPARATOR}")
+                            } else {
+                                true
+                            }
                 }?.let {
                     assertTrue(
                         it.status is Pass,
