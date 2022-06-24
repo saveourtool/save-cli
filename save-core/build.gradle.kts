@@ -4,6 +4,8 @@ import com.saveourtool.save.generation.generateConfigOptions
 
 import de.undercouch.gradle.tasks.download.Download
 import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 
 plugins {
     id("com.saveourtool.save.buildutils.kotlin-library")
@@ -78,8 +80,10 @@ tasks.register<Download>("downloadTestResources") {
     ))
     dest("../examples/kotlin-diktat")
     doLast {
-        file("../examples/kotlin-diktat/diktat-${Versions.IntegrationTest.diktat}.jar").renameTo(
-            file("../examples/kotlin-diktat/diktat.jar")
+        Files.move(
+            file("../examples/kotlin-diktat/diktat-${Versions.IntegrationTest.diktat}.jar").toPath(),
+            file("../examples/kotlin-diktat/diktat.jar").toPath(),
+            StandardCopyOption.REPLACE_EXISTING
         )
     }
 }

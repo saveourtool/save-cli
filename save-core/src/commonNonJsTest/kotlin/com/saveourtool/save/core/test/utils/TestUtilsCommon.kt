@@ -70,7 +70,7 @@ fun runTestsWithDiktat(
             assertEquals(
                 Fail(
                     "(MISSING WARNINGS):" +
-                            " [Warning(message=[DUMMY_ERROR] this error should not match, line=8, column=1," +
+                            " [Warning(message=[DUMMY_ERROR] this error should not match{{.*}}, line=8, column=1," +
                             " fileName=ThisShouldAlwaysFailTest.kt)]",
                     "(MISSING WARNINGS): (1). (MATCHED WARNINGS): (1)"
                 ), test.status
