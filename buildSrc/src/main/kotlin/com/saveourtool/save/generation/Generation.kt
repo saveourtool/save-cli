@@ -183,11 +183,10 @@ fun Project.generateConfigOptions(destination: File) {
 /**
  * Read config from provided file
  *
- * @param T type of object in config file
  * @param configFile a path to file
  * @return map which is parsed from file [confinFile]
  */
-inline fun <reified T> readConfig(configFile: String): Map<String, T> {
+fun <T> readConfig(configFile: String): Map<String, T> {
     val gson = Gson()
     val bufferedReader: BufferedReader = File(configFile).bufferedReader()
     val jsonString = bufferedReader.use { it.readText() }
