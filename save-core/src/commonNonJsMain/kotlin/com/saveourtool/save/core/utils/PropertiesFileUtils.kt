@@ -14,6 +14,7 @@ class PropertiesFileUtils {
          * @param fs implementation of [FileSystem]
          * @param propertiesFilePath path to a properties file
          * @return map of String to String with content of properties file
+         * @throws IOException failed to read properties file
          */
         @Suppress("TOO_LONG_FUNCTION")
         fun read(fs: FileSystem, propertiesFilePath: Path): Map<String, String> {
@@ -29,7 +30,7 @@ class PropertiesFileUtils {
                         line.split("=", limit = 2).let {
                             if (it.size != 2) {
                                 throw IllegalArgumentException("Incorrect format of property in $propertiesFilePath" +
-                                            " Should be <key = value>, but was <$line>")
+                                        " Should be <key = value>, but was <$line>")
                             }
                             it[0].trim() to it[1].trim()
                         }
