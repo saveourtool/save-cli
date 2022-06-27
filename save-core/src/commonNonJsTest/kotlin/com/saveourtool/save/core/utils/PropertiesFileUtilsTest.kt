@@ -12,7 +12,6 @@ class PropertiesFileUtilsTest {
     private val fs: FileSystem = FileSystem.SYSTEM
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / PropertiesFileUtilsTest::class.simpleName!!)
 
-
     @Test
     fun `read properties file`() {
         val testFile = tmpDir / "default.properties"
