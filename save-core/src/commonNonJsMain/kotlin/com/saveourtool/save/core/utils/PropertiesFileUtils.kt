@@ -15,6 +15,7 @@ class PropertiesFileUtils {
          * @param propertiesFilePath path to a properties file
          * @return map of String to String with content of properties file
          * @throws IOException failed to read properties file
+         * @throws IllegalArgumentException properties files has invalid format
          */
         @Suppress("TOO_LONG_FUNCTION")
         fun read(fs: FileSystem, propertiesFilePath: Path): Map<String, String> {
