@@ -2,7 +2,10 @@
  * This file contains code for codegen: generating a list of options for config files and README.
  */
 
-@file:Suppress("FILE_NAME_MATCH_CLASS")
+@file:Suppress(
+    "FILE_NAME_MATCH_CLASS",
+    "FILE_IS_TOO_LONG"
+)
 
 package com.saveourtool.save.generation
 
