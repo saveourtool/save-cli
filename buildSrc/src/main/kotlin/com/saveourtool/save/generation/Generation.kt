@@ -20,6 +20,7 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.asClassName
 import org.gradle.api.Project
 
 import java.io.BufferedReader
@@ -380,15 +381,16 @@ fun extractClassNameFromString(type: String) = ClassName(type.substringBeforeLas
 fun generateParseArgsFunc(options: Map<String, Option>, arguments: Map<String, Argument>): FunSpec.Builder {
     val parseArgsFunc = FunSpec.builder("parseArgs")
     parseArgsFunc.returns(ClassName("com.saveourtool.save.core.config", "SaveProperties"))
-    parseArgsFunc.addParameter("args", ClassName("kotlin", "Array")
-        .parameterizedBy(ClassName("kotlin", "String")))
-    parseArgsFunc.addStatement("val parser = ArgParser(\"save\")")
+    parseArgsFunc.addParameter("fs", ClassName.bestGuess("okio.FileSystem"))
+    parseArgsFunc.addParameter("args", Array::class.asClassName().parameterizedBy(String::class.asClassName()))
+    parseArgsFunc.addStatement("val %N = ArgParser(%S)", "parser", "save")
         .generateOptions(options)
         .generateAgruments(arguments)
-        .addStatement("parser.parse(args)")
-        .addStatement("val propertiesFromFileOrDefault = %T.parsePropertiesFile<%T>(%N, %S)",
+        .addStatement("%N.parse(%N)", "parser", "args")
+        .addStatement("val propertiesFromFileOrDefault = %T.parsePropertiesFile<%T>(%N, %N, %S)",
             ClassName.bestGuess("com.saveourtool.save.core.utils.CliUtils"),
             ClassName("com.saveourtool.save.core.config", "SavePropertiesDefaults"),
+            "fs",
             "testRootDir",
             "save")
         .addStatement("return %T(", ClassName("com.saveourtool.save.core.config", "SaveProperties"))

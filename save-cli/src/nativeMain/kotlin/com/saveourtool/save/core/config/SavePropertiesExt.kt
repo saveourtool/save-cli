@@ -20,7 +20,7 @@ import okio.Path.Companion.toPath
  */
 fun SaveProperties.Companion.of(args: Array<String>): SaveProperties {
     val configFromCli = try {
-        parseArgs(args)
+        parseArgs(FileSystem.SYSTEM, args)
     } catch (e: IOException) {
         return logErrorAndExit(
             ExitCodes.INVALID_CONFIGURATION,

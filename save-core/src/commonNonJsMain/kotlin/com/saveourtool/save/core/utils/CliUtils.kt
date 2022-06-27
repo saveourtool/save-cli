@@ -16,19 +16,20 @@ class CliUtils {
         /**
          * Parse properties file ([rootDir]/[projectName].properties) to [T] structure
          *
+         * @param fs implementation of [FileSystem]
          * @param rootDir
          * @param projectName
          * @return parsed [T] structure
          * @throws IOException when [rootDir] not found
          */
         @OptIn(ExperimentalSerializationApi::class)
-        inline fun <reified T> parsePropertiesFile(rootDir: String, projectName: String): T {
+        inline fun <reified T> parsePropertiesFile(fs: FileSystem, rootDir: String, projectName: String): T {
             val rootDirPath = rootDir.toPath()
-            if (!FileSystem.SYSTEM.exists(rootDirPath) || !FileSystem.SYSTEM.metadata(rootDirPath).isDirectory) {
+            if (!fs.exists(rootDirPath) || !fs.metadata(rootDirPath).isDirectory) {
                 throw IOException("Invalid folder: $rootDir")
             }
             val propertiesFilePath = rootDirPath / "$projectName.properties"
-            val propertiesFileContext = PropertiesFileUtils.read(propertiesFilePath)
+            val propertiesFileContext = PropertiesFileUtils.read(fs, propertiesFilePath)
             return Properties.decodeFromStringMap(propertiesFileContext)
         }
 

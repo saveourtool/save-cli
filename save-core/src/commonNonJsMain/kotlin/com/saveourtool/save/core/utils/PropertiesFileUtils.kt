@@ -7,14 +7,13 @@ import okio.Path
 
 class PropertiesFileUtils {
     companion object {
-        private val fs: FileSystem = FileSystem.SYSTEM
-
         /**
+         * @param fs implementation of [FileSystem]
          * @param propertiesFilePath path to a properties file
          * @return map of String to String with content of properties file
          */
         @Suppress("TOO_LONG_FUNCTION")
-        fun read(propertiesFilePath: Path): Map<String, String> {
+        fun read(fs: FileSystem, propertiesFilePath: Path): Map<String, String> {
             if (!fs.exists(propertiesFilePath)) {
                 return emptyMap()
             }
