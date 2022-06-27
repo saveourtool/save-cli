@@ -14,7 +14,6 @@ import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
-import com.squareup.kotlinpoet.LambdaTypeName
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
@@ -306,11 +305,17 @@ fun generateSavePropertiesClass(options: Map<String, Option>, arguments: Map<Str
     return classBuilder
 }
 
+/**
+ * @param className class name of generating class
+ * @param options map of cli option names to [Option] objects
+ * @param arguments map of cli argument names to [Argument] objects
+ * @return returns a data class which contains only properties are settable via properties file
+ */
 fun genereatePropertiesClassWithDefaults(
     className: String,
     options: Map<String, Option>,
-    arguments: Map<String, Argument>): TypeSpec.Builder {
-
+    arguments: Map<String, Argument>
+): TypeSpec.Builder {
     val classBuilder = TypeSpec.classBuilder("${className}Defaults").addModifiers(KModifier.DATA, KModifier.PRIVATE)
     classBuilder.addAnnotation(AnnotationSpec.builder(ClassName("kotlinx.serialization", "Serializable")).build())
 
@@ -381,7 +386,11 @@ fun generateParseArgsFunc(options: Map<String, Option>, arguments: Map<String, A
         .generateOptions(options)
         .generateAgruments(arguments)
         .addStatement("parser.parse(args)")
-        .addStatement("val propertiesFromFileOrDefault = %T.parsePropertiesFile<%T>(%N, %S)", ClassName.bestGuess("com.saveourtool.save.core.utils.CliUtils"), ClassName("com.saveourtool.save.core.config", "SavePropertiesDefaults"), "testRootDir", "save")
+        .addStatement("val propertiesFromFileOrDefault = %T.parsePropertiesFile<%T>(%N, %S)",
+            ClassName.bestGuess("com.saveourtool.save.core.utils.CliUtils"),
+            ClassName("com.saveourtool.save.core.config", "SavePropertiesDefaults"),
+            "testRootDir",
+            "save")
         .addStatement("return %T(", ClassName("com.saveourtool.save.core.config", "SaveProperties"))
         .assignMembers(options, arguments)
         .addStatement(")")
@@ -436,6 +445,4 @@ private inline fun <reified T> readConfig(configFile: String): Map<String, T> {
     return gson.fromJson(jsonString, object : TypeToken<Map<String, T>>() {}.type)
 }
 
-private fun stringOrLiteral(kotlinType: String): String {
-    return "%" + if (kotlinType.contains("String")) "S" else "L"
-}
+private fun stringOrLiteral(kotlinType: String): String = "%${if (kotlinType.contains("String")) "S" else "L"}"
