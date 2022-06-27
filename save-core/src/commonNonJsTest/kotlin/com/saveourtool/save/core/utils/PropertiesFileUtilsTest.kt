@@ -45,7 +45,6 @@ class PropertiesFileUtilsTest {
         val testFile = tmpDir / "not-existed.properties"
         require(!fs.exists(testFile))
 
-
         assertEquals(
             emptyMap(),
             PropertiesFileUtils.read(fs, testFile)
