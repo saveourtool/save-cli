@@ -1,15 +1,16 @@
 package com.saveourtool.save.core.utils
 
-import kotlinx.cli.ArgParser
-import kotlinx.cli.ArgType
-import kotlinx.cli.default
 import okio.FileSystem
 import okio.IOException
+
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlinx.cli.ArgParser
+import kotlinx.cli.ArgType
+import kotlinx.cli.default
 
 class CliUtilsTest {
     private val fs: FileSystem = FileSystem.SYSTEM
@@ -83,6 +84,10 @@ class CliUtilsTest {
         fs.deleteRecursively(tmpDir)
     }
 
+    /**
+     * @property key1
+     * @property key2
+     */
     @kotlinx.serialization.Serializable
     private data class TestProperties(
         val key1: String,
