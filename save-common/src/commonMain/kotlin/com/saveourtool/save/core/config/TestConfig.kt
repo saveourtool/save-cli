@@ -130,7 +130,7 @@ data class TestConfig(
             this.pluginConfigs.merge(it)
         }
         // merge configurations with parents
-        this.mergeConfigWithParents()
+        this.mergeConfigWithParent()
         return this
     }
 
@@ -168,7 +168,7 @@ data class TestConfig(
      *
      * @return merged test config
      */
-    fun mergeConfigWithParents(): TestConfig {
+    fun mergeConfigWithParent(): TestConfig {
         logDebug("Merging configs  (with parental configs from higher directory level) for ${this.location}")
 
         if (parentConfig != null) {

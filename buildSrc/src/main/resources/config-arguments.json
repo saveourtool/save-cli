@@ -11,6 +11,6 @@
     "kotlinType": "kotlin.collections.List<kotlin.String>",
     "description" : "Paths to individual test files, can be provided to execute only them",
     "vararg": true,
-    "default": "emptyList()"
+    "default": null
   }
 }

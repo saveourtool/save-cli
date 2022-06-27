@@ -21,6 +21,7 @@ kotlin {
                 implementation(projects.saveReporters)
                 api(libs.okio)
                 implementation(libs.kotlinx.serialization.core)
+                implementation(libs.kotlinx.serialization.properties)
                 implementation(libs.kotlinx.cli)
                 implementation(libs.ktoml.core)
                 implementation(libs.ktoml.file)
