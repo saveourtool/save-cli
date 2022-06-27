@@ -108,3 +108,6 @@
   configuration:
     valueArgument: true
     valueParameter: true
+- name: DEBUG_PRINT
+  enabled: true
+  ignoreAnnotated: [ Test ]
