@@ -5,6 +5,9 @@ import okio.FileSystem
 import okio.IOException
 import okio.Path
 
+/**
+ * Util class for processing properties file
+ */
 class PropertiesFileUtils {
     companion object {
         /**
