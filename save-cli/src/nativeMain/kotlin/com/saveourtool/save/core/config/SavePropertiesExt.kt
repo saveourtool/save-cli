@@ -27,7 +27,9 @@ fun SaveProperties.Companion.of(args: Array<String>): SaveProperties {
             "Save expects to get the root directory for test files as the first CLI argument: save [cli-options] <test-root> [...]. " +
                     "Provided value to cli as a root for test directory and is not able to find it. " +
                     "Please provide a valid path to the root directory of test files. " +
-                    "If you wanted to pass a configuration option instead, please check the list of available options using '--help'.")
+                    "If you wanted to pass a configuration option instead, please check the list of available options using '--help'. " +
+                    "Error details: ${e.message}"
+        )
     }
     tryToUpdateDebugLevel(configFromCli)
     logDebug("Using the following properties for SAVE execution:\n${configFromCli.getFields()}")

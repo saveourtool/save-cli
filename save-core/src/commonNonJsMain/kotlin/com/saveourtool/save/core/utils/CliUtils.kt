@@ -29,7 +29,7 @@ inline fun <reified T> FileSystem.parsePropertiesFile(
     rootDir: String,
     projectName: String
 ): T {
-    val rootDirPath = rootDir.toPath().let { if (it.isAbsolute) it else ".".toPath() / rootDir }
+    val rootDirPath = rootDir.toPath()
     if (!this.exists(rootDirPath) || !this.metadata(rootDirPath).isDirectory) {
         throw IOException("Invalid folder: $rootDir")
     }

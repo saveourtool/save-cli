@@ -9,6 +9,7 @@ import com.saveourtool.save.core.config.isSaveTomlConfig
 import com.saveourtool.save.core.config.resolveSaveTomlConfig
 import com.saveourtool.save.core.files.ConfigDetector
 import com.saveourtool.save.core.files.StdStreamsSink
+import com.saveourtool.save.core.files.createFile
 import com.saveourtool.save.core.logging.logDebug
 import com.saveourtool.save.core.logging.logError
 import com.saveourtool.save.core.logging.logInfo
@@ -173,7 +174,13 @@ class Save(
             ReportType.TOML -> "$outFileBaseName.toml"
         }
         val out = when (val currentOutputType = saveProperties.resultOutput) {
-            OutputStreamType.FILE -> fs.sink(outFileName.toPath()).buffer()
+            OutputStreamType.FILE -> {
+                val reportFile = saveProperties.reportDir.toPath() / outFileName
+                logDebug("Created folders to $reportFile")
+                reportFile.parent?.let { fs.createDirectories(it) }
+                logDebug("Created FILE to $reportFile")
+                fs.sink(saveProperties.reportDir.toPath() / outFileName).buffer()
+            }
             OutputStreamType.STDOUT, OutputStreamType.STDERR -> StdStreamsSink(currentOutputType).buffer()
         }
         // todo: make `saveProperties.reportType` a collection
