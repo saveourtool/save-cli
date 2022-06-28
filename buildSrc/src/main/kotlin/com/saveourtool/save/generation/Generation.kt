@@ -188,7 +188,11 @@ fun FunSpec.Builder.generateAgruments(jsonObject: Map<String, Argument>): FunSpe
  * @param arguments map of cli argument names to [Argument] objects
  * @return a corresponding [FunSpec.Builder]
  */
-fun FunSpec.Builder.assignMembers(options: Map<String, Option>, arguments: Map<String, Argument>, overrideFieldName: String): FunSpec.Builder {
+fun FunSpec.Builder.assignMembers(
+    options: Map<String, Option>,
+    arguments: Map<String, Argument>,
+    overrideFieldName: String
+): FunSpec.Builder {
     this.addCode(CodeBlock.builder().indent().build())
     options.forEach { (key, _) ->
         this.addCode(CodeBlock.builder()
