@@ -121,9 +121,7 @@ fun FunSpec.Builder.generateOptions(jsonObject: Map<String, Option>): FunSpec.Bu
                         it.add("shortName = %S,\n", value.shortName)
                     }
                 }
-                // We replace whitespaces to `·`, in aim to avoid incorrect line breaking,
-                // which could be done by kotlinpoet (see https://github.com/square/kotlinpoet/issues/598)
-                .add("description = %S\n", value.description.replace(" ", "·"))
+                .add("description = %S\n", value.description)
                 .unindent()
                 .add(")\n")
                 .also {
@@ -153,9 +151,7 @@ fun FunSpec.Builder.generateAgruments(jsonObject: Map<String, Argument>): FunSpe
             .add("val %N = parser.argument(\n", key + "Argument")
             .indent()
             .add("${value.argType},\n")
-            // We replace whitespaces to `·`, in aim to avoid incorrect line breaking,
-            // which could be done by kotlinpoet (see https://github.com/square/kotlinpoet/issues/598)
-            .add("description = %S\n", value.description.replace(" ", "·"))
+            .add("description = %S\n", value.description)
             .unindent()
             .add(")\n")
             .also {
