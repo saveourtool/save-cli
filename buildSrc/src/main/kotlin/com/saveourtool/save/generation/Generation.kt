@@ -188,19 +188,22 @@ fun FunSpec.Builder.generateAgruments(jsonObject: Map<String, Argument>): FunSpe
  * @param arguments map of cli argument names to [Argument] objects
  * @return a corresponding [FunSpec.Builder]
  */
-fun FunSpec.Builder.assignMembers(options: Map<String, Option>, arguments: Map<String, Argument>): FunSpec.Builder {
-    val cliUtilsClassName = ClassName.bestGuess("com.saveourtool.save.core.utils.CliUtils")
+fun FunSpec.Builder.assignMembers(options: Map<String, Option>, arguments: Map<String, Argument>, overrideFieldName: String): FunSpec.Builder {
     this.addCode(CodeBlock.builder().indent().build())
     options.forEach { (key, _) ->
         this.addCode(CodeBlock.builder()
-            .add("%N = %T.resolveValue(%N, %N, %N.%N),", key, cliUtilsClassName, key + "Option", key, "propertiesFromFileOrDefault", key)
+            .add("%N = %N.%M(%N, %N.%N),", key, key + "Option",
+                MemberName("com.saveourtool.save.core.utils", "resolveValue"),
+                key, overrideFieldName, key)
             .add("\n")
             .build())
     }
     arguments.forEach { (key, value) ->
         if (value.default != null) {
             this.addCode(CodeBlock.builder()
-                .add("%N = %T.resolveValue(%N, %N, %N.%N),", key, cliUtilsClassName, key + "Argument", key, "propertiesFromFileOrDefault", key)
+                .add("%N = %N.%M(%N, %N.%N),", key, key + "Argument",
+                    MemberName("com.saveourtool.save.core.utils", "resolveValue"),
+                    key, overrideFieldName, key)
                 .add("\n")
                 .build())
         } else {
@@ -386,18 +389,20 @@ fun generateParseArgsFunc(options: Map<String, Option>, arguments: Map<String, A
     parseArgsFunc.returns(ClassName("com.saveourtool.save.core.config", "SaveProperties"))
     parseArgsFunc.addParameter("fs", ClassName.bestGuess("okio.FileSystem"))
     parseArgsFunc.addParameter("args", Array::class.asClassName().parameterizedBy(String::class.asClassName()))
+    val overrideFieldName = "propertiesFromFileOrDefault"
     parseArgsFunc.addStatement("val %N = ArgParser(%S)", "parser", "save")
         .generateOptions(options)
         .generateAgruments(arguments)
         .addStatement("%N.parse(%N)", "parser", "args")
-        .addStatement("val propertiesFromFileOrDefault = %T.parsePropertiesFile<%T>(%N, %N, %S)",
-            ClassName.bestGuess("com.saveourtool.save.core.utils.CliUtils"),
+        .addStatement("val %N: %T = %N.%M(%N, %S)",
+            overrideFieldName,
             ClassName("com.saveourtool.save.core.config", "SavePropertiesDefaults"),
             "fs",
+            MemberName("com.saveourtool.save.core.utils", "parsePropertiesFile"),
             "testRootDir",
             "save")
         .addStatement("return %T(", ClassName("com.saveourtool.save.core.config", "SaveProperties"))
-        .assignMembers(options, arguments)
+        .assignMembers(options, arguments, overrideFieldName)
         .addStatement(")")
     return parseArgsFunc
 }

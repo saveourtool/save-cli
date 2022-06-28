@@ -17,7 +17,7 @@ class CliUtilsTest {
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FileSystem::class.simpleName!!)
 
     @Test
-    fun `read properties file`() {
+    fun `parse properties file`() {
         val testFile = tmpDir / "test.properties"
         fs.write(testFile) {
             this.write("key1=value1\n".encodeToByteArray())
@@ -26,16 +26,14 @@ class CliUtilsTest {
 
         assertEquals(
             TestProperties("value1", "value2"),
-            CliUtils.parsePropertiesFile(fs,
-                tmpDir.toString(), "test")
+            fs.parsePropertiesFile(tmpDir.toString(), "test")
         )
     }
 
     @Test
-    fun `read properties file from not existed folder`() {
+    fun `parse properties file from not existed folder`() {
         assertFailsWith<IOException> {
-            CliUtils.parsePropertiesFile<TestProperties>(fs,
-                tmpDir.resolve("not-existed").toString(), "test")
+            fs.parsePropertiesFile<TestProperties>(tmpDir.resolve("not-existed").toString(), "test")
         }
     }
 
@@ -55,13 +53,13 @@ class CliUtilsTest {
         assertEquals("some_value1", key1)
         assertEquals(
             "cli_value1",
-            CliUtils.resolveValue(key1Option, "cli_value1", "override_value1")
+            key1Option.resolveValue("cli_value1", "override_value1")
         )
 
         assertEquals("default_value2", key2)
         assertEquals(
             "override_value2",
-            CliUtils.resolveValue(key2Option, "cli_value2", "override_value2")
+            key2Option.resolveValue("cli_value2", "override_value2")
         )
 
         assertFailsWith<RuntimeException> {
@@ -70,7 +68,46 @@ class CliUtilsTest {
         }
         assertEquals(
             "override_value3",
-            CliUtils.resolveValue(key3Option, "cli_value3", "override_value3")
+            key3Option.resolveValue("cli_value3", "override_value3")
+        )
+    }
+
+    @Test
+    fun `read properties file`() {
+        val testFile = tmpDir / "default.properties"
+        fs.write(testFile) {
+            this.write("key1=value1\n".encodeToByteArray())
+            this.write("key2=value2\n".encodeToByteArray())
+            this.write("key3=value31=value32\n".encodeToByteArray())
+        }
+
+        assertEquals(
+            mapOf("key1" to "value1", "key2" to "value2", "key3" to "value31=value32"),
+            fs.readPropertiesFile(testFile)
+        )
+    }
+
+    @Test
+    fun `read invalid properties file`() {
+        val testFile = tmpDir / "invalid.properties"
+        fs.write(testFile) {
+            this.write("key1=value1\n".encodeToByteArray())
+            this.write("key2\n".encodeToByteArray())
+        }
+
+        assertFailsWith<IllegalArgumentException> {
+            fs.readPropertiesFile(testFile)
+        }
+    }
+
+    @Test
+    fun `read not existed properties file`() {
+        val testFile = tmpDir / "not-existed.properties"
+        require(!fs.exists(testFile))
+
+        assertEquals(
+            emptyMap(),
+            fs.readPropertiesFile(testFile)
         )
     }
 
