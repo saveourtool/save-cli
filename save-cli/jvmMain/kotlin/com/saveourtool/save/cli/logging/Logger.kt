@@ -16,7 +16,7 @@ import kotlin.system.exitProcess
  * @return nothing, program terminates in this method
  */
 @Deprecated("never use this method in save-core as it can lead to a break of save-cloud application")
-fun logErrorAndExit(exitCode: ExitCodes, message: String): Nothing {
+fun <R> logErrorAndExit(exitCode: ExitCodes, message: String): R {
     logError(message)
     exitProcess(exitCode.code)
 }

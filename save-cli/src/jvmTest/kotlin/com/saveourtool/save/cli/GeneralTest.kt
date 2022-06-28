@@ -18,6 +18,7 @@ import okio.Path.Companion.toPath
 import okio.buffer
 
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.serialization.decodeFromString
 
@@ -38,6 +39,45 @@ class GeneralTest {
 
     @Test
     fun `examples test`() {
+        // Almost all result statuses should be Pass, except the few cases
+        doTest("../examples/kotlin-diktat/") { reports ->
+            reports.forEach { report ->
+                report.pluginExecutions.forEach { pluginExecution ->
+                    pluginExecution.testResults.find { result ->
+                        // FixMe: if we will have other failing tests - we will make the logic less hardcoded
+                        result.resources.test.name != "GarbageTest.kt" &&
+                                result.resources.test.name != "ThisShouldAlwaysFailTest.kt" &&
+                                !result.resources.test.toString().contains("warn${Path.DIRECTORY_SEPARATOR}chapter2") &&
+                                if (getCurrentOs() == CurrentOs.WINDOWS) {
+                                    // These tests fail on Windows: https://github.com/saveourtool/save-cli/issues/402
+                                    !result.resources.test.toString().contains("warn-dir${Path.DIRECTORY_SEPARATOR}")
+                                } else {
+                                    true
+                                }
+                    }?.let {
+                        assertTrue(
+                            it.status is Pass,
+                            "Test on resources ${it.resources} was expected to pass, but actually has status ${it.status}: $it"
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `examples test from subfolder`() {
+        // Almost all result statuses should be Pass, except the few cases
+        doTest("../examples/kotlin-diktat/", "fix/smoke") { reports ->
+            assertEquals(5, reports.size)
+        }
+    }
+
+    private fun doTest(
+        workingDir: String,
+        testRootDir: String = ".",
+        assertReports: (List<Report>) -> Unit
+    ) {
         val binDir = "../save-cli/build/bin/" + when (getCurrentOs()) {
             CurrentOs.LINUX -> "linuxX64"
             CurrentOs.MACOS -> "macosX64"
@@ -51,30 +91,28 @@ class GeneralTest {
         // Binary should be created at this moment
         assertTrue(saveExecutableFiles.isNotEmpty())
 
-        val examplesDir = "../examples/kotlin-diktat/"
-
         val actualSaveBinary = saveExecutableFiles.last()
         val saveBinName = if (isCurrentOsWindows()) "save.exe" else "save"
-        val destination = examplesDir.toPath() / saveBinName
+        val destination = workingDir.toPath() / saveBinName
         // Copy latest version of save into examples
         fs.copy(actualSaveBinary, destination)
         assertTrue(fs.exists(destination))
 
         // Check for existence of diktat and ktlint
-        assertTrue(fs.exists((examplesDir.toPath() / "diktat.jar")))
-        assertTrue(fs.exists((examplesDir.toPath() / "ktlint")))
+        assertTrue(fs.exists((workingDir.toPath() / "diktat.jar")))
+        assertTrue(fs.exists((workingDir.toPath() / "ktlint")))
 
         // Make sure, that we will check report, which will be obtained after current execution; remove old report if exist
-        val reportFile = examplesDir.toPath() / "save.out.json".toPath()
+        val reportFile = workingDir.toPath() / "save-reports" / "save.out.json".toPath()
         if (fs.exists(reportFile)) {
             fs.delete(reportFile)
         }
 
         val runCmd = if (isCurrentOsWindows()) "" else "sudo chmod +x $saveBinName && ./"
-        val saveFlags = " . --result-output FILE --report-type JSON"
+        val saveFlags = " $testRootDir --result-output file --report-type json --log all"
         // Execute the script from examples
         val execCmd = "$runCmd$saveBinName $saveFlags"
-        val pb = ProcessBuilder(true, fs).exec(execCmd, examplesDir, null, 200_000L)
+        val pb = ProcessBuilder(true, fs).exec(execCmd, workingDir, null, 200_000L)
         println("SAVE execution output:\n${pb.stdout.joinToString("\n")}")
         if (pb.stderr.isNotEmpty()) {
             println("Warning and errors during SAVE execution:\n${pb.stderr.joinToString("\n")}")
@@ -90,28 +128,7 @@ class GeneralTest {
 
         println("Following tests failed: ${reports.map { it.testSuite }}")
 
-        // Almost all result statuses should be Pass, except the few cases
-        reports.forEach { report ->
-            report.pluginExecutions.forEach { pluginExecution ->
-                pluginExecution.testResults.find { result ->
-                    // FixMe: if we will have other failing tests - we will make the logic less hardcoded
-                    result.resources.test.name != "GarbageTest.kt" &&
-                            result.resources.test.name != "ThisShouldAlwaysFailTest.kt" &&
-                            !result.resources.test.toString().contains("warn${Path.DIRECTORY_SEPARATOR}chapter2") &&
-                            if (getCurrentOs() == CurrentOs.WINDOWS) {
-                                // These tests fail on Windows: https://github.com/saveourtool/save-cli/issues/402
-                                !result.resources.test.toString().contains("warn-dir${Path.DIRECTORY_SEPARATOR}")
-                            } else {
-                                true
-                            }
-                }?.let {
-                    assertTrue(
-                        it.status is Pass,
-                        "Test on resources ${it.resources} was expected to pass, but actually has status ${it.status}: $it"
-                    )
-                }
-            }
-        }
+        assertReports(reports)
         fs.delete(destination)
         fs.delete(reportFile)
     }
