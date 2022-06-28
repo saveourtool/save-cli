@@ -122,12 +122,15 @@ data class TestConfig(
      * @return an update this [TestConfig]
      */
     fun processInPlace(createPluginConfigList: (TestConfig) -> List<PluginConfig>): TestConfig {
+        // need to process parent first
+        this.parentConfig?.processInPlace(createPluginConfigList)
         // discover plugins from the test configuration
         createPluginConfigList(this).forEach {
-            this.pluginConfigs.add(it)
+            logTrace("Discovered new pluginConfig: $it")
+            this.pluginConfigs.merge(it)
         }
         // merge configurations with parents
-        this.mergeConfigWithParents()
+        this.mergeConfigWithParent()
         return this
     }
 
@@ -138,10 +141,11 @@ data class TestConfig(
      * @return a list of [Plugin]s from this config with non-empty test resources
      */
     fun buildActivePlugins(pluginFromConfig: (PluginConfig, TestConfig) -> Plugin): List<Plugin> =
-            pluginConfigsWithoutGeneralConfig().map {
-                // create plugins from the configuration
-                pluginFromConfig(it, this)
-            }
+            pluginConfigsWithoutGeneralConfig()
+                .map {
+                    // create plugins from the configuration
+                    pluginFromConfig(it, this)
+                }
                 // filter out plugins that don't have any resources
                 .filter { plugin ->
                     plugin.discoverTestFiles(directory).any().also { isNotEmpty ->
@@ -164,26 +168,15 @@ data class TestConfig(
      *
      * @return merged test config
      */
-    fun mergeConfigWithParents(): TestConfig {
+    fun mergeConfigWithParent(): TestConfig {
         logDebug("Merging configs  (with parental configs from higher directory level) for ${this.location}")
 
-        this.parentConfigs().toList().forEach { parentConfig ->
+        if (parentConfig != null) {
             logTrace("Using parental config ${parentConfig.location} to merge it with child config: ${this.location}")
             // return from the function if we stay at the root element of the plugin tree
             val parentalPlugins = parentConfig.pluginConfigs
             parentalPlugins.forEach { parentalPluginConfig ->
-                val childConfigs = this.pluginConfigs.filter { it.type == parentalPluginConfig.type }
-                if (childConfigs.isEmpty()) {
-                    // if we haven't found a plugin from parent in a current list of plugins - we will simply copy it
-                    this.pluginConfigs.add(parentalPluginConfig)
-                } else {
-                    // else, we will merge plugin with a corresponding plugin from a parent config
-                    // we expect that there is only one plugin of such type, otherwise we will throw an exception
-                    logTrace("Starting merging process of ${parentalPluginConfig.type} from ${parentConfig.location} into $location")
-                    val mergedConfig = childConfigs.single().mergeWith(parentalPluginConfig)
-                    logTrace("Finished merging process of ${parentalPluginConfig.type} from ${parentConfig.location} into $location")
-                    this.pluginConfigs.set(this.pluginConfigs.indexOf(childConfigs.single()), mergedConfig)
-                }
+                this.pluginConfigs.merge(parentalPluginConfig)
             }
         }
         return this
@@ -198,6 +191,23 @@ data class TestConfig(
         }
         logDebug("Validated plugin configuration for [$location] " +
                 "(${pluginConfigs.map { it.type }.filterNot { it == TestConfigSections.GENERAL }})")
+    }
+
+    private fun MutableList<PluginConfig>.merge(parentalPluginConfig: PluginConfig) {
+        val childConfigs = this.filter { it.type == parentalPluginConfig.type }
+        if (childConfigs.isEmpty()) {
+            // if we haven't found a plugin from parent in a current list of plugins - we will simply copy it
+            this.add(parentalPluginConfig)
+        } else {
+            require(childConfigs.size == 1) {
+                "Duplicate config with type ${parentalPluginConfig.type} in $this"
+            }
+            val childConfig = childConfigs.single()
+            // else, we will merge plugin with a corresponding plugin from a parent config
+            // we expect that there is only one plugin of such type, otherwise we will throw an exception
+            logTrace("Merging process of ${parentalPluginConfig.type} from $parentalPluginConfig into $childConfig")
+            this[this.indexOf(childConfig)] = childConfig.mergeWith(parentalPluginConfig)
+        }
     }
 }
 
@@ -220,3 +230,8 @@ enum class TestConfigSections {
  * @return whether a file denoted by this [Path] is a default save configuration file (save.toml)
  */
 fun Path.isSaveTomlConfig() = name == "save.toml"
+
+/**
+ * @return a file (save.toml) in current directory
+ */
+fun Path.resolveSaveTomlConfig() = this / "save.toml"

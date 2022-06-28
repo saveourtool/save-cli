@@ -125,8 +125,10 @@ class ClassicWarnTest {
         runTestsWithDiktat(
             emptyList(), 1
         ) {
-            includeSuites = "Autofix and Warn"
-            excludeSuites = "Directory: Chapter1"
+            it.copy(
+                includeSuites = "Autofix and Warn",
+                excludeSuites = "Directory: Chapter1"
+            )
         }
     }
 

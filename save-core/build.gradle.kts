@@ -1,6 +1,7 @@
 
-import com.saveourtool.save.generation.configFilePath
+import com.saveourtool.save.generation.argumentsConfigFilePath
 import com.saveourtool.save.generation.generateConfigOptions
+import com.saveourtool.save.generation.optionsConfigFilePath
 
 import de.undercouch.gradle.tasks.download.Download
 import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
@@ -20,6 +21,7 @@ kotlin {
                 implementation(projects.saveReporters)
                 api(libs.okio)
                 implementation(libs.kotlinx.serialization.core)
+                implementation(libs.kotlinx.serialization.properties)
                 implementation(libs.kotlinx.cli)
                 implementation(libs.ktoml.core)
                 implementation(libs.ktoml.file)
@@ -40,7 +42,8 @@ kotlin {
 }
 
 val generateConfigOptionsTaskProvider = tasks.register("generateConfigOptions") {
-    inputs.file(configFilePath())
+    inputs.file(optionsConfigFilePath())
+    inputs.file(argumentsConfigFilePath())
     val generatedFile = File("$buildDir/generated/src/com/saveourtool/save/core/config/SaveProperties.kt")
     outputs.file(generatedFile)
 
