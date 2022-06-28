@@ -9,7 +9,6 @@ import com.saveourtool.save.core.config.isSaveTomlConfig
 import com.saveourtool.save.core.config.resolveSaveTomlConfig
 import com.saveourtool.save.core.files.ConfigDetector
 import com.saveourtool.save.core.files.StdStreamsSink
-import com.saveourtool.save.core.files.createFile
 import com.saveourtool.save.core.logging.logDebug
 import com.saveourtool.save.core.logging.logError
 import com.saveourtool.save.core.logging.logInfo
