@@ -1,53 +1,31 @@
-import com.saveourtool.save.buildutils.configureDetekt
-import com.saveourtool.save.buildutils.configureDiktat
-import com.saveourtool.save.buildutils.configurePublishing
-
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem
-import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
+import org.gradle.nativeplatform.platform.internal.DefaultOperatingSystem
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 plugins {
-    kotlin("multiplatform")
+    id("com.saveourtool.save.buildutils.kotlin-library")
 }
 
 kotlin {
-    jvm()
     val os = getCurrentOperatingSystem()
-    val saveTarget = listOf(when {
-        os.isWindows -> mingwX64()
-        os.isLinux -> linuxX64()
-        os.isMacOsX -> macosX64()
-        else -> throw GradleException("Unknown operating system $os")
-    })
 
-    configure(saveTarget) {
-        binaries {
-            val name = "save-${project.version}-${this@configure.name}"
-            executable {
-                this.baseName = name
-                entryPoint = "com.saveourtool.save.cli.main"
-            }
-        }
-    }
+    jvm()
+
+    createNativeBinaries(os, this)
 
     sourceSets {
-        all {
-            languageSettings.optIn("kotlin.RequiresOptIn")
+        val commonMain by getting {
+            dependencies {
+                api(libs.okio)
+            }
         }
-        val jvmMain by getting
 
-        val commonMain by getting
-        val nativeMain by creating {
-            dependsOn(commonMain)
+        val commonNonJsMain by getting {
             dependencies {
                 implementation(projects.saveCore)
                 implementation(libs.kotlinx.serialization.properties)
             }
         }
-        saveTarget.forEach {
-            getByName("${it.name}Main").dependsOn(nativeMain)
-        }
-
-        val commonTest by getting
 
         val jvmTest by getting {
             dependencies {
@@ -61,6 +39,33 @@ kotlin {
         }
     }
 
+    linkProperExecutable(os)
+
+    tasks.withType<Test>().configureEach {
+        dependsOn(":save-core:downloadTestResources")
+    }
+}
+
+fun createNativeBinaries(os: DefaultOperatingSystem, kotlin: KotlinMultiplatformExtension) {
+    val saveTarget = when {
+        os.isWindows -> kotlin.mingwX64()
+        os.isLinux -> kotlin.linuxX64()
+        os.isMacOsX -> kotlin.macosX64()
+        else -> throw GradleException("Unknown operating system $os")
+    }
+
+    configure(listOf(saveTarget)) {
+        binaries {
+            val name = "save-${project.version}-${this@configure.name}"
+            executable {
+                this.baseName = name
+                entryPoint = "com.saveourtool.save.cli"
+            }
+        }
+    }
+}
+
+fun linkProperExecutable(os: DefaultOperatingSystem) {
     val linkReleaseExecutableTaskProvider = when {
         os.isLinux -> tasks.getByName("linkReleaseExecutableLinuxX64")
         os.isWindows -> tasks.getByName("linkReleaseExecutableMingwX64")
@@ -69,6 +74,13 @@ kotlin {
     }
     project.tasks.register("linkReleaseExecutableMultiplatform") {
         dependsOn(linkReleaseExecutableTaskProvider)
+    }
+
+    // disable building of some binaries to speed up build
+    // possible values: `all` - build all binaries, `debug` - build only debug binaries
+    val enabledExecutables = if (hasProperty("enabledExecutables")) property("enabledExecutables") as String else null
+    if (enabledExecutables != null && enabledExecutables != "all" || enabledExecutables == "debug") {
+        linkReleaseExecutableTaskProvider.enabled = false
     }
 
     // Integration test should be able to have access to binary during the execution. Also we use here the debug version,
@@ -81,23 +93,4 @@ kotlin {
             else -> throw GradleException("Unknown operating system $os")
         }
     ))
-
-    tasks.withType<Test>().configureEach {
-        dependsOn(":save-core:downloadTestResources")
-    }
-
-    // disable building of some binaries to speed up build
-    // possible values: `all` - build all binaries, `debug` - build only debug binaries
-    val enabledExecutables = if (hasProperty("enabledExecutables")) property("enabledExecutables") as String else null
-    if (enabledExecutables != null && enabledExecutables != "all" || enabledExecutables == "debug") {
-        linkReleaseExecutableTaskProvider.enabled = false
-    }
-}
-
-configurePublishing()
-configureDiktat()
-configureDetekt()
-
-tasks.withType<KotlinJvmTest> {
-    useJUnitPlatform()
 }
