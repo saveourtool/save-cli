@@ -186,6 +186,7 @@ fun FunSpec.Builder.generateAgruments(jsonObject: Map<String, Argument>): FunSpe
  *
  * @param options map of cli option names to [Option] objects
  * @param arguments map of cli argument names to [Argument] objects
+ * @param overrideFieldName name for field to which we parse properties file
  * @return a corresponding [FunSpec.Builder]
  */
 fun FunSpec.Builder.assignMembers(
