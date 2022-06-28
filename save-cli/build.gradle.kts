@@ -47,6 +47,11 @@ kotlin {
     }
 }
 
+/**
+ * @param os
+ * @param kotlin
+ * @throws GradleException
+ */
 fun createNativeBinaries(os: DefaultOperatingSystem, kotlin: KotlinMultiplatformExtension) {
     val saveTarget = when {
         os.isWindows -> kotlin.mingwX64()
@@ -66,6 +71,10 @@ fun createNativeBinaries(os: DefaultOperatingSystem, kotlin: KotlinMultiplatform
     }
 }
 
+/**
+ * @param os
+ * @throws GradleException
+ */
 fun linkProperExecutable(os: DefaultOperatingSystem) {
     val linkReleaseExecutableTaskProvider = when {
         os.isLinux -> tasks.getByName("linkReleaseExecutableLinuxX64")

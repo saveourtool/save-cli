@@ -1,7 +1,6 @@
 package com.saveourtool.save.core.utils
 
 import com.saveourtool.save.core.files.fs
-import okio.FileSystem
 import okio.Path
 
 import java.io.BufferedReader
