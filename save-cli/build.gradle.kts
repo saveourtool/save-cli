@@ -60,7 +60,7 @@ fun createNativeBinaries(os: DefaultOperatingSystem, kotlin: KotlinMultiplatform
             val name = "save-${project.version}-${this@configure.name}"
             executable {
                 this.baseName = name
-                entryPoint = "com.saveourtool.save.cli"
+                entryPoint = "com.saveourtool.save.cli.main"
             }
         }
     }
