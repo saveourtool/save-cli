@@ -23,6 +23,7 @@ kotlin {
         val commonNonJsMain by getting {
             dependencies {
                 implementation(projects.saveCore)
+                implementation(projects.saveCommon)
                 implementation(libs.kotlinx.serialization.properties)
             }
         }

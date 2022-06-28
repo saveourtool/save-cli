@@ -2,15 +2,17 @@
  * Utilities to work with SAVE config in CLI mode
  */
 
-package com.saveourtool.save.core.config
+package com.saveourtool.save.cli.config
 
 import com.saveourtool.save.cli.ExitCodes
+import com.saveourtool.save.cli.fs
 import com.saveourtool.save.cli.logging.logErrorAndExit
+import com.saveourtool.save.core.config.SaveProperties
+import com.saveourtool.save.core.config.resolveSaveTomlConfig
 import com.saveourtool.save.core.logging.logDebug
 import com.saveourtool.save.core.logging.logType
 
 import okio.FileNotFoundException
-import okio.FileSystem
 import okio.IOException
 import okio.Path.Companion.toPath
 
@@ -20,7 +22,7 @@ import okio.Path.Companion.toPath
  */
 fun SaveProperties.Companion.of(args: Array<String>): SaveProperties {
     val configFromCli = try {
-        parseArgs(FileSystem.SYSTEM, args)
+        parseArgs(fs, args)
     } catch (e: IOException) {
         return logErrorAndExit(
             ExitCodes.INVALID_CONFIGURATION,
@@ -42,7 +44,7 @@ fun SaveProperties.Companion.of(args: Array<String>): SaveProperties {
 private fun SaveProperties.validate(): SaveProperties {
     val fullConfigPath = testRootDir.toPath().resolveSaveTomlConfig()
     try {
-        FileSystem.SYSTEM.metadata(fullConfigPath)
+        fs.metadata(fullConfigPath)
     } catch (e: FileNotFoundException) {
         return logErrorAndExit(
             ExitCodes.INVALID_CONFIGURATION, "Not able to find configuration file '$fullConfigPath'." +
