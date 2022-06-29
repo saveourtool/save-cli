@@ -109,3 +109,7 @@ fun linkProperExecutable(os: DefaultOperatingSystem) {
         }
     ))
 }
+
+application {
+    mainClass.set("com.saveourtool.save.cli.SaveCliRunnerKt")
+}
