@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 plugins {
     id("com.saveourtool.save.buildutils.kotlin-library")
+    application
 }
 
 kotlin {
@@ -11,7 +12,7 @@ kotlin {
 
     jvm()
 
-    createNativeBinaries(os, this)
+    registerNativeBinaries(os, this)
 
     sourceSets {
         val commonMain by getting {
@@ -47,12 +48,16 @@ kotlin {
     }
 }
 
+application {
+    mainClass.set("com.saveourtool.save.cli.SaveCliRunnerKt")
+}
+
 /**
  * @param os
  * @param kotlin
  * @throws GradleException
  */
-fun createNativeBinaries(os: DefaultOperatingSystem, kotlin: KotlinMultiplatformExtension) {
+fun registerNativeBinaries(os: DefaultOperatingSystem, kotlin: KotlinMultiplatformExtension) {
     val saveTarget = when {
         os.isWindows -> kotlin.mingwX64()
         os.isLinux -> kotlin.linuxX64()
