@@ -89,7 +89,7 @@ fun linkProperExecutable(os: DefaultOperatingSystem) {
     // disable building of some binaries to speed up build
     // possible values: `all` - build all binaries, `debug` - build only debug binaries
     val enabledExecutables = if (hasProperty("enabledExecutables")) property("enabledExecutables") as String else null
-    if (enabledExecutables != null && enabledExecutables != "all" || enabledExecutables == "debug") {
+    if (enabledExecutables != null && enabledExecutables != "all") {
         linkReleaseExecutableTaskProvider.enabled = false
     }
 
