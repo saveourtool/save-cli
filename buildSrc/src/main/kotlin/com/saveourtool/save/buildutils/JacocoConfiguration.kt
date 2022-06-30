@@ -2,6 +2,8 @@
  * Configure JaCoCo for code coverage calculation
  */
 
+@file:Suppress("FILE_WILDCARD_IMPORTS")
+
 package com.saveourtool.save.buildutils
 
 import org.gradle.api.Project
