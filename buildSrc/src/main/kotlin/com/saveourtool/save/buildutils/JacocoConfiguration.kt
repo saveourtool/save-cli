@@ -48,11 +48,10 @@ fun Project.configureJacoco() {
     // AFTER that in "com.saveourtool.save.buildutils.kotlin-library" we try to register this task once again and fail
     // so the order of plugins in `apply` is critically important
     val jacocoTestReportTask = if (project.name == "save-cli") {
-        val jacocoTask = (tasks.getByName("jacocoTestReport") as JacocoReport)
-        jacocoTask.configure<JacocoReport> { configure() }
-        jacocoTask
+        val jacocoTestReportTask by tasks.named("jacocoTestReport", configure)
+        jacocoTestReportTask
     } else {
-        val jacocoTestReportTask by tasks.register<JacocoReport>("jacocoTestReport", configure)
+        val jacocoTestReportTask by tasks.register("jacocoTestReport", configure)
         jacocoTestReportTask
     }
 
