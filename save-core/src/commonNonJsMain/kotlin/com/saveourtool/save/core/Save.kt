@@ -48,6 +48,12 @@ class Save(
     internal val reporter = getReporter(saveProperties)
 
     /**
+     * test root path which is set by user and can be different from config root path
+     * it can contain only subset of the whole test set
+     * */
+    private val testRootPath = saveProperties.testRootDir.toPath()
+
+    /**
      * Main entrypoint for SAVE framework. Discovers plugins and calls their execution.
      *
      * @return Reporter
@@ -56,8 +62,6 @@ class Save(
     @Suppress("TOO_LONG_FUNCTION")
     fun performAnalysis(): Reporter {
         logInfo("Welcome to SAVE version $SAVE_VERSION")
-        // FixMe: now we work only with the save.toml config and it's hierarchy, but we should work properly here with directories as well
-        val testRootPath = saveProperties.testRootDir.toPath()
         val rootTestConfigPath = testRootPath.resolveSaveTomlConfig()
         val (requestedConfigs, requestedTests) = saveProperties.testFiles
             .map { testRootPath / it }
@@ -147,12 +151,10 @@ class Save(
         logDebug("=> Executing plugin: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
         reporter.onPluginExecutionStart(plugin)
         try {
-            val testRepositoryRootPath = plugin.testConfig.getRootConfig().location
-
             plugin.execute()
                 .onEach { event ->
                     // calculate relative paths, because reporters don't need paths higher than root dir
-                    val resourcesRelative = event.resources.withRelativePaths(testRepositoryRootPath)
+                    val resourcesRelative = event.resources.withRelativePaths(testRootPath)
                     reporter.onEvent(event.copy(resources = resourcesRelative))
                 }
                 .forEach(this::handleResult)
