@@ -11,6 +11,9 @@ jobs:
     name: Build and test
     runs-on: ${{ matrix.os }}
     strategy:
+      # We need multiple builds to run even if the 1st one is failing, because
+      # test failures may be OS-specific (or the tests themselves flaky).
+      fail-fast: false
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
 
@@ -43,6 +46,47 @@ jobs:
             -PgprUser=${{ github.actor }}
             -PgprKey=${{ secrets.GITHUB_TOKEN }}
 
+        # For some reason, running `gradle build jvmTest` produces no JUnit reports,
+        # so these two targets should be separated into separate steps.
+      - name: gradle jvmTest
+        uses: gradle/gradle-build-action@v2
+        if: ${{ always() }}
+        with:
+          gradle-version: wrapper
+          # The `--continue` flag is necessary so that Gradle keeps going after the 1st test failure.
+          # The `jvmTest` target is needed for JUnit-style XML reports.
+          arguments: |
+            --continue
+            jvmTest
+            -x detekt
+            -Porg.gradle.caching=true
+            -Pdetekt.multiplatform.disabled=true
+            -PdisableRedundantTargets=true
+            -PenabledExecutables=debug
+            -PgprUser=${{ github.actor }}
+            -PgprKey=${{ secrets.GITHUB_TOKEN }}
+
+        # This step needs a Git repository, so it's impossible to extract it
+        # into a separate job (or, otherwise, we'd need to upload the content
+        # of the whole `.git` folder as an artifact).
+      - name: JUnit Tests (dorny/test-reporter@v1)
+        uses: dorny/test-reporter@v1
+        if: ${{ always() }}
+        with:
+          name: JUnit Tests (${{ runner.os }}, dorny/test-reporter@v1)
+          # Comma-separated values.
+          path: "**/build/test-results/*/TEST-*.xml"
+          reporter: java-junit
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: ${{ always() }}
+        with:
+          name: xml-test-reports-${{ runner.os }}
+          path: |
+            **/build/test-results/*/TEST-*.xml
+          retention-days: 1
+
       - name: Upload gradle reports
         if: ${{ always() }}
         uses: actions/upload-artifact@v3
@@ -55,3 +99,40 @@ jobs:
         with:
           flags: unittests
           fail_ci_if_error: false # optional (default = false)
+
+  report:
+    name: Publish JUnit test results
+    if: ${{ always() }}
+    needs: build_and_test_with_code_coverage
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+
+    permissions:
+      checks: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/download-artifact@v3
+        if: ${{ always() }}
+        with:
+          name: xml-test-reports-${{ runner.os }}
+
+        # Uses Docker, that's why Linux-only.
+      - name: JUnit Tests (EnricoMi/publish-unit-test-result-action@v1, Linux)
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: ${{ runner.os == 'Linux' }}
+        with:
+          check_name: JUnit Tests (${{ runner.os }}, EnricoMi/publish-unit-test-result-action@v1)
+          files: |
+            **/build/test-results/*/TEST-*.xml
+
+      - name: JUnit Tests (EnricoMi/publish-unit-test-result-action@v1, Windows or Mac OS X)
+        uses: EnricoMi/publish-unit-test-result-action/composite@v1
+        if: ${{ runner.os == 'Windows' || runner.os == 'macOS' }}
+        with:
+          check_name: JUnit Tests (${{ runner.os }}, EnricoMi/publish-unit-test-result-action@v1)
+          files: |
+            **/build/test-results/*/TEST-*.xml
