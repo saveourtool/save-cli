@@ -23,7 +23,7 @@ class ProcessBuilderTest {
         try {
             processBuilder.exec(" ", "", null, 10_000L)
         } catch (ex: ProcessExecutionException) {
-            assertEquals("Command couldn't be empty!", ex.message)
+            assertEquals("Execution command in ProcessBuilder couldn't be empty!", ex.message)
         }
     }
 

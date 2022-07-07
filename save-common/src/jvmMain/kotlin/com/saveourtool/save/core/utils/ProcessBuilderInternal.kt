@@ -1,6 +1,6 @@
 package com.saveourtool.save.core.utils
 
-import okio.FileSystem
+import com.saveourtool.save.core.files.fs
 import okio.Path
 
 import java.io.BufferedReader
@@ -87,7 +87,7 @@ actual class ProcessBuilderInternal actual constructor(
         val data = br.useLines {
             it.joinToString("\n")
         }
-        FileSystem.SYSTEM.write(file) {
+        fs.write(file) {
             write(data.encodeToByteArray())
         }
     }
