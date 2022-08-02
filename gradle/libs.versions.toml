@@ -2,7 +2,7 @@
 kotlin = "1.7.0"
 okio = "3.2.0"
 serialization = "1.3.3"
-diktat = "1.2.0"
+diktat = "1.2.2"
 kotlinx-cli = "0.3.4"
 kotlinx-datetime = "0.4.0"
 kotlinx-coroutines = "1.6.3-native-mt"
