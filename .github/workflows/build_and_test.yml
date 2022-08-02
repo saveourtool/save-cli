@@ -32,6 +32,7 @@ jobs:
           java-version: 11
           distribution: temurin
       - name: Retrieve Kotlin version
+        shell: bash
         run: |
           kv=$(cat gradle/libs.versions.toml | grep '^kotlin =' | awk -F'[=]' '{print $2}' | tr -d '" ')
           echo KOTLIN_VERSION=$kv >> $GITHUB_ENV
