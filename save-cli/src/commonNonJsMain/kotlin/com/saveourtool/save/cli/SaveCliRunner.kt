@@ -4,11 +4,12 @@
 
 package com.saveourtool.save.cli
 
+import com.saveourtool.save.cli.config.of
 import com.saveourtool.save.core.Save
-import okio.FileSystem
+import com.saveourtool.save.core.config.SaveProperties
 
 fun main(args: Array<String>) {
-    val config = createConfigFromArgs(args)
-    Save(config, FileSystem.SYSTEM)
+    val config = SaveProperties.of(args)
+    Save(config, fs)
         .performAnalysis()
 }

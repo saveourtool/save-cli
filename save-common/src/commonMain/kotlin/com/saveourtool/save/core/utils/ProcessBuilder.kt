@@ -79,7 +79,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
         timeOutMillis: Long,
     ): ExecutionResult {
         if (command.isBlank()) {
-            logErrorAndThrowProcessBuilderException("Command couldn't be empty!")
+            logErrorAndThrowProcessBuilderException("Execution command in ProcessBuilder couldn't be empty!")
         }
         if (command.contains(">") && useInternalRedirections) {
             logError("Found user provided redirections in `$command`. " +

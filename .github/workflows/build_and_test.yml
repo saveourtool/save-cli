@@ -11,8 +11,18 @@ jobs:
     name: Build and test
     runs-on: ${{ matrix.os }}
     strategy:
+      # We need multiple builds to run even if the 1st one is failing, because
+      # test failures may be OS-specific (or the tests themselves flaky).
+      fail-fast: false
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
+
+    # A possible workaround for <https://github.com/dorny/test-reporter/issues/168>.
+    permissions:
+      checks: write
+      contents: write
+      pull-requests: write
+      statuses: write
 
     steps:
       - uses: actions/checkout@v3
@@ -33,15 +43,47 @@ jobs:
       - uses: gradle/gradle-build-action@v2
         with:
           gradle-version: wrapper
+          # The `--continue` flag is necessary so that Gradle keeps going after the 1st test failure.
+          # By default, when test for all MPP targets are executed, Kotlin Gradle Plugin generates a single aggregated HTML report.
+          # Property `kotlin.tests.individualTaskReports` enables individual Junit-style XML reports.
+          # See org.jetbrains.kotlin.gradle.testing.internal.KotlinTestReport.
           arguments: |
             build
+            --continue
             -x detekt
+            -Pkotlin.tests.individualTaskReports=true
             -Porg.gradle.caching=true
             -Pdetekt.multiplatform.disabled=true
             -PdisableRedundantTargets=true
             -PenabledExecutables=debug
             -PgprUser=${{ github.actor }}
             -PgprKey=${{ secrets.GITHUB_TOKEN }}
+
+        # This step needs a Git repository, so it's impossible to extract it
+        # into a separate job (or, otherwise, we'd need to upload the content
+        # of the whole `.git` folder as an artifact).
+      - name: JUnit Tests (dorny/test-reporter@v1)
+        uses: dorny/test-reporter@v1
+        if: ${{ always() }}
+        with:
+          name: JUnit Tests (${{ runner.os }}, dorny/test-reporter@v1)
+          # Comma-separated values.
+          path: "**/build/test-results/*/TEST-*.xml"
+          reporter: java-junit
+        # Ignore the "Resource not accessible by integration" error when a PR
+        # originates from a non-collaborator. This is
+        # <https://github.com/dorny/test-reporter/issues/168> which may be
+        # potentially fixed with <https://github.com/dorny/test-reporter/pull/174>.
+        continue-on-error: true
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: ${{ always() }}
+        with:
+          name: xml-test-reports-${{ runner.os }}
+          path: |
+            **/build/test-results/*/TEST-*.xml
+          retention-days: 1
 
       - name: Upload gradle reports
         if: ${{ always() }}
@@ -55,3 +97,40 @@ jobs:
         with:
           flags: unittests
           fail_ci_if_error: false # optional (default = false)
+
+  report:
+    name: Publish JUnit test results
+    if: ${{ always() }}
+    needs: build_and_test_with_code_coverage
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+
+    permissions:
+      checks: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/download-artifact@v3
+        if: ${{ always() }}
+        with:
+          name: xml-test-reports-${{ runner.os }}
+
+        # Uses Docker, that's why Linux-only.
+      - name: JUnit Tests (EnricoMi/publish-unit-test-result-action@v1, Linux)
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: ${{ runner.os == 'Linux' }}
+        with:
+          check_name: JUnit Tests (${{ runner.os }}, EnricoMi/publish-unit-test-result-action@v1)
+          files: |
+            **/build/test-results/*/TEST-*.xml
+
+      - name: JUnit Tests (EnricoMi/publish-unit-test-result-action@v1, Windows or Mac OS X)
+        uses: EnricoMi/publish-unit-test-result-action/composite@v1
+        if: ${{ runner.os == 'Windows' || runner.os == 'macOS' }}
+        with:
+          check_name: JUnit Tests (${{ runner.os }}, EnricoMi/publish-unit-test-result-action@v1)
+          files: |
+            **/build/test-results/*/TEST-*.xml

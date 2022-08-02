@@ -2,18 +2,13 @@
  * Configure JaCoCo for code coverage calculation
  */
 
+@file:Suppress("FILE_WILDCARD_IMPORTS")
+
 package com.saveourtool.save.buildutils
 
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
-import org.gradle.kotlin.dsl.apply
-import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.get
-import org.gradle.kotlin.dsl.getByType
-import org.gradle.kotlin.dsl.getValue
-import org.gradle.kotlin.dsl.named
-import org.gradle.kotlin.dsl.provideDelegate
-import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.*
 import org.gradle.testing.jacoco.plugins.JacocoPlugin
 import org.gradle.testing.jacoco.plugins.JacocoPluginExtension
 import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
@@ -37,7 +32,8 @@ fun Project.configureJacoco() {
             isEnabled = true
         }
     }
-    val jacocoTestReportTask by tasks.register<JacocoReport>("jacocoTestReport") {
+
+    val configure: JacocoReport.() -> Unit = {
         executionData(jvmTestTask.extensions.getByType(JacocoTaskExtension::class.java).destinationFile)
         // todo: include platform-specific source sets
         additionalSourceDirs(kotlin.sourceSets["commonMain"].kotlin.sourceDirectories)
@@ -49,6 +45,18 @@ fun Project.configureJacoco() {
             html.required.set(true)
         }
     }
+
+    // `application` plugin creates jacocoTestReport task in plugin section (this is definitely incorrect behavior)
+    // AFTER that in "com.saveourtool.save.buildutils.kotlin-library" we try to register this task once again and fail
+    // so the order of plugins in `apply` is critically important
+    val jacocoTestReportTask = if (project.name == "save-cli") {
+        val jacocoTestReportTask by tasks.named("jacocoTestReport", configure)
+        jacocoTestReportTask
+    } else {
+        val jacocoTestReportTask by tasks.register("jacocoTestReport", configure)
+        jacocoTestReportTask
+    }
+
     jvmTestTask.finalizedBy(jacocoTestReportTask)
     jacocoTestReportTask.dependsOn(jvmTestTask)
 }

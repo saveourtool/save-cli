@@ -6,6 +6,7 @@ import com.saveourtool.save.core.config.SAVE_VERSION
 import com.saveourtool.save.core.config.SaveProperties
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.config.isSaveTomlConfig
+import com.saveourtool.save.core.config.resolveSaveTomlConfig
 import com.saveourtool.save.core.files.ConfigDetector
 import com.saveourtool.save.core.files.StdStreamsSink
 import com.saveourtool.save.core.logging.logDebug
@@ -47,6 +48,12 @@ class Save(
     internal val reporter = getReporter(saveProperties)
 
     /**
+     * test root path which is set by user and can be different from config root path
+     * it can contain only subset of the whole test set
+     * */
+    private val testRootPath = saveProperties.testRootDir.toPath()
+
+    /**
      * Main entrypoint for SAVE framework. Discovers plugins and calls their execution.
      *
      * @return Reporter
@@ -55,11 +62,8 @@ class Save(
     @Suppress("TOO_LONG_FUNCTION")
     fun performAnalysis(): Reporter {
         logInfo("Welcome to SAVE version $SAVE_VERSION")
-        // FixMe: now we work only with the save.toml config and it's hierarchy, but we should work properly here with directories as well
-        val testRootPath = saveProperties.testFiles!![0].toPath()
-        val rootTestConfigPath = testRootPath / "save.toml"
-        val (requestedConfigs, requestedTests) = saveProperties.testFiles!!
-            .drop(1)
+        val rootTestConfigPath = testRootPath.resolveSaveTomlConfig()
+        val (requestedConfigs, requestedTests) = saveProperties.testFiles
             .map { testRootPath / it }
             .map { it.toString() }
             .partition { it.toPath().isSaveTomlConfig() }
@@ -147,12 +151,10 @@ class Save(
         logDebug("=> Executing plugin: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
         reporter.onPluginExecutionStart(plugin)
         try {
-            val testRepositoryRootPath = plugin.testConfig.getRootConfig().location
-
             plugin.execute()
                 .onEach { event ->
                     // calculate relative paths, because reporters don't need paths higher than root dir
-                    val resourcesRelative = event.resources.withRelativePaths(testRepositoryRootPath)
+                    val resourcesRelative = event.resources.withRelativePaths(testRootPath)
                     reporter.onEvent(event.copy(resources = resourcesRelative))
                 }
                 .forEach(this::handleResult)
@@ -166,14 +168,20 @@ class Save(
 
     private fun getReporter(saveProperties: SaveProperties): Reporter {
         val outFileBaseName = "save.out"  // todo: make configurable
-        val outFileName = when (saveProperties.reportType!!) {
+        val outFileName = when (saveProperties.reportType) {
             ReportType.PLAIN, ReportType.PLAIN_FAILED, ReportType.TEST -> outFileBaseName
             ReportType.JSON -> "$outFileBaseName.json"
             ReportType.XML -> "$outFileBaseName.xml"
             ReportType.TOML -> "$outFileBaseName.toml"
         }
-        val out = when (val currentOutputType = saveProperties.resultOutput!!) {
-            OutputStreamType.FILE -> fs.sink(outFileName.toPath()).buffer()
+        val out = when (val currentOutputType = saveProperties.resultOutput) {
+            OutputStreamType.FILE -> {
+                val reportFile = saveProperties.reportDir.toPath() / outFileName
+                logDebug("Created folders to $reportFile")
+                reportFile.parent?.let { fs.createDirectories(it) }
+                logDebug("Created FILE to $reportFile")
+                fs.sink(saveProperties.reportDir.toPath() / outFileName).buffer()
+            }
             OutputStreamType.STDOUT, OutputStreamType.STDERR -> StdStreamsSink(currentOutputType).buffer()
         }
         // todo: make `saveProperties.reportType` a collection
