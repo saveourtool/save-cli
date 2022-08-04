@@ -31,15 +31,18 @@ jobs:
         with:
           java-version: 11
           distribution: temurin
+      - name: Retrieve Kotlin version
+        shell: bash
+        run: |
+          kv=$(cat gradle/libs.versions.toml | grep '^kotlin =' | awk -F'[=]' '{print $2}' | tr -d '" ')
+          echo KOTLIN_VERSION=$kv >> $GITHUB_ENV
       - name: Cache konan
         uses: actions/cache@v3
         with:
           # [@actions/glob](https://github.com/actions/toolkit/tree/main/packages/glob) is used to match paths
           # It should correctly expand `~` on every OS.
           path: ~/.konan
-          key: ${{ runner.os }}-gradle-konan-1.7.0
-          restore-keys: |
-            ${{ runner.os }}-gradle-konan-1.7.0
+          key: ${{ runner.os }}-gradle-konan-${{ env.KOTLIN_VERSION }}
       - uses: gradle/gradle-build-action@v2
         with:
           gradle-version: wrapper
