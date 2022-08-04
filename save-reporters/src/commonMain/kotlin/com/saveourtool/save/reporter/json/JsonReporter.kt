@@ -18,9 +18,8 @@ import kotlinx.serialization.modules.subclass
 /**
  * Reporter that produces a JSON report as a [Report]
  *
- * @property out a sink for output
- *
  * @param builder additional configuration lambda for serializers module
+ * @property out a sink for output
  */
 class JsonReporter(
     override val out: BufferedSink,

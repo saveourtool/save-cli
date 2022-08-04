@@ -238,7 +238,7 @@ class WarnPluginTest {
                     |Test1Test.java:3:6: Class name should be in PascalCase
                     |Test1Test.java:5:5: Variable name should be in lowerCamelCase
                     |Test1Test.java:7:1: File should end with trailing newline
-            |""".trimMargin()
+            """.trimMargin()
         )
         performTest(
             listOf(
@@ -269,7 +269,7 @@ class WarnPluginTest {
                     |Test1Test.java:3:6: Class name should be in PascalCase
                     |Test1Test.java:5:5: Variable name should be in lowerCamelCase
                     |Test1Test.java:7:1: File should end with trailing newline
-            |""".trimMargin()
+            """.trimMargin()
         )
         performTest(
             listOf(
@@ -299,7 +299,7 @@ class WarnPluginTest {
                     |Test1Test.java: Class name should be in PascalCase
                     |Test1Test.java: Variable name should be in lowerCamelCase
                     |Test1Test.java: File should end with trailing newline
-            |""".trimMargin()
+            """.trimMargin()
         )
         performTest(
             listOf(

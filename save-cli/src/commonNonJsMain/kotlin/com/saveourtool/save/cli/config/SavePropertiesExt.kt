@@ -59,8 +59,10 @@ private fun SaveProperties.validate(): SaveProperties {
  * @return string which represents all fields of current instance
  */
 private fun SaveProperties.getFields() = this.toString()
-    .dropWhile { it != '(' }.drop(1)
-    .dropLastWhile { it != ')' }.dropLast(1)
+    .dropWhile { it != '(' }
+    .drop(1)
+    .dropLastWhile { it != ')' }
+    .dropLast(1)
 
 private fun tryToUpdateDebugLevel(properties: SaveProperties) {
     logType.set(properties.logType)

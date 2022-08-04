@@ -22,7 +22,10 @@ import org.gradle.kotlin.dsl.getByType
 fun Project.configureVersioning() {
     apply<ReckonPlugin>()
     apply<GrgitServicePlugin>()
-    val grgitProvider = project.extensions.getByType<GrgitServiceExtension>().service.map { it.grgit }
+    val grgitProvider = project.extensions
+        .getByType<GrgitServiceExtension>()
+        .service
+        .map { it.grgit }
 
     val isSnapshot = hasProperty("reckon.stage") && property("reckon.stage") == "snapshot"
     configure<ReckonExtension> {
@@ -39,7 +42,9 @@ fun Project.configureVersioning() {
     val isRelease = hasProperty("release") && (property("release") as String != "false")
     if (isRelease) {
         val grgit = grgitProvider.get()
-        val status = grgit.repository.jgit.status().call()
+        val status = grgit.repository.jgit
+            .status()
+            .call()
         if (!status.isClean) {
             throw GradleException("Release build will be performed with not clean git tree; aborting. " +
                     "Untracked files: ${status.untracked}, uncommitted changes: ${status.uncommittedChanges}")
