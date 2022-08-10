@@ -73,6 +73,7 @@ class GeneralTest {
         }
     }
 
+    @Suppress("DEBUG_PRINT")
     private fun doTest(
         workingDir: String,
         testRootDir: String = ".",
