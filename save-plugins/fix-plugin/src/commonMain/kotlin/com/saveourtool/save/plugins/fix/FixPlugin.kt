@@ -72,59 +72,61 @@ class FixPlugin(
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
         extraFlagsExtractor = ExtraFlagsExtractor(generalConfig, fs)
 
-        return files.map { it as FixTestFiles }.chunked(fixPluginConfig.batchSize!!.toInt()).map { chunk ->
+        return files.map { it as FixTestFiles }
+            .chunked(fixPluginConfig.batchSize!!.toInt())
+            .map { chunk ->
 
-            val extraFlagsList = chunk.map { it.test }.mapNotNull { path ->
-                extraFlagsExtractor.extractExtraFlagsFrom(path)
-            }
-                .distinct()
-            require(extraFlagsList.size <= 1) {
-                "Extra flags for all files in a batch should be same, but you have batchSize=${fixPluginConfig.batchSize}" +
-                        " and there are ${extraFlagsList.size} different sets of flags inside it, namely $extraFlagsList"
-            }
-            val extraFlags = extraFlagsList.singleOrNull() ?: ExtraFlags("", "")
+                val extraFlagsList = chunk.map { it.test }.mapNotNull { path ->
+                    extraFlagsExtractor.extractExtraFlagsFrom(path)
+                }
+                    .distinct()
+                require(extraFlagsList.size <= 1) {
+                    "Extra flags for all files in a batch should be same, but you have batchSize=${fixPluginConfig.batchSize}" +
+                            " and there are ${extraFlagsList.size} different sets of flags inside it, namely $extraFlagsList"
+                }
+                val extraFlags = extraFlagsList.singleOrNull() ?: ExtraFlags("", "")
 
-            val pathMap = chunk.map { it.test to it.expected }
-            val pathCopyMap = pathMap.map { (test, expected) ->
-                createTestFile(test, generalConfig, fixPluginConfig) to expected
-            }
-            val testCopyNames =
-                    pathCopyMap.joinToString(separator = fixPluginConfig.batchSeparator!!) { (testCopy, _) -> testCopy.toString() }
+                val pathMap = chunk.map { it.test to it.expected }
+                val pathCopyMap = pathMap.map { (test, expected) ->
+                    createTestFile(test, generalConfig, fixPluginConfig) to expected
+                }
+                val testCopyNames =
+                        pathCopyMap.joinToString(separator = fixPluginConfig.batchSeparator!!) { (testCopy, _) -> testCopy.toString() }
 
-            val execFlagsAdjusted = resolvePlaceholdersFrom(fixPluginConfig.execFlags, extraFlags, testCopyNames)
-            val execCmd = "${generalConfig.execCmd} $execFlagsAdjusted"
-            val time = generalConfig.timeOutMillis!!.times(pathMap.size)
+                val execFlagsAdjusted = resolvePlaceholdersFrom(fixPluginConfig.execFlags, extraFlags, testCopyNames)
+                val execCmd = "${generalConfig.execCmd} $execFlagsAdjusted"
+                val time = generalConfig.timeOutMillis!!.times(pathMap.size)
 
-            val executionResult = try {
-                pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time)
-            } catch (ex: ProcessTimeoutException) {
-                logWarn("The following tests took too long to run and were stopped: ${chunk.map { it.test }}, timeout for single test: ${ex.timeoutMillis}")
-                return@map failTestResult(chunk, ex, execCmd)
-            } catch (ex: ProcessExecutionException) {
-                return@map failTestResult(chunk, ex, execCmd)
-            }
+                val executionResult = try {
+                    pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time)
+                } catch (ex: ProcessTimeoutException) {
+                    logWarn("The following tests took too long to run and were stopped: ${chunk.map { it.test }}, timeout for single test: ${ex.timeoutMillis}")
+                    return@map failTestResult(chunk, ex, execCmd)
+                } catch (ex: ProcessExecutionException) {
+                    return@map failTestResult(chunk, ex, execCmd)
+                }
 
-            val stdout = executionResult.stdout
-            val stderr = executionResult.stderr
+                val stdout = executionResult.stdout
+                val stderr = executionResult.stderr
 
-            pathCopyMap.map { (testCopy, expected) ->
-                val fixedLines = fs.readLines(testCopy)
-                val expectedLines = fs.readLines(expected)
+                pathCopyMap.map { (testCopy, expected) ->
+                    val fixedLines = fs.readLines(testCopy)
+                    val expectedLines = fs.readLines(expected)
 
-                val test = pathMap.first { (test, _) -> test.name == testCopy.name }.first
+                    val test = pathMap.first { (test, _) -> test.name == testCopy.name }.first
 
-                TestResult(
-                    FixTestFiles(test, expected),
-                    checkStatus(expectedLines, fixedLines),
-                    DebugInfo(
-                        execCmd,
-                        stdout.filter { it.contains(testCopy.name) }.joinToString("\n"),
-                        stderr.filter { it.contains(testCopy.name) }.joinToString("\n"),
-                        null
+                    TestResult(
+                        FixTestFiles(test, expected),
+                        checkStatus(expectedLines, fixedLines),
+                        DebugInfo(
+                            execCmd,
+                            stdout.filter { it.contains(testCopy.name) }.joinToString("\n"),
+                            stderr.filter { it.contains(testCopy.name) }.joinToString("\n"),
+                            null
+                        )
                     )
-                )
+                }
             }
-        }
             .flatten()
     }
 

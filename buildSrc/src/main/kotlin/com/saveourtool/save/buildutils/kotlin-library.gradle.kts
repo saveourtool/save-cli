@@ -53,7 +53,7 @@ kotlin {
             }
     }
 
-    /**
+    /*
      * Common structure for MPP libraries:
      *            common
      *              |
@@ -63,7 +63,6 @@ kotlin {
      *     /   |    \
      * linux  mingw macos
      */
-    @Suppress("WRONG_NEWLINES_AROUND_KDOC")
     sourceSets {
         all {
             languageSettings.optIn("kotlin.RequiresOptIn")

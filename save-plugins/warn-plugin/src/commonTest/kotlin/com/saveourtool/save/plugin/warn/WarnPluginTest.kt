@@ -80,7 +80,7 @@ class WarnPluginTest {
                 class example {
                     int foo = 42;
                 }
-            """.trimIndent()
+                """.trimIndent()
             ),
             defaultWarnConfig,
             defaultGeneralConfig
@@ -100,7 +100,7 @@ class WarnPluginTest {
                 |Test1Test.java:7: Variable name should be in LowerCase
                 |Test1Test.java:10: Class should have a Kdoc
                 |Test1Test.java:10: Class name should be in PascalCase
-                """.trimMargin()
+            """.trimMargin()
         )
         performTest(
             listOf(
@@ -115,7 +115,7 @@ class WarnPluginTest {
                 }
                 // ;warn: Class should have a Kdoc
                 // ;warn:10: Class name should be in PascalCase
-            """.trimIndent()
+                """.trimIndent()
             ),
             defaultWarnConfig.copy(
                 actualWarningsPattern = Regex("(.+):(\\d+): (.+)"),
@@ -145,7 +145,7 @@ class WarnPluginTest {
                 |Test1Test.java:6:1: Class name should be in PascalCase
                 |Test1Test.java:6:1: Class name shouldn't have a number
                 |Test1Test.java:9:1: Variable name should be in LowerCase
-                """.trimMargin()
+            """.trimMargin()
         )
         performTest(
             listOf(
@@ -160,7 +160,7 @@ class WarnPluginTest {
                 // ;warn:${'$'}l+1:1: Variable name should be in LowerCase
                     int Foo = 42;
                 }
-            """.trimIndent()
+                """.trimIndent()
             ),
             defaultWarnConfig.copy(
                 actualWarningsPattern = Regex("(.+):(\\d+):(\\d*): (.*)"),
@@ -179,7 +179,7 @@ class WarnPluginTest {
             """
                 |Test1Test.java:4:6: Class name should be in PascalCase
                 |Test1Test.java:5:8: Variable name should be in lowerCamelCase
-                """.trimMargin()
+            """.trimMargin()
         )
         performTest(
             listOf(
@@ -190,7 +190,7 @@ class WarnPluginTest {
                 class example {
                     int Foo = 42;
                 }
-            """.trimIndent()
+                """.trimIndent()
             ),
             defaultWarnConfig.copy(
                 exactWarningsMatch = false,
@@ -218,7 +218,7 @@ class WarnPluginTest {
                     int Foo = 42;
                 }
                 // ;warn:7:1: File should end with trailing newline
-            """.trimIndent()
+                """.trimIndent()
             ),
             defaultWarnConfig.copy(
                 execFlags = "echo Test1Test.java:4:6: Class name should be in PascalCase",
@@ -238,7 +238,7 @@ class WarnPluginTest {
                     |Test1Test.java:3:6: Class name should be in PascalCase
                     |Test1Test.java:5:5: Variable name should be in lowerCamelCase
                     |Test1Test.java:7:1: File should end with trailing newline
-                    |""".trimMargin()
+            """.trimMargin()
         )
         performTest(
             listOf(
@@ -250,7 +250,7 @@ class WarnPluginTest {
                     int Foo = 42;
                 }
                 // ;warn:7:1: File should end with trailing newline
-            """.trimIndent()
+                """.trimIndent()
             ),
             defaultWarnConfig,
             defaultGeneralConfig
@@ -269,7 +269,7 @@ class WarnPluginTest {
                     |Test1Test.java:3:6: Class name should be in PascalCase
                     |Test1Test.java:5:5: Variable name should be in lowerCamelCase
                     |Test1Test.java:7:1: File should end with trailing newline
-                    |""".trimMargin()
+            """.trimMargin()
         )
         performTest(
             listOf(
@@ -281,7 +281,7 @@ class WarnPluginTest {
                     int Foo = 42;
                 }
                 // ;warn:3:1: File should end with trailing newline
-            """.trimIndent()
+                """.trimIndent()
             ),
             defaultWarnConfig,
             defaultGeneralConfig.copy(expectedWarningsPattern = Regex("(.+):(\\d+):(\\d+): (.+)")),
@@ -299,7 +299,7 @@ class WarnPluginTest {
                     |Test1Test.java: Class name should be in PascalCase
                     |Test1Test.java: Variable name should be in lowerCamelCase
                     |Test1Test.java: File should end with trailing newline
-                    |""".trimMargin()
+            """.trimMargin()
         )
         performTest(
             listOf(
@@ -311,7 +311,7 @@ class WarnPluginTest {
                     int Foo = 42;
                 }
                 // ;warn: File should end with trailing newline
-            """.trimIndent()
+                """.trimIndent()
             ),
             defaultWarnConfig.copy(
                 actualWarningsPattern = Regex("(.+): (.+)"),
@@ -341,7 +341,7 @@ class WarnPluginTest {
             """
                 |Test1Test.java:4:6: Class name should be in PascalCase
                 |Test2Test.java:2:3: Class name should be in PascalCase
-                """.trimMargin()
+            """.trimMargin()
         )
         performTest(
             listOf(
@@ -352,7 +352,7 @@ class WarnPluginTest {
                 class example {
                     int foo = 42;
                 }
-            """.trimIndent(),
+                """.trimIndent(),
                 """
                 package com.saveourtool.save.example
                 
@@ -360,7 +360,7 @@ class WarnPluginTest {
                 class example2 {
                     int foo = 42;
                 }
-            """.trimIndent()
+                """.trimIndent()
             ),
             defaultWarnConfig.copy(
                 batchSize = 2
@@ -378,7 +378,7 @@ class WarnPluginTest {
         mockExecCmd(
             """
                 |
-                """.trimMargin()
+            """.trimMargin()
         )
         fs.createFile(tmpDir / "Test1Test.java")
         fs.createFile(tmpDir / "Test2Test.java")

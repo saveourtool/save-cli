@@ -36,9 +36,15 @@ class FixAndWarnPlugin(
     redirectTo,
 ) {
     private val fixPluginConfig: FixPluginConfig =
-            testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().fix
+            testConfig.pluginConfigs
+                .filterIsInstance<FixAndWarnPluginConfig>()
+                .single()
+                .fix
     private val warnPluginConfig: WarnPluginConfig =
-            testConfig.pluginConfigs.filterIsInstance<FixAndWarnPluginConfig>().single().warn
+            testConfig.pluginConfigs
+                .filterIsInstance<FixAndWarnPluginConfig>()
+                .single()
+                .warn
     private val generalConfig: GeneralConfig =
             testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
 

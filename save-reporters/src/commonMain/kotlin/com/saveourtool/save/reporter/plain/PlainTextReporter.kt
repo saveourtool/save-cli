@@ -20,6 +20,7 @@ import okio.BufferedSink
  *
  * @property out a sink for output
  */
+@Suppress("WRONG_INDENTATION")  // https://github.com/saveourtool/diktat/issues/1490
 open class PlainTextReporter(override val out: BufferedSink) : Reporter {
     override val type: ReportType = ReportType.PLAIN
     private var currentTestSuite: String? = null
