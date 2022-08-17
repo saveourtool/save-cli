@@ -6,6 +6,7 @@
 
 package com.saveourtool.save.core.plugin
 
+import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.TestConfigSections
 import com.saveourtool.save.core.utils.RegexSerializer
 
@@ -41,7 +42,7 @@ interface PluginConfig {
     val resourceNamePatternStr: String
 
     /**
-     * @param otherConfig - 'this' will be merged with 'other'
+     * @param otherConfig 'this' will be merged with 'other'
      * @return merged config
      */
     fun mergeWith(otherConfig: PluginConfig): PluginConfig
@@ -49,9 +50,10 @@ interface PluginConfig {
     /**
      * Method, which validates config and provides the default values for fields, if possible
      *
+     * @param evaluatedToolConfig configuration for evaluated tool to set properties are related to evaluated tool
      * @return new validated instance obtained from [this]
      */
-    fun validateAndSetDefaults(): PluginConfig
+    fun validateAndSetDefaults(evaluatedToolConfig: EvaluatedToolConfig): PluginConfig
 }
 
 /**
@@ -60,13 +62,15 @@ interface PluginConfig {
  * of nested configs, we can't detect whether the value are passed by user, or taken from default.
  * The logic of the default value processing will be provided in stage of validation
  *
- * @property execCmd a command that will be executed to check resources and emit warnings
+ * @property execCmd a command that will be executed to check resources
+ * @property batchSize it controls how many files execCmd will process at a time
+ * @property batchSeparator A separator to join test files to string if the tested tool supports processing of file batches (`batch-size` > 1)
  * @property tags special labels that can be used for splitting tests into groups
  * @property description free text with a description
  * @property suiteName name of test suite that can be visible from save-cloud
  * @property language to tests
  * @property excludedTests excluded tests from the run
- * @property expectedWarningsPattern - pattern with warnings that are expected from the test file
+ * @property expectedWarningsPattern pattern with warnings that are expected from the test file
  * @property runConfigPattern everything from the capture group will be split by comma and then by `=`
  * @property timeOutMillis command execution time for one test
  * @property expectedWarningsMiddlePattern
@@ -75,6 +79,10 @@ interface PluginConfig {
 @Serializable
 data class GeneralConfig(
     val execCmd: String? = null,
+    @Transient
+    val batchSize: Int? = null,
+    @Transient
+    val batchSeparator: String? = null,
     val tags: List<String>? = null,
     val description: String? = null,
     val suiteName: String? = null,
@@ -104,6 +112,8 @@ data class GeneralConfig(
 
         return GeneralConfig(
             this.execCmd ?: other.execCmd,
+            this.batchSize ?: other.batchSize,
+            this.batchSeparator ?: other.batchSeparator,
             mergedTag,
             this.description ?: other.description,
             this.suiteName ?: other.suiteName,
@@ -118,8 +128,8 @@ data class GeneralConfig(
     }
 
     @Suppress("MagicNumber")
-    override fun validateAndSetDefaults(): GeneralConfig {
-        requireNotNull(execCmd) {
+    override fun validateAndSetDefaults(evaluatedToolConfig: EvaluatedToolConfig): GeneralConfig {
+        val execCmd = requireNotNull(evaluatedToolConfig.execCmd ?: this.execCmd) {
             errorMsgForRequireCheck("execCmd")
         }
         requireNotNull(tags) {
@@ -133,6 +143,8 @@ data class GeneralConfig(
         }
         return GeneralConfig(
             execCmd,
+            evaluatedToolConfig.batchSize,
+            evaluatedToolConfig.batchSeparator,
             tags,
             description,
             suiteName,

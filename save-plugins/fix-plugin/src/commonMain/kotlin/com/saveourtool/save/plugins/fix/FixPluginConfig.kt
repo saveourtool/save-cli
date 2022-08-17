@@ -2,6 +2,7 @@
 
 package com.saveourtool.save.plugins.fix
 
+import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.TestConfigSections
 import com.saveourtool.save.core.plugin.PluginConfig
 import com.saveourtool.save.core.utils.RegexSerializer
@@ -18,18 +19,14 @@ import kotlinx.serialization.UseSerializers
  * of nested configs, we can't detect whether the value are passed by user, or taken from default.
  * The logic of the default value processing will be provided in stage of validation
  *
- * @property execFlags a command that will be executed to mutate test file contents
- * @property batchSize it controls how many files execCmd will process at a time.
+ * @property execFlags a flags that will be applied to execCmd
  * @property resourceNameTestSuffix suffix name of the test file.
  * @property resourceNameExpectedSuffix suffix name of the expected file.
- * @property batchSeparator
  * @property ignoreLines mutable list of patterns that later will be used to filter lines in test file
  */
 @Serializable
 data class FixPluginConfig(
     val execFlags: String? = null,
-    val batchSize: Long? = null,
-    val batchSeparator: String? = null,
     val resourceNameTestSuffix: String? = null,
     val resourceNameExpectedSuffix: String? = null,
     val ignoreLines: MutableList<String>? = null
@@ -62,8 +59,6 @@ data class FixPluginConfig(
         val other = otherConfig as FixPluginConfig
         return FixPluginConfig(
             this.execFlags ?: other.execFlags,
-            this.batchSize ?: other.batchSize,
-            this.batchSeparator ?: other.batchSeparator,
             this.resourceNameTestSuffix ?: other.resourceNameTestSuffix,
             this.resourceNameExpectedSuffix ?: other.resourceNameExpectedSuffix,
             other.ignoreLines?.let {
@@ -75,10 +70,8 @@ data class FixPluginConfig(
     }
 
     // due to probable bug in ktoml, ignoreLines = [] and no ignoreLines is ktoml are parsed to be mutableListOf("null")
-    override fun validateAndSetDefaults() = FixPluginConfig(
-        execFlags ?: "",
-        batchSize ?: 1,
-        batchSeparator ?: ", ",
+    override fun validateAndSetDefaults(evaluatedToolConfig: EvaluatedToolConfig) = FixPluginConfig(
+        (evaluatedToolConfig.execFlags ?: execFlags) ?: "",
         resourceNameTest,
         resourceNameExpected,
         ignoreLines

@@ -36,8 +36,6 @@ class WarnPluginTest {
         execFlags = "$catCmd $mockScriptFile && set stub=",
         warningTextHasLine = true,
         warningTextHasColumn = true,
-        batchSize = 1,
-        batchSeparator = ", ",
         lineCaptureGroup = 1,
         columnCaptureGroup = 2,
         messageCaptureGroup = 3,
@@ -362,9 +360,7 @@ class WarnPluginTest {
                 }
                 """.trimIndent()
             ),
-            defaultWarnConfig.copy(
-                batchSize = 2
-            ),
+            defaultWarnConfig,
             defaultGeneralConfig
         ) { results ->
             assertEquals(2, results.size)
@@ -387,9 +383,7 @@ class WarnPluginTest {
         fs.createFile(tmpDir / "inner" / "Test4Test.java")
         performTest(
             emptyList(),  // files will be discovered in tmpDir, because they are already created
-            defaultWarnConfig.copy(
-                batchSize = 2,
-            ),
+            defaultWarnConfig,
             defaultGeneralConfig
         ) { results ->
             assertEquals(4, results.size)

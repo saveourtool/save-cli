@@ -11,6 +11,7 @@ import com.saveourtool.save.core.config.LogType
 import com.saveourtool.save.core.config.OutputStreamType
 import com.saveourtool.save.core.config.ReportType
 import com.saveourtool.save.core.config.SaveProperties
+import com.saveourtool.save.core.files.fs
 import com.saveourtool.save.core.logging.logType
 import com.saveourtool.save.core.result.Fail
 import com.saveourtool.save.core.result.Ignored
@@ -55,7 +56,7 @@ fun runTestsWithDiktat(
     logType.set(LogType.ALL)
     // In this test we need to merge with emulated empty save.properties file in aim to use default values,
     // since initially all fields are null
-    val save = Save(saveProperties, FileSystem.SYSTEM)
+    val save = Save(saveProperties, fs)
     val testReporter = save.performAnalysis() as TestReporter
 
     assertEquals(numberOfTests, testReporter.results.size)

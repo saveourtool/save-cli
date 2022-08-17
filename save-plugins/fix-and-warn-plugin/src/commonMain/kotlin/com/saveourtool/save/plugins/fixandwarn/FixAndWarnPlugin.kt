@@ -1,5 +1,6 @@
 package com.saveourtool.save.plugins.fixandwarn
 
+import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.readLines
 import com.saveourtool.save.core.plugin.GeneralConfig
@@ -24,12 +25,14 @@ private typealias WarningsList = MutableList<Pair<Int, String>>
  */
 class FixAndWarnPlugin(
     testConfig: TestConfig,
+    evaluatedToolConfig: EvaluatedToolConfig,
     testFiles: List<String>,
     fileSystem: FileSystem,
     useInternalRedirections: Boolean = true,
     redirectTo: Path? = null,
 ) : Plugin(
     testConfig,
+    evaluatedToolConfig,
     testFiles,
     fileSystem,
     useInternalRedirections,
@@ -53,8 +56,8 @@ class FixAndWarnPlugin(
     private lateinit var warnPlugin: WarnPlugin
 
     private fun initOrUpdateConfigs() {
-        fixPlugin = FixPlugin(createTestConfigForPlugins(fixPluginConfig), testFiles, fs)
-        warnPlugin = WarnPlugin(createTestConfigForPlugins(warnPluginConfig), testFiles, fs)
+        fixPlugin = FixPlugin(createTestConfigForPlugins(fixPluginConfig), evaluatedToolConfig, testFiles, fs)
+        warnPlugin = WarnPlugin(createTestConfigForPlugins(warnPluginConfig), evaluatedToolConfig, testFiles, fs)
     }
 
     /**
@@ -74,7 +77,7 @@ class FixAndWarnPlugin(
     )
 
     override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
-        testConfig.validateAndSetDefaults()
+        testConfig.validateAndSetDefaults(evaluatedToolConfig)
         // Need to update private fields after validation
         initOrUpdateConfigs()
         val expectedFiles = files.map { it as FixPlugin.FixTestFiles }.map { it.expected }

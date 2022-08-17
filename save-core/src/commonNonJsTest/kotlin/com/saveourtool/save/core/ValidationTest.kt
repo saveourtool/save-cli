@@ -1,5 +1,6 @@
 package com.saveourtool.save.core
 
+import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.plugin.GeneralConfig
 import com.saveourtool.save.plugin.warn.WarnPluginConfig
@@ -16,13 +17,17 @@ import kotlin.test.assertTrue
 class ValidationTest {
     private val fs: FileSystem = FileSystem.SYSTEM
 
+    private val emptyEvaluatedToolConfig = EvaluatedToolConfig(
+        null, null, 1, ", "
+    )
+
     @Test
     fun `set defaults to general section`() {
         createTomlFiles()
         val generalConfig = GeneralConfig("exeCmd", tags = listOf("Tag11", "Tag12"), description = "Description1", suiteName = "suiteName1")
         val config = TestConfig(toml1, null, mutableListOf(generalConfig), fs)
 
-        config.validateAndSetDefaults()
+        config.validateAndSetDefaults(emptyEvaluatedToolConfig)
 
         assertEquals(1, config.pluginConfigs.size)
 
@@ -35,9 +40,10 @@ class ValidationTest {
         createTomlFiles()
         val generalConfig = GeneralConfig()
         val config = TestConfig(toml1, null, mutableListOf(generalConfig), fs)
+
         generalConfig.configLocation = config.location
         try {
-            config.validateAndSetDefaults()
+            config.validateAndSetDefaults(emptyEvaluatedToolConfig)
         } catch (ex: IllegalArgumentException) {
             assertEquals(
                 """
@@ -56,7 +62,7 @@ class ValidationTest {
         val warnConfig = WarnPluginConfig(execFlags = "execFlags", messageCaptureGroup = 4)
         val config = TestConfig(toml1, null, mutableListOf(warnConfig), fs)
 
-        config.validateAndSetDefaults()
+        config.validateAndSetDefaults(emptyEvaluatedToolConfig)
 
         assertEquals(1, config.pluginConfigs.size)
 
@@ -83,7 +89,7 @@ class ValidationTest {
         val warnConfig = WarnPluginConfig(execFlags = "execFlags", warningTextHasLine = true, warningTextHasColumn = false)
         val config = TestConfig(toml1, null, mutableListOf(warnConfig), fs)
 
-        config.validateAndSetDefaults()
+        config.validateAndSetDefaults(emptyEvaluatedToolConfig)
 
         assertEquals(1, config.pluginConfigs.size)
 
@@ -101,7 +107,7 @@ class ValidationTest {
         val warnConfig = WarnPluginConfig(execFlags = "execFlags", warningTextHasLine = false, lineCaptureGroup = 1)
         val config = TestConfig(toml1, null, mutableListOf(warnConfig), fs)
 
-        config.validateAndSetDefaults()
+        config.validateAndSetDefaults(emptyEvaluatedToolConfig)
 
         assertEquals(1, config.pluginConfigs.size)
 
@@ -119,7 +125,7 @@ class ValidationTest {
         val warnConfig = WarnPluginConfig(execFlags = "execFlags", lineCaptureGroup = 5)
         val config = TestConfig(toml1, null, mutableListOf(warnConfig), fs)
 
-        config.validateAndSetDefaults()
+        config.validateAndSetDefaults(emptyEvaluatedToolConfig)
 
         assertEquals(1, config.pluginConfigs.size)
 
@@ -138,7 +144,7 @@ class ValidationTest {
         val config = TestConfig(toml1, null, mutableListOf(warnConfig), fs)
         warnConfig.configLocation = config.location
         try {
-            config.validateAndSetDefaults()
+            config.validateAndSetDefaults(emptyEvaluatedToolConfig)
         } catch (ex: IllegalArgumentException) {
             assertTrue("Exception message content incorrect: ${ex.message}") {
                 ex.message!!.startsWith(
@@ -155,7 +161,7 @@ class ValidationTest {
         val fixConfig = FixPluginConfig(execFlags = "execFlags")
         val config = TestConfig(toml1, null, mutableListOf(fixConfig), fs)
 
-        config.validateAndSetDefaults()
+        config.validateAndSetDefaults(emptyEvaluatedToolConfig)
 
         assertEquals(1, config.pluginConfigs.size)
 

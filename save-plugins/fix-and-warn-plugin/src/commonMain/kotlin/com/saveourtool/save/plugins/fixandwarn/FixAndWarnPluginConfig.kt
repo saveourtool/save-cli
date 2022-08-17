@@ -1,5 +1,6 @@
 package com.saveourtool.save.plugins.fixandwarn
 
+import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.TestConfigSections
 import com.saveourtool.save.core.plugin.PluginConfig
 import com.saveourtool.save.plugin.warn.WarnPluginConfig
@@ -41,19 +42,10 @@ data class FixAndWarnPluginConfig(
         }
     }
 
-    override fun validateAndSetDefaults(): PluginConfig {
-        require(warn.resourceNamePattern.matches(fix.resourceNameTest) &&
-                fix.batchSize == warn.batchSize
-        ) {
-            """
-               Test files batch sizes should be identical for [fix] and [warn] plugins and [fix] files should match [warn] regex .
-               But found [fix]: {${fix.resourceNameTest}, ${fix.batchSize}},
-                         [warn]: {${warn.resourceNamePatternStr}, ${warn.batchSize}}
-           """
-        }
+    override fun validateAndSetDefaults(evaluatedToolConfig: EvaluatedToolConfig): PluginConfig {
         return FixAndWarnPluginConfig(
-            fix.validateAndSetDefaults(),
-            warn.validateAndSetDefaults()
+            fix.validateAndSetDefaults(evaluatedToolConfig),
+            warn.validateAndSetDefaults(evaluatedToolConfig)
         ).also {
             it.configLocation = this.configLocation
         }

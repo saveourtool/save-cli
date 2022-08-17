@@ -1,6 +1,7 @@
 package com.saveourtool.save.plugin.warn
 
 import com.saveourtool.save.core.config.ActualWarningsFormat
+import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.ExpectedWarningsFormat
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
@@ -47,12 +48,14 @@ private typealias WarningMap = Map<String, List<Warning>>
  */
 class WarnPlugin(
     testConfig: TestConfig,
+    evaluatedToolConfig: EvaluatedToolConfig,
     testFiles: List<String>,
     fileSystem: FileSystem,
     useInternalRedirections: Boolean = true,
     redirectTo: Path? = null,
 ) : Plugin(
     testConfig,
+    evaluatedToolConfig,
     testFiles,
     fileSystem,
     useInternalRedirections,
@@ -62,7 +65,7 @@ class WarnPlugin(
     private lateinit var tmpDirName: String
 
     override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
-        testConfig.validateAndSetDefaults()
+        testConfig.validateAndSetDefaults(evaluatedToolConfig)
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
         extraFlagsExtractor = ExtraFlagsExtractor(generalConfig, fs)
@@ -74,7 +77,7 @@ class WarnPlugin(
         return warnPluginConfig.wildCardInDirectoryMode?.let {
             handleTestFile(files.map { it.test }.toList(), warnPluginConfig, generalConfig).asSequence()
         } ?: run {
-            files.chunked(warnPluginConfig.batchSize!!.toInt()).flatMap { chunk ->
+            files.chunked(generalConfig.batchSize!!.toInt()).flatMap { chunk ->
                 handleTestFile(chunk.map { it.test }, warnPluginConfig, generalConfig)
             }
         }

@@ -1,12 +1,7 @@
 package com.saveourtool.save.core
 
-import com.saveourtool.save.core.config.OutputStreamType
-import com.saveourtool.save.core.config.ReportType
+import com.saveourtool.save.core.config.*
 import com.saveourtool.save.core.config.SAVE_VERSION
-import com.saveourtool.save.core.config.SaveProperties
-import com.saveourtool.save.core.config.TestConfig
-import com.saveourtool.save.core.config.isSaveTomlConfig
-import com.saveourtool.save.core.config.resolveSaveTomlConfig
 import com.saveourtool.save.core.files.ConfigDetector
 import com.saveourtool.save.core.files.StdStreamsSink
 import com.saveourtool.save.core.logging.logDebug
@@ -72,6 +67,14 @@ class Save(
 
         reporter.beforeAll()
 
+        // create config for evaluated tool from cli args
+        val evaluatedToolConfig = EvaluatedToolConfig(
+            execCmd = saveProperties.overrideExecCmd,
+            execFlags = saveProperties.overrideExecFlags,
+            batchSize = saveProperties.batchSize,
+            batchSeparator = saveProperties.batchSeparator,
+        )
+
         // get all toml configs in file system
         val testConfigs = ConfigDetector(fs)
             .configFromFile(rootTestConfigPath)
@@ -81,12 +84,12 @@ class Save(
             // iterating top-down
             testConfig
                 // fully process this config's configuration sections
-                .processInPlace()
+                .processInPlace(evaluatedToolConfig)
                 .takeIf {
                     it.isFromEnabledSuite(includeSuites, excludeSuites)
                 }
                 // create plugins and choose only active (with test resources) ones
-                ?.buildActivePlugins(requestedTests)
+                ?.buildActivePlugins(evaluatedToolConfig, requestedTests)
                 ?.takeIf { plugins ->
                     plugins.isNotEmpty()
                 }

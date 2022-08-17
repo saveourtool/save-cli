@@ -1,5 +1,6 @@
 package com.saveourtool.save.core.plugin
 
+import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.config.isSaveTomlConfig
 import com.saveourtool.save.core.files.createRelativePathToTheRoot
@@ -20,7 +21,9 @@ import kotlinx.serialization.Serializable
 
 /**
  * Plugin that can be injected into SAVE during execution. Plugins accept contents of configuration file and then perform some work.
+ *
  * @property testConfig
+ * @property evaluatedToolConfig
  * @property testFiles a list of files (test resources or save.toml configs)
  * @property fs describes the current file system
  * @property useInternalRedirections whether to redirect stdout/stderr for internal purposes
@@ -29,6 +32,7 @@ import kotlinx.serialization.Serializable
 @Suppress("TooManyFunctions")
 abstract class Plugin(
     val testConfig: TestConfig,
+    protected val evaluatedToolConfig: EvaluatedToolConfig,
     protected val testFiles: List<String>,
     protected val fs: FileSystem,
     private val useInternalRedirections: Boolean,

@@ -34,6 +34,8 @@ class CmdExecutorWarn(
     pb,
     testConfig
 ) {
+    private val batchSeparator: String = generalConfig.batchSeparator!!
+
     override fun getWildCardInDirectoryMode(): String? = warnPluginConfig.wildCardInDirectoryMode
 
     override fun getExecFlags(): String? = warnPluginConfig.execFlags
@@ -55,5 +57,5 @@ class CmdExecutorWarn(
     }
         ?: this.stdout
 
-    override fun getBatchSeparator(): String = warnPluginConfig.batchSeparator!!
+    override fun getBatchSeparator(): String = batchSeparator
 }

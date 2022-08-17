@@ -4,6 +4,7 @@
 package com.saveourtool.save.plugin.warn
 
 import com.saveourtool.save.core.config.ActualWarningsFormat
+import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.ExpectedWarningsFormat
 import com.saveourtool.save.core.config.TestConfigSections
 import com.saveourtool.save.core.plugin.PluginConfig
@@ -21,7 +22,7 @@ import kotlinx.serialization.UseSerializers
  * of nested configs, we can't detect whether the value are passed by user, or taken from default.
  * The logic of the default value processing will be provided in stage of validation
  *
- * @property execFlags a command that will be executed to check resources and emit warnings
+ * @property execFlags a flags that will be applied to execCmd
  * @property actualWarningsPattern a regular expression by which warnings will be discovered in the process output
  * @property warningTextHasLine whether line number is included in [actualWarningsPattern]
  * @property warningTextHasColumn whether column number is included in [actualWarningsPattern]
@@ -41,8 +42,6 @@ import kotlinx.serialization.UseSerializers
  * corresponding to the whole string.
  * @property exactWarningsMatch exact match of errors
  * @property testNameRegex regular expression, which defines a test-file's name.
- * @property batchSize it controls how many files execCmd will process at a time.
- * @property batchSeparator separator for batch mode
  * @property linePlaceholder placeholder for line number, which resolved as current line and support addition and subtraction
  * @property wildCardInDirectoryMode mode that controls that we are targeting our tested tools on directories (not on files)
  * This prefix will be added to the name of the directory, if you would like to use directory mode without any prefix simply use ""
@@ -66,8 +65,6 @@ data class WarnPluginConfig(
     val actualWarningsPattern: Regex? = null,
     val warningTextHasLine: Boolean? = null,
     val warningTextHasColumn: Boolean? = null,
-    val batchSize: Long? = null,
-    val batchSeparator: String? = null,
     val lineCaptureGroup: Long? = null,
     val columnCaptureGroup: Long? = null,
     val messageCaptureGroup: Long? = null,
@@ -118,8 +115,6 @@ data class WarnPluginConfig(
             this.actualWarningsPattern ?: other.actualWarningsPattern,
             this.warningTextHasLine ?: other.warningTextHasLine,
             this.warningTextHasColumn ?: other.warningTextHasColumn,
-            this.batchSize ?: other.batchSize,
-            this.batchSeparator ?: other.batchSeparator,
             this.lineCaptureGroup ?: other.lineCaptureGroup,
             this.columnCaptureGroup ?: other.columnCaptureGroup,
             this.messageCaptureGroup ?: other.messageCaptureGroup,
@@ -155,7 +150,7 @@ data class WarnPluginConfig(
         "ComplexMethod",
         "TOO_LONG_FUNCTION"
     )
-    override fun validateAndSetDefaults(): WarnPluginConfig {
+    override fun validateAndSetDefaults(evaluatedToolConfig: EvaluatedToolConfig): WarnPluginConfig {
         requirePositiveIfNotNull(lineCaptureGroup)
         requirePositiveIfNotNull(columnCaptureGroup)
         requirePositiveIfNotNull(messageCaptureGroup)
@@ -163,7 +158,6 @@ data class WarnPluginConfig(
         requirePositiveIfNotNull(lineCaptureGroupOut)
         requirePositiveIfNotNull(columnCaptureGroupOut)
         requirePositiveIfNotNull(messageCaptureGroupOut)
-        requirePositiveIfNotNull(batchSize)
         requireValidPatternForRegexInWarning()
 
         val expectedWarningsFormat = expectedWarningsFormat ?: ExpectedWarningsFormat.IN_PLACE
@@ -184,14 +178,13 @@ data class WarnPluginConfig(
         val newLineCaptureGroupOut = if (newWarningTextHasLine) (lineCaptureGroupOut ?: 2) else null
         val newColumnCaptureGroupOut = if (newWarningTextHasColumn) (columnCaptureGroupOut ?: 3) else null
         val newMessageCaptureGroupOut = messageCaptureGroupOut ?: 4
+        val execFlags = (evaluatedToolConfig.execFlags ?: execFlags) ?: ""
 
         return WarnPluginConfig(
-            execFlags ?: "",
+            execFlags,
             actualWarningsPattern ?: defaultOutputPattern,
             newWarningTextHasLine,
             newWarningTextHasColumn,
-            batchSize ?: 1,
-            batchSeparator ?: ", ",
             newLineCaptureGroup,
             newColumnCaptureGroup,
             newMessageCaptureGroup,

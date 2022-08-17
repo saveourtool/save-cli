@@ -1,5 +1,6 @@
 package com.saveourtool.save.plugin
 
+import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
 import com.saveourtool.save.core.plugin.Plugin
@@ -15,6 +16,7 @@ internal expect val fs: FileSystem
  */
 class MockPlugin(baseDir: Path, testFiles: List<String> = emptyList()) : Plugin(
     TestConfig((baseDir / "save.toml").also { fs.createFile(it) }, null, fs = fs),
+    EvaluatedToolConfig(null, null, 1, ", "),
     testFiles,
     fs,
     useInternalRedirections = true,

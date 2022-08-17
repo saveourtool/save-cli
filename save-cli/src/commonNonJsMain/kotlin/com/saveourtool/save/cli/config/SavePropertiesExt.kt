@@ -7,6 +7,7 @@ package com.saveourtool.save.cli.config
 import com.saveourtool.save.cli.ExitCodes
 import com.saveourtool.save.cli.fs
 import com.saveourtool.save.cli.logging.logErrorAndExit
+import com.saveourtool.save.cli.logging.logWarn
 import com.saveourtool.save.core.config.SaveProperties
 import com.saveourtool.save.core.config.resolveSaveTomlConfig
 import com.saveourtool.save.core.logging.logDebug
@@ -50,6 +51,23 @@ private fun SaveProperties.validate(): SaveProperties {
             ExitCodes.INVALID_CONFIGURATION, "Not able to find configuration file '$fullConfigPath'." +
                     " Please provide a valid path to the test config via command-line or using the file with properties."
         )
+    }
+    if (batchSize < 1) {
+        return logErrorAndExit(
+            ExitCodes.INVALID_CONFIGURATION, "Property `batch-size` should be more than 1."
+        )
+    }
+    overrideExecCmd?.also {
+        logWarn {
+            "Property `override-exec-cmd` is a temporary workaround for `save-cloud`, " +
+                    "please be aware this property can be removed in future versions"
+        }
+    }
+    overrideExecFlags?.also {
+        logWarn {
+            "Property `override-exec-flags` is a temporary workaround for `save-cloud`, " +
+                    "please be aware this property can be removed in future versions"
+        }
     }
 
     return this
