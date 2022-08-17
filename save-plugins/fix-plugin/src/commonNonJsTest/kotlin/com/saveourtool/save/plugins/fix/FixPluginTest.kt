@@ -1,7 +1,9 @@
 package com.saveourtool.save.plugins.fix
 
+import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
+import com.saveourtool.save.core.files.fs
 import com.saveourtool.save.core.plugin.GeneralConfig
 import com.saveourtool.save.core.result.DebugInfo
 import com.saveourtool.save.core.result.Pass
@@ -23,10 +25,10 @@ import kotlin.test.assertTrue
  * - running tool
  */
 class FixPluginTest {
-    private val fs = FileSystem.SYSTEM
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "${FixPluginTest::class.simpleName!!}-${Random.nextInt()}").also {
         fs.createDirectory(it)
     }
+    private val emptyEvaluatedToolConfig = EvaluatedToolConfig(null, null, 1, ", ")
 
     @Test
     fun `should detect two files`() {
@@ -78,8 +80,9 @@ class FixPluginTest {
             null,
             mutableListOf(
                 FixPluginConfig(executionCmd),
-                GeneralConfig("", listOf(""), "", "")
+                GeneralConfig("", 1, ", ", listOf(""), "", "")
             ), fs),
+            emptyEvaluatedToolConfig,
             testFiles = emptyList(),
             fs,
             useInternalRedirections = false
@@ -133,8 +136,9 @@ class FixPluginTest {
             null,
             mutableListOf(
                 fixPluginConfig,
-                GeneralConfig("", listOf(""), "", "")
+                GeneralConfig("", 1, ", ", listOf(""), "", "")
             ), fs),
+            emptyEvaluatedToolConfig,
             testFiles = emptyList(),
             fs,
             useInternalRedirections = false
@@ -158,6 +162,7 @@ class FixPluginTest {
 
     internal fun discoverFilePairs() = FixPlugin(
         TestConfig(tmpDir / "save.toml", null, mutableListOf(FixPluginConfig("")), fs),
+        emptyEvaluatedToolConfig,
         testFiles = emptyList(),
         fs,
         useInternalRedirections = false
