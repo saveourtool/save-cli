@@ -6,9 +6,11 @@ package com.saveourtool.save.plugin.warn
 import com.saveourtool.save.core.config.ActualWarningsFormat
 import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.ExpectedWarningsFormat
+import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.config.TestConfigSections
 import com.saveourtool.save.core.plugin.PluginConfig
 import com.saveourtool.save.core.utils.RegexSerializer
+import com.saveourtool.save.core.utils.validateAndGetExecFlags
 
 import okio.Path
 import okio.Path.Companion.toPath
@@ -150,7 +152,7 @@ data class WarnPluginConfig(
         "ComplexMethod",
         "TOO_LONG_FUNCTION"
     )
-    override fun validateAndSetDefaults(evaluatedToolConfig: EvaluatedToolConfig): WarnPluginConfig {
+    override fun validateAndSetDefaults(testConfig: TestConfig, evaluatedToolConfig: EvaluatedToolConfig): WarnPluginConfig {
         requirePositiveIfNotNull(lineCaptureGroup)
         requirePositiveIfNotNull(columnCaptureGroup)
         requirePositiveIfNotNull(messageCaptureGroup)
@@ -178,10 +180,9 @@ data class WarnPluginConfig(
         val newLineCaptureGroupOut = if (newWarningTextHasLine) (lineCaptureGroupOut ?: 2) else null
         val newColumnCaptureGroupOut = if (newWarningTextHasColumn) (columnCaptureGroupOut ?: 3) else null
         val newMessageCaptureGroupOut = messageCaptureGroupOut ?: 4
-        val execFlags = (evaluatedToolConfig.execFlags ?: execFlags) ?: ""
 
         return WarnPluginConfig(
-            execFlags,
+            execFlags.validateAndGetExecFlags(testConfig, evaluatedToolConfig),
             actualWarningsPattern ?: defaultOutputPattern,
             newWarningTextHasLine,
             newWarningTextHasColumn,

@@ -16,7 +16,6 @@ import kotlin.test.assertTrue
 @Suppress("LONG_LINE")
 class ValidationTest {
     private val fs: FileSystem = FileSystem.SYSTEM
-
     private val emptyEvaluatedToolConfig = EvaluatedToolConfig(
         null, null, 1, ", "
     )

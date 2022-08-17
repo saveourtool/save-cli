@@ -1,6 +1,7 @@
 package com.saveourtool.save.plugins.fixandwarn
 
 import com.saveourtool.save.core.config.EvaluatedToolConfig
+import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.config.TestConfigSections
 import com.saveourtool.save.core.plugin.PluginConfig
 import com.saveourtool.save.plugin.warn.WarnPluginConfig
@@ -42,12 +43,10 @@ data class FixAndWarnPluginConfig(
         }
     }
 
-    override fun validateAndSetDefaults(evaluatedToolConfig: EvaluatedToolConfig): PluginConfig {
-        return FixAndWarnPluginConfig(
-            fix.validateAndSetDefaults(evaluatedToolConfig),
-            warn.validateAndSetDefaults(evaluatedToolConfig)
-        ).also {
-            it.configLocation = this.configLocation
-        }
+    override fun validateAndSetDefaults(testConfig: TestConfig, evaluatedToolConfig: EvaluatedToolConfig): PluginConfig = FixAndWarnPluginConfig(
+        fix.validateAndSetDefaults(testConfig, evaluatedToolConfig),
+        warn.validateAndSetDefaults(testConfig, evaluatedToolConfig)
+    ).also {
+        it.configLocation = this.configLocation
     }
 }

@@ -18,7 +18,6 @@ import com.saveourtool.save.core.result.Ignored
 import com.saveourtool.save.core.result.Pass
 import com.saveourtool.save.reporter.test.TestReporter
 
-import okio.FileSystem
 import okio.Path
 
 import kotlin.test.assertEquals

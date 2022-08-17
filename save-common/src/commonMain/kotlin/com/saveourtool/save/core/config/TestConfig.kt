@@ -193,7 +193,7 @@ data class TestConfig(
      */
     fun validateAndSetDefaults(evaluatedToolConfig: EvaluatedToolConfig) {
         pluginConfigs.forEachIndexed { index, config ->
-            pluginConfigs[index] = config.validateAndSetDefaults(evaluatedToolConfig)
+            pluginConfigs[index] = config.validateAndSetDefaults(this, evaluatedToolConfig)
         }
         logDebug("Validated plugin configuration for [$location] " +
                 "(${pluginConfigs.map { it.type }.filterNot { it == TestConfigSections.GENERAL }})")

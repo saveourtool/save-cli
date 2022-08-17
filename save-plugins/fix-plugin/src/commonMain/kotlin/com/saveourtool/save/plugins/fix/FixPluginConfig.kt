@@ -3,9 +3,11 @@
 package com.saveourtool.save.plugins.fix
 
 import com.saveourtool.save.core.config.EvaluatedToolConfig
+import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.config.TestConfigSections
 import com.saveourtool.save.core.plugin.PluginConfig
 import com.saveourtool.save.core.utils.RegexSerializer
+import com.saveourtool.save.core.utils.validateAndGetExecFlags
 
 import okio.Path
 import okio.Path.Companion.toPath
@@ -70,8 +72,8 @@ data class FixPluginConfig(
     }
 
     // due to probable bug in ktoml, ignoreLines = [] and no ignoreLines is ktoml are parsed to be mutableListOf("null")
-    override fun validateAndSetDefaults(evaluatedToolConfig: EvaluatedToolConfig) = FixPluginConfig(
-        (evaluatedToolConfig.execFlags ?: execFlags) ?: "",
+    override fun validateAndSetDefaults(testConfig: TestConfig, evaluatedToolConfig: EvaluatedToolConfig): FixPluginConfig = FixPluginConfig(
+        execFlags.validateAndGetExecFlags(testConfig, evaluatedToolConfig),
         resourceNameTest,
         resourceNameExpected,
         ignoreLines

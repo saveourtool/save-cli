@@ -7,6 +7,7 @@
 package com.saveourtool.save.core.plugin
 
 import com.saveourtool.save.core.config.EvaluatedToolConfig
+import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.config.TestConfigSections
 import com.saveourtool.save.core.utils.RegexSerializer
 
@@ -50,10 +51,11 @@ interface PluginConfig {
     /**
      * Method, which validates config and provides the default values for fields, if possible
      *
+     * @param testConfig configuration for tests
      * @param evaluatedToolConfig configuration for evaluated tool to set properties are related to evaluated tool
      * @return new validated instance obtained from [this]
      */
-    fun validateAndSetDefaults(evaluatedToolConfig: EvaluatedToolConfig): PluginConfig
+    fun validateAndSetDefaults(testConfig: TestConfig, evaluatedToolConfig: EvaluatedToolConfig): PluginConfig
 }
 
 /**
@@ -128,7 +130,7 @@ data class GeneralConfig(
     }
 
     @Suppress("MagicNumber")
-    override fun validateAndSetDefaults(evaluatedToolConfig: EvaluatedToolConfig): GeneralConfig {
+    override fun validateAndSetDefaults(testConfig: TestConfig, evaluatedToolConfig: EvaluatedToolConfig): GeneralConfig {
         val execCmd = requireNotNull(evaluatedToolConfig.execCmd ?: this.execCmd) {
             errorMsgForRequireCheck("execCmd")
         }
