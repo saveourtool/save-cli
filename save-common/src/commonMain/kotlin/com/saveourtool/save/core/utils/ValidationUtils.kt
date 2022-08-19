@@ -14,12 +14,15 @@ import com.saveourtool.save.core.config.TestConfig
  */
 fun String?.validateAndGetExecFlags(testConfig: TestConfig, evaluatedToolConfig: EvaluatedToolConfig): String {
     if (this != null) {
-        val generalConfig = requireNotNull(testConfig.getGeneralConfig()) {
-            "Not found general config"
-        }
-        require(generalConfig.execCmd != null) {
-            "`execCmd` should be set for tests with `execFlags`"
-        }
+        testConfig.parentConfigs(true)
+            .mapNotNull { it.getGeneralConfig() }
+            .firstOrNull { it.execCmd != null }
+            .let {
+                requireNotNull(it) {
+                    "`execCmd` should be set for tests with `execFlags`"
+                }
+            }
+
     }
     return evaluatedToolConfig.execFlags ?: this ?: ""
 }

@@ -1,5 +1,6 @@
 package com.saveourtool.save.plugin.warn
 
+import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
 import com.saveourtool.save.core.plugin.GeneralConfig
@@ -421,6 +422,7 @@ class WarnPluginTest {
 
         val results = WarnPlugin(
             TestConfig(config, null, mutableListOf(warnPluginConfig, generalConfig), fs),
+            EvaluatedToolConfig(null, null, 1, ", "),
             testFiles = emptyList(),
             fs
         )

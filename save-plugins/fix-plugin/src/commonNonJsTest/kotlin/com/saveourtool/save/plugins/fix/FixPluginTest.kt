@@ -130,13 +130,13 @@ class FixPluginTest {
             "${diskWithTmpDir}cd $tmpDir && echo Expected file | tee"
         }
 
-        val fixPluginConfig = if (isCurrentOsWindows()) FixPluginConfig(executionCmd, 2) else FixPluginConfig(executionCmd, 2, " ")
+        val fixPluginConfig = if (isCurrentOsWindows()) FixPluginConfig(executionCmd) else FixPluginConfig(executionCmd, " ")
 
         val fixPlugin = FixPlugin(TestConfig(config,
             null,
             mutableListOf(
                 fixPluginConfig,
-                GeneralConfig("", 1, ", ", listOf(""), "", "")
+                GeneralConfig("", 2, ", ", listOf(""), "", "")
             ), fs),
             emptyEvaluatedToolConfig,
             testFiles = emptyList(),
