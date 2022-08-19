@@ -42,14 +42,12 @@ import kotlinx.serialization.modules.subclass
  */
 class FixPlugin(
     testConfig: TestConfig,
-    evaluatedToolConfig: EvaluatedToolConfig,
     testFiles: List<String>,
     fileSystem: FileSystem,
     useInternalRedirections: Boolean = true,
     redirectTo: Path? = null,
 ) : Plugin(
     testConfig,
-    evaluatedToolConfig,
     testFiles,
     fileSystem,
     useInternalRedirections,
@@ -69,22 +67,20 @@ class FixPlugin(
     private lateinit var extraFlagsExtractor: ExtraFlagsExtractor
 
     @Suppress("TOO_LONG_FUNCTION")
-    override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
-        testConfig.validateAndSetDefaults(evaluatedToolConfig)
+    override fun handleFiles(evaluatedToolConfig: EvaluatedToolConfig, files: Sequence<TestFiles>): Sequence<TestResult> {
+        testConfig.validateAndSetDefaults()
         val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
         extraFlagsExtractor = ExtraFlagsExtractor(generalConfig, fs)
 
         return files.map { it as FixTestFiles }
-            .chunked(generalConfig.batchSize!!.toInt())
+            .chunked(evaluatedToolConfig.batchSize)
             .map { chunk ->
+                val copyPaths = chunk.map { it.test }
 
-                val extraFlagsList = chunk.map { it.test }.mapNotNull { path ->
-                    extraFlagsExtractor.extractExtraFlagsFrom(path)
-                }
-                    .distinct()
+                val extraFlagsList = copyPaths.mapNotNull { path -> extraFlagsExtractor.extractExtraFlagsFrom(path) }.distinct()
                 require(extraFlagsList.size <= 1) {
-                    "Extra flags for all files in a batch should be same, but you have batchSize=${generalConfig.batchSize}" +
+                    "Extra flags for all files in a batch should be same, but you have batchSize=${evaluatedToolConfig.batchSize}" +
                             " and there are ${extraFlagsList.size} different sets of flags inside it, namely $extraFlagsList"
                 }
                 val extraFlags = extraFlagsList.singleOrNull() ?: ExtraFlags("", "")
@@ -94,10 +90,12 @@ class FixPlugin(
                     createTestFile(test, generalConfig, fixPluginConfig) to expected
                 }
                 val testCopyNames =
-                        pathCopyMap.joinToString(separator = generalConfig.batchSeparator!!) { (testCopy, _) -> testCopy.toString() }
+                        pathCopyMap.joinToString(separator = evaluatedToolConfig.batchSeparator) { (testCopy, _) -> testCopy.toString() }
 
-                val execFlagsAdjusted = resolvePlaceholdersFrom(fixPluginConfig.execFlags, extraFlags, testCopyNames)
-                val execCmd = "${generalConfig.execCmd} $execFlagsAdjusted"
+                val execFlags = evaluatedToolConfig.execFlags ?: fixPluginConfig.execFlags
+                val execFlagsAdjusted = resolvePlaceholdersFrom(execFlags, extraFlags, testCopyNames)
+                val execCmdWithoutFlags = evaluatedToolConfig.execCmd ?: generalConfig.execCmd
+                val execCmd = "$execCmdWithoutFlags $execFlagsAdjusted"
                 val time = generalConfig.timeOutMillis!!.times(pathMap.size)
 
                 val executionResult = try {

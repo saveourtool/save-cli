@@ -43,9 +43,9 @@ data class FixAndWarnPluginConfig(
         }
     }
 
-    override fun validateAndSetDefaults(testConfig: TestConfig, evaluatedToolConfig: EvaluatedToolConfig): PluginConfig = FixAndWarnPluginConfig(
-        fix.validateAndSetDefaults(testConfig, evaluatedToolConfig),
-        warn.validateAndSetDefaults(testConfig, evaluatedToolConfig)
+    override fun validateAndSetDefaults(): PluginConfig = FixAndWarnPluginConfig(
+        fix.validateAndSetDefaults(),
+        warn.validateAndSetDefaults()
     ).also {
         it.configLocation = this.configLocation
     }

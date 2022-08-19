@@ -25,14 +25,12 @@ private typealias WarningsList = MutableList<Pair<Int, String>>
  */
 class FixAndWarnPlugin(
     testConfig: TestConfig,
-    evaluatedToolConfig: EvaluatedToolConfig,
     testFiles: List<String>,
     fileSystem: FileSystem,
     useInternalRedirections: Boolean = true,
     redirectTo: Path? = null,
 ) : Plugin(
     testConfig,
-    evaluatedToolConfig,
     testFiles,
     fileSystem,
     useInternalRedirections,
@@ -56,8 +54,8 @@ class FixAndWarnPlugin(
     private lateinit var warnPlugin: WarnPlugin
 
     private fun initOrUpdateConfigs() {
-        fixPlugin = FixPlugin(createTestConfigForPlugins(fixPluginConfig), evaluatedToolConfig, testFiles, fs)
-        warnPlugin = WarnPlugin(createTestConfigForPlugins(warnPluginConfig), evaluatedToolConfig, testFiles, fs)
+        fixPlugin = FixPlugin(createTestConfigForPlugins(fixPluginConfig), testFiles, fs)
+        warnPlugin = WarnPlugin(createTestConfigForPlugins(warnPluginConfig), testFiles, fs)
     }
 
     /**
@@ -76,8 +74,8 @@ class FixAndWarnPlugin(
         fs,
     )
 
-    override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
-        testConfig.validateAndSetDefaults(evaluatedToolConfig)
+    override fun handleFiles(evaluatedToolConfig: EvaluatedToolConfig, files: Sequence<TestFiles>): Sequence<TestResult> {
+        testConfig.validateAndSetDefaults()
         // Need to update private fields after validation
         initOrUpdateConfigs()
         val expectedFiles = files.map { it as FixPlugin.FixTestFiles }.map { it.expected }
@@ -86,7 +84,7 @@ class FixAndWarnPlugin(
         // fixme: should be performed on copies of files
         val filesAndTheirWarningsMap = removeWarningsFromExpectedFiles(expectedFiles)
 
-        val fixTestResults = fixPlugin.handleFiles(files).toList()
+        val fixTestResults = fixPlugin.handleFiles(evaluatedToolConfig, files).toList()
 
         val (fixTestResultsPassed, fixTestResultsFailed) = fixTestResults.partition { it.status is Pass }
 
@@ -112,7 +110,7 @@ class FixAndWarnPlugin(
         // TODO: then warn plugin should look at the fix plugin output for actual warnings, and not execute command one more time.
         // TODO: However it's required changes in warn plugin logic (it's should be able to compare expected and actual warnings from different places),
         // TODO: this probably could be obtained after https://github.com/saveourtool/save/issues/164,
-        val warnTestResults = warnPlugin.handleFiles(expectedFilesWithPass.map { Test(it) })
+        val warnTestResults = warnPlugin.handleFiles(evaluatedToolConfig, expectedFilesWithPass.map { Test(it) })
 
         val fixAndWarnTestResults = fixTestResultsFailed.asSequence() + warnTestResults.map { testResult ->
             files.map { it as FixPlugin.FixTestFiles }

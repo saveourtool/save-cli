@@ -422,11 +422,10 @@ class WarnPluginTest {
 
         val results = WarnPlugin(
             TestConfig(config, null, mutableListOf(warnPluginConfig, generalConfig), fs),
-            EvaluatedToolConfig(null, null, 1, ", "),
             testFiles = emptyList(),
             fs
         )
-            .execute()
+            .execute(EvaluatedToolConfig(null, null, 1, ", "))
             .toList()
         assertion(results)
     }

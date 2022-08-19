@@ -72,8 +72,8 @@ data class FixPluginConfig(
     }
 
     // due to probable bug in ktoml, ignoreLines = [] and no ignoreLines is ktoml are parsed to be mutableListOf("null")
-    override fun validateAndSetDefaults(testConfig: TestConfig, evaluatedToolConfig: EvaluatedToolConfig): FixPluginConfig = FixPluginConfig(
-        execFlags.validateAndGetExecFlags(testConfig, evaluatedToolConfig),
+    override fun validateAndSetDefaults(): FixPluginConfig = FixPluginConfig(
+        execFlags ?: "",
         resourceNameTest,
         resourceNameExpected,
         ignoreLines

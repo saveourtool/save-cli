@@ -82,16 +82,15 @@ class FixAndWarnPluginTest {
                             true, true, 1, 2, 3, 1, 1, 1, 2, 3, 4
                         )
                     ),
-                    GeneralConfig("", 1, ", ", listOf(""), "", "", expectedWarningsPattern = Regex("// ;warn:(\\d+):(\\d+): (.*)"), runConfigPattern = defaultExtraConfigPattern)
+                    GeneralConfig("", listOf(""), "", "", expectedWarningsPattern = Regex("// ;warn:(\\d+):(\\d+): (.*)"), runConfigPattern = defaultExtraConfigPattern)
                 ),
                 fs,
             ),
-            evaluatedToolConfig = EvaluatedToolConfig(null, null, 1, ", "),
             testFiles = emptyList(),
             fs,
             useInternalRedirections = false
         )
-        val results = fixAndWarnPlugin.execute().toList()
+        val results = fixAndWarnPlugin.execute(EvaluatedToolConfig(null, null, 1, ", ")).toList()
 
         println("Results $results")
         assertEquals(1, results.count(), "Size of results should equal number of pairs")

@@ -28,7 +28,6 @@ class FixPluginTest {
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "${FixPluginTest::class.simpleName!!}-${Random.nextInt()}").also {
         fs.createDirectory(it)
     }
-    private val emptyEvaluatedToolConfig = EvaluatedToolConfig(null, null, 1, ", ")
 
     @Test
     fun `should detect two files`() {
@@ -80,14 +79,13 @@ class FixPluginTest {
             null,
             mutableListOf(
                 FixPluginConfig(executionCmd),
-                GeneralConfig("", 1, ", ", listOf(""), "", "")
+                GeneralConfig("", listOf(""), "", "")
             ), fs),
-            emptyEvaluatedToolConfig,
             testFiles = emptyList(),
             fs,
             useInternalRedirections = false
         )
-        val results = fixPlugin.execute().toList()
+        val results = fixPlugin.execute(EvaluatedToolConfig(null, null, 1, ", ")).toList()
 
         assertEquals(1, results.size, "Size of results should equal number of pairs")
         val testResult = results.single()
@@ -136,14 +134,13 @@ class FixPluginTest {
             null,
             mutableListOf(
                 fixPluginConfig,
-                GeneralConfig("", 2, ", ", listOf(""), "", "")
+                GeneralConfig("", listOf(""), "", "")
             ), fs),
-            emptyEvaluatedToolConfig,
             testFiles = emptyList(),
             fs,
             useInternalRedirections = false
         )
-        val results = fixPlugin.execute().toList()
+        val results = fixPlugin.execute(EvaluatedToolConfig(null, null, 2, ", ")).toList()
 
         // We call ProcessBuilder ourselves, because the command ">" does not work for the list of files
         ProcessBuilder(false, fs).exec("echo Expected file > $testFile2", "", null, 10_000L)
@@ -162,7 +159,6 @@ class FixPluginTest {
 
     internal fun discoverFilePairs() = FixPlugin(
         TestConfig(tmpDir / "save.toml", null, mutableListOf(FixPluginConfig("")), fs),
-        emptyEvaluatedToolConfig,
         testFiles = emptyList(),
         fs,
         useInternalRedirections = false

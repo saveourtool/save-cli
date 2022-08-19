@@ -90,12 +90,12 @@ class Save(
             // iterating top-down
             testConfig
                 // fully process this config's configuration sections
-                .processInPlace(evaluatedToolConfig)
+                .processInPlace()
                 .takeIf {
                     it.isFromEnabledSuite(includeSuites, excludeSuites)
                 }
                 // create plugins and choose only active (with test resources) ones
-                ?.buildActivePlugins(evaluatedToolConfig, requestedTests)
+                ?.buildActivePlugins(requestedTests)
                 ?.takeIf { plugins ->
                     plugins.isNotEmpty()
                 }
@@ -106,7 +106,7 @@ class Save(
                 ?.forEach {
                     atLeastOneExecutionProvided = true
                     // execute created plugins
-                    executePlugin(it, reporter)
+                    executePlugin(evaluatedToolConfig, it, reporter)
                 }
                 ?.also {
                     reporter.onSuiteEnd(testConfig.getGeneralConfig()?.suiteName!!)
@@ -155,12 +155,12 @@ class Save(
                 (excludeSuites.isEmpty() || !excludeSuites.contains(suiteName))
     }
 
-    private fun executePlugin(plugin: Plugin, reporter: Reporter) {
+    private fun executePlugin(evaluatedToolConfig: EvaluatedToolConfig, plugin: Plugin, reporter: Reporter) {
         reporter.onPluginInitialization(plugin)
         logDebug("=> Executing plugin: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
         reporter.onPluginExecutionStart(plugin)
         try {
-            plugin.execute()
+            plugin.execute(evaluatedToolConfig)
                 .onEach { event ->
                     // calculate relative paths, because reporters don't need paths higher than root dir
                     val resourcesRelative = event.resources.withRelativePaths(testRootPath)

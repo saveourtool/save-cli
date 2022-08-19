@@ -48,14 +48,12 @@ private typealias WarningMap = Map<String, List<Warning>>
  */
 class WarnPlugin(
     testConfig: TestConfig,
-    evaluatedToolConfig: EvaluatedToolConfig,
     testFiles: List<String>,
     fileSystem: FileSystem,
     useInternalRedirections: Boolean = true,
     redirectTo: Path? = null,
 ) : Plugin(
     testConfig,
-    evaluatedToolConfig,
     testFiles,
     fileSystem,
     useInternalRedirections,
@@ -64,8 +62,8 @@ class WarnPlugin(
     private lateinit var extraFlagsExtractor: ExtraFlagsExtractor
     private lateinit var tmpDirName: String
 
-    override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
-        testConfig.validateAndSetDefaults(evaluatedToolConfig)
+    override fun handleFiles(evaluatedToolConfig: EvaluatedToolConfig, files: Sequence<TestFiles>): Sequence<TestResult> {
+        testConfig.validateAndSetDefaults()
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
         extraFlagsExtractor = ExtraFlagsExtractor(generalConfig, fs)
@@ -75,10 +73,10 @@ class WarnPlugin(
         // 
         // In case, when user doesn't want to use directory mode, he needs simply not to pass [wildCardInDirectoryMode] and it will be null
         return warnPluginConfig.wildCardInDirectoryMode?.let {
-            handleTestFile(files.map { it.test }.toList(), warnPluginConfig, generalConfig).asSequence()
+            handleTestFile(files.map { it.test }.toList(), evaluatedToolConfig, warnPluginConfig, generalConfig).asSequence()
         } ?: run {
-            files.chunked(generalConfig.batchSize!!.toInt()).flatMap { chunk ->
-                handleTestFile(chunk.map { it.test }, warnPluginConfig, generalConfig)
+            files.chunked(evaluatedToolConfig.batchSize).flatMap { chunk ->
+                handleTestFile(chunk.map { it.test }, evaluatedToolConfig, warnPluginConfig, generalConfig)
             }
         }
     }
@@ -111,6 +109,7 @@ class WarnPlugin(
     )
     private fun handleTestFile(
         originalPaths: List<Path>,
+        evaluatedToolConfig: EvaluatedToolConfig,
         warnPluginConfig: WarnPluginConfig,
         generalConfig: GeneralConfig
     ): Sequence<TestResult> {
@@ -127,6 +126,9 @@ class WarnPlugin(
             copyPaths,
             extraFlagsExtractor,
             pb,
+            evaluatedToolConfig.execCmd ?: generalConfig.execCmd,
+            evaluatedToolConfig.execFlags ?: warnPluginConfig.execFlags,
+            evaluatedToolConfig.batchSeparator,
             warnPluginConfig,
             testConfig,
             fs,

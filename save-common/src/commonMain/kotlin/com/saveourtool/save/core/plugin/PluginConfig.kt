@@ -51,11 +51,9 @@ interface PluginConfig {
     /**
      * Method, which validates config and provides the default values for fields, if possible
      *
-     * @param testConfig configuration for tests
-     * @param evaluatedToolConfig configuration for evaluated tool to set properties are related to evaluated tool
      * @return new validated instance obtained from [this]
      */
-    fun validateAndSetDefaults(testConfig: TestConfig, evaluatedToolConfig: EvaluatedToolConfig): PluginConfig
+    fun validateAndSetDefaults(): PluginConfig
 }
 
 /**
@@ -81,10 +79,6 @@ interface PluginConfig {
 @Serializable
 data class GeneralConfig(
     val execCmd: String? = null,
-    @Transient
-    val batchSize: Int? = null,
-    @Transient
-    val batchSeparator: String? = null,
     val tags: List<String>? = null,
     val description: String? = null,
     val suiteName: String? = null,
@@ -114,8 +108,6 @@ data class GeneralConfig(
 
         return GeneralConfig(
             this.execCmd ?: other.execCmd,
-            this.batchSize ?: other.batchSize,
-            this.batchSeparator ?: other.batchSeparator,
             mergedTag,
             this.description ?: other.description,
             this.suiteName ?: other.suiteName,
@@ -130,8 +122,8 @@ data class GeneralConfig(
     }
 
     @Suppress("MagicNumber")
-    override fun validateAndSetDefaults(testConfig: TestConfig, evaluatedToolConfig: EvaluatedToolConfig): GeneralConfig {
-        val execCmd = requireNotNull(evaluatedToolConfig.execCmd ?: this.execCmd) {
+    override fun validateAndSetDefaults(): GeneralConfig {
+        requireNotNull(execCmd) {
             errorMsgForRequireCheck("execCmd")
         }
         requireNotNull(tags) {
@@ -145,8 +137,6 @@ data class GeneralConfig(
         }
         return GeneralConfig(
             execCmd,
-            evaluatedToolConfig.batchSize,
-            evaluatedToolConfig.batchSeparator,
             tags,
             description,
             suiteName,

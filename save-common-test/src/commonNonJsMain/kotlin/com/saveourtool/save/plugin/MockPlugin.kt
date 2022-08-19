@@ -16,13 +16,12 @@ internal expect val fs: FileSystem
  */
 class MockPlugin(baseDir: Path, testFiles: List<String> = emptyList()) : Plugin(
     TestConfig((baseDir / "save.toml").also { fs.createFile(it) }, null, fs = fs),
-    EvaluatedToolConfig(null, null, 1, ", "),
     testFiles,
     fs,
     useInternalRedirections = true,
     redirectTo = null
 ) {
-    override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> = emptySequence()
+    override fun handleFiles(evaluatedToolConfig: EvaluatedToolConfig, files: Sequence<TestFiles>): Sequence<TestResult> = emptySequence()
 
     override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<TestFiles> = emptySequence()
 

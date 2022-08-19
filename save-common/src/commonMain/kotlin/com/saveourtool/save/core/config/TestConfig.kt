@@ -118,18 +118,16 @@ data class TestConfig(
     /**
      * Walk all descendant configs and merge them with their parents
      *
-     * @param evaluatedToolConfig a configuration for evaluated tool
-     * @param createPluginConfigList a function which can create a list of [PluginConfig]s for this [TestConfig] and provided [EvaluatedToolConfig]
+     * @param createPluginConfigList a function which can create a list of [PluginConfig]s for this [TestConfig]
      * @return an update this [TestConfig]
      */
     fun processInPlace(
-        evaluatedToolConfig: EvaluatedToolConfig,
-        createPluginConfigList: (EvaluatedToolConfig, TestConfig) -> List<PluginConfig>
+        createPluginConfigList: (TestConfig) -> List<PluginConfig>
     ): TestConfig {
         // need to process parent first
-        this.parentConfig?.processInPlace(evaluatedToolConfig, createPluginConfigList)
+        this.parentConfig?.processInPlace(createPluginConfigList)
         // discover plugins from the test configuration
-        createPluginConfigList(evaluatedToolConfig, this).forEach {
+        createPluginConfigList(this).forEach {
             logTrace("Discovered new pluginConfig: $it")
             this.pluginConfigs.merge(it)
         }
@@ -188,12 +186,10 @@ data class TestConfig(
 
     /**
      * Method, which validates all plugin configs and set default values, if possible
-     *
-     * @param evaluatedToolConfig
      */
-    fun validateAndSetDefaults(evaluatedToolConfig: EvaluatedToolConfig) {
+    fun validateAndSetDefaults() {
         pluginConfigs.forEachIndexed { index, config ->
-            pluginConfigs[index] = config.validateAndSetDefaults(this, evaluatedToolConfig)
+            pluginConfigs[index] = config.validateAndSetDefaults()
         }
         logDebug("Validated plugin configuration for [$location] " +
                 "(${pluginConfigs.map { it.type }.filterNot { it == TestConfigSections.GENERAL }})")

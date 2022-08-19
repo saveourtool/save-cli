@@ -23,7 +23,6 @@ import kotlinx.serialization.Serializable
  * Plugin that can be injected into SAVE during execution. Plugins accept contents of configuration file and then perform some work.
  *
  * @property testConfig
- * @property evaluatedToolConfig
  * @property testFiles a list of files (test resources or save.toml configs)
  * @property fs describes the current file system
  * @property useInternalRedirections whether to redirect stdout/stderr for internal purposes
@@ -32,7 +31,6 @@ import kotlinx.serialization.Serializable
 @Suppress("TooManyFunctions")
 abstract class Plugin(
     val testConfig: TestConfig,
-    protected val evaluatedToolConfig: EvaluatedToolConfig,
     protected val testFiles: List<String>,
     protected val fs: FileSystem,
     private val useInternalRedirections: Boolean,
@@ -48,7 +46,7 @@ abstract class Plugin(
      *
      * @return a sequence of [TestResult]s for each group of test resources
      */
-    fun execute(): Sequence<TestResult> {
+    fun execute(evaluatedToolConfig: EvaluatedToolConfig): Sequence<TestResult> {
         clean()
         val testFilesList = discoverTestFiles(testConfig.directory).toList()
 
@@ -72,7 +70,7 @@ abstract class Plugin(
             val excludedTestResults = excludedTestFiles.map {
                 TestResult(it, Ignored("Excluded by configuration"))
             }
-            handleFiles(actualTestFiles.asSequence()) + excludedTestResults
+            handleFiles(evaluatedToolConfig, actualTestFiles.asSequence()) + excludedTestResults
         } else {
             emptySequence()
         }
@@ -81,10 +79,11 @@ abstract class Plugin(
     /**
      * Perform plugin's work on a set of files.
      *
+     * @param evaluatedToolConfig a configuration for evaluated tool
      * @param files a sequence of file groups, corresponding to tests.
      * @return a sequence of [TestResult]s for each group of test resources
      */
-    abstract fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult>
+    abstract fun handleFiles(evaluatedToolConfig: EvaluatedToolConfig, files: Sequence<TestFiles>): Sequence<TestResult>
 
     /**
      * Discover groups of resource files which will be used to run tests, applying additional filtering
