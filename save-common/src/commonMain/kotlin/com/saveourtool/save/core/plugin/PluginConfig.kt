@@ -6,8 +6,6 @@
 
 package com.saveourtool.save.core.plugin
 
-import com.saveourtool.save.core.config.EvaluatedToolConfig
-import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.config.TestConfigSections
 import com.saveourtool.save.core.utils.RegexSerializer
 
@@ -63,8 +61,6 @@ interface PluginConfig {
  * The logic of the default value processing will be provided in stage of validation
  *
  * @property execCmd a command that will be executed to check resources
- * @property batchSize it controls how many files execCmd will process at a time
- * @property batchSeparator A separator to join test files to string if the tested tool supports processing of file batches (`batch-size` > 1)
  * @property tags special labels that can be used for splitting tests into groups
  * @property description free text with a description
  * @property suiteName name of test suite that can be visible from save-cloud

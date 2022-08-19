@@ -1,7 +1,5 @@
 package com.saveourtool.save.plugins.fixandwarn
 
-import com.saveourtool.save.core.config.EvaluatedToolConfig
-import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.config.TestConfigSections
 import com.saveourtool.save.core.plugin.PluginConfig
 import com.saveourtool.save.plugin.warn.WarnPluginConfig

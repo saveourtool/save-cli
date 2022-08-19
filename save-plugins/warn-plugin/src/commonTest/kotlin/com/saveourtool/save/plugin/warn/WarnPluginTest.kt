@@ -362,7 +362,8 @@ class WarnPluginTest {
                 """.trimIndent()
             ),
             defaultWarnConfig,
-            defaultGeneralConfig
+            defaultGeneralConfig,
+            2
         ) { results ->
             assertEquals(2, results.size)
             assertTrue(results.all { it.status is Pass })
@@ -385,7 +386,8 @@ class WarnPluginTest {
         performTest(
             emptyList(),  // files will be discovered in tmpDir, because they are already created
             defaultWarnConfig,
-            defaultGeneralConfig
+            defaultGeneralConfig,
+            2
         ) { results ->
             assertEquals(4, results.size)
             assertTrue(results.all { it.status is Pass })
@@ -410,7 +412,8 @@ class WarnPluginTest {
         texts: List<String>,
         warnPluginConfig: WarnPluginConfig,
         generalConfig: GeneralConfig,
-        assertion: (List<TestResult>) -> Unit
+        batchSize: Int = 1,
+        assertion: (List<TestResult>) -> Unit,
     ) {
         val config = fs.createFile(tmpDir / "save.toml")
         texts.forEachIndexed { idx, text ->
@@ -425,7 +428,7 @@ class WarnPluginTest {
             testFiles = emptyList(),
             fs
         )
-            .execute(EvaluatedToolConfig(null, null, 1, ", "))
+            .execute(EvaluatedToolConfig(null, null, batchSize, ", "))
             .toList()
         assertion(results)
     }

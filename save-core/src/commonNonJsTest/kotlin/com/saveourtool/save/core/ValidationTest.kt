@@ -35,7 +35,6 @@ class ValidationTest {
         createTomlFiles()
         val generalConfig = GeneralConfig()
         val config = TestConfig(toml1, null, mutableListOf(generalConfig), fs)
-
         generalConfig.configLocation = config.location
         try {
             config.validateAndSetDefaults()

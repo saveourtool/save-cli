@@ -128,7 +128,7 @@ class FixPluginTest {
             "${diskWithTmpDir}cd $tmpDir && echo Expected file | tee"
         }
 
-        val fixPluginConfig = if (isCurrentOsWindows()) FixPluginConfig(executionCmd) else FixPluginConfig(executionCmd, " ")
+        val fixPluginConfig = FixPluginConfig(executionCmd)
 
         val fixPlugin = FixPlugin(TestConfig(config,
             null,
@@ -140,7 +140,8 @@ class FixPluginTest {
             fs,
             useInternalRedirections = false
         )
-        val results = fixPlugin.execute(EvaluatedToolConfig(null, null, 2, ", ")).toList()
+        val batchSeparator = if (isCurrentOsWindows()) ", " else " "
+        val results = fixPlugin.execute(EvaluatedToolConfig(null, null, 2, batchSeparator)).toList()
 
         // We call ProcessBuilder ourselves, because the command ">" does not work for the list of files
         ProcessBuilder(false, fs).exec("echo Expected file > $testFile2", "", null, 10_000L)

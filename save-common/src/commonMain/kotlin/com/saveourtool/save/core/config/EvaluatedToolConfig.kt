@@ -5,8 +5,8 @@ package com.saveourtool.save.core.config
  *
  * @property execCmd
  * @property execFlags
- * @property batchSize
- * @property batchSeparator
+ * @property batchSize it controls how many files execCmd will process at a time
+ * @property batchSeparator A separator to join test files to string if the tested tool supports processing of file batches (`batch-size` > 1)
  */
 data class EvaluatedToolConfig(
     val execCmd: String?,

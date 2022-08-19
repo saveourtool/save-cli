@@ -2,12 +2,9 @@
 
 package com.saveourtool.save.plugins.fix
 
-import com.saveourtool.save.core.config.EvaluatedToolConfig
-import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.config.TestConfigSections
 import com.saveourtool.save.core.plugin.PluginConfig
 import com.saveourtool.save.core.utils.RegexSerializer
-import com.saveourtool.save.core.utils.validateAndGetExecFlags
 
 import okio.Path
 import okio.Path.Companion.toPath

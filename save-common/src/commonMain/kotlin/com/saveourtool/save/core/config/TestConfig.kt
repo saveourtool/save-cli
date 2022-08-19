@@ -121,9 +121,7 @@ data class TestConfig(
      * @param createPluginConfigList a function which can create a list of [PluginConfig]s for this [TestConfig]
      * @return an update this [TestConfig]
      */
-    fun processInPlace(
-        createPluginConfigList: (TestConfig) -> List<PluginConfig>
-    ): TestConfig {
+    fun processInPlace(createPluginConfigList: (TestConfig) -> List<PluginConfig>): TestConfig {
         // need to process parent first
         this.parentConfig?.processInPlace(createPluginConfigList)
         // discover plugins from the test configuration

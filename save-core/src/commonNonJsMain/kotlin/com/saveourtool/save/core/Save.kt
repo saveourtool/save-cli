@@ -155,7 +155,11 @@ class Save(
                 (excludeSuites.isEmpty() || !excludeSuites.contains(suiteName))
     }
 
-    private fun executePlugin(evaluatedToolConfig: EvaluatedToolConfig, plugin: Plugin, reporter: Reporter) {
+    private fun executePlugin(
+        evaluatedToolConfig: EvaluatedToolConfig,
+        plugin: Plugin,
+        reporter: Reporter
+    ) {
         reporter.onPluginInitialization(plugin)
         logDebug("=> Executing plugin: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
         reporter.onPluginExecutionStart(plugin)

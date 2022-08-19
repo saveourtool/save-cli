@@ -44,6 +44,7 @@ abstract class Plugin(
     /**
      * Perform plugin's work.
      *
+     * @param evaluatedToolConfig a configuration for evaluated tool
      * @return a sequence of [TestResult]s for each group of test resources
      */
     fun execute(evaluatedToolConfig: EvaluatedToolConfig): Sequence<TestResult> {
