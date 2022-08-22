@@ -1,6 +1,7 @@
 package com.saveourtool.save.plugin.warn
 
 import com.saveourtool.save.core.config.ActualWarningsFormat
+import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.ExpectedWarningsFormat
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
@@ -61,7 +62,7 @@ class WarnPlugin(
     private lateinit var extraFlagsExtractor: ExtraFlagsExtractor
     private lateinit var tmpDirName: String
 
-    override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
+    override fun handleFiles(evaluatedToolConfig: EvaluatedToolConfig, files: Sequence<TestFiles>): Sequence<TestResult> {
         testConfig.validateAndSetDefaults()
         val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
@@ -72,10 +73,10 @@ class WarnPlugin(
         // 
         // In case, when user doesn't want to use directory mode, he needs simply not to pass [wildCardInDirectoryMode] and it will be null
         return warnPluginConfig.wildCardInDirectoryMode?.let {
-            handleTestFile(files.map { it.test }.toList(), warnPluginConfig, generalConfig).asSequence()
+            handleTestFile(files.map { it.test }.toList(), evaluatedToolConfig, warnPluginConfig, generalConfig).asSequence()
         } ?: run {
-            files.chunked(warnPluginConfig.batchSize!!.toInt()).flatMap { chunk ->
-                handleTestFile(chunk.map { it.test }, warnPluginConfig, generalConfig)
+            files.chunked(evaluatedToolConfig.batchSize).flatMap { chunk ->
+                handleTestFile(chunk.map { it.test }, evaluatedToolConfig, warnPluginConfig, generalConfig)
             }
         }
     }
@@ -108,6 +109,7 @@ class WarnPlugin(
     )
     private fun handleTestFile(
         originalPaths: List<Path>,
+        evaluatedToolConfig: EvaluatedToolConfig,
         warnPluginConfig: WarnPluginConfig,
         generalConfig: GeneralConfig
     ): Sequence<TestResult> {
@@ -124,6 +126,9 @@ class WarnPlugin(
             copyPaths,
             extraFlagsExtractor,
             pb,
+            evaluatedToolConfig.execCmd ?: generalConfig.execCmd,
+            evaluatedToolConfig.execFlags ?: warnPluginConfig.execFlags,
+            evaluatedToolConfig.batchSeparator,
             warnPluginConfig,
             testConfig,
             fs,

@@ -4,19 +4,18 @@
 
 package com.saveourtool.save.core
 
+import com.saveourtool.save.core.files.fs
 import com.saveourtool.save.core.utils.ProcessBuilder
 import com.saveourtool.save.core.utils.ProcessBuilder.Companion.processCommandWithEcho
 import com.saveourtool.save.core.utils.ProcessExecutionException
 import com.saveourtool.save.core.utils.isCurrentOsWindows
-
-import okio.FileSystem
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 @Suppress("INLINE_CLASS_CAN_BE_USED")
 class ProcessBuilderTest {
-    private val processBuilder = ProcessBuilder(useInternalRedirections = true, FileSystem.SYSTEM)
+    private val processBuilder = ProcessBuilder(useInternalRedirections = true, fs)
 
     @Test
     fun `empty command`() {

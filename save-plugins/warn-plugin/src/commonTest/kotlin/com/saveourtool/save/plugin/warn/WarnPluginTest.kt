@@ -1,5 +1,6 @@
 package com.saveourtool.save.plugin.warn
 
+import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
 import com.saveourtool.save.core.plugin.GeneralConfig
@@ -36,8 +37,6 @@ class WarnPluginTest {
         execFlags = "$catCmd $mockScriptFile && set stub=",
         warningTextHasLine = true,
         warningTextHasColumn = true,
-        batchSize = 1,
-        batchSeparator = ", ",
         lineCaptureGroup = 1,
         columnCaptureGroup = 2,
         messageCaptureGroup = 3,
@@ -362,10 +361,9 @@ class WarnPluginTest {
                 }
                 """.trimIndent()
             ),
-            defaultWarnConfig.copy(
-                batchSize = 2
-            ),
-            defaultGeneralConfig
+            defaultWarnConfig,
+            defaultGeneralConfig,
+            2
         ) { results ->
             assertEquals(2, results.size)
             assertTrue(results.all { it.status is Pass })
@@ -387,10 +385,9 @@ class WarnPluginTest {
         fs.createFile(tmpDir / "inner" / "Test4Test.java")
         performTest(
             emptyList(),  // files will be discovered in tmpDir, because they are already created
-            defaultWarnConfig.copy(
-                batchSize = 2,
-            ),
-            defaultGeneralConfig
+            defaultWarnConfig,
+            defaultGeneralConfig,
+            2
         ) { results ->
             assertEquals(4, results.size)
             assertTrue(results.all { it.status is Pass })
@@ -415,7 +412,8 @@ class WarnPluginTest {
         texts: List<String>,
         warnPluginConfig: WarnPluginConfig,
         generalConfig: GeneralConfig,
-        assertion: (List<TestResult>) -> Unit
+        batchSize: Int = 1,
+        assertion: (List<TestResult>) -> Unit,
     ) {
         val config = fs.createFile(tmpDir / "save.toml")
         texts.forEachIndexed { idx, text ->
@@ -430,7 +428,7 @@ class WarnPluginTest {
             testFiles = emptyList(),
             fs
         )
-            .execute()
+            .execute(EvaluatedToolConfig(null, null, batchSize, ", "))
             .toList()
         assertion(results)
     }

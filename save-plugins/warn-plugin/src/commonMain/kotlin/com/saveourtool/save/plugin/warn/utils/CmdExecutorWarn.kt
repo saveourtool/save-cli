@@ -23,11 +23,14 @@ class CmdExecutorWarn(
     copyPaths: List<Path>,
     extraFlagsExtractor: ExtraFlagsExtractor,
     pb: ProcessBuilder,
+    execCmd: String?,
+    private val execFlags: String?,
+    private val batchSeparator: String,
     private val warnPluginConfig: WarnPluginConfig,
     private val testConfig: TestConfig,
     private val fs: FileSystem,
 ) : CmdExecutorBase(
-    generalConfig.execCmd!!,
+    execCmd!!,
     generalConfig.timeOutMillis!!,
     copyPaths,
     extraFlagsExtractor,
@@ -36,7 +39,7 @@ class CmdExecutorWarn(
 ) {
     override fun getWildCardInDirectoryMode(): String? = warnPluginConfig.wildCardInDirectoryMode
 
-    override fun getExecFlags(): String? = warnPluginConfig.execFlags
+    override fun getExecFlags(): String? = execFlags
 
     @Suppress("SwallowedException")
     override fun ExecutionResult.getStdout(): List<String> = warnPluginConfig.testToolResFileOutput?.let {
@@ -55,5 +58,5 @@ class CmdExecutorWarn(
     }
         ?: this.stdout
 
-    override fun getBatchSeparator(): String = warnPluginConfig.batchSeparator!!
+    override fun getBatchSeparator(): String = batchSeparator
 }

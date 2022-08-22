@@ -41,7 +41,7 @@ interface PluginConfig {
     val resourceNamePatternStr: String
 
     /**
-     * @param otherConfig - 'this' will be merged with 'other'
+     * @param otherConfig 'this' will be merged with 'other'
      * @return merged config
      */
     fun mergeWith(otherConfig: PluginConfig): PluginConfig
@@ -60,13 +60,13 @@ interface PluginConfig {
  * of nested configs, we can't detect whether the value are passed by user, or taken from default.
  * The logic of the default value processing will be provided in stage of validation
  *
- * @property execCmd a command that will be executed to check resources and emit warnings
+ * @property execCmd a command that will be executed to check resources
  * @property tags special labels that can be used for splitting tests into groups
  * @property description free text with a description
  * @property suiteName name of test suite that can be visible from save-cloud
  * @property language to tests
  * @property excludedTests excluded tests from the run
- * @property expectedWarningsPattern - pattern with warnings that are expected from the test file
+ * @property expectedWarningsPattern pattern with warnings that are expected from the test file
  * @property runConfigPattern everything from the capture group will be split by comma and then by `=`
  * @property timeOutMillis command execution time for one test
  * @property expectedWarningsMiddlePattern

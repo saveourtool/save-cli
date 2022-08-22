@@ -1,5 +1,6 @@
 package com.saveourtool.save.plugin
 
+import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
 import com.saveourtool.save.core.plugin.Plugin
@@ -20,7 +21,7 @@ class MockPlugin(baseDir: Path, testFiles: List<String> = emptyList()) : Plugin(
     useInternalRedirections = true,
     redirectTo = null
 ) {
-    override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> = emptySequence()
+    override fun handleFiles(evaluatedToolConfig: EvaluatedToolConfig, files: Sequence<TestFiles>): Sequence<TestResult> = emptySequence()
 
     override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<TestFiles> = emptySequence()
 

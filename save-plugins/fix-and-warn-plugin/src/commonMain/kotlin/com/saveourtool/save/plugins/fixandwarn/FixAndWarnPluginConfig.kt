@@ -42,13 +42,11 @@ data class FixAndWarnPluginConfig(
     }
 
     override fun validateAndSetDefaults(): PluginConfig {
-        require(warn.resourceNamePattern.matches(fix.resourceNameTest) &&
-                fix.batchSize == warn.batchSize
-        ) {
+        require(warn.resourceNamePattern.matches(fix.resourceNameTest)) {
             """
-               Test files batch sizes should be identical for [fix] and [warn] plugins and [fix] files should match [warn] regex .
-               But found [fix]: {${fix.resourceNameTest}, ${fix.batchSize}},
-                         [warn]: {${warn.resourceNamePatternStr}, ${warn.batchSize}}
+               Pattern of [fix] files should match [warn] resource files.
+               But found [fix]: {${fix.resourceNameTest},
+                         [warn]: {${warn.resourceNamePatternStr}
            """
         }
         return FixAndWarnPluginConfig(

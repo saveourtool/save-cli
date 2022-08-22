@@ -1,5 +1,6 @@
 package com.saveourtool.save.core
 
+import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.OutputStreamType
 import com.saveourtool.save.core.config.ReportType
 import com.saveourtool.save.core.config.SAVE_VERSION
@@ -72,6 +73,14 @@ class Save(
 
         reporter.beforeAll()
 
+        // create config for evaluated tool from cli args
+        val evaluatedToolConfig = EvaluatedToolConfig(
+            execCmd = saveProperties.overrideExecCmd,
+            execFlags = saveProperties.overrideExecFlags,
+            batchSize = saveProperties.batchSize,
+            batchSeparator = saveProperties.batchSeparator,
+        )
+
         // get all toml configs in file system
         val testConfigs = ConfigDetector(fs)
             .configFromFile(rootTestConfigPath)
@@ -97,7 +106,7 @@ class Save(
                 ?.forEach {
                     atLeastOneExecutionProvided = true
                     // execute created plugins
-                    executePlugin(it, reporter)
+                    executePlugin(evaluatedToolConfig, it, reporter)
                 }
                 ?.also {
                     reporter.onSuiteEnd(testConfig.getGeneralConfig()?.suiteName!!)
@@ -146,12 +155,16 @@ class Save(
                 (excludeSuites.isEmpty() || !excludeSuites.contains(suiteName))
     }
 
-    private fun executePlugin(plugin: Plugin, reporter: Reporter) {
+    private fun executePlugin(
+        evaluatedToolConfig: EvaluatedToolConfig,
+        plugin: Plugin,
+        reporter: Reporter
+    ) {
         reporter.onPluginInitialization(plugin)
         logDebug("=> Executing plugin: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
         reporter.onPluginExecutionStart(plugin)
         try {
-            plugin.execute()
+            plugin.execute(evaluatedToolConfig)
                 .onEach { event ->
                     // calculate relative paths, because reporters don't need paths higher than root dir
                     val resourcesRelative = event.resources.withRelativePaths(testRootPath)

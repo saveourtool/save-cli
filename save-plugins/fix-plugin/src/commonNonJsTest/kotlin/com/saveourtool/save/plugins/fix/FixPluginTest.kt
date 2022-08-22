@@ -1,7 +1,9 @@
 package com.saveourtool.save.plugins.fix
 
+import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
+import com.saveourtool.save.core.files.fs
 import com.saveourtool.save.core.plugin.GeneralConfig
 import com.saveourtool.save.core.result.DebugInfo
 import com.saveourtool.save.core.result.Pass
@@ -23,7 +25,6 @@ import kotlin.test.assertTrue
  * - running tool
  */
 class FixPluginTest {
-    private val fs = FileSystem.SYSTEM
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "${FixPluginTest::class.simpleName!!}-${Random.nextInt()}").also {
         fs.createDirectory(it)
     }
@@ -84,7 +85,7 @@ class FixPluginTest {
             fs,
             useInternalRedirections = false
         )
-        val results = fixPlugin.execute().toList()
+        val results = fixPlugin.execute(EvaluatedToolConfig(null, null, 1, ", ")).toList()
 
         assertEquals(1, results.size, "Size of results should equal number of pairs")
         val testResult = results.single()
@@ -127,7 +128,7 @@ class FixPluginTest {
             "${diskWithTmpDir}cd $tmpDir && echo Expected file | tee"
         }
 
-        val fixPluginConfig = if (isCurrentOsWindows()) FixPluginConfig(executionCmd, 2) else FixPluginConfig(executionCmd, 2, " ")
+        val fixPluginConfig = FixPluginConfig(executionCmd)
 
         val fixPlugin = FixPlugin(TestConfig(config,
             null,
@@ -139,7 +140,8 @@ class FixPluginTest {
             fs,
             useInternalRedirections = false
         )
-        val results = fixPlugin.execute().toList()
+        val batchSeparator = if (isCurrentOsWindows()) ", " else " "
+        val results = fixPlugin.execute(EvaluatedToolConfig(null, null, 2, batchSeparator)).toList()
 
         // We call ProcessBuilder ourselves, because the command ">" does not work for the list of files
         ProcessBuilder(false, fs).exec("echo Expected file > $testFile2", "", null, 10_000L)
