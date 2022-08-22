@@ -41,10 +41,19 @@ data class FixAndWarnPluginConfig(
         }
     }
 
-    override fun validateAndSetDefaults(): PluginConfig = FixAndWarnPluginConfig(
-        fix.validateAndSetDefaults(),
-        warn.validateAndSetDefaults()
-    ).also {
-        it.configLocation = this.configLocation
+    override fun validateAndSetDefaults(): PluginConfig {
+        require(warn.resourceNamePattern.matches(fix.resourceNameTest)) {
+            """
+               Pattern of [fix] files should match [warn] resource files.
+               But found [fix]: {${fix.resourceNameTest},
+                         [warn]: {${warn.resourceNamePatternStr}
+           """
+        }
+        return FixAndWarnPluginConfig(
+            fix.validateAndSetDefaults(),
+            warn.validateAndSetDefaults()
+        ).also {
+            it.configLocation = this.configLocation
+        }
     }
 }
