@@ -54,7 +54,7 @@ private fun SaveProperties.validate(): SaveProperties {
     }
     if (batchSize < 1) {
         return logErrorAndExit(
-            ExitCodes.INVALID_CONFIGURATION, "Property `batch-size` should be more than 1."
+            ExitCodes.INVALID_CONFIGURATION, "Property `batch-size` should be more or equal to 1."
         )
     }
     overrideExecCmd?.also {
