@@ -17,7 +17,7 @@ import kotlinx.serialization.Transient
 import kotlinx.serialization.UseSerializers
 
 /**
- * Core interface for plugin configuration (like warnPlugin/fixPluin/e.t.c)
+ * Core interface for plugin configuration (like warnPlugin/fixPlugin/e.t.c)
  */
 interface PluginConfig {
     /**
