@@ -37,7 +37,7 @@ data class CountWarnings(
     val unexpected: Int,
 ) {
     companion object {
-        const val NOT_APPLICABLE_COUNTER: Int = -99
+        private const val NOT_APPLICABLE_COUNTER: Int = -99
 
         /**
          * [CountWarnings] is not applicable for current run
@@ -48,5 +48,11 @@ data class CountWarnings(
             NOT_APPLICABLE_COUNTER,
             NOT_APPLICABLE_COUNTER
         )
+
+        /**
+         * @param counter value of counter to be checked
+         * @return true if provided value has value which means that current counter is not applicable (FixPlugin for example), otherwise -- false
+         */
+        fun isNotApplicable(counter: Int): Boolean = NOT_APPLICABLE_COUNTER == counter
     }
 }
