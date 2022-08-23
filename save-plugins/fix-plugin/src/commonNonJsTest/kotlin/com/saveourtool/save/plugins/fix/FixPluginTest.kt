@@ -62,6 +62,7 @@ class FixPluginTest {
         assertEquals("Test2Expected.java", pairs.single().second.name)
     }
 
+    @Suppress("TOO_LONG_FUNCTION")
     @Test
     fun `should calculate diff of discovered files`() {
         val config = fs.createFile(tmpDir / "save.toml")
