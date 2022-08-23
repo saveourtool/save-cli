@@ -13,6 +13,7 @@ import com.saveourtool.save.core.plugin.ExtraFlagsExtractor
 import com.saveourtool.save.core.plugin.GeneralConfig
 import com.saveourtool.save.core.plugin.Plugin
 import com.saveourtool.save.core.plugin.resolvePlaceholdersFrom
+import com.saveourtool.save.core.result.CountWarnings
 import com.saveourtool.save.core.result.DebugInfo
 import com.saveourtool.save.core.result.Fail
 import com.saveourtool.save.core.result.Pass
@@ -123,7 +124,8 @@ class FixPlugin(
                             execCmd,
                             stdout.filter { it.contains(testCopy.name) }.joinToString("\n"),
                             stderr.filter { it.contains(testCopy.name) }.joinToString("\n"),
-                            null
+                            null,
+                            CountWarnings.notApplicable,
                         )
                     )
                 }
@@ -139,7 +141,7 @@ class FixPlugin(
         TestResult(
             it,
             Fail(ex.describe(), ex.describe()),
-            DebugInfo(execCmd, null, ex.message, null)
+            DebugInfo(execCmd, null, ex.message, null, CountWarnings.notApplicable)
         )
     }
 

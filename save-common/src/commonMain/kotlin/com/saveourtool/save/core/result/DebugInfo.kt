@@ -35,4 +35,18 @@ data class CountWarnings(
     val matched: Int,
     val expected: Int,
     val unexpected: Int,
-)
+) {
+    companion object {
+        const val NOT_APPLICABLE_COUNTER: Int = -99
+
+        /**
+         * [CountWarnings] is not applicable for current run
+         */
+        val notApplicable = CountWarnings(
+            NOT_APPLICABLE_COUNTER,
+            NOT_APPLICABLE_COUNTER,
+            NOT_APPLICABLE_COUNTER,
+            NOT_APPLICABLE_COUNTER
+        )
+    }
+}
