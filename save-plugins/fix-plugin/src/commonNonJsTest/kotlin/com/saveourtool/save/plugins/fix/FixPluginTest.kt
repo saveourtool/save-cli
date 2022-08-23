@@ -5,6 +5,7 @@ import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
 import com.saveourtool.save.core.files.fs
 import com.saveourtool.save.core.plugin.GeneralConfig
+import com.saveourtool.save.core.result.CountWarnings
 import com.saveourtool.save.core.result.DebugInfo
 import com.saveourtool.save.core.result.Pass
 import com.saveourtool.save.core.result.TestResult
@@ -61,6 +62,7 @@ class FixPluginTest {
         assertEquals("Test2Expected.java", pairs.single().second.name)
     }
 
+    @Suppress("TOO_LONG_FUNCTION")
     @Test
     fun `should calculate diff of discovered files`() {
         val config = fs.createFile(tmpDir / "save.toml")
@@ -90,8 +92,14 @@ class FixPluginTest {
         assertEquals(1, results.size, "Size of results should equal number of pairs")
         val testResult = results.single()
         assertEquals(
-            TestResult(FixPlugin.FixTestFiles(testFile, expectedFile), Pass(null), DebugInfo(
-                testResult.debugInfo?.execCmd, testResult.debugInfo?.stdout, testResult.debugInfo?.stderr, null)
+            TestResult(FixPlugin.FixTestFiles(testFile, expectedFile), Pass(null),
+                DebugInfo(
+                    testResult.debugInfo?.execCmd,
+                    testResult.debugInfo?.stdout,
+                    testResult.debugInfo?.stderr,
+                    null,
+                    CountWarnings.notApplicable,
+                )
             ),
             testResult
         )
