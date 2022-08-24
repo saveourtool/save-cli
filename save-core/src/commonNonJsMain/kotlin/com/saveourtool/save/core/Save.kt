@@ -1,13 +1,7 @@
 package com.saveourtool.save.core
 
-import com.saveourtool.save.core.config.EvaluatedToolConfig
-import com.saveourtool.save.core.config.OutputStreamType
-import com.saveourtool.save.core.config.ReportType
+import com.saveourtool.save.core.config.*
 import com.saveourtool.save.core.config.SAVE_VERSION
-import com.saveourtool.save.core.config.SaveProperties
-import com.saveourtool.save.core.config.TestConfig
-import com.saveourtool.save.core.config.isSaveTomlConfig
-import com.saveourtool.save.core.config.resolveSaveTomlConfig
 import com.saveourtool.save.core.files.ConfigDetector
 import com.saveourtool.save.core.files.StdStreamsSink
 import com.saveourtool.save.core.logging.logDebug
@@ -26,6 +20,7 @@ import com.saveourtool.save.core.result.Pass
 import com.saveourtool.save.core.result.TestResult
 import com.saveourtool.save.core.utils.buildActivePlugins
 import com.saveourtool.save.core.utils.processInPlace
+import com.saveourtool.save.core.utils.readFromFile
 import com.saveourtool.save.plugin.warn.WarnPluginConfig
 import com.saveourtool.save.plugins.fix.FixPlugin
 import com.saveourtool.save.plugins.fix.FixPluginConfig
@@ -75,14 +70,28 @@ class Save(
 
         // create config for evaluated tool from cli args
         val evaluatedToolConfig = EvaluatedToolConfig(
-            execCmd = saveProperties.overrideExecCmd,
-            execFlags = saveProperties.overrideExecFlags,
             batchSize = saveProperties.batchSize,
             batchSeparator = saveProperties.batchSeparator,
         )
 
+        // create config for evaluated tool from cli args
+        val saveOverridesPath = testRootPath.resolveSaveOverridesTomlConfig()
+        val pluginConfigOverrides = if (fs.exists(saveOverridesPath)) {
+            TestConfigSections.values()
+                .filterNot(TestConfigSections.GENERAL::equals)
+                .associateWith {
+                    readFromFile<SaveOverrides, SaveOverrides.SaveOverridesInterim>(
+                        saveOverridesPath,
+                        it.name.lowercase(),
+                        ""
+                    )
+                }
+        } else {
+            emptyMap()
+        }
+
         // get all toml configs in file system
-        val testConfigs = ConfigDetector(fs)
+        val testConfigs = ConfigDetector(fs, evaluatedToolConfig, pluginConfigOverrides)
             .configFromFile(rootTestConfigPath)
             .getAllTestConfigsForFiles(requestedConfigs)
         var atLeastOneExecutionProvided = false
@@ -106,7 +115,7 @@ class Save(
                 ?.forEach {
                     atLeastOneExecutionProvided = true
                     // execute created plugins
-                    executePlugin(evaluatedToolConfig, it, reporter)
+                    executePlugin(saveOverrides, it, reporter)
                 }
                 ?.also {
                     reporter.onSuiteEnd(testConfig.getGeneralConfig()?.suiteName!!)
@@ -156,7 +165,7 @@ class Save(
     }
 
     private fun executePlugin(
-        evaluatedToolConfig: EvaluatedToolConfig,
+        saveOverrides: Map<TestConfigSections, SaveOverrides>,
         plugin: Plugin,
         reporter: Reporter
     ) {
@@ -164,7 +173,7 @@ class Save(
         logDebug("=> Executing plugin: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
         reporter.onPluginExecutionStart(plugin)
         try {
-            plugin.execute(evaluatedToolConfig)
+            plugin.execute(saveOverrides)
                 .onEach { event ->
                     // calculate relative paths, because reporters don't need paths higher than root dir
                     val resourcesRelative = event.resources.withRelativePaths(testRootPath)

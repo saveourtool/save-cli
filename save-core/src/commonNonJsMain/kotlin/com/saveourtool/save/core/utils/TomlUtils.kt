@@ -19,11 +19,15 @@ import com.akuleshov7.ktoml.exceptions.TomlDecodingException
 import com.akuleshov7.ktoml.file.TomlFileReader
 import com.akuleshov7.ktoml.parsers.TomlParser
 import com.akuleshov7.ktoml.tree.TomlTable
+import com.saveourtool.save.core.config.Interim
+import com.saveourtool.save.core.files.fs
+import com.saveourtool.save.core.plugin.PluginConfigOverrides
 import okio.FileSystem
 import okio.Path
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.serializer
+import okio.Path.Companion.toPath
 
 private fun Path.testConfigFactory(table: TomlTable) =
         when (table.fullTableName.uppercase().replace("\"", "")) {
@@ -80,6 +84,10 @@ fun createPluginConfigListFromToml(testConfigPath: Path, fs: FileSystem): List<P
         getTopLevelTomlTables(testConfigPath, fs)
             .map { testConfigPath.testConfigFactory(it) }
 
+fun createPluginConfigOverridesFromToml(testConfigPath: Path): PluginConfigOverrides {
+    readFromFile<>()
+}
+
 /**
  * @param testConfigPath path to the test config
  * @param fs FileSystem for file reading
@@ -90,3 +98,33 @@ fun getTopLevelTomlTables(testConfigPath: Path, fs: FileSystem): List<TomlTable>
     .children
     .filterIsInstance<TomlTable>()
     .filter { !it.isSynthetic }
+
+/**
+ * @param filePath path to the TOML file
+ * @param specificTableName table name to deserialize [T]
+ * @param generalTableName table name for default values of [T]
+ * @param I interim type of [T]
+ */
+inline fun <T, reified I : Interim<T, I>> readFromFile(
+    filePath: Path,
+    specificTableName: String,
+    generalTableName: String
+): T {
+    val serializer = serializer<I>()
+    val tomlInputConfigGeneralConfig = TomlInputConfig(ignoreUnknownNames = true)
+    return fs.read(filePath) {
+        val content = generateSequence { this.readUtf8Line() }.toList()
+        val generic: I = if (generalTableName.isNotEmpty()) {
+            TomlFileReader.partiallyDecodeFromString(
+                serializer,
+                content,
+                generalTableName,
+                tomlInputConfigGeneralConfig
+            )
+        } else {
+            TomlFileReader.decodeFromString(serializer, content, tomlInputConfigGeneralConfig)
+        }
+        val specific: I = TomlFileReader.partiallyDecodeFromString(serializer, content, specificTableName, TomlInputConfig())
+        generic.merge(specific).build()
+    }
+}

@@ -15,6 +15,7 @@ import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
 import kotlin.js.JsName
+import kotlin.reflect.cast
 
 /**
  * Configuration for a test suite, that is read from test suite configuration file (toml config)
@@ -235,3 +236,8 @@ fun Path.isSaveTomlConfig() = name == "save.toml"
  * @return a file (save.toml) in current directory
  */
 fun Path.resolveSaveTomlConfig() = this / "save.toml"
+
+/**
+ * @return a file (save-overrides.toml) in current directory
+ */
+fun Path.resolveSaveOverridesTomlConfig() = this / "save-overrides.toml"

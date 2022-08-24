@@ -1,7 +1,9 @@
 package com.saveourtool.save.plugins.fix
 
 import com.saveourtool.save.core.config.EvaluatedToolConfig
+import com.saveourtool.save.core.config.SaveOverrides
 import com.saveourtool.save.core.config.TestConfig
+import com.saveourtool.save.core.config.TestConfigSections
 import com.saveourtool.save.core.files.createFile
 import com.saveourtool.save.core.files.createRelativePathToTheRoot
 import com.saveourtool.save.core.files.myDeleteRecursively
@@ -74,14 +76,15 @@ class FixPlugin(
         val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
         extraFlagsExtractor = ExtraFlagsExtractor(generalConfig, fs)
 
+        val overrides = requireNotNull(saveOverrides[TestConfigSections.FIX])
         return files.map { it as FixTestFiles }
-            .chunked(evaluatedToolConfig.batchSize)
+            .chunked(overrides.batchSize)
             .map { chunk ->
                 val copyPaths = chunk.map { it.test }
 
                 val extraFlagsList = copyPaths.mapNotNull { path -> extraFlagsExtractor.extractExtraFlagsFrom(path) }.distinct()
                 require(extraFlagsList.size <= 1) {
-                    "Extra flags for all files in a batch should be same, but you have batchSize=${evaluatedToolConfig.batchSize}" +
+                    "Extra flags for all files in a batch should be same, but you have batchSize=${overrides.batchSize}" +
                             " and there are ${extraFlagsList.size} different sets of flags inside it, namely $extraFlagsList"
                 }
                 val extraFlags = extraFlagsList.singleOrNull() ?: ExtraFlags("", "")
@@ -91,11 +94,11 @@ class FixPlugin(
                     createTestFile(test, generalConfig, fixPluginConfig) to expected
                 }
                 val testCopyNames =
-                        pathCopyMap.joinToString(separator = evaluatedToolConfig.batchSeparator) { (testCopy, _) -> testCopy.toString() }
+                        pathCopyMap.joinToString(separator = overrides.batchSeparator) { (testCopy, _) -> testCopy.toString() }
 
-                val execFlags = evaluatedToolConfig.execFlags ?: fixPluginConfig.execFlags
+                val execFlags = overrides.execFlags ?: fixPluginConfig.execFlags
                 val execFlagsAdjusted = resolvePlaceholdersFrom(execFlags, extraFlags, testCopyNames)
-                val execCmdWithoutFlags = evaluatedToolConfig.execCmd ?: generalConfig.execCmd
+                val execCmdWithoutFlags = overrides.execCmd ?: generalConfig.execCmd
                 val execCmd = "$execCmdWithoutFlags $execFlagsAdjusted"
                 val time = generalConfig.timeOutMillis!!.times(pathMap.size)
 

@@ -90,7 +90,7 @@ class FixAndWarnPluginTest {
             fs,
             useInternalRedirections = false
         )
-        val results = fixAndWarnPlugin.execute(EvaluatedToolConfig(null, null, 1, ", ")).toList()
+        val results = fixAndWarnPlugin.execute(EvaluatedToolConfig(1, ", ")).toList()
 
         println("Results $results")
         assertEquals(1, results.count(), "Size of results should equal number of pairs")

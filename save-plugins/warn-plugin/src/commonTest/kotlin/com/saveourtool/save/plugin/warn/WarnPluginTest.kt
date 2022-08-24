@@ -428,7 +428,7 @@ class WarnPluginTest {
             testFiles = emptyList(),
             fs
         )
-            .execute(EvaluatedToolConfig(null, null, batchSize, ", "))
+            .execute(EvaluatedToolConfig(batchSize, ", "))
             .toList()
         assertion(results)
     }

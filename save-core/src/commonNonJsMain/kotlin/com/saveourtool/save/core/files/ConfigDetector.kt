@@ -1,10 +1,11 @@
 package com.saveourtool.save.core.files
 
-import com.saveourtool.save.core.config.TestConfig
-import com.saveourtool.save.core.config.isSaveTomlConfig
+import com.saveourtool.save.core.config.*
 import com.saveourtool.save.core.logging.logDebug
 import com.saveourtool.save.core.logging.logError
 import com.saveourtool.save.core.logging.logTrace
+import com.saveourtool.save.core.plugin.PluginConfigOverrides
+import com.saveourtool.save.plugins.fix.FixPluginConfigOverrides
 
 import okio.FileSystem
 import okio.Path
@@ -12,9 +13,13 @@ import okio.Path
 /**
  * A class that is capable of discovering config files hierarchy.
  */
-class ConfigDetector(private val fs: FileSystem) {
+class ConfigDetector(
+    private val fs: FileSystem,
+    private val evaluatedToolConfig: EvaluatedToolConfig,
+    private val pluginConfigOverrides: Map<TestConfigSections, PluginConfigOverrides>,
+) {
     /**
-     * Try to create SAVE config file from [file].
+     * Try to create SAVE config file from [testConfig].
      *
      * @param testConfig - testing configuration (save.toml) from which SAVE config file should be built
      * @return [TestConfig] or null if no suitable config file has been found.

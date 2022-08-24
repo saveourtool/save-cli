@@ -87,7 +87,7 @@ class FixPluginTest {
             fs,
             useInternalRedirections = false
         )
-        val results = fixPlugin.execute(EvaluatedToolConfig(null, null, 1, ", ")).toList()
+        val results = fixPlugin.execute(EvaluatedToolConfig(1, ", ")).toList()
 
         assertEquals(1, results.size, "Size of results should equal number of pairs")
         val testResult = results.single()
@@ -149,7 +149,7 @@ class FixPluginTest {
             useInternalRedirections = false
         )
         val batchSeparator = if (isCurrentOsWindows()) ", " else " "
-        val results = fixPlugin.execute(EvaluatedToolConfig(null, null, 2, batchSeparator)).toList()
+        val results = fixPlugin.execute(EvaluatedToolConfig(2, batchSeparator)).toList()
 
         // We call ProcessBuilder ourselves, because the command ">" does not work for the list of files
         ProcessBuilder(false, fs).exec("echo Expected file > $testFile2", "", null, 10_000L)
