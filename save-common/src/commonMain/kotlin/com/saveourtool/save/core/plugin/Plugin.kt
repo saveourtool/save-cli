@@ -42,10 +42,9 @@ abstract class Plugin(
     /**
      * Perform plugin's work.
      *
-     * @param evaluatedToolConfig a configuration for evaluated tool
      * @return a sequence of [TestResult]s for each group of test resources
      */
-    fun execute(evaluatedToolConfig: EvaluatedToolConfig): Sequence<TestResult> {
+    fun execute(): Sequence<TestResult> {
         clean()
         val testFilesList = discoverTestFiles(testConfig.directory).toList()
 
@@ -69,7 +68,7 @@ abstract class Plugin(
             val excludedTestResults = excludedTestFiles.map {
                 TestResult(it, Ignored("Excluded by configuration"))
             }
-            handleFiles(evaluatedToolConfig, actualTestFiles.asSequence()) + excludedTestResults
+            handleFiles(actualTestFiles.asSequence()) + excludedTestResults
         } else {
             emptySequence()
         }
@@ -78,11 +77,10 @@ abstract class Plugin(
     /**
      * Perform plugin's work on a set of files.
      *
-     * @param evaluatedToolConfig a configuration for evaluated tool
      * @param files a sequence of file groups, corresponding to tests.
      * @return a sequence of [TestResult]s for each group of test resources
      */
-    abstract fun handleFiles(evaluatedToolConfig: EvaluatedToolConfig, files: Sequence<TestFiles>): Sequence<TestResult>
+    abstract fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult>
 
     /**
      * Discover groups of resource files which will be used to run tests, applying additional filtering

@@ -4,8 +4,7 @@ import com.saveourtool.save.core.config.*
 import com.saveourtool.save.core.logging.logDebug
 import com.saveourtool.save.core.logging.logError
 import com.saveourtool.save.core.logging.logTrace
-import com.saveourtool.save.core.plugin.PluginConfigOverrides
-import com.saveourtool.save.plugins.fix.FixPluginConfigOverrides
+import com.saveourtool.save.core.plugin.PluginConfig
 
 import okio.FileSystem
 import okio.Path
@@ -16,7 +15,7 @@ import okio.Path
 class ConfigDetector(
     private val fs: FileSystem,
     private val evaluatedToolConfig: EvaluatedToolConfig,
-    private val pluginConfigOverrides: Map<TestConfigSections, PluginConfigOverrides>,
+    private val pluginConfigsOverrides: List<PluginConfig>,
 ) {
     /**
      * Try to create SAVE config file from [testConfig].
@@ -66,6 +65,8 @@ class ConfigDetector(
                         TestConfig(
                             path,
                             parentConfig,
+                            evaluatedToolConfig,
+                            overridesPluginConfigs = pluginConfigsOverrides,
                             fs = fs,
                         )
                     )
@@ -116,6 +117,8 @@ class ConfigDetector(
         return TestConfig(
             file,
             parentConfig,
+            evaluatedToolConfig,
+            overridesPluginConfigs = pluginConfigsOverrides,
             fs = fs,
         )
     }

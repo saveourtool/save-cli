@@ -19,6 +19,7 @@ import com.saveourtool.save.core.result.Ignored
 import com.saveourtool.save.core.result.Pass
 import com.saveourtool.save.core.result.TestResult
 import com.saveourtool.save.core.utils.buildActivePlugins
+import com.saveourtool.save.core.utils.createPluginConfigListFromToml
 import com.saveourtool.save.core.utils.processInPlace
 import com.saveourtool.save.core.utils.readFromFile
 import com.saveourtool.save.plugin.warn.WarnPluginConfig
@@ -77,17 +78,9 @@ class Save(
         // create config for evaluated tool from cli args
         val saveOverridesPath = testRootPath.resolveSaveOverridesTomlConfig()
         val pluginConfigOverrides = if (fs.exists(saveOverridesPath)) {
-            TestConfigSections.values()
-                .filterNot(TestConfigSections.GENERAL::equals)
-                .associateWith {
-                    readFromFile<SaveOverrides, SaveOverrides.SaveOverridesInterim>(
-                        saveOverridesPath,
-                        it.name.lowercase(),
-                        ""
-                    )
-                }
+            createPluginConfigListFromToml(saveOverridesPath, fs)
         } else {
-            emptyMap()
+            emptyList()
         }
 
         // get all toml configs in file system
@@ -115,7 +108,7 @@ class Save(
                 ?.forEach {
                     atLeastOneExecutionProvided = true
                     // execute created plugins
-                    executePlugin(saveOverrides, it, reporter)
+                    executePlugin(it, reporter)
                 }
                 ?.also {
                     reporter.onSuiteEnd(testConfig.getGeneralConfig()?.suiteName!!)
@@ -165,7 +158,6 @@ class Save(
     }
 
     private fun executePlugin(
-        saveOverrides: Map<TestConfigSections, SaveOverrides>,
         plugin: Plugin,
         reporter: Reporter
     ) {
@@ -173,7 +165,7 @@ class Save(
         logDebug("=> Executing plugin: ${plugin::class.simpleName} for [${plugin.testConfig.location}]")
         reporter.onPluginExecutionStart(plugin)
         try {
-            plugin.execute(saveOverrides)
+            plugin.execute()
                 .onEach { event ->
                     // calculate relative paths, because reporters don't need paths higher than root dir
                     val resourcesRelative = event.resources.withRelativePaths(testRootPath)

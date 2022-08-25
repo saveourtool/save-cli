@@ -84,10 +84,6 @@ fun createPluginConfigListFromToml(testConfigPath: Path, fs: FileSystem): List<P
         getTopLevelTomlTables(testConfigPath, fs)
             .map { testConfigPath.testConfigFactory(it) }
 
-fun createPluginConfigOverridesFromToml(testConfigPath: Path): PluginConfigOverrides {
-    readFromFile<>()
-}
-
 /**
  * @param testConfigPath path to the test config
  * @param fs FileSystem for file reading
