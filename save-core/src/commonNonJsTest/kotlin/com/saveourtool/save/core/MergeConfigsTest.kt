@@ -48,34 +48,34 @@ class MergeConfigsTest {
 
     @Test
     fun `merge general configs`() {
-        val parent = mutableListOf(generalConfig1)
-        val child = mutableListOf<PluginConfig>(generalConfig2)
+        val config1 = mutableListOf(generalConfig1)
+        val config2 = mutableListOf<PluginConfig>(generalConfig2)
 
-        child.mergeWith(parent)
+        config2.mergeWith(config1)
 
-        assertEquals(1, child.size)
+        assertEquals(1, config2.size)
 
         val expectedGeneralConfig =
                 GeneralConfig("", listOf("Tag11", "Tag12", "Tag21"), "Description2", "suiteName2", "Kotlin", listOf("excludedTests: test3"), runConfigPattern = extraFlagsPattern1)
 
-        val actualGeneralConfig = child.singleIsInstance<GeneralConfig>()
+        val actualGeneralConfig = config2.singleIsInstance<GeneralConfig>()
         assertEquals(expectedGeneralConfig, actualGeneralConfig)
     }
 
     @Test
     fun `merge two incomplete configs`() {
-        val parent = mutableListOf(generalConfig1, warnConfig1)
-        val child = mutableListOf<PluginConfig>(generalConfig2)
+        val config1 = mutableListOf(generalConfig1, warnConfig1)
+        val config2 = mutableListOf<PluginConfig>(generalConfig2)
 
-        child.mergeWith(parent)
+        config2.mergeWith(config1)
 
-        assertEquals(2, child.size)
+        assertEquals(2, config2.size)
 
         val expectedGeneralConfig =
                 GeneralConfig("", listOf("Tag11", "Tag12", "Tag21"), "Description2", "suiteName2", "Kotlin", listOf("excludedTests: test3"), runConfigPattern = extraFlagsPattern1)
 
-        val actualGeneralConfig = child.singleIsInstance<GeneralConfig>()
-        val actualWarnConfig = child.singleIsInstance<WarnPluginConfig>()
+        val actualGeneralConfig = config2.singleIsInstance<GeneralConfig>()
+        val actualWarnConfig = config2.singleIsInstance<WarnPluginConfig>()
 
         assertEquals(expectedGeneralConfig, actualGeneralConfig)
         assertEquals(warnConfig1, actualWarnConfig)
@@ -83,15 +83,15 @@ class MergeConfigsTest {
 
     @Test
     fun `merge two incomplete configs 2`() {
-        val parent = mutableListOf<PluginConfig>()
-        val child = mutableListOf(generalConfig2, warnConfig1)
+        val config1 = mutableListOf<PluginConfig>()
+        val config2 = mutableListOf(generalConfig2, warnConfig1)
 
-        child.mergeWith(parent)
+        config2.mergeWith(config1)
 
-        assertEquals(2, child.size)
+        assertEquals(2, config2.size)
 
-        val actualGeneralConfig = child.singleIsInstance<GeneralConfig>()
-        val actualWarnConfig = child.singleIsInstance<WarnPluginConfig>()
+        val actualGeneralConfig = config2.singleIsInstance<GeneralConfig>()
+        val actualWarnConfig = config2.singleIsInstance<WarnPluginConfig>()
 
         assertEquals(generalConfig2, actualGeneralConfig)
         assertEquals(warnConfig1, actualWarnConfig)
@@ -99,12 +99,12 @@ class MergeConfigsTest {
 
     @Test
     fun `merge two configs with different fields`() {
-        val parent = mutableListOf(generalConfig1, warnConfig2, fixConfig1)
-        val child = mutableListOf(generalConfig2, warnConfig3, fixConfig2)
+        val config1 = mutableListOf(generalConfig1, warnConfig2, fixConfig1)
+        val config2 = mutableListOf(generalConfig2, warnConfig3, fixConfig2)
 
-        child.mergeWith(parent)
+        config2.mergeWith(config1)
 
-        assertEquals(3, child.size)
+        assertEquals(3, config2.size)
 
         val expectedGeneralConfig =
                 GeneralConfig("", listOf("Tag11", "Tag12", "Tag21"), "Description2", "suiteName2", "Kotlin", listOf("excludedTests: test3"), runConfigPattern = extraFlagsPattern1)
@@ -112,9 +112,9 @@ class MergeConfigsTest {
             true, false, 3, 3, 3, 1, 1, 3, 3, 3, 3, true, null)
         val expectedFixConfig = FixPluginConfig("fixCmd2", "Suffix")
 
-        val actualGeneralConfig = child.singleIsInstance<GeneralConfig>()
-        val actualWarnConfig = child.singleIsInstance<WarnPluginConfig>()
-        val actualFixConfig = child.singleIsInstance<FixPluginConfig>()
+        val actualGeneralConfig = config2.singleIsInstance<GeneralConfig>()
+        val actualWarnConfig = config2.singleIsInstance<WarnPluginConfig>()
+        val actualFixConfig = config2.singleIsInstance<FixPluginConfig>()
 
         assertEquals(expectedGeneralConfig, actualGeneralConfig)
         assertEquals(expectedWarnConfig, actualWarnConfig)
