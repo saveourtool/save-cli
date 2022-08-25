@@ -170,14 +170,14 @@ data class TestConfig(
      *
      * @return all plugin configs without general config
      */
-    fun pluginConfigsWithoutGeneralConfig() = pluginConfigs.filterNot { it is GeneralConfig }
+    private fun pluginConfigsWithoutGeneralConfig() = pluginConfigs.filterNot { it is GeneralConfig }
 
     /**
      * Merge parent list of plugins with the current list
      *
      * @return merged test config
      */
-    fun mergeConfigWithParent(): TestConfig {
+    private fun mergeConfigWithParent(): TestConfig {
         logDebug("Merging configs  (with parental configs from higher directory level) for ${this.location}")
 
         parentConfig?.let {

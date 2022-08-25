@@ -257,7 +257,6 @@ class MergeAndOverrideConfigsTest {
 
     @Test
     fun `merge real toml configs with empty execFlag in child`() {
-        val evaluatedToolConfig = EvaluatedToolConfig(1, "")
 
         val toml1 = "src/commonNonJsTest/resources/merge_configs/save.toml"
         val configList1 = createPluginConfigListFromToml(toml1.toPath(), fs)
@@ -277,14 +276,27 @@ class MergeAndOverrideConfigsTest {
         assertEquals(listOf(""), childGeneralConfig.tags)
         assertEquals(null, childWarnConfig.execFlags)
 
-        val testConfig1 = TestConfig(toml1.toPath(), null, evaluatedToolConfig, configList1.toMutableList(), emptyList(), fs)
-        val testConfig2 = TestConfig(toml2.toPath(), testConfig1, evaluatedToolConfig, configList2.toMutableList(), emptyList(), fs)
+        val evaluatedToolConfig = EvaluatedToolConfig(1, "")
+        val testConfig1 = TestConfig(toml1.toPath(), null, evaluatedToolConfig, mutableListOf(), emptyList(), fs)
+        val testConfig2 = TestConfig(toml2.toPath(), testConfig1, evaluatedToolConfig, mutableListOf(), emptyList(), fs)
 
-        val mergedTestConfig = testConfig2.mergeConfigWithParent()
+        testConfig2.processInPlace {
+            when (it) {
+                testConfig1 -> {
+                    configList1.toMutableList()
+                }
+                testConfig2 -> {
+                    configList2.toMutableList()
+                }
+                else -> {
+                    throw IllegalArgumentException("Not expected testConfig: $it")
+                }
+            }
+        }
         testConfig2.validateAndSetDefaults()
 
-        val mergedGeneralConfig: GeneralConfig = mergedTestConfig.pluginConfigs.singleIsInstance()
-        val mergedWarnConfig: WarnPluginConfig = mergedTestConfig.pluginConfigs.singleIsInstance()
+        val mergedGeneralConfig: GeneralConfig = testConfig2.pluginConfigs.singleIsInstance()
+        val mergedWarnConfig: WarnPluginConfig = testConfig2.pluginConfigs.singleIsInstance()
 
         assertEquals(listOf("Tag", ""), mergedGeneralConfig.tags)
         // execFlags should be empty, not `"null"`
@@ -299,8 +311,19 @@ class MergeAndOverrideConfigsTest {
         val saveOverridesToml = "src/commonNonJsTest/resources/override_configs".toPath().resolveSaveOverridesTomlConfig()
         val overrides = createPluginConfigListFromToml(saveOverridesToml, fs)
 
-        val result = configs.toMutableList()
-        result.overrideBy(overrides)
+        val evaluatedToolConfig = EvaluatedToolConfig(1, "")
+        val testConfig = TestConfig(
+            location = saveToml,
+            parentConfig = null,
+            evaluatedToolConfig = evaluatedToolConfig,
+            pluginConfigs = mutableListOf(),
+            overridesPluginConfigs = overrides,
+            fs = fs
+        )
+        testConfig.processInPlace {
+            configs
+        }
+        val result = testConfig.pluginConfigs
         assertEquals(3, result.size)
 
         assertEquals(

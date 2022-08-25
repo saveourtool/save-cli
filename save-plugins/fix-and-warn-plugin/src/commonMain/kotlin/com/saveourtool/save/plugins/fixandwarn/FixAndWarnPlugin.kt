@@ -45,7 +45,7 @@ class FixAndWarnPlugin(
                 .singleIsInstance<FixAndWarnPluginConfig>()
                 .warn
     private val generalConfig: GeneralConfig =
-            testConfig.pluginConfigs.singleIsInstance<GeneralConfig>()
+            testConfig.pluginConfigs.singleIsInstance()
 
     @Suppress("MISSING_KDOC_CLASS_ELEMENTS")
     internal lateinit var fixPlugin: FixPlugin
