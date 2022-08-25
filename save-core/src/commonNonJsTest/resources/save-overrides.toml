@@ -1,9 +1,8 @@
+[general]
 execCmd = "sh -c"
-execFlags = "--encode"
 
 [fix]
-execCmd = "sh -a && source .env"
+execFlags = "--encode"
 
 [warn]
 execFlags = "--warn"
-batchSize = 4

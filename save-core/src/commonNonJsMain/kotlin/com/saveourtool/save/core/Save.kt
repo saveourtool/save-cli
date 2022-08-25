@@ -1,7 +1,14 @@
 package com.saveourtool.save.core
 
-import com.saveourtool.save.core.config.*
+import com.saveourtool.save.core.config.EvaluatedToolConfig
+import com.saveourtool.save.core.config.OutputStreamType
+import com.saveourtool.save.core.config.ReportType
 import com.saveourtool.save.core.config.SAVE_VERSION
+import com.saveourtool.save.core.config.SaveProperties
+import com.saveourtool.save.core.config.TestConfig
+import com.saveourtool.save.core.config.isSaveTomlConfig
+import com.saveourtool.save.core.config.resolveSaveOverridesTomlConfig
+import com.saveourtool.save.core.config.resolveSaveTomlConfig
 import com.saveourtool.save.core.files.ConfigDetector
 import com.saveourtool.save.core.files.StdStreamsSink
 import com.saveourtool.save.core.logging.logDebug
@@ -21,7 +28,6 @@ import com.saveourtool.save.core.result.TestResult
 import com.saveourtool.save.core.utils.buildActivePlugins
 import com.saveourtool.save.core.utils.createPluginConfigListFromToml
 import com.saveourtool.save.core.utils.processInPlace
-import com.saveourtool.save.core.utils.readFromFile
 import com.saveourtool.save.plugin.warn.WarnPluginConfig
 import com.saveourtool.save.plugins.fix.FixPlugin
 import com.saveourtool.save.plugins.fix.FixPluginConfig

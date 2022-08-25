@@ -1,6 +1,8 @@
 package com.saveourtool.save.plugin.warn
 
-import com.saveourtool.save.core.config.*
+import com.saveourtool.save.core.config.ActualWarningsFormat
+import com.saveourtool.save.core.config.ExpectedWarningsFormat
+import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
 import com.saveourtool.save.core.files.getWorkingDirectory
 import com.saveourtool.save.core.files.readLines

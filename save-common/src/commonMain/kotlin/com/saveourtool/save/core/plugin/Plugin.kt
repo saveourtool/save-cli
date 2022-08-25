@@ -1,6 +1,7 @@
 package com.saveourtool.save.core.plugin
 
-import com.saveourtool.save.core.config.*
+import com.saveourtool.save.core.config.TestConfig
+import com.saveourtool.save.core.config.isSaveTomlConfig
 import com.saveourtool.save.core.files.createRelativePathToTheRoot
 import com.saveourtool.save.core.files.findDescendantDirectoriesBy
 import com.saveourtool.save.core.files.parentsWithSelf
