@@ -7,6 +7,7 @@ import com.saveourtool.save.core.plugin.GeneralConfig
 import com.saveourtool.save.core.plugin.PluginConfig
 import com.saveourtool.save.core.utils.createPluginConfigListFromToml
 import com.saveourtool.save.core.utils.mergeWith
+import com.saveourtool.save.core.utils.overrideBy
 import com.saveourtool.save.core.utils.singleIsInstance
 import com.saveourtool.save.plugin.warn.WarnPluginConfig
 import com.saveourtool.save.plugins.fix.FixPluginConfig
@@ -21,7 +22,7 @@ import kotlin.test.assertEquals
     "LOCAL_VARIABLE_EARLY_DECLARATION",
     "LONG_LINE",
 )
-class MergeConfigsTest {
+class OverrideConfigsTest {
     private val extraFlagsPattern1 = Regex("// RUN: (.*)")
     private val extraFlagsPattern2 = Regex("## RUN: (.*)")
     private val generalConfig1 = GeneralConfig("", listOf("Tag11", "Tag12"), "Description1", "suiteName1", "Kotlin", listOf("excludedTests: test1"), runConfigPattern = extraFlagsPattern2)
@@ -47,11 +48,11 @@ class MergeConfigsTest {
     private val evaluatedToolConfig = EvaluatedToolConfig(1, "")
 
     @Test
-    fun `merge general configs`() {
+    fun `override general configs`() {
         val config1 = mutableListOf(generalConfig1)
         val config2 = mutableListOf<PluginConfig>(generalConfig2)
 
-        config2.mergeWith(config1)
+        config2.overrideBy(config1)
 
         assertEquals(1, config2.size)
 
