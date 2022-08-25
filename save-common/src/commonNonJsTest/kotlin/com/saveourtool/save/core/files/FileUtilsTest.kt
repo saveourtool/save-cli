@@ -10,7 +10,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class FileUtilsTest {
-    private val fs = FileSystem.SYSTEM
     private lateinit var tmpDir: Path
 
     @BeforeTest

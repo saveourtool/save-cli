@@ -86,7 +86,7 @@ data class TestConfig(
      *
      * @return [GeneralConfig] or `null` if not found
      */
-    fun getGeneralConfig() = pluginConfigs.singleIsInstanceOrNull<GeneralConfig>()
+    fun getGeneralConfig(): GeneralConfig? = pluginConfigs.singleIsInstanceOrNull()
 
     /**
      * @param withSelf if true, include this config as the first element of the sequence or start with parent config otherwise

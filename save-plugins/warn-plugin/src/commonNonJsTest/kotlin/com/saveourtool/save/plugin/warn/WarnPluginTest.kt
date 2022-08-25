@@ -3,6 +3,7 @@ package com.saveourtool.save.plugin.warn
 import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
+import com.saveourtool.save.core.files.fs
 import com.saveourtool.save.core.plugin.GeneralConfig
 import com.saveourtool.save.core.plugin.ResourceFormatException
 import com.saveourtool.save.core.result.Pass
@@ -21,7 +22,6 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class WarnPluginTest {
-    private val fs = FileSystem.SYSTEM
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPluginTest::class.simpleName!!)
     private val catCmd = if (isCurrentOsWindows()) "type" else "cat"
     private val mockScriptFile = tmpDir / "resource"
@@ -199,7 +199,7 @@ class WarnPluginTest {
             assertEquals(1, results.size)
             assertTrue(results.single().status is Pass)
             val nameWarn =
-                    "(UNEXPECTED WARNINGS): [Warning(message=Variable name should be in lowerCamelCase, line=5, column=8, fileName=Test1Test.java)]"
+                "(UNEXPECTED WARNINGS): [Warning(message=Variable name should be in lowerCamelCase, line=5, column=8, fileName=Test1Test.java)]"
             assertEquals(nameWarn, (results.single().status as Pass).message)
         }
     }
@@ -424,11 +424,18 @@ class WarnPluginTest {
         }
 
         val results = WarnPlugin(
-            TestConfig(config, null, mutableListOf(warnPluginConfig, generalConfig), fs),
+            TestConfig(
+                config,
+                null,
+                EvaluatedToolConfig(batchSize, ", "),
+                mutableListOf(warnPluginConfig, generalConfig),
+                emptyList(),
+                fs
+            ),
             testFiles = emptyList(),
             fs
         )
-            .execute(EvaluatedToolConfig(batchSize, ", "))
+            .execute()
             .toList()
         assertion(results)
     }

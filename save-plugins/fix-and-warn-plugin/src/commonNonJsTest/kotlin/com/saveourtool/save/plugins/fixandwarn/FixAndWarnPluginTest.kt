@@ -3,6 +3,7 @@ package com.saveourtool.save.plugins.fixandwarn
 import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
+import com.saveourtool.save.core.files.fs
 import com.saveourtool.save.core.plugin.GeneralConfig
 import com.saveourtool.save.core.result.Pass
 import com.saveourtool.save.core.utils.isCurrentOsWindows
@@ -19,7 +20,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class FixAndWarnPluginTest {
-    private val fs = FileSystem.SYSTEM
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "${FixAndWarnPluginTest::class.simpleName!!}-${Random.nextInt()}")
     private val defaultExtraConfigPattern = Regex("(.+):(\\d+):(\\d+): (.+)")
 
@@ -74,6 +74,7 @@ class FixAndWarnPluginTest {
             TestConfig(
                 config,
                 null,
+                EvaluatedToolConfig(1, ", "),
                 mutableListOf(
                     FixAndWarnPluginConfig(
                         FixPluginConfig(fixExecutionCmd),
@@ -84,13 +85,14 @@ class FixAndWarnPluginTest {
                     ),
                     GeneralConfig("", listOf(""), "", "", expectedWarningsPattern = Regex("// ;warn:(\\d+):(\\d+): (.*)"), runConfigPattern = defaultExtraConfigPattern)
                 ),
+                emptyList(),
                 fs,
             ),
             testFiles = emptyList(),
             fs,
             useInternalRedirections = false
         )
-        val results = fixAndWarnPlugin.execute(EvaluatedToolConfig(1, ", ")).toList()
+        val results = fixAndWarnPlugin.execute().toList()
 
         println("Results $results")
         assertEquals(1, results.count(), "Size of results should equal number of pairs")
