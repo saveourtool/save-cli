@@ -18,20 +18,20 @@ class ValidationTest {
     @Test
     fun `set defaults to general section`() {
         val generalConfig = GeneralConfig("exeCmd", tags = listOf("Tag11", "Tag12"), description = "Description1", suiteName = "suiteName1")
-        val config = mutableListOf<PluginConfig>(generalConfig)
+        val config: MutableList<PluginConfig> = mutableListOf(generalConfig)
 
         config.validateAndSetDefaults()
 
         assertEquals(1, config.size)
 
-        val actualGeneralConfig1 = config.singleIsInstance<GeneralConfig>()
+        val actualGeneralConfig1: GeneralConfig = config.singleIsInstance()
         assertEquals(emptyList(), actualGeneralConfig1.excludedTests)
     }
 
     @Test
     fun `invalid general section`() {
         val generalConfig = GeneralConfig()
-        val config = mutableListOf<PluginConfig>(generalConfig)
+        val config: MutableList<PluginConfig> = mutableListOf(generalConfig)
         generalConfig.configLocation = "./some-path".toPath()
         try {
             config.validateAndSetDefaults()
@@ -50,13 +50,13 @@ class ValidationTest {
     @Test
     fun `set defaults to warn section`() {
         val warnConfig = WarnPluginConfig(execFlags = "execFlags", messageCaptureGroup = 4)
-        val config = mutableListOf<PluginConfig>(warnConfig)
+        val config: MutableList<PluginConfig> = mutableListOf(warnConfig)
 
         config.validateAndSetDefaults()
 
         assertEquals(1, config.size)
 
-        val actualWarnConfig = config.singleIsInstance<WarnPluginConfig>()
+        val actualWarnConfig: WarnPluginConfig = config.singleIsInstance()
         assertEquals(Regex("(.+):(\\d*):(\\d*): (.+)").toString(), actualWarnConfig.actualWarningsPattern.toString())
         assertEquals(true, actualWarnConfig.warningTextHasLine)
         assertEquals(true, actualWarnConfig.warningTextHasColumn)
@@ -76,13 +76,13 @@ class ValidationTest {
     @Test
     fun `validate warn section`() {
         val warnConfig = WarnPluginConfig(execFlags = "execFlags", warningTextHasLine = true, warningTextHasColumn = false)
-        val config = mutableListOf<PluginConfig>(warnConfig)
+        val config: MutableList<PluginConfig> = mutableListOf(warnConfig)
 
         config.validateAndSetDefaults()
 
         assertEquals(1, config.size)
 
-        val actualWarnConfig = config.singleIsInstance<WarnPluginConfig>()
+        val actualWarnConfig: WarnPluginConfig = config.singleIsInstance()
         assertEquals(true, actualWarnConfig.warningTextHasLine)
         assertEquals(false, actualWarnConfig.warningTextHasColumn)
         assertEquals(1, actualWarnConfig.lineCaptureGroup)
@@ -93,13 +93,13 @@ class ValidationTest {
     @Test
     fun `validate warn section 2`() {
         val warnConfig = WarnPluginConfig(execFlags = "execFlags", warningTextHasLine = false, lineCaptureGroup = 1)
-        val config = mutableListOf<PluginConfig>(warnConfig)
+        val config: MutableList<PluginConfig> = mutableListOf(warnConfig)
 
         config.validateAndSetDefaults()
 
         assertEquals(1, config.size)
 
-        val actualWarnConfig = config.singleIsInstance<WarnPluginConfig>()
+        val actualWarnConfig: WarnPluginConfig = config.singleIsInstance()
         assertEquals(false, actualWarnConfig.warningTextHasLine)
         assertEquals(true, actualWarnConfig.warningTextHasColumn)
         assertEquals(null, actualWarnConfig.lineCaptureGroup)
@@ -110,13 +110,13 @@ class ValidationTest {
     @Test
     fun `validate warn section 3`() {
         val warnConfig = WarnPluginConfig(execFlags = "execFlags", lineCaptureGroup = 5)
-        val config = mutableListOf<PluginConfig>(warnConfig)
+        val config: MutableList<PluginConfig> = mutableListOf(warnConfig)
 
         config.validateAndSetDefaults()
 
         assertEquals(1, config.size)
 
-        val actualWarnConfig = config.singleIsInstance<WarnPluginConfig>()
+        val actualWarnConfig: WarnPluginConfig = config.singleIsInstance()
         assertEquals(true, actualWarnConfig.warningTextHasLine)
         assertEquals(true, actualWarnConfig.warningTextHasColumn)
         assertEquals(5, actualWarnConfig.lineCaptureGroup)
@@ -127,7 +127,7 @@ class ValidationTest {
     @Test
     fun `validate warn section 4`() {
         val warnConfig = WarnPluginConfig(execFlags = "execFlags", lineCaptureGroup = -127)
-        val config = mutableListOf<PluginConfig>(warnConfig)
+        val config: MutableList<PluginConfig> = mutableListOf(warnConfig)
         warnConfig.configLocation = "./some-location".toPath()
         try {
             config.validateAndSetDefaults()
@@ -144,13 +144,13 @@ class ValidationTest {
     @Test
     fun `set defaults to fix section`() {
         val fixConfig = FixPluginConfig(execFlags = "execFlags")
-        val config = mutableListOf<PluginConfig>(fixConfig)
+        val config: MutableList<PluginConfig> = mutableListOf(fixConfig)
 
         config.validateAndSetDefaults()
 
         assertEquals(1, config.size)
 
-        val actualFixConfig = config.singleIsInstance<FixPluginConfig>()
+        val actualFixConfig: FixPluginConfig = config.singleIsInstance()
         assertEquals("Test", actualFixConfig.resourceNameTest)
         assertEquals("Expected", actualFixConfig.resourceNameExpected)
     }

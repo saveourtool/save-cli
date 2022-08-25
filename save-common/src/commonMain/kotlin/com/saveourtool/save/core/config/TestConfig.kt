@@ -10,13 +10,14 @@ import com.saveourtool.save.core.logging.logTrace
 import com.saveourtool.save.core.plugin.GeneralConfig
 import com.saveourtool.save.core.plugin.Plugin
 import com.saveourtool.save.core.plugin.PluginConfig
-import com.saveourtool.save.core.utils.singleIsInstanceOrNull
 import com.saveourtool.save.core.utils.mergeWith
 import com.saveourtool.save.core.utils.overrideBy
+import com.saveourtool.save.core.utils.singleIsInstanceOrNull
 
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
+
 import kotlin.js.JsName
 
 /**

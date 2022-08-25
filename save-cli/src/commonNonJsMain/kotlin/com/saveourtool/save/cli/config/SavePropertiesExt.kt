@@ -7,7 +7,6 @@ package com.saveourtool.save.cli.config
 import com.saveourtool.save.cli.ExitCodes
 import com.saveourtool.save.cli.fs
 import com.saveourtool.save.cli.logging.logErrorAndExit
-import com.saveourtool.save.cli.logging.logWarn
 import com.saveourtool.save.core.config.SaveProperties
 import com.saveourtool.save.core.config.resolveSaveTomlConfig
 import com.saveourtool.save.core.logging.logDebug

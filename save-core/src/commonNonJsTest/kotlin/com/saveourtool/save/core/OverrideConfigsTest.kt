@@ -50,7 +50,7 @@ class OverrideConfigsTest {
     @Test
     fun `override general configs`() {
         val config1 = mutableListOf(generalConfig1)
-        val config2 = mutableListOf<PluginConfig>(generalConfig2)
+        val config2: MutableList<PluginConfig> = mutableListOf(generalConfig2)
 
         config2.overrideBy(config1)
 
@@ -59,14 +59,14 @@ class OverrideConfigsTest {
         val expectedGeneralConfig =
                 GeneralConfig("", listOf("Tag11", "Tag12", "Tag21"), "Description2", "suiteName2", "Kotlin", listOf("excludedTests: test3"), runConfigPattern = extraFlagsPattern1)
 
-        val actualGeneralConfig = config2.singleIsInstance<GeneralConfig>()
+        val actualGeneralConfig: GeneralConfig = config2.singleIsInstance()
         assertEquals(expectedGeneralConfig, actualGeneralConfig)
     }
 
     @Test
     fun `merge two incomplete configs`() {
         val config1 = mutableListOf(generalConfig1, warnConfig1)
-        val config2 = mutableListOf<PluginConfig>(generalConfig2)
+        val config2: MutableList<PluginConfig> = mutableListOf(generalConfig2)
 
         config2.mergeWith(config1)
 
@@ -75,8 +75,8 @@ class OverrideConfigsTest {
         val expectedGeneralConfig =
                 GeneralConfig("", listOf("Tag11", "Tag12", "Tag21"), "Description2", "suiteName2", "Kotlin", listOf("excludedTests: test3"), runConfigPattern = extraFlagsPattern1)
 
-        val actualGeneralConfig = config2.singleIsInstance<GeneralConfig>()
-        val actualWarnConfig = config2.singleIsInstance<WarnPluginConfig>()
+        val actualGeneralConfig: GeneralConfig = config2.singleIsInstance()
+        val actualWarnConfig: WarnPluginConfig = config2.singleIsInstance()
 
         assertEquals(expectedGeneralConfig, actualGeneralConfig)
         assertEquals(warnConfig1, actualWarnConfig)
@@ -84,15 +84,15 @@ class OverrideConfigsTest {
 
     @Test
     fun `merge two incomplete configs 2`() {
-        val config1 = mutableListOf<PluginConfig>()
+        val config1: List<PluginConfig> = emptyList()
         val config2 = mutableListOf(generalConfig2, warnConfig1)
 
         config2.mergeWith(config1)
 
         assertEquals(2, config2.size)
 
-        val actualGeneralConfig = config2.singleIsInstance<GeneralConfig>()
-        val actualWarnConfig = config2.singleIsInstance<WarnPluginConfig>()
+        val actualGeneralConfig: GeneralConfig = config2.singleIsInstance()
+        val actualWarnConfig: WarnPluginConfig = config2.singleIsInstance()
 
         assertEquals(generalConfig2, actualGeneralConfig)
         assertEquals(warnConfig1, actualWarnConfig)
@@ -113,9 +113,9 @@ class OverrideConfigsTest {
             true, false, 3, 3, 3, 1, 1, 3, 3, 3, 3, true, null)
         val expectedFixConfig = FixPluginConfig("fixCmd2", "Suffix")
 
-        val actualGeneralConfig = config2.singleIsInstance<GeneralConfig>()
-        val actualWarnConfig = config2.singleIsInstance<WarnPluginConfig>()
-        val actualFixConfig = config2.singleIsInstance<FixPluginConfig>()
+        val actualGeneralConfig: GeneralConfig = config2.singleIsInstance()
+        val actualWarnConfig: WarnPluginConfig = config2.singleIsInstance()
+        val actualFixConfig: FixPluginConfig = config2.singleIsInstance()
 
         assertEquals(expectedGeneralConfig, actualGeneralConfig)
         assertEquals(expectedWarnConfig, actualWarnConfig)
@@ -141,9 +141,9 @@ class OverrideConfigsTest {
             true, false, 4, 4, 4, 1, 1, 4, 4, 4, 4, true, null)
         val expectedFixConfig = FixPluginConfig("fixCmd4", "Suffix")
 
-        val actualGeneralConfig = config4.singleIsInstance<GeneralConfig>()
-        val actualWarnConfig = config4.singleIsInstance<WarnPluginConfig>()
-        val actualFixConfig = config4.singleIsInstance<FixPluginConfig>()
+        val actualGeneralConfig: GeneralConfig = config4.singleIsInstance()
+        val actualWarnConfig: WarnPluginConfig = config4.singleIsInstance()
+        val actualFixConfig: FixPluginConfig = config4.singleIsInstance()
 
         assertEquals(expectedGeneralConfig, actualGeneralConfig)
         assertEquals(expectedWarnConfig, actualWarnConfig)
@@ -155,8 +155,8 @@ class OverrideConfigsTest {
         val toml1 = "src/commonNonJsTest/resources/merge_configs/save.toml"
         val configList1 = createPluginConfigListFromToml(toml1.toPath(), fs)
 
-        val parentGeneralConfig = configList1.singleIsInstance<GeneralConfig>()
-        val parentWarnConfig = configList1.singleIsInstance<WarnPluginConfig>()
+        val parentGeneralConfig: GeneralConfig = configList1.singleIsInstance()
+        val parentWarnConfig: WarnPluginConfig = configList1.singleIsInstance()
         assertEquals("echo hello world", parentGeneralConfig.execCmd)
         assertEquals(listOf("Tag"), parentGeneralConfig.tags)
         assertEquals(null, parentWarnConfig.execFlags)
@@ -164,8 +164,8 @@ class OverrideConfigsTest {
         val toml2 = "src/commonNonJsTest/resources/merge_configs/inner/save.toml"
         val configList2 = createPluginConfigListFromToml(toml2.toPath(), fs)
 
-        val childGeneralConfig = configList2.singleIsInstance<GeneralConfig>()
-        val childWarnConfig = configList2.singleIsInstance<WarnPluginConfig>()
+        val childGeneralConfig: GeneralConfig = configList2.singleIsInstance()
+        val childWarnConfig: WarnPluginConfig = configList2.singleIsInstance()
 
         assertEquals(listOf(""), childGeneralConfig.tags)
         assertEquals(null, childWarnConfig.execFlags)
@@ -176,8 +176,8 @@ class OverrideConfigsTest {
         val mergedTestConfig = testConfig2.mergeConfigWithParent()
         testConfig2.validateAndSetDefaults()
 
-        val mergedGeneralConfig = mergedTestConfig.pluginConfigs.singleIsInstance<GeneralConfig>()
-        val mergedWarnConfig = mergedTestConfig.pluginConfigs.singleIsInstance<WarnPluginConfig>()
+        val mergedGeneralConfig: GeneralConfig = mergedTestConfig.pluginConfigs.singleIsInstance()
+        val mergedWarnConfig: WarnPluginConfig = mergedTestConfig.pluginConfigs.singleIsInstance()
 
         assertEquals(listOf("Tag", ""), mergedGeneralConfig.tags)
         // execFlags should be empty, not `"null"`

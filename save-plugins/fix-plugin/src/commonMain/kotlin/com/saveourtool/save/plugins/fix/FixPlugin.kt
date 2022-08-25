@@ -70,8 +70,8 @@ class FixPlugin(
     @Suppress("TOO_LONG_FUNCTION")
     override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
         testConfig.validateAndSetDefaults()
-        val fixPluginConfig = testConfig.pluginConfigs.singleIsInstance<FixPluginConfig>()
-        val generalConfig = testConfig.pluginConfigs.singleIsInstance<GeneralConfig>()
+        val fixPluginConfig: FixPluginConfig = testConfig.pluginConfigs.singleIsInstance()
+        val generalConfig: GeneralConfig = testConfig.pluginConfigs.singleIsInstance()
         extraFlagsExtractor = ExtraFlagsExtractor(generalConfig, fs)
 
         val evaluatedToolConfig = testConfig.evaluatedToolConfig

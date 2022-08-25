@@ -36,6 +36,18 @@ fun MutableList<PluginConfig>.overrideBy(otherPluginConfigs: List<PluginConfig>)
     }
 }
 
+/**
+ * @return a single [PluginConfig] with type [P] from current list
+ */
+inline fun <reified P : PluginConfig> List<PluginConfig>.singleIsInstance(): P = requireNotNull(this.singleIsInstanceOrNull()) {
+    "Not found an element with type ${P::class}"
+}
+
+/**
+ * @return a single [PluginConfig] with type [P] from current list or null
+ */
+inline fun <reified P : PluginConfig> List<PluginConfig>.singleIsInstanceOrNull(): P? = this.filterIsInstance<P>().singleOrNull()
+
 private fun MutableList<PluginConfig>.mergeOrOverride(otherPluginConfig: PluginConfig, merge: Boolean = true) {
     val childConfigsWithIndex = this.withIndex().filter { (_, value) -> value.type == otherPluginConfig.type }
     if (childConfigsWithIndex.isEmpty()) {
@@ -58,15 +70,3 @@ private fun MutableList<PluginConfig>.mergeOrOverride(otherPluginConfig: PluginC
         }
     }
 }
-
-/**
- * @return a single [PluginConfig] with type [P] from current list
- */
-inline fun <reified P : PluginConfig> List<PluginConfig>.singleIsInstance() = requireNotNull(this.singleIsInstanceOrNull<P>()) {
-    "Not found an element with type ${P::class}"
-}
-
-/**
- * @return a single [PluginConfig] with type [P] from current list or null
- */
-inline fun <reified P : PluginConfig> List<PluginConfig>.singleIsInstanceOrNull() = this.filterIsInstance<P>().singleOrNull()

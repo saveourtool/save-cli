@@ -52,7 +52,7 @@ class MergeAndOverrideConfigsTest {
     fun `merge and override general configs`() {
         val config1 = listOf(generalConfig1)
 
-        val config2ForMerge = mutableListOf<PluginConfig>(generalConfig2)
+        val config2ForMerge: MutableList<PluginConfig> = mutableListOf(generalConfig2)
         config2ForMerge.mergeWith(config1)
         assertEquals(1, config2ForMerge.size)
         assertEquals(
@@ -65,10 +65,10 @@ class MergeAndOverrideConfigsTest {
                 excludedTests = listOf("excludedTests: test3"),
                 runConfigPattern = extraFlagsPattern1
             ),
-            config2ForMerge.singleIsInstance<GeneralConfig>()
+            config2ForMerge.singleIsInstance()
         )
 
-        val config2ForOverride = mutableListOf<PluginConfig>(generalConfig2)
+        val config2ForOverride: MutableList<PluginConfig> = mutableListOf(generalConfig2)
         config2ForOverride.overrideBy(config1)
         assertEquals(1, config2ForOverride.size)
         assertEquals(
@@ -81,7 +81,7 @@ class MergeAndOverrideConfigsTest {
                 excludedTests = listOf("excludedTests: test1"),
                 runConfigPattern = extraFlagsPattern2
             ),
-            config2ForOverride.singleIsInstance<GeneralConfig>()
+            config2ForOverride.singleIsInstance()
         )
     }
 
@@ -89,7 +89,7 @@ class MergeAndOverrideConfigsTest {
     fun `merge and override two incomplete configs`() {
         val config1 = listOf(generalConfig1, warnConfig1)
 
-        val config2ForMerge = mutableListOf<PluginConfig>(generalConfig2)
+        val config2ForMerge: MutableList<PluginConfig> = mutableListOf(generalConfig2)
         config2ForMerge.mergeWith(config1)
         assertEquals(2, config2ForMerge.size)
         assertEquals(
@@ -102,11 +102,11 @@ class MergeAndOverrideConfigsTest {
                 excludedTests = listOf("excludedTests: test3"),
                 runConfigPattern = extraFlagsPattern1
             ),
-            config2ForMerge.singleIsInstance<GeneralConfig>()
+            config2ForMerge.singleIsInstance()
         )
-        assertEquals(warnConfig1, config2ForMerge.singleIsInstance<WarnPluginConfig>())
+        assertEquals(warnConfig1, config2ForMerge.singleIsInstance())
 
-        val config2ForOverride = mutableListOf<PluginConfig>(generalConfig2)
+        val config2ForOverride: MutableList<PluginConfig> = mutableListOf(generalConfig2)
         config2ForOverride.overrideBy(config1)
         assertEquals(2, config2ForOverride.size)
         assertEquals(
@@ -119,26 +119,26 @@ class MergeAndOverrideConfigsTest {
                 excludedTests = listOf("excludedTests: test1"),
                 runConfigPattern = extraFlagsPattern2
             ),
-            config2ForOverride.singleIsInstance<GeneralConfig>()
+            config2ForOverride.singleIsInstance()
         )
-        assertEquals(warnConfig1, config2ForOverride.singleIsInstance<WarnPluginConfig>())
+        assertEquals(warnConfig1, config2ForOverride.singleIsInstance())
     }
 
     @Test
     fun `merge and override two incomplete configs 2`() {
-        val config1 = listOf<PluginConfig>()
+        val config1: List<PluginConfig> = emptyList()
 
         val config2ForMerge = mutableListOf(generalConfig2, warnConfig1)
         config2ForMerge.mergeWith(config1)
         assertEquals(2, config2ForMerge.size)
-        assertEquals(generalConfig2, config2ForMerge.singleIsInstance<GeneralConfig>())
-        assertEquals(warnConfig1, config2ForMerge.singleIsInstance<WarnPluginConfig>())
+        assertEquals(generalConfig2, config2ForMerge.singleIsInstance())
+        assertEquals(warnConfig1, config2ForMerge.singleIsInstance())
 
         val config2ForOverride = mutableListOf(generalConfig2, warnConfig1)
         config2ForOverride.overrideBy(config1)
         assertEquals(2, config2ForOverride.size)
-        assertEquals(generalConfig2, config2ForOverride.singleIsInstance<GeneralConfig>())
-        assertEquals(warnConfig1, config2ForOverride.singleIsInstance<WarnPluginConfig>())
+        assertEquals(generalConfig2, config2ForOverride.singleIsInstance())
+        assertEquals(warnConfig1, config2ForOverride.singleIsInstance())
     }
 
     @Test
@@ -158,7 +158,7 @@ class MergeAndOverrideConfigsTest {
                 excludedTests = listOf("excludedTests: test3"),
                 runConfigPattern = extraFlagsPattern1
             ),
-            config2ForMerge.singleIsInstance<GeneralConfig>()
+            config2ForMerge.singleIsInstance()
         )
         assertEquals(
             WarnPluginConfig(
@@ -178,11 +178,11 @@ class MergeAndOverrideConfigsTest {
                 exactWarningsMatch = true,
                 testNameRegex = null
             ),
-            config2ForMerge.singleIsInstance<WarnPluginConfig>()
+            config2ForMerge.singleIsInstance()
         )
         assertEquals(
             FixPluginConfig("fixCmd2", "Suffix"),
-            config2ForMerge.singleIsInstance<FixPluginConfig>())
+            config2ForMerge.singleIsInstance())
 
         val config2ForOverride = mutableListOf(generalConfig2, warnConfig3, fixConfig2)
         config2ForOverride.overrideBy(config1)
@@ -197,7 +197,7 @@ class MergeAndOverrideConfigsTest {
                 excludedTests = listOf("excludedTests: test1"),
                 runConfigPattern = extraFlagsPattern2,
             ),
-            config2ForOverride.singleIsInstance<GeneralConfig>()
+            config2ForOverride.singleIsInstance()
         )
         assertEquals(
             WarnPluginConfig(
@@ -217,14 +217,14 @@ class MergeAndOverrideConfigsTest {
                 exactWarningsMatch = true,
                 testNameRegex = null,
             ),
-            config2ForOverride.singleIsInstance<WarnPluginConfig>()
+            config2ForOverride.singleIsInstance()
         )
         assertEquals(
             FixPluginConfig(
                 execFlags = "fixCmd1",
                 resourceNameTestSuffix = "Suffix",
             ),
-            config2ForOverride.singleIsInstance<FixPluginConfig>())
+            config2ForOverride.singleIsInstance())
     }
 
     @Test
@@ -246,9 +246,9 @@ class MergeAndOverrideConfigsTest {
             true, false, 4, 4, 4, 1, 1, 4, 4, 4, 4, true, null)
         val expectedFixConfig = FixPluginConfig("fixCmd4", "Suffix")
 
-        val actualGeneralConfig = config4.singleIsInstance<GeneralConfig>()
-        val actualWarnConfig = config4.singleIsInstance<WarnPluginConfig>()
-        val actualFixConfig = config4.singleIsInstance<FixPluginConfig>()
+        val actualGeneralConfig: GeneralConfig = config4.singleIsInstance()
+        val actualWarnConfig: WarnPluginConfig = config4.singleIsInstance()
+        val actualFixConfig: FixPluginConfig = config4.singleIsInstance()
 
         assertEquals(expectedGeneralConfig, actualGeneralConfig)
         assertEquals(expectedWarnConfig, actualWarnConfig)
@@ -262,8 +262,8 @@ class MergeAndOverrideConfigsTest {
         val toml1 = "src/commonNonJsTest/resources/merge_configs/save.toml"
         val configList1 = createPluginConfigListFromToml(toml1.toPath(), fs)
 
-        val parentGeneralConfig = configList1.singleIsInstance<GeneralConfig>()
-        val parentWarnConfig = configList1.singleIsInstance<WarnPluginConfig>()
+        val parentGeneralConfig: GeneralConfig = configList1.singleIsInstance()
+        val parentWarnConfig: WarnPluginConfig = configList1.singleIsInstance()
         assertEquals("echo hello world", parentGeneralConfig.execCmd)
         assertEquals(listOf("Tag"), parentGeneralConfig.tags)
         assertEquals(null, parentWarnConfig.execFlags)
@@ -271,8 +271,8 @@ class MergeAndOverrideConfigsTest {
         val toml2 = "src/commonNonJsTest/resources/merge_configs/inner/save.toml"
         val configList2 = createPluginConfigListFromToml(toml2.toPath(), fs)
 
-        val childGeneralConfig = configList2.singleIsInstance<GeneralConfig>()
-        val childWarnConfig = configList2.singleIsInstance<WarnPluginConfig>()
+        val childGeneralConfig: GeneralConfig = configList2.singleIsInstance()
+        val childWarnConfig: WarnPluginConfig = configList2.singleIsInstance()
 
         assertEquals(listOf(""), childGeneralConfig.tags)
         assertEquals(null, childWarnConfig.execFlags)
@@ -283,8 +283,8 @@ class MergeAndOverrideConfigsTest {
         val mergedTestConfig = testConfig2.mergeConfigWithParent()
         testConfig2.validateAndSetDefaults()
 
-        val mergedGeneralConfig = mergedTestConfig.pluginConfigs.singleIsInstance<GeneralConfig>()
-        val mergedWarnConfig = mergedTestConfig.pluginConfigs.singleIsInstance<WarnPluginConfig>()
+        val mergedGeneralConfig: GeneralConfig = mergedTestConfig.pluginConfigs.singleIsInstance()
+        val mergedWarnConfig: WarnPluginConfig = mergedTestConfig.pluginConfigs.singleIsInstance()
 
         assertEquals(listOf("Tag", ""), mergedGeneralConfig.tags)
         // execFlags should be empty, not `"null"`
@@ -310,18 +310,18 @@ class MergeAndOverrideConfigsTest {
                 description = "My description",
                 suiteName = "DocsCheck",
             ),
-            result.singleIsInstance<GeneralConfig>()
+            result.singleIsInstance()
         )
         assertEquals(
             WarnPluginConfig(
                 execFlags = "--warn",
             ),
-            result.singleIsInstance<WarnPluginConfig>()
+            result.singleIsInstance()
         )
         assertEquals(
             FixPluginConfig(
                 execFlags = "--fix",
             ),
-            result.singleIsInstance<FixPluginConfig>())
+            result.singleIsInstance())
     }
 }
