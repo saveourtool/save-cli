@@ -92,6 +92,10 @@ class Save(
         // get all toml configs in file system
         val testConfigs = ConfigDetector(fs, evaluatedToolConfig, pluginConfigOverrides)
             .configFromFile(rootTestConfigPath)
+            .also { testConfig ->
+                // need to process all parents (if there is a parent)
+                testConfig.parentConfig?.processInPlace(true)
+            }
             .getAllTestConfigsForFiles(requestedConfigs)
         var atLeastOneExecutionProvided = false
         testConfigs.forEach { testConfig ->

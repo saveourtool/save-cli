@@ -126,16 +126,22 @@ data class TestConfig(
     /**
      * Walk all descendant configs and merge them with their parents
      *
+     * @param processParent flag that controls processing of parent of current [TestConfig]
      * @param createPluginConfigList a function which can create a list of [PluginConfig]s for this [TestConfig]
      * @return an update this [TestConfig]
      */
-    fun processInPlace(createPluginConfigList: (TestConfig) -> List<PluginConfig>): TestConfig {
-        // need to process parent first
-        this.parentConfig?.processInPlace(createPluginConfigList)
+    fun processInPlace(processParent: Boolean, createPluginConfigList: (TestConfig) -> List<PluginConfig>): TestConfig {
+        // need to process parent first, if it wasn't processed already
+        if (processParent) {
+            this.parentConfig?.processInPlace(processParent, createPluginConfigList)
+        }
         // discover plugins from the test configuration
-        createPluginConfigList(this).forEach {
-            logTrace("Discovered new pluginConfig: $it")
-            this.pluginConfigs.add(it)
+        createPluginConfigList(this).forEach { pluginConfig ->
+            logTrace("Discovered new pluginConfig: $pluginConfig")
+            require(this.pluginConfigs.none { it.type == pluginConfig.type }) {
+                "Found duplicate for $pluginConfig"
+            }
+            this.pluginConfigs.add(pluginConfig)
         }
         // merge configurations with parents
         this.mergeConfigWithParent()

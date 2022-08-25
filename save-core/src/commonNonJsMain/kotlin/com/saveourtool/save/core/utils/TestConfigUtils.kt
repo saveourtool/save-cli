@@ -14,9 +14,10 @@ import com.saveourtool.save.plugins.fixandwarn.FixAndWarnPlugin
 /**
  * Evaluate all descendants of [this] config, reading individual plugin configurations from TOML file.
  *
+ * @param processParent flag that controls processing of parent TestConfig
  * @return [this] config with all descendants being evaluated (`pluginConfigs` are filled with data and merged with parents)
  */
-fun TestConfig.processInPlace() = processInPlace {
+fun TestConfig.processInPlace(processParent: Boolean = false) = processInPlace(processParent) {
     createPluginConfigListFromToml(it.location, fs)
 }
 

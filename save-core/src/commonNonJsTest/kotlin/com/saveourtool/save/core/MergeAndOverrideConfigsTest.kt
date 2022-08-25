@@ -279,7 +279,7 @@ class MergeAndOverrideConfigsTest {
         val testConfig1 = TestConfig(toml1.toPath(), null, evaluatedToolConfig, mutableListOf(), emptyList(), fs)
         val testConfig2 = TestConfig(toml2.toPath(), testConfig1, evaluatedToolConfig, mutableListOf(), emptyList(), fs)
 
-        testConfig2.processInPlace {
+        testConfig2.processInPlace(true) {
             when (it) {
                 testConfig1 -> configList1.toMutableList()
                 testConfig2 -> configList2.toMutableList()
@@ -313,7 +313,7 @@ class MergeAndOverrideConfigsTest {
             overridesPluginConfigs = overrides,
             fs = fs
         )
-        testConfig.processInPlace {
+        testConfig.processInPlace(true) {
             configs
         }
         val result = testConfig.pluginConfigs
