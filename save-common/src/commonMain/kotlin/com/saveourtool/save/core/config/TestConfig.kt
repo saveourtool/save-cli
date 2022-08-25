@@ -10,6 +10,9 @@ import com.saveourtool.save.core.logging.logTrace
 import com.saveourtool.save.core.plugin.GeneralConfig
 import com.saveourtool.save.core.plugin.Plugin
 import com.saveourtool.save.core.plugin.PluginConfig
+import com.saveourtool.save.core.utils.singleIsInstanceOrNull
+import com.saveourtool.save.core.utils.mergeWith
+import com.saveourtool.save.core.utils.overrideBy
 
 import okio.FileSystem
 import okio.Path
@@ -82,7 +85,7 @@ data class TestConfig(
      *
      * @return [GeneralConfig] or `null` if not found
      */
-    fun getGeneralConfig() = pluginConfigs.filterIsInstance<GeneralConfig>().singleOrNull()
+    fun getGeneralConfig() = pluginConfigs.singleIsInstanceOrNull<GeneralConfig>()
 
     /**
      * @param withSelf if true, include this config as the first element of the sequence or start with parent config otherwise
@@ -131,7 +134,7 @@ data class TestConfig(
         // discover plugins from the test configuration
         createPluginConfigList(this).forEach {
             logTrace("Discovered new pluginConfig: $it")
-            this.pluginConfigs.mergeOrOverride(it)
+            this.pluginConfigs.add(it)
         }
         // merge configurations with parents
         this.mergeConfigWithParent()
@@ -176,22 +179,16 @@ data class TestConfig(
     fun mergeConfigWithParent(): TestConfig {
         logDebug("Merging configs  (with parental configs from higher directory level) for ${this.location}")
 
-        if (parentConfig != null) {
+        parentConfig?.let {
             logTrace("Using parental config ${parentConfig.location} to merge it with child config: ${this.location}")
-            // return from the function if we stay at the root element of the plugin tree
-            val parentalPlugins = parentConfig.pluginConfigs
-            parentalPlugins.forEach { parentalPluginConfig ->
-                this.pluginConfigs.mergeOrOverride(parentalPluginConfig)
-            }
+            this.pluginConfigs.mergeWith(parentConfig.pluginConfigs)
         }
         return this
     }
 
     private fun overrideConfig() {
         logDebug("Overriding configs for $location")
-        overridesPluginConfigs.forEach { overridesPluginConfig ->
-            pluginConfigs.mergeOrOverride(overridesPluginConfig, false)
-        }
+        pluginConfigs.overrideBy(overridesPluginConfigs)
     }
 
     /**
@@ -203,29 +200,6 @@ data class TestConfig(
         }
         logDebug("Validated plugin configuration for [$location] " +
                 "(${pluginConfigs.map { it.type }.filterNot { it == TestConfigSections.GENERAL }})")
-    }
-
-    private fun MutableList<PluginConfig>.mergeOrOverride(parentalPluginConfig: PluginConfig, merge: Boolean = true) {
-        val childConfigs = this.filter { it.type == parentalPluginConfig.type }
-        if (childConfigs.isEmpty()) {
-            // if we haven't found a plugin from parent in a current list of plugins - we will simply copy it
-            this.add(parentalPluginConfig)
-        } else {
-            require(childConfigs.size == 1) {
-                "Duplicate config with type ${parentalPluginConfig.type} in $this"
-            }
-            val childConfig = childConfigs.single()
-            // else, we will merge plugin with a corresponding plugin from a parent config
-            // we expect that there is only one plugin of such type, otherwise we will throw an exception
-
-            this[this.indexOf(childConfig)] = if (merge) {
-                logTrace("Merging process of ${parentalPluginConfig.type} from $parentalPluginConfig into $childConfig")
-                childConfig.mergeWith(parentalPluginConfig)
-            } else {
-                logTrace("Overriding process of ${parentalPluginConfig.type} from $parentalPluginConfig into $childConfig")
-                parentalPluginConfig.mergeWith(childConfig)
-            }
-        }
     }
 }
 

@@ -7,6 +7,7 @@ import com.saveourtool.save.core.plugin.Plugin
 import com.saveourtool.save.core.plugin.PluginConfig
 import com.saveourtool.save.core.result.Pass
 import com.saveourtool.save.core.result.TestResult
+import com.saveourtool.save.core.utils.singleIsInstance
 import com.saveourtool.save.plugin.warn.WarnPlugin
 import com.saveourtool.save.plugin.warn.WarnPluginConfig
 import com.saveourtool.save.plugins.fix.FixPlugin
@@ -37,16 +38,14 @@ class FixAndWarnPlugin(
 ) {
     private val fixPluginConfig: FixPluginConfig =
             testConfig.pluginConfigs
-                .filterIsInstance<FixAndWarnPluginConfig>()
-                .single()
+                .singleIsInstance<FixAndWarnPluginConfig>()
                 .fix
     private val warnPluginConfig: WarnPluginConfig =
             testConfig.pluginConfigs
-                .filterIsInstance<FixAndWarnPluginConfig>()
-                .single()
+                .singleIsInstance<FixAndWarnPluginConfig>()
                 .warn
     private val generalConfig: GeneralConfig =
-            testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
+            testConfig.pluginConfigs.singleIsInstance<GeneralConfig>()
 
     @Suppress("MISSING_KDOC_CLASS_ELEMENTS")
     internal lateinit var fixPlugin: FixPlugin

@@ -20,6 +20,7 @@ import com.saveourtool.save.core.result.TestResult
 import com.saveourtool.save.core.utils.PathSerializer
 import com.saveourtool.save.core.utils.ProcessExecutionException
 import com.saveourtool.save.core.utils.ProcessTimeoutException
+import com.saveourtool.save.core.utils.singleIsInstance
 
 import io.github.petertrr.diffutils.diff
 import io.github.petertrr.diffutils.patch.ChangeDelta
@@ -69,8 +70,8 @@ class FixPlugin(
     @Suppress("TOO_LONG_FUNCTION")
     override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
         testConfig.validateAndSetDefaults()
-        val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
-        val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
+        val fixPluginConfig = testConfig.pluginConfigs.singleIsInstance<FixPluginConfig>()
+        val generalConfig = testConfig.pluginConfigs.singleIsInstance<GeneralConfig>()
         extraFlagsExtractor = ExtraFlagsExtractor(generalConfig, fs)
 
         val evaluatedToolConfig = testConfig.evaluatedToolConfig

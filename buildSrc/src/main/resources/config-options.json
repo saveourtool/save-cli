@@ -79,22 +79,6 @@
       "description" : "Path to directory, where to store output (when `resultOutput` is set to `FILE`)",
       "default" : "save-reports"
     },
-    "overrideExecCmd" : {
-      "argType": "ArgType.String",
-      "kotlinType": "kotlin.String",
-      "fullName": "override-exec-cmd",
-      "shortName" : "",
-      "description" : "A temporary workaround for save-cloud to override `execCmd` in `save.toml`",
-      "default" : null
-    },
-    "overrideExecFlags" : {
-      "argType": "ArgType.String",
-      "kotlinType": "kotlin.String",
-      "fullName": "override-exec-flags",
-      "shortName" : "",
-      "description" : "A temporary workaround for save-cloud to override `execFlags` in `save.toml`",
-      "default" : null
-    },
     "batchSize" : {
       "argType" : "ArgType.Int",
       "kotlinType": "kotlin.Int",

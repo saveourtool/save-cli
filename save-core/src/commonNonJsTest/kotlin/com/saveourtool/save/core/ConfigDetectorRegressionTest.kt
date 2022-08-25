@@ -1,15 +1,16 @@
 package com.saveourtool.save.core
 
+import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.files.ConfigDetector
+import com.saveourtool.save.core.files.fs
 
-import okio.FileSystem
 import okio.Path.Companion.toPath
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ConfigDetectorRegressionTest {
-    private val fs: FileSystem = FileSystem.SYSTEM
+    private val evaluatedToolConfig = EvaluatedToolConfig(1, "")
 
     @Test
     fun `config detector regression test on directories`() {
@@ -20,14 +21,14 @@ class ConfigDetectorRegressionTest {
             "$baseDir/highlevel/suite2/inner/save.toml"
         )
 
-        val actual1 = ConfigDetector(fs)
+        val actual1 = ConfigDetector(fs, evaluatedToolConfig, emptyList())
             .configFromFile(baseDir.toPath())
             .getAllTestConfigs()
             .map { it.location.toString() }
 
         assertEquals(expected, actual1)
 
-        val actual2 = ConfigDetector(fs)
+        val actual2 = ConfigDetector(fs, evaluatedToolConfig, emptyList())
             .configFromFile("$baseDir/save.toml".toPath())
             .getAllTestConfigs()
             .map { it.location.toString() }

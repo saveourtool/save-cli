@@ -11,6 +11,7 @@ import com.saveourtool.save.core.result.Ignored
 import com.saveourtool.save.core.result.TestResult
 import com.saveourtool.save.core.utils.PathSerializer
 import com.saveourtool.save.core.utils.ProcessBuilder
+import com.saveourtool.save.core.utils.singleIsInstanceOrNull
 
 import okio.FileSystem
 import okio.Path
@@ -51,8 +52,7 @@ abstract class Plugin(
 
         val excludedTests = testConfig
             .pluginConfigs
-            .filterIsInstance<GeneralConfig>()
-            .singleOrNull()
+            .singleIsInstanceOrNull<GeneralConfig>()
             ?.excludedTests
 
         if (!excludedTests.isNullOrEmpty()) {

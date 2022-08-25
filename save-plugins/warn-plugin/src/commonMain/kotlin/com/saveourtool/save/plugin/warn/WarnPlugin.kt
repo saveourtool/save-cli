@@ -16,10 +16,7 @@ import com.saveourtool.save.core.plugin.Plugin
 import com.saveourtool.save.core.result.DebugInfo
 import com.saveourtool.save.core.result.Fail
 import com.saveourtool.save.core.result.TestResult
-import com.saveourtool.save.core.utils.ExecutionResult
-import com.saveourtool.save.core.utils.ProcessExecutionException
-import com.saveourtool.save.core.utils.ProcessTimeoutException
-import com.saveourtool.save.core.utils.SarifParsingException
+import com.saveourtool.save.core.utils.*
 import com.saveourtool.save.plugin.warn.sarif.toWarnings
 import com.saveourtool.save.plugin.warn.utils.CmdExecutorWarn
 import com.saveourtool.save.plugin.warn.utils.ResultsChecker
@@ -63,8 +60,8 @@ class WarnPlugin(
 
     override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
         testConfig.validateAndSetDefaults()
-        val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
-        val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
+        val warnPluginConfig = testConfig.pluginConfigs.singleIsInstance<WarnPluginConfig>()
+        val generalConfig = testConfig.pluginConfigs.singleIsInstance<GeneralConfig>()
         extraFlagsExtractor = ExtraFlagsExtractor(generalConfig, fs)
 
         // Special trick to handle cases when tested tool is able to process directories.
@@ -81,7 +78,7 @@ class WarnPlugin(
     }
 
     override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<TestFiles> {
-        val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
+        val warnPluginConfig = testConfig.pluginConfigs.singleIsInstance<WarnPluginConfig>()
         val regex = warnPluginConfig.resourceNamePattern
         // returned sequence is a sequence of groups of size 1
         return resourceDirectories.flatMap { directory ->
