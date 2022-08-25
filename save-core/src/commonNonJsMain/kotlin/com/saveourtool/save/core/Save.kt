@@ -28,6 +28,7 @@ import com.saveourtool.save.core.result.TestResult
 import com.saveourtool.save.core.utils.buildActivePlugins
 import com.saveourtool.save.core.utils.createPluginConfigListFromToml
 import com.saveourtool.save.core.utils.processInPlace
+import com.saveourtool.save.core.utils.processWithParentsInPlace
 import com.saveourtool.save.plugin.warn.WarnPluginConfig
 import com.saveourtool.save.plugins.fix.FixPlugin
 import com.saveourtool.save.plugins.fix.FixPluginConfig
@@ -94,7 +95,7 @@ class Save(
             .configFromFile(rootTestConfigPath)
             .also { testConfig ->
                 // need to process all parents (if there is a parent)
-                testConfig.parentConfig?.processInPlace(true)
+                testConfig.parentConfig?.processWithParentsInPlace()
             }
             .getAllTestConfigsForFiles(requestedConfigs)
         var atLeastOneExecutionProvided = false

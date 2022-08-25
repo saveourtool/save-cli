@@ -126,15 +126,10 @@ data class TestConfig(
     /**
      * Walk all descendant configs and merge them with their parents
      *
-     * @param processParent flag that controls processing of parent of current [TestConfig]
      * @param createPluginConfigList a function which can create a list of [PluginConfig]s for this [TestConfig]
      * @return an update this [TestConfig]
      */
-    fun processInPlace(processParent: Boolean, createPluginConfigList: (TestConfig) -> List<PluginConfig>): TestConfig {
-        // need to process parent first, if it wasn't processed already
-        if (processParent) {
-            this.parentConfig?.processInPlace(processParent, createPluginConfigList)
-        }
+    fun processInPlace(createPluginConfigList: (TestConfig) -> List<PluginConfig>): TestConfig {
         // discover plugins from the test configuration
         createPluginConfigList(this).forEach { pluginConfig ->
             logTrace("Discovered new pluginConfig: $pluginConfig")

@@ -279,13 +279,8 @@ class MergeAndOverrideConfigsTest {
         val testConfig1 = TestConfig(toml1.toPath(), null, evaluatedToolConfig, mutableListOf(), emptyList(), fs)
         val testConfig2 = TestConfig(toml2.toPath(), testConfig1, evaluatedToolConfig, mutableListOf(), emptyList(), fs)
 
-        testConfig2.processInPlace(true) {
-            when (it) {
-                testConfig1 -> configList1.toMutableList()
-                testConfig2 -> configList2.toMutableList()
-                else -> throw IllegalArgumentException("Not expected testConfig: $it")
-            }
-        }
+        testConfig1.processInPlace { configList1 }
+        testConfig2.processInPlace { configList2 }
         testConfig2.validateAndSetDefaults()
 
         val mergedGeneralConfig: GeneralConfig = testConfig2.pluginConfigs.singleIsInstance()
@@ -313,7 +308,7 @@ class MergeAndOverrideConfigsTest {
             overridesPluginConfigs = overrides,
             fs = fs
         )
-        testConfig.processInPlace(true) {
+        testConfig.processInPlace {
             configs
         }
         val result = testConfig.pluginConfigs
