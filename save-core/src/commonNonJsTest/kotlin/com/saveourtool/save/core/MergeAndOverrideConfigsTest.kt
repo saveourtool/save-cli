@@ -257,7 +257,6 @@ class MergeAndOverrideConfigsTest {
 
     @Test
     fun `merge real toml configs with empty execFlag in child`() {
-
         val toml1 = "src/commonNonJsTest/resources/merge_configs/save.toml"
         val configList1 = createPluginConfigListFromToml(toml1.toPath(), fs)
 
@@ -282,15 +281,9 @@ class MergeAndOverrideConfigsTest {
 
         testConfig2.processInPlace {
             when (it) {
-                testConfig1 -> {
-                    configList1.toMutableList()
-                }
-                testConfig2 -> {
-                    configList2.toMutableList()
-                }
-                else -> {
-                    throw IllegalArgumentException("Not expected testConfig: $it")
-                }
+                testConfig1 -> configList1.toMutableList()
+                testConfig2 -> configList2.toMutableList()
+                else -> throw IllegalArgumentException("Not expected testConfig: $it")
             }
         }
         testConfig2.validateAndSetDefaults()
