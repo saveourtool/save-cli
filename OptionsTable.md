@@ -13,5 +13,3 @@ Most (except for `-h` and `-prop`) of the options below can be passed to a SAVE 
 | l | language | Language that you are developing analyzer for | UNDEFINED |
 | out | result-output | Data output stream | STDOUT |
 | - | report-dir | Path to directory, where to store output (when `resultOutput` is set to `FILE`) | save-reports |
-| - | batch-size | Number of files execCmd will process at a time | 1 |
-| - | batch-separator | A separator to join test files to string if the tested tool supports processing of file batches (`batch-size` > 1) | ,  |
