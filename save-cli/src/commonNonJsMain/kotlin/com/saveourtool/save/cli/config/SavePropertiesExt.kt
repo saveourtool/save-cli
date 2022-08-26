@@ -51,12 +51,6 @@ private fun SaveProperties.validate(): SaveProperties {
                     " Please provide a valid path to the test config via command-line or using the file with properties."
         )
     }
-    if (batchSize < 1) {
-        return logErrorAndExit(
-            ExitCodes.INVALID_CONFIGURATION, "Property `batch-size` should be more or equal to 1."
-        )
-    }
-
     return this
 }
 

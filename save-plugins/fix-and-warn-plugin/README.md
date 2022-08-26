@@ -18,14 +18,14 @@ their configuration as a subsections of `[fix and warn]` plugin.
 ```toml
 [general]
 execCmd="./ktlint -R diktat-0.4.2.jar"
+batchSize = 1
+batchSeparator = ", "
 description = "My suite description"
 suiteName = "DocsCheck"
 
 [fix and warn]
     [fix and warn.fix]
         execFlags="-F"
-        batchSize = 1
-        batchSeparator = ", "
         resourceNameTestSuffix = "Test"
         resourceNameExpectedSuffix = "Expected"
     [fix and warn.warn]

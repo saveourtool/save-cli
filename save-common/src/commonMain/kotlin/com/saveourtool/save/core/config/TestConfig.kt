@@ -177,7 +177,7 @@ data class TestConfig(
      * @return merged test config
      */
     private fun mergeConfigWithParent(): TestConfig {
-        logDebug("Merging configs  (with parental configs from higher directory level) for ${this.location}")
+        logDebug("Merging configs (with parental configs from higher directory level) for ${this.location}")
 
         parentConfig?.let {
             logTrace("Using parental config ${parentConfig.location} to merge it with child config: ${this.location}")

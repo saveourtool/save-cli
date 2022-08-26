@@ -39,13 +39,13 @@ language=kotlin
 ```toml
 [general]
 execCmd="./ktlint -R diktat-0.4.2.jar"
+batchSize = 1 # (default value)
+batchSeparator = ", " # (default value)
 description = "My suite description"
 suiteName = "DocsCheck"
 
 [fix]
 execFlags="-F"
-batchSize = 1 # (default value)
-batchSeparator = ", " # (default value)
 resourceNameTestSuffix = "Test" # (default value)
 resourceNameExpectedSuffix = "Expected" #(default value)
 ```
