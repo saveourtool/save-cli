@@ -1,6 +1,5 @@
 package com.saveourtool.save.core
 
-import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.files.ConfigDetector
 import com.saveourtool.save.core.files.createFile
 import com.saveourtool.save.core.files.fs
@@ -15,7 +14,7 @@ import kotlin.test.assertTrue
 
 class ConfigDetectorTest {
     private val tmpDir = fs.createTempDir(ConfigDetectorTest::class.simpleName!!)
-    private val configDetector = ConfigDetector(fs, EvaluatedToolConfig(1, ""), emptyList())
+    private val configDetector = ConfigDetector(fs, emptyList())
 
     @Test
     fun `should detect single file`() {

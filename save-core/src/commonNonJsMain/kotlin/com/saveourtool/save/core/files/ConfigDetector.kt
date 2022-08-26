@@ -1,6 +1,5 @@
 package com.saveourtool.save.core.files
 
-import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.config.isSaveTomlConfig
 import com.saveourtool.save.core.logging.logDebug
@@ -16,7 +15,6 @@ import okio.Path
  */
 class ConfigDetector(
     private val fs: FileSystem,
-    private val evaluatedToolConfig: EvaluatedToolConfig,
     private val overridesPluginConfigs: List<PluginConfig>,
 ) {
     /**
@@ -67,7 +65,6 @@ class ConfigDetector(
                         TestConfig(
                             path,
                             parentConfig,
-                            evaluatedToolConfig,
                             overridesPluginConfigs = overridesPluginConfigs,
                             fs = fs,
                         )
@@ -119,7 +116,6 @@ class ConfigDetector(
         return TestConfig(
             file,
             parentConfig,
-            evaluatedToolConfig,
             overridesPluginConfigs = overridesPluginConfigs,
             fs = fs,
         )

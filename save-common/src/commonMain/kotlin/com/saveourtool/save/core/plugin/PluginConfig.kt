@@ -8,6 +8,8 @@ package com.saveourtool.save.core.plugin
 
 import com.saveourtool.save.core.config.TestConfigSections
 import com.saveourtool.save.core.utils.RegexSerializer
+import com.saveourtool.save.core.utils.requireNotNull
+import com.saveourtool.save.core.utils.requirePositive
 
 import okio.Path
 import okio.Path.Companion.toPath
@@ -61,6 +63,8 @@ interface PluginConfig {
  * The logic of the default value processing will be provided in stage of validation
  *
  * @property execCmd a command that will be executed to check resources
+ * @property batchSize it controls how many files execCmd will process at a time
+ * @property batchSeparator A separator to join test files to string if the tested tool supports processing of file batches (`batch-size` > 1)
  * @property tags special labels that can be used for splitting tests into groups
  * @property description free text with a description
  * @property suiteName name of test suite that can be visible from save-cloud
@@ -75,6 +79,8 @@ interface PluginConfig {
 @Serializable
 data class GeneralConfig(
     val execCmd: String? = null,
+    val batchSize: Long? = null,
+    val batchSeparator: String? = null,
     val tags: List<String>? = null,
     val description: String? = null,
     val suiteName: String? = null,
@@ -104,6 +110,8 @@ data class GeneralConfig(
 
         return GeneralConfig(
             this.execCmd ?: other.execCmd,
+            this.batchSize ?: other.batchSize,
+            this.batchSeparator ?: other.batchSeparator,
             mergedTag,
             this.description ?: other.description,
             this.suiteName ?: other.suiteName,
@@ -119,23 +127,16 @@ data class GeneralConfig(
 
     @Suppress("MagicNumber")
     override fun validateAndSetDefaults(): GeneralConfig {
-        requireNotNull(execCmd) {
-            errorMsgForRequireCheck("execCmd")
-        }
-        requireNotNull(tags) {
-            errorMsgForRequireCheck("tags")
-        }
-        requireNotNull(description) {
-            errorMsgForRequireCheck("description")
-        }
-        requireNotNull(suiteName) {
-            errorMsgForRequireCheck("suiteName")
+        batchSize?.also {
+            requirePositive("batchSize", it)
         }
         return GeneralConfig(
-            execCmd,
-            tags,
-            description,
-            suiteName,
+            requireNotNull("execCmd", execCmd),
+            batchSize ?: 1,
+            batchSeparator ?: ", ",
+            requireNotNull("tags", tags),
+            requireNotNull("description", description),
+            requireNotNull("suiteName", suiteName),
             language,
             excludedTests ?: emptyList(),
             expectedWarningsPattern ?: defaultExpectedWarningPattern,
@@ -145,13 +146,6 @@ data class GeneralConfig(
             timeOutMillis ?: 10_000L,
         ).also { it.configLocation = this.configLocation }
     }
-
-    private fun errorMsgForRequireCheck(field: String) =
-            """
-                        Error: Couldn't find `$field` in [general] section of `$configLocation` config.
-                        Current configuration: ${this.toString().substringAfter("(").substringBefore(")")}
-                        Please provide it in this, or at least in one of the parent configs.
-            """.trimIndent()
 
     companion object {
         /**

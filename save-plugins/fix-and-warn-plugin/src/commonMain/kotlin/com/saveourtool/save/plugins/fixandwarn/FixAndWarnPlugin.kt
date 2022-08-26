@@ -65,7 +65,6 @@ class FixAndWarnPlugin(
     private fun createTestConfigForPlugins(pluginConfig: PluginConfig) = TestConfig(
         testConfig.location,
         testConfig.parentConfig,
-        testConfig.evaluatedToolConfig,
         mutableListOf(
             generalConfig,
             pluginConfig

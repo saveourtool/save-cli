@@ -1,6 +1,5 @@
 package com.saveourtool.save.plugins.fix
 
-import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
 import com.saveourtool.save.core.files.fs
@@ -81,10 +80,9 @@ class FixPluginTest {
             TestConfig(
                 config,
                 null,
-                EvaluatedToolConfig(1, ", "),
                 mutableListOf(
                     FixPluginConfig(executionCmd),
-                    GeneralConfig("", listOf(""), "", "")
+                    GeneralConfig("", 1, ", ", listOf(""), "", "")
                 ),
                 emptyList(),
                 fs
@@ -149,10 +147,9 @@ class FixPluginTest {
             TestConfig(
                 config,
                 null,
-                EvaluatedToolConfig(2, batchSeparator),
                 mutableListOf(
                     fixPluginConfig,
-                    GeneralConfig("", listOf(""), "", "")
+                    GeneralConfig("", 2, batchSeparator, listOf(""), "", "")
                 ),
                 emptyList(),
                 fs
@@ -182,7 +179,6 @@ class FixPluginTest {
         TestConfig(
             tmpDir / "save.toml",
             null,
-            EvaluatedToolConfig(1, ""),
             mutableListOf(FixPluginConfig("")),
             emptyList(),
             fs

@@ -1,6 +1,5 @@
 package com.saveourtool.save.core
 
-import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.OutputStreamType
 import com.saveourtool.save.core.config.ReportType
 import com.saveourtool.save.core.config.SAVE_VERSION
@@ -77,12 +76,6 @@ class Save(
         reporter.beforeAll()
 
         // create config for evaluated tool from cli args
-        val evaluatedToolConfig = EvaluatedToolConfig(
-            batchSize = saveProperties.batchSize,
-            batchSeparator = saveProperties.batchSeparator,
-        )
-
-        // create config for evaluated tool from cli args
         val saveOverridesPath = testRootPath.resolveSaveOverridesTomlConfig()
         val pluginConfigOverrides = if (fs.exists(saveOverridesPath)) {
             createPluginConfigListFromToml(saveOverridesPath, fs)
@@ -91,7 +84,7 @@ class Save(
         }
 
         // get all toml configs in file system
-        val testConfigs = ConfigDetector(fs, evaluatedToolConfig, pluginConfigOverrides)
+        val testConfigs = ConfigDetector(fs, pluginConfigOverrides)
             .configFromFile(rootTestConfigPath)
             .also { testConfig ->
                 // need to process all parents (if there is a parent)

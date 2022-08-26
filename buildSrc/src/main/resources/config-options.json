@@ -78,21 +78,5 @@
       "shortName" : "",
       "description" : "Path to directory, where to store output (when `resultOutput` is set to `FILE`)",
       "default" : "save-reports"
-    },
-    "batchSize" : {
-      "argType" : "ArgType.Int",
-      "kotlinType": "kotlin.Int",
-      "fullName" : "batch-size",
-      "shortName" : "",
-      "description" : "Number of files execCmd will process at a time",
-      "default" : "1"
-    },
-    "batchSeparator" : {
-      "argType": "ArgType.String",
-      "kotlinType": "kotlin.String",
-      "fullName": "batch-separator",
-      "shortName" : "",
-      "description" : "A separator to join test files to string if the tested tool supports processing of file batches (`batch-size` > 1)",
-      "default" : ", "
     }
 }

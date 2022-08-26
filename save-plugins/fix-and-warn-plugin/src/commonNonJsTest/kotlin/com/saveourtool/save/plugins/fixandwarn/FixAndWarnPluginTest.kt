@@ -1,6 +1,5 @@
 package com.saveourtool.save.plugins.fixandwarn
 
-import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
 import com.saveourtool.save.core.files.fs
@@ -74,7 +73,6 @@ class FixAndWarnPluginTest {
             TestConfig(
                 config,
                 null,
-                EvaluatedToolConfig(1, ", "),
                 mutableListOf(
                     FixAndWarnPluginConfig(
                         FixPluginConfig(fixExecutionCmd),
@@ -83,7 +81,7 @@ class FixAndWarnPluginTest {
                             true, true, 1, 2, 3, 1, 1, 1, 2, 3, 4
                         )
                     ),
-                    GeneralConfig("", listOf(""), "", "", expectedWarningsPattern = Regex("// ;warn:(\\d+):(\\d+): (.*)"), runConfigPattern = defaultExtraConfigPattern)
+                    GeneralConfig("", 1, ", ", listOf(""), "", "", expectedWarningsPattern = Regex("// ;warn:(\\d+):(\\d+): (.*)"), runConfigPattern = defaultExtraConfigPattern)
                 ),
                 emptyList(),
                 fs,

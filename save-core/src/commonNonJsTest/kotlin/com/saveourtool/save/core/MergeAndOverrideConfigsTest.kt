@@ -1,6 +1,5 @@
 package com.saveourtool.save.core
 
-import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.config.resolveSaveOverridesTomlConfig
 import com.saveourtool.save.core.config.resolveSaveTomlConfig
@@ -27,10 +26,10 @@ import kotlin.test.assertEquals
 class MergeAndOverrideConfigsTest {
     private val extraFlagsPattern1 = Regex("// RUN: (.*)")
     private val extraFlagsPattern2 = Regex("## RUN: (.*)")
-    private val generalConfig1 = GeneralConfig("", listOf("Tag11", "Tag12"), "Description1", "suiteName1", "Kotlin", listOf("excludedTests: test1"), runConfigPattern = extraFlagsPattern2)
-    private val generalConfig2 = GeneralConfig("", listOf("Tag21"), "Description2", "suiteName2", "Kotlin", listOf("excludedTests: test3"), runConfigPattern = extraFlagsPattern1)
-    private val generalConfig3 = GeneralConfig("", listOf("Tag21", "Tag31", "Tag32"), "Description2", "suiteName3", "Kotlin", listOf("excludedTests: test5", "includedTests: test6"), runConfigPattern = extraFlagsPattern2)
-    private val generalConfig4 = GeneralConfig("", listOf("Tag11", "Tag21"), "Description2", "suiteName4", "Kotlin", listOf("excludedTests: test7"), runConfigPattern = extraFlagsPattern2)
+    private val generalConfig1 = GeneralConfig("", 1, ", ", listOf("Tag11", "Tag12"), "Description1", "suiteName1", "Kotlin", listOf("excludedTests: test1"), runConfigPattern = extraFlagsPattern2)
+    private val generalConfig2 = GeneralConfig("", 1, ", ", listOf("Tag21"), "Description2", "suiteName2", "Kotlin", listOf("excludedTests: test3"), runConfigPattern = extraFlagsPattern1)
+    private val generalConfig3 = GeneralConfig("", 1, ", ", listOf("Tag21", "Tag31", "Tag32"), "Description2", "suiteName3", "Kotlin", listOf("excludedTests: test5", "includedTests: test6"), runConfigPattern = extraFlagsPattern2)
+    private val generalConfig4 = GeneralConfig("", 1, ", ", listOf("Tag11", "Tag21"), "Description2", "suiteName4", "Kotlin", listOf("excludedTests: test7"), runConfigPattern = extraFlagsPattern2)
     private val warningsOutputPattern1 = Regex(".*")
     private val warningsOutputPattern2 = Regex("\\w+ - (\\d+)/(\\d+) - (.*)$")
     private val warnConfig1 = WarnPluginConfig("execCmd1", warningsOutputPattern2,
@@ -241,7 +240,7 @@ class MergeAndOverrideConfigsTest {
 
         assertEquals(3, config4.size)
         val expectedGeneralConfig =
-                GeneralConfig("", listOf("Tag11", "Tag12", "Tag21", "Tag31", "Tag32"), "Description2", "suiteName4", "Kotlin", listOf("excludedTests: test7"), runConfigPattern = extraFlagsPattern2)
+                GeneralConfig("", 1, ", ", listOf("Tag11", "Tag12", "Tag21", "Tag31", "Tag32"), "Description2", "suiteName4", "Kotlin", listOf("excludedTests: test7"), runConfigPattern = extraFlagsPattern2)
         val expectedWarnConfig = WarnPluginConfig("execCmd4", warningsOutputPattern2,
             true, false, 4, 4, 4, 1, 1, 4, 4, 4, 4, true, null)
         val expectedFixConfig = FixPluginConfig("fixCmd4", "Suffix")
@@ -275,9 +274,8 @@ class MergeAndOverrideConfigsTest {
         assertEquals(listOf(""), childGeneralConfig.tags)
         assertEquals(null, childWarnConfig.execFlags)
 
-        val evaluatedToolConfig = EvaluatedToolConfig(1, "")
-        val testConfig1 = TestConfig(toml1.toPath(), null, evaluatedToolConfig, mutableListOf(), emptyList(), fs)
-        val testConfig2 = TestConfig(toml2.toPath(), testConfig1, evaluatedToolConfig, mutableListOf(), emptyList(), fs)
+        val testConfig1 = TestConfig(toml1.toPath(), null, mutableListOf(), emptyList(), fs)
+        val testConfig2 = TestConfig(toml2.toPath(), testConfig1, mutableListOf(), emptyList(), fs)
 
         testConfig1.processInPlace { configList1 }
         testConfig2.processInPlace { configList2 }
@@ -299,11 +297,9 @@ class MergeAndOverrideConfigsTest {
         val saveOverridesToml = "src/commonNonJsTest/resources/override_configs".toPath().resolveSaveOverridesTomlConfig()
         val overrides = createPluginConfigListFromToml(saveOverridesToml, fs)
 
-        val evaluatedToolConfig = EvaluatedToolConfig(1, "")
         val testConfig = TestConfig(
             location = saveToml,
             parentConfig = null,
-            evaluatedToolConfig = evaluatedToolConfig,
             pluginConfigs = mutableListOf(),
             overridesPluginConfigs = overrides,
             fs = fs

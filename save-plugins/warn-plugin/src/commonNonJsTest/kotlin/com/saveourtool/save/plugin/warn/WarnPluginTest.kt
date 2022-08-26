@@ -1,6 +1,5 @@
 package com.saveourtool.save.plugin.warn
 
-import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
 import com.saveourtool.save.core.files.fs
@@ -412,7 +411,7 @@ class WarnPluginTest {
         texts: List<String>,
         warnPluginConfig: WarnPluginConfig,
         generalConfig: GeneralConfig,
-        batchSize: Int = 1,
+        batchSize: Long = 1,
         assertion: (List<TestResult>) -> Unit,
     ) {
         val config = fs.createFile(tmpDir / "save.toml")
@@ -427,8 +426,7 @@ class WarnPluginTest {
             TestConfig(
                 config,
                 null,
-                EvaluatedToolConfig(batchSize, ", "),
-                mutableListOf(warnPluginConfig, generalConfig),
+                mutableListOf(warnPluginConfig, generalConfig.copy(batchSize = batchSize)),
                 emptyList(),
                 fs
             ),

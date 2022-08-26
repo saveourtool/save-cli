@@ -72,17 +72,22 @@ class FixPlugin(
         testConfig.validateAndSetDefaults()
         val fixPluginConfig: FixPluginConfig = testConfig.pluginConfigs.singleIsInstance()
         val generalConfig: GeneralConfig = testConfig.pluginConfigs.singleIsInstance()
+        val batchSize = requireNotNull(generalConfig.batchSize) {
+            "`batchSize` is not set"
+        }.toInt()
+        val batchSeparator = requireNotNull(generalConfig.batchSeparator) {
+            "`batchSeparator` is not set"
+        }
         extraFlagsExtractor = ExtraFlagsExtractor(generalConfig, fs)
 
-        val evaluatedToolConfig = testConfig.evaluatedToolConfig
         return files.map { it as FixTestFiles }
-            .chunked(evaluatedToolConfig.batchSize)
+            .chunked(batchSize)
             .map { chunk ->
                 val copyPaths = chunk.map { it.test }
 
                 val extraFlagsList = copyPaths.mapNotNull { path -> extraFlagsExtractor.extractExtraFlagsFrom(path) }.distinct()
                 require(extraFlagsList.size <= 1) {
-                    "Extra flags for all files in a batch should be same, but you have batchSize=${evaluatedToolConfig.batchSize}" +
+                    "Extra flags for all files in a batch should be same, but you have batchSize=$batchSize" +
                             " and there are ${extraFlagsList.size} different sets of flags inside it, namely $extraFlagsList"
                 }
                 val extraFlags = extraFlagsList.singleOrNull() ?: ExtraFlags("", "")
@@ -92,7 +97,7 @@ class FixPlugin(
                     createTestFile(test, generalConfig, fixPluginConfig) to expected
                 }
                 val testCopyNames =
-                        pathCopyMap.joinToString(separator = evaluatedToolConfig.batchSeparator) { (testCopy, _) -> testCopy.toString() }
+                        pathCopyMap.joinToString(separator = batchSeparator) { (testCopy, _) -> testCopy.toString() }
 
                 val execFlags = fixPluginConfig.execFlags
                 val execFlagsAdjusted = resolvePlaceholdersFrom(execFlags, extraFlags, testCopyNames)

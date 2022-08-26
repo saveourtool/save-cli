@@ -24,7 +24,6 @@ import kotlin.js.JsName
  * Configuration for a test suite, that is read from test suite configuration file (toml config)
  * @property location [Path] denoting the location of this file
  * @property parentConfig parent config in the hierarchy of configs, `null` if this config is root.
- * @property evaluatedToolConfig a configuration for evaluated tool
  * @property pluginConfigs list of configurations for plugins that are active in this config
  * @property overridesPluginConfigs list of configurations for plugins that overrides [pluginConfigs]
  * @property fs filesystem which can access test configs
@@ -33,7 +32,6 @@ import kotlin.js.JsName
 data class TestConfig(
     val location: Path,
     val parentConfig: TestConfig?,
-    val evaluatedToolConfig: EvaluatedToolConfig,
     val pluginConfigs: MutableList<PluginConfig> = mutableListOf(),
     val overridesPluginConfigs: List<PluginConfig>,
     val fs: FileSystem,
@@ -139,7 +137,7 @@ data class TestConfig(
             this.pluginConfigs.add(pluginConfig)
         }
         // merge configurations with parents
-        this.mergeConfigWithParent()
+        mergeConfigWithParent()
         overrideConfig()
         return this
     }
