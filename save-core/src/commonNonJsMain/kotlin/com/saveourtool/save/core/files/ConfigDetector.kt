@@ -15,7 +15,7 @@ import okio.Path
  */
 class ConfigDetector(
     private val fs: FileSystem,
-    private val overridesPluginConfigs: List<PluginConfig>,
+    private val overridesPluginConfigs: List<PluginConfig> = emptyList(),
 ) {
     /**
      * Try to create SAVE config file from [testConfig].
