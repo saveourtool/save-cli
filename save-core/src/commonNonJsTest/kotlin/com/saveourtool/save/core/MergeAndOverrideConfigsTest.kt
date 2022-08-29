@@ -1,3 +1,8 @@
+@file:Suppress(
+    "FILE_IS_TOO_LONG",
+    "TOO_LONG_FUNCTION",
+)
+
 package com.saveourtool.save.core
 
 import com.saveourtool.save.core.config.TestConfig
@@ -18,34 +23,116 @@ import okio.Path.Companion.toPath
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@Suppress(
-    "TOO_LONG_FUNCTION",
-    "LOCAL_VARIABLE_EARLY_DECLARATION",
-    "LONG_LINE",
-)
 class MergeAndOverrideConfigsTest {
     private val extraFlagsPattern1 = Regex("// RUN: (.*)")
     private val extraFlagsPattern2 = Regex("## RUN: (.*)")
-    private val generalConfig1 = GeneralConfig("", 1, ", ", listOf("Tag11", "Tag12"), "Description1", "suiteName1", "Kotlin", listOf("excludedTests: test1"), runConfigPattern = extraFlagsPattern2)
-    private val generalConfig2 = GeneralConfig("", 1, ", ", listOf("Tag21"), "Description2", "suiteName2", "Kotlin", listOf("excludedTests: test3"), runConfigPattern = extraFlagsPattern1)
-    private val generalConfig3 = GeneralConfig("", 1, ", ", listOf("Tag21", "Tag31", "Tag32"), "Description2", "suiteName3", "Kotlin", listOf("excludedTests: test5", "includedTests: test6"), runConfigPattern = extraFlagsPattern2)
-    private val generalConfig4 = GeneralConfig("", 1, ", ", listOf("Tag11", "Tag21"), "Description2", "suiteName4", "Kotlin", listOf("excludedTests: test7"), runConfigPattern = extraFlagsPattern2)
+    private val generalConfig1 = GeneralConfig(
+        execCmd = "execCmd1",
+        batchSize = 1,
+        batchSeparator = ", ",
+        tags = listOf("Tag11", "Tag12"),
+        description = "Description1",
+        suiteName = "suiteName1",
+        language = "Kotlin",
+        excludedTests = listOf("excludedTests: test1"),
+        runConfigPattern = extraFlagsPattern2
+    )
+    private val generalConfig2 = GeneralConfig(
+        execCmd = "execCmd2",
+        batchSize = 2,
+        batchSeparator = "; ",
+        tags = listOf("Tag21"),
+        description = "Description2",
+        suiteName = "suiteName2",
+        language = "Kotlin",
+        excludedTests = listOf("excludedTests: test3"),
+        runConfigPattern = extraFlagsPattern1
+    )
+    private val generalConfig3 = GeneralConfig(
+        execCmd = "execCmd3",
+        batchSize = 3,
+        batchSeparator = " ",
+        tags = listOf("Tag21", "Tag31", "Tag32"),
+        description = "Description2",
+        suiteName = "suiteName3",
+        language = "Kotlin",
+        excludedTests = listOf("excludedTests: test5", "includedTests: test6"),
+        runConfigPattern = extraFlagsPattern2
+    )
+    private val generalConfig4 = GeneralConfig(
+        execCmd = null,
+        batchSize = null,
+        batchSeparator = null,
+        tags = listOf("Tag11", "Tag21"),
+        description = "Description2",
+        suiteName = "suiteName4",
+        language = "Kotlin",
+        excludedTests = listOf("excludedTests: test7"),
+        runConfigPattern = extraFlagsPattern2
+    )
     private val warningsOutputPattern1 = Regex(".*")
     private val warningsOutputPattern2 = Regex("\\w+ - (\\d+)/(\\d+) - (.*)$")
-    private val warnConfig1 = WarnPluginConfig("execCmd1", warningsOutputPattern2,
-        false, false, 1, 1, 1, 1, 1, 1, 1, 1, 1, false, null)
-    private val warnConfig2 = WarnPluginConfig("execCmd2", warningsOutputPattern1,
-        true, true, 2, 2, 2, 1, 1, 2, 2, 2, 2, true, null)
-    private val warnConfig3 = WarnPluginConfig("execCmd3", warningsOutputPattern2,
-        warningTextHasColumn = false, lineCaptureGroup = 3, columnCaptureGroup = 3, messageCaptureGroup = 3,
-        fileNameCaptureGroupOut = 3, lineCaptureGroupOut = 3, columnCaptureGroupOut = 3, messageCaptureGroupOut = 3)
-    private val warnConfig4 = WarnPluginConfig("execCmd4", warningsOutputPattern2,
-        lineCaptureGroup = 4, columnCaptureGroup = 4, messageCaptureGroup = 4,
-        fileNameCaptureGroupOut = 4, lineCaptureGroupOut = 4, columnCaptureGroupOut = 4, messageCaptureGroupOut = 4)
-    private val fixConfig1 = FixPluginConfig("fixCmd1", "Suffix")
-    private val fixConfig2 = FixPluginConfig("fixCmd2")
-    private val fixConfig3 = FixPluginConfig("fixCmd3", null)
-    private val fixConfig4 = FixPluginConfig("fixCmd4")
+    private val warnConfig1 = WarnPluginConfig(
+        execFlags = "warnExecFlags1",
+        actualWarningsPattern = warningsOutputPattern2,
+        warningTextHasLine = false,
+        warningTextHasColumn = false,
+        lineCaptureGroup = 1,
+        columnCaptureGroup = 1,
+        messageCaptureGroup = 1,
+        messageCaptureGroupMiddle = 1,
+        messageCaptureGroupEnd = 1,
+        fileNameCaptureGroupOut = 1,
+        lineCaptureGroupOut = 1,
+        columnCaptureGroupOut = 1,
+        messageCaptureGroupOut = 1,
+        exactWarningsMatch = false,
+        testNameRegex = null
+    )
+    private val warnConfig2 = WarnPluginConfig(
+        execFlags = "warnExecFlags2",
+        actualWarningsPattern = warningsOutputPattern1,
+        warningTextHasLine = true,
+        warningTextHasColumn = true,
+        lineCaptureGroup = 2,
+        columnCaptureGroup = 2,
+        messageCaptureGroup = 2,
+        messageCaptureGroupMiddle = 1,
+        messageCaptureGroupEnd = 1,
+        fileNameCaptureGroupOut = 2,
+        lineCaptureGroupOut = 2,
+        columnCaptureGroupOut = 2,
+        messageCaptureGroupOut = 2,
+        exactWarningsMatch = true,
+        testNameRegex = null
+    )
+    private val warnConfig3 = WarnPluginConfig(
+        execFlags = "warnExecFlags3",
+        actualWarningsPattern = warningsOutputPattern2,
+        warningTextHasColumn = false,
+        lineCaptureGroup = 3,
+        columnCaptureGroup = 3,
+        messageCaptureGroup = 3,
+        fileNameCaptureGroupOut = 3,
+        lineCaptureGroupOut = 3,
+        columnCaptureGroupOut = 3,
+        messageCaptureGroupOut = 3
+    )
+    private val warnConfig4 = WarnPluginConfig(
+        execFlags = "warnExecFlags4",
+        actualWarningsPattern = warningsOutputPattern2,
+        lineCaptureGroup = 4,
+        columnCaptureGroup = 4,
+        messageCaptureGroup = 4,
+        fileNameCaptureGroupOut = 4,
+        lineCaptureGroupOut = 4,
+        columnCaptureGroupOut = 4,
+        messageCaptureGroupOut = 4
+    )
+    private val fixConfig1 = FixPluginConfig(execFlags = "fixExecFlags1", resourceNameTestSuffix = "Suffix")
+    private val fixConfig2 = FixPluginConfig(execFlags = "fixExecFlags2")
+    private val fixConfig3 = FixPluginConfig(execFlags = "fixExecFlags3", resourceNameTestSuffix = null)
+    private val fixConfig4 = FixPluginConfig(execFlags = "fixExecFlags4")
 
     @Test
     fun `merge and override general configs`() {
@@ -56,7 +143,9 @@ class MergeAndOverrideConfigsTest {
         assertEquals(1, config2ForMerge.size)
         assertEquals(
             GeneralConfig(
-                execCmd = "",
+                execCmd = "execCmd2",
+                batchSize = 2,
+                batchSeparator = "; ",
                 tags = listOf("Tag11", "Tag12", "Tag21"),
                 description = "Description2",
                 suiteName = "suiteName2",
@@ -72,7 +161,9 @@ class MergeAndOverrideConfigsTest {
         assertEquals(1, config2ForOverride.size)
         assertEquals(
             GeneralConfig(
-                execCmd = "",
+                execCmd = "execCmd1",
+                batchSize = 1,
+                batchSeparator = ", ",
                 tags = listOf("Tag21", "Tag11", "Tag12"),
                 description = "Description1",
                 suiteName = "suiteName1",
@@ -93,7 +184,9 @@ class MergeAndOverrideConfigsTest {
         assertEquals(2, config2ForMerge.size)
         assertEquals(
             GeneralConfig(
-                execCmd = "",
+                execCmd = "execCmd2",
+                batchSize = 2,
+                batchSeparator = "; ",
                 tags = listOf("Tag11", "Tag12", "Tag21"),
                 description = "Description2",
                 suiteName = "suiteName2",
@@ -110,7 +203,9 @@ class MergeAndOverrideConfigsTest {
         assertEquals(2, config2ForOverride.size)
         assertEquals(
             GeneralConfig(
-                execCmd = "",
+                execCmd = "execCmd1",
+                batchSize = 1,
+                batchSeparator = ", ",
                 tags = listOf("Tag21", "Tag11", "Tag12"),
                 description = "Description1",
                 suiteName = "suiteName1",
@@ -149,7 +244,9 @@ class MergeAndOverrideConfigsTest {
         assertEquals(3, config2ForMerge.size)
         assertEquals(
             GeneralConfig(
-                execCmd = "",
+                execCmd = "execCmd2",
+                batchSize = 2,
+                batchSeparator = "; ",
                 tags = listOf("Tag11", "Tag12", "Tag21"),
                 description = "Description2",
                 suiteName = "suiteName2",
@@ -161,7 +258,7 @@ class MergeAndOverrideConfigsTest {
         )
         assertEquals(
             WarnPluginConfig(
-                execFlags = "execCmd3",
+                execFlags = "warnExecFlags3",
                 actualWarningsPattern = warningsOutputPattern2,
                 warningTextHasLine = true,
                 warningTextHasColumn = false,
@@ -180,7 +277,7 @@ class MergeAndOverrideConfigsTest {
             config2ForMerge.singleIsInstance()
         )
         assertEquals(
-            FixPluginConfig("fixCmd2", "Suffix"),
+            FixPluginConfig("fixExecFlags2", "Suffix"),
             config2ForMerge.singleIsInstance())
 
         val config2ForOverride = mutableListOf(generalConfig2, warnConfig3, fixConfig2)
@@ -188,7 +285,9 @@ class MergeAndOverrideConfigsTest {
         assertEquals(3, config2ForOverride.size)
         assertEquals(
             GeneralConfig(
-                execCmd = "",
+                execCmd = "execCmd1",
+                batchSize = 1,
+                batchSeparator = ", ",
                 tags = listOf("Tag21", "Tag11", "Tag12"),
                 description = "Description1",
                 suiteName = "suiteName1",
@@ -200,7 +299,7 @@ class MergeAndOverrideConfigsTest {
         )
         assertEquals(
             WarnPluginConfig(
-                execFlags = "execCmd2",
+                execFlags = "warnExecFlags2",
                 actualWarningsPattern = warningsOutputPattern1,
                 warningTextHasLine = true,
                 warningTextHasColumn = true,
@@ -220,7 +319,7 @@ class MergeAndOverrideConfigsTest {
         )
         assertEquals(
             FixPluginConfig(
-                execFlags = "fixCmd1",
+                execFlags = "fixExecFlags1",
                 resourceNameTestSuffix = "Suffix",
             ),
             config2ForOverride.singleIsInstance())
@@ -240,10 +339,35 @@ class MergeAndOverrideConfigsTest {
 
         assertEquals(3, config4.size)
         val expectedGeneralConfig =
-                GeneralConfig("", 1, ", ", listOf("Tag11", "Tag12", "Tag21", "Tag31", "Tag32"), "Description2", "suiteName4", "Kotlin", listOf("excludedTests: test7"), runConfigPattern = extraFlagsPattern2)
-        val expectedWarnConfig = WarnPluginConfig("execCmd4", warningsOutputPattern2,
-            true, false, 4, 4, 4, 1, 1, 4, 4, 4, 4, true, null)
-        val expectedFixConfig = FixPluginConfig("fixCmd4", "Suffix")
+                GeneralConfig(
+                    execCmd = "execCmd3",
+                    batchSize = 3,
+                    batchSeparator = " ",
+                    tags = listOf("Tag11", "Tag12", "Tag21", "Tag31", "Tag32"),
+                    description = "Description2",
+                    suiteName = "suiteName4",
+                    language = "Kotlin",
+                    excludedTests = listOf("excludedTests: test7"),
+                    runConfigPattern = extraFlagsPattern2
+                )
+        val expectedWarnConfig = WarnPluginConfig(
+            execFlags = "warnExecFlags4",
+            actualWarningsPattern = warningsOutputPattern2,
+            warningTextHasLine = true,
+            warningTextHasColumn = false,
+            lineCaptureGroup = 4,
+            columnCaptureGroup = 4,
+            messageCaptureGroup = 4,
+            messageCaptureGroupMiddle = 1,
+            messageCaptureGroupEnd = 1,
+            fileNameCaptureGroupOut = 4,
+            lineCaptureGroupOut = 4,
+            columnCaptureGroupOut = 4,
+            messageCaptureGroupOut = 4,
+            exactWarningsMatch = true,
+            testNameRegex = null
+        )
+        val expectedFixConfig = FixPluginConfig(execFlags = "fixExecFlags4", resourceNameTestSuffix = "Suffix")
 
         val actualGeneralConfig: GeneralConfig = config4.singleIsInstance()
         val actualWarnConfig: WarnPluginConfig = config4.singleIsInstance()

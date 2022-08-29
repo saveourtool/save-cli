@@ -8,12 +8,10 @@ import com.saveourtool.save.plugin.warn.WarnPluginConfig
 import com.saveourtool.save.plugins.fix.FixPluginConfig
 
 import okio.Path.Companion.toPath
-
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import kotlin.test.fail
 
-@Suppress("LONG_LINE")
 class ValidationTest {
     @Test
     fun `set defaults to general section`() {
@@ -26,21 +24,33 @@ class ValidationTest {
 
         val actualGeneralConfig1: GeneralConfig = config.singleIsInstance()
         assertEquals(emptyList(), actualGeneralConfig1.excludedTests)
+        assertEquals(1, actualGeneralConfig1.batchSize)
+        assertEquals(", ", actualGeneralConfig1.batchSeparator)
     }
 
     @Test
     fun `invalid general section`() {
-        val generalConfig = GeneralConfig()
-        val config: MutableList<PluginConfig> = mutableListOf(generalConfig)
-        generalConfig.configLocation = "./some-path".toPath()
-        try {
-            config.validateAndSetDefaults()
-        } catch (ex: IllegalArgumentException) {
+        val generalConfig = GeneralConfig().apply {
+            configLocation = "./some-path".toPath()
+        }
+
+        assertException(generalConfig) { ex ->
             assertEquals(
                 """
                     Error: Couldn't find `execCmd` in [general] section of `${generalConfig.configLocation}` config.
                     Current configuration: ${generalConfig.toString().substringAfter("(").substringBefore(")")}
                     Please provide it in this, or at least in one of the parent configs.
+                """.trimIndent(),
+                ex.message
+            )
+        }
+
+        val generalConfigWithInvalidBatchSize = generalConfig.copy(execCmd = "execCmd", batchSize = -1)
+        assertException(generalConfigWithInvalidBatchSize) { ex ->
+            assertEquals(
+                """
+                    [Configuration Error]: `batchSize` in [general] section of `${generalConfigWithInvalidBatchSize.configLocation}` config should be positive!
+                    Current configuration: ${generalConfigWithInvalidBatchSize.toString().substringAfter("(").substringBefore(")")}
                 """.trimIndent(),
                 ex.message
             )
@@ -126,18 +136,17 @@ class ValidationTest {
     // `lineCaptureGroup` provided, but incorrect -- error
     @Test
     fun `validate warn section 4`() {
-        val warnConfig = WarnPluginConfig(execFlags = "execFlags", lineCaptureGroup = -127)
-        val config: MutableList<PluginConfig> = mutableListOf(warnConfig)
-        warnConfig.configLocation = "./some-location".toPath()
-        try {
-            config.validateAndSetDefaults()
-        } catch (ex: IllegalArgumentException) {
-            assertTrue("Exception message content incorrect: ${ex.message}") {
-                ex.message!!.startsWith(
-                    "[Configuration Error]: All integer values in [warn] section of `${warnConfig.configLocation}` config should be positive!" +
-                            "\nCurrent configuration: "
-                )
-            }
+        val warnConfig = WarnPluginConfig(execFlags = "execFlags", lineCaptureGroup = -127).apply {
+            configLocation = "./some-location".toPath()
+        }
+        assertException(warnConfig) { ex ->
+            assertEquals(
+                """
+                    [Configuration Error]: `lineCaptureGroup` in [warn] section of `${warnConfig.configLocation}` config should be positive!
+                    Current configuration: ${warnConfig.toString().substringAfter("(").substringBefore(")")}
+                """.trimIndent(),
+                ex.message
+            )
         }
     }
 
@@ -153,5 +162,15 @@ class ValidationTest {
         val actualFixConfig: FixPluginConfig = config.singleIsInstance()
         assertEquals("Test", actualFixConfig.resourceNameTest)
         assertEquals("Expected", actualFixConfig.resourceNameExpected)
+    }
+
+    private fun assertException(pluginConfig: PluginConfig, validation: (IllegalArgumentException) -> Unit) {
+        try {
+            val config: MutableList<PluginConfig> = mutableListOf(pluginConfig)
+            config.validateAndSetDefaults()
+            fail("Expect exception with type ${IllegalArgumentException::class}")
+        } catch (ex: IllegalArgumentException) {
+            validation(ex)
+        }
     }
 }

@@ -15,7 +15,7 @@ import com.saveourtool.save.core.plugin.PluginConfig
  */
 fun <T : PluginConfig, R : Any> T.requireNotNull(field: String, value: R?) = requireNotNull(value) {
     """
-        Error: Couldn't find `$field` in [$type] section of `$configLocation` config.
+        Error: Couldn't find `$field` in [${type.name.lowercase()}] section of `$configLocation` config.
         Current configuration: ${this.currentConfiguration()}
         Please provide it in this, or at least in one of the parent configs.
     """.trimIndent()
@@ -30,7 +30,7 @@ fun <T : PluginConfig, R : Any> T.requireNotNull(field: String, value: R?) = req
  */
 fun <T : PluginConfig> T.requirePositive(field: String, value: Long) = require(value >= 0) {
     """
-        [Configuration Error]: `$field` in [$type] section of `$configLocation` config should be positive!
+        [Configuration Error]: `$field` in [${type.name.lowercase()}] section of `$configLocation` config should be positive!
         Current configuration: ${this.currentConfiguration()}
         """.trimIndent()
 }
