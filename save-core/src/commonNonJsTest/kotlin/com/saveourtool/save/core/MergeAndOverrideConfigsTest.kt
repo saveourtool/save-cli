@@ -8,13 +8,16 @@ package com.saveourtool.save.core
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.config.resolveSaveOverridesTomlConfig
 import com.saveourtool.save.core.config.resolveSaveTomlConfig
+import com.saveourtool.save.core.files.createFile
 import com.saveourtool.save.core.files.fs
 import com.saveourtool.save.core.plugin.GeneralConfig
 import com.saveourtool.save.core.plugin.PluginConfig
 import com.saveourtool.save.core.utils.createPluginConfigListFromToml
 import com.saveourtool.save.core.utils.mergeWith
 import com.saveourtool.save.core.utils.overrideBy
+import com.saveourtool.save.core.utils.processWithParentsInPlace
 import com.saveourtool.save.core.utils.singleIsInstance
+import com.saveourtool.save.createTempDir
 import com.saveourtool.save.plugin.warn.WarnPluginConfig
 import com.saveourtool.save.plugins.fix.FixPluginConfig
 
@@ -454,5 +457,58 @@ class MergeAndOverrideConfigsTest {
                 execFlags = "--fix",
             ),
             result.singleIsInstance())
+    }
+
+    @Test
+    fun `load save toml from middle hierarchy`() {
+        val tmpDir = fs.createTempDir()
+        val generalConfig1 = GeneralConfig(
+            execCmd = "execCmd"
+        )
+        val testConfig1 = TestConfig(
+            location = tmpDir.resolveSaveTomlConfig()
+                .also { fs.createFile(it) },
+            parentConfig = null,
+            pluginConfigs = mutableListOf(
+                generalConfig1
+            ),
+            overridesPluginConfigs = emptyList(),
+            fs = fs
+        )
+        val testConfig2 = TestConfig(
+            location = tmpDir.resolve("sub-folder")
+                .also { fs.createDirectories(it) }
+                .resolveSaveTomlConfig()
+                .also { fs.createFile(it) },
+            parentConfig = testConfig1,
+            pluginConfigs = mutableListOf(),
+            overridesPluginConfigs = emptyList(),
+            fs = fs
+        )
+        val testConfig3 = TestConfig(
+            location = tmpDir.resolve("sub-folder").resolve("sub-sub-folder")
+                .also { fs.createDirectories(it) }
+                .resolveSaveTomlConfig()
+                .also { fs.createFile(it) },
+            parentConfig = testConfig2,
+            pluginConfigs = mutableListOf(),
+            overridesPluginConfigs = emptyList(),
+            fs = fs
+        )
+        val testConfig4 = TestConfig(
+            location = tmpDir.resolve("sub-folder").resolve("sub-sub-folder").resolve("sub-sub-sub-folder")
+                .also { fs.createDirectories(it) }
+                .resolveSaveTomlConfig()
+                .also { fs.createFile(it) },
+            parentConfig = testConfig3,
+            pluginConfigs = mutableListOf(),
+            overridesPluginConfigs = emptyList(),
+            fs = fs
+        )
+
+        testConfig4.processWithParentsInPlace()
+
+        assertEquals(generalConfig1, testConfig4.getGeneralConfig())
+        fs.deleteRecursively(tmpDir)
     }
 }

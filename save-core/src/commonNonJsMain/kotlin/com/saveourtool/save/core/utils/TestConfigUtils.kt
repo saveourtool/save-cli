@@ -26,7 +26,7 @@ fun TestConfig.processInPlace() = processInPlace {
  * @return [this] config with all descendants being evaluated (`pluginConfigs` are filled with data and merged with parents)
  */
 fun TestConfig.processWithParentsInPlace(): TestConfig {
-    parentConfig?.processInPlace()
+    parentConfig?.processWithParentsInPlace()
     return processInPlace()
 }
 
