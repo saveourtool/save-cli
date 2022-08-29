@@ -79,6 +79,8 @@ you will need the following SAVE configuration:
 ```toml
 [general]
 execCmd = "./detekt"
+batchSize = 1 # (default value)
+batchSeparator  = ", " # (default value)
 description = "My suite description"
 suiteName = "DocsCheck"
 language = "Kotlin"
@@ -123,8 +125,6 @@ messageCaptureGroupEnd = 1 # (default value)
 warningTextHasColumn = true # (default value)
 warningTextHasLine = true # (default value)
 testNameRegex = ".*Test.*" # (default value)
-batchSize = 1 # (default value)
-batchSeparator  = ", " # (default value)
 linePlaceholder = "$line" # (default value)
 patternForRegexInWarning = ["{{", "}}"]
 # if true - the regex created from expected warning will be wrapped with '.*': .*warn.*.

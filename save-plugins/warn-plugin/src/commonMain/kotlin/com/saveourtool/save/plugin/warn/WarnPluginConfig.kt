@@ -8,6 +8,7 @@ import com.saveourtool.save.core.config.ExpectedWarningsFormat
 import com.saveourtool.save.core.config.TestConfigSections
 import com.saveourtool.save.core.plugin.PluginConfig
 import com.saveourtool.save.core.utils.RegexSerializer
+import com.saveourtool.save.core.utils.requirePositive
 
 import okio.Path
 import okio.Path.Companion.toPath
@@ -150,13 +151,13 @@ data class WarnPluginConfig(
         "TOO_LONG_FUNCTION"
     )
     override fun validateAndSetDefaults(): WarnPluginConfig {
-        requirePositiveIfNotNull(lineCaptureGroup)
-        requirePositiveIfNotNull(columnCaptureGroup)
-        requirePositiveIfNotNull(messageCaptureGroup)
-        requirePositiveIfNotNull(fileNameCaptureGroupOut)
-        requirePositiveIfNotNull(lineCaptureGroupOut)
-        requirePositiveIfNotNull(columnCaptureGroupOut)
-        requirePositiveIfNotNull(messageCaptureGroupOut)
+        lineCaptureGroup?.let { requirePositive("lineCaptureGroup", it) }
+        columnCaptureGroup?.let { requirePositive("columnCaptureGroup", it) }
+        messageCaptureGroup?.let { requirePositive("messageCaptureGroup", it) }
+        fileNameCaptureGroupOut?.let { requirePositive("fileNameCaptureGroupOut", it) }
+        lineCaptureGroupOut?.let { requirePositive("lineCaptureGroupOut", it) }
+        columnCaptureGroupOut?.let { requirePositive("columnCaptureGroupOut", it) }
+        messageCaptureGroupOut?.let { requirePositive("messageCaptureGroupOut", it) }
         requireValidPatternForRegexInWarning()
 
         val expectedWarningsFormat = expectedWarningsFormat ?: ExpectedWarningsFormat.IN_PLACE
@@ -207,17 +208,6 @@ data class WarnPluginConfig(
             actualWarningsFileName = actualWarningsFileName,
         ).also {
             it.configLocation = this.configLocation
-        }
-    }
-
-    private fun requirePositiveIfNotNull(value: Long?) {
-        value?.let {
-            require(value >= 0) {
-                """
-                    [Configuration Error]: All integer values in [warn] section of `$configLocation` config should be positive!
-                    Current configuration: ${this.toString().substringAfter("(").substringBefore(")")}
-                """.trimIndent()
-            }
         }
     }
 

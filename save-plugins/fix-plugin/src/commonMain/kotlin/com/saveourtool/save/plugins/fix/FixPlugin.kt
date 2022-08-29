@@ -1,6 +1,5 @@
 package com.saveourtool.save.plugins.fix
 
-import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
 import com.saveourtool.save.core.files.createRelativePathToTheRoot
@@ -21,6 +20,7 @@ import com.saveourtool.save.core.result.TestResult
 import com.saveourtool.save.core.utils.PathSerializer
 import com.saveourtool.save.core.utils.ProcessExecutionException
 import com.saveourtool.save.core.utils.ProcessTimeoutException
+import com.saveourtool.save.core.utils.singleIsInstance
 
 import io.github.petertrr.diffutils.diff
 import io.github.petertrr.diffutils.patch.ChangeDelta
@@ -67,21 +67,27 @@ class FixPlugin(
     private var tmpDirectory: Path? = null
     private lateinit var extraFlagsExtractor: ExtraFlagsExtractor
 
-    @Suppress("TOO_LONG_FUNCTION")
-    override fun handleFiles(evaluatedToolConfig: EvaluatedToolConfig, files: Sequence<TestFiles>): Sequence<TestResult> {
+    @Suppress("TOO_LONG_FUNCTION", "LongMethod")
+    override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
         testConfig.validateAndSetDefaults()
-        val fixPluginConfig = testConfig.pluginConfigs.filterIsInstance<FixPluginConfig>().single()
-        val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
+        val fixPluginConfig: FixPluginConfig = testConfig.pluginConfigs.singleIsInstance()
+        val generalConfig: GeneralConfig = testConfig.pluginConfigs.singleIsInstance()
+        val batchSize = requireNotNull(generalConfig.batchSize) {
+            "`batchSize` is not set"
+        }.toInt()
+        val batchSeparator = requireNotNull(generalConfig.batchSeparator) {
+            "`batchSeparator` is not set"
+        }
         extraFlagsExtractor = ExtraFlagsExtractor(generalConfig, fs)
 
         return files.map { it as FixTestFiles }
-            .chunked(evaluatedToolConfig.batchSize)
+            .chunked(batchSize)
             .map { chunk ->
                 val copyPaths = chunk.map { it.test }
 
                 val extraFlagsList = copyPaths.mapNotNull { path -> extraFlagsExtractor.extractExtraFlagsFrom(path) }.distinct()
                 require(extraFlagsList.size <= 1) {
-                    "Extra flags for all files in a batch should be same, but you have batchSize=${evaluatedToolConfig.batchSize}" +
+                    "Extra flags for all files in a batch should be same, but you have batchSize=$batchSize" +
                             " and there are ${extraFlagsList.size} different sets of flags inside it, namely $extraFlagsList"
                 }
                 val extraFlags = extraFlagsList.singleOrNull() ?: ExtraFlags("", "")
@@ -91,11 +97,11 @@ class FixPlugin(
                     createTestFile(test, generalConfig, fixPluginConfig) to expected
                 }
                 val testCopyNames =
-                        pathCopyMap.joinToString(separator = evaluatedToolConfig.batchSeparator) { (testCopy, _) -> testCopy.toString() }
+                        pathCopyMap.joinToString(separator = batchSeparator) { (testCopy, _) -> testCopy.toString() }
 
-                val execFlags = evaluatedToolConfig.execFlags ?: fixPluginConfig.execFlags
+                val execFlags = fixPluginConfig.execFlags
                 val execFlagsAdjusted = resolvePlaceholdersFrom(execFlags, extraFlags, testCopyNames)
-                val execCmdWithoutFlags = evaluatedToolConfig.execCmd ?: generalConfig.execCmd
+                val execCmdWithoutFlags = generalConfig.execCmd
                 val execCmd = "$execCmdWithoutFlags $execFlagsAdjusted"
                 val time = generalConfig.timeOutMillis!!.times(pathMap.size)
 

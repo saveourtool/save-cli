@@ -2,9 +2,8 @@ package com.saveourtool.save.core
 
 import com.saveourtool.save.core.files.ConfigDetector
 import com.saveourtool.save.core.files.createFile
+import com.saveourtool.save.core.files.fs
 import com.saveourtool.save.createTempDir
-
-import okio.FileSystem
 
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -14,9 +13,8 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class ConfigDetectorTest {
-    private val fs = FileSystem.SYSTEM
     private val tmpDir = fs.createTempDir(ConfigDetectorTest::class.simpleName!!)
-    private val configDetector = ConfigDetector(fs)
+    private val configDetector = ConfigDetector(fs, emptyList())
 
     @Test
     fun `should detect single file`() {

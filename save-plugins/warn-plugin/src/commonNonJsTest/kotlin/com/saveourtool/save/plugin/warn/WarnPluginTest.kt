@@ -1,8 +1,8 @@
 package com.saveourtool.save.plugin.warn
 
-import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
+import com.saveourtool.save.core.files.fs
 import com.saveourtool.save.core.plugin.GeneralConfig
 import com.saveourtool.save.core.plugin.ResourceFormatException
 import com.saveourtool.save.core.result.Pass
@@ -21,7 +21,6 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class WarnPluginTest {
-    private val fs = FileSystem.SYSTEM
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / WarnPluginTest::class.simpleName!!)
     private val catCmd = if (isCurrentOsWindows()) "type" else "cat"
     private val mockScriptFile = tmpDir / "resource"
@@ -412,7 +411,7 @@ class WarnPluginTest {
         texts: List<String>,
         warnPluginConfig: WarnPluginConfig,
         generalConfig: GeneralConfig,
-        batchSize: Int = 1,
+        batchSize: Long = 1,
         assertion: (List<TestResult>) -> Unit,
     ) {
         val config = fs.createFile(tmpDir / "save.toml")
@@ -424,11 +423,17 @@ class WarnPluginTest {
         }
 
         val results = WarnPlugin(
-            TestConfig(config, null, mutableListOf(warnPluginConfig, generalConfig), fs),
+            TestConfig(
+                config,
+                null,
+                mutableListOf(warnPluginConfig, generalConfig.copy(batchSize = batchSize)),
+                emptyList(),
+                fs
+            ),
             testFiles = emptyList(),
             fs
         )
-            .execute(EvaluatedToolConfig(null, null, batchSize, ", "))
+            .execute()
             .toList()
         assertion(results)
     }

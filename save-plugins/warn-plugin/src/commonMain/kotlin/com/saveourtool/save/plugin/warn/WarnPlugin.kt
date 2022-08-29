@@ -1,7 +1,6 @@
 package com.saveourtool.save.plugin.warn
 
 import com.saveourtool.save.core.config.ActualWarningsFormat
-import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.ExpectedWarningsFormat
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
@@ -21,6 +20,7 @@ import com.saveourtool.save.core.utils.ExecutionResult
 import com.saveourtool.save.core.utils.ProcessExecutionException
 import com.saveourtool.save.core.utils.ProcessTimeoutException
 import com.saveourtool.save.core.utils.SarifParsingException
+import com.saveourtool.save.core.utils.singleIsInstance
 import com.saveourtool.save.plugin.warn.sarif.toWarnings
 import com.saveourtool.save.plugin.warn.utils.CmdExecutorWarn
 import com.saveourtool.save.plugin.warn.utils.ResultsChecker
@@ -62,10 +62,16 @@ class WarnPlugin(
     private lateinit var extraFlagsExtractor: ExtraFlagsExtractor
     private lateinit var tmpDirName: String
 
-    override fun handleFiles(evaluatedToolConfig: EvaluatedToolConfig, files: Sequence<TestFiles>): Sequence<TestResult> {
+    override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
         testConfig.validateAndSetDefaults()
-        val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
-        val generalConfig = testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
+        val warnPluginConfig: WarnPluginConfig = testConfig.pluginConfigs.singleIsInstance()
+        val generalConfig: GeneralConfig = testConfig.pluginConfigs.singleIsInstance()
+        val batchSize = requireNotNull(generalConfig.batchSize) {
+            "`batchSize` is not set"
+        }.toInt()
+        val batchSeparator = requireNotNull(generalConfig.batchSeparator) {
+            "`batchSeparator` is not set"
+        }
         extraFlagsExtractor = ExtraFlagsExtractor(generalConfig, fs)
 
         // Special trick to handle cases when tested tool is able to process directories.
@@ -73,16 +79,16 @@ class WarnPlugin(
         // 
         // In case, when user doesn't want to use directory mode, he needs simply not to pass [wildCardInDirectoryMode] and it will be null
         return warnPluginConfig.wildCardInDirectoryMode?.let {
-            handleTestFile(files.map { it.test }.toList(), evaluatedToolConfig, warnPluginConfig, generalConfig).asSequence()
+            handleTestFile(files.map { it.test }.toList(), warnPluginConfig, generalConfig, batchSeparator).asSequence()
         } ?: run {
-            files.chunked(evaluatedToolConfig.batchSize).flatMap { chunk ->
-                handleTestFile(chunk.map { it.test }, evaluatedToolConfig, warnPluginConfig, generalConfig)
+            files.chunked(batchSize).flatMap { chunk ->
+                handleTestFile(chunk.map { it.test }, warnPluginConfig, generalConfig, batchSeparator)
             }
         }
     }
 
     override fun rawDiscoverTestFiles(resourceDirectories: Sequence<Path>): Sequence<TestFiles> {
-        val warnPluginConfig = testConfig.pluginConfigs.filterIsInstance<WarnPluginConfig>().single()
+        val warnPluginConfig: WarnPluginConfig = testConfig.pluginConfigs.singleIsInstance()
         val regex = warnPluginConfig.resourceNamePattern
         // returned sequence is a sequence of groups of size 1
         return resourceDirectories.flatMap { directory ->
@@ -109,9 +115,9 @@ class WarnPlugin(
     )
     private fun handleTestFile(
         originalPaths: List<Path>,
-        evaluatedToolConfig: EvaluatedToolConfig,
         warnPluginConfig: WarnPluginConfig,
-        generalConfig: GeneralConfig
+        generalConfig: GeneralConfig,
+        batchSeparator: String,
     ): Sequence<TestResult> {
         // extracting all warnings from test resource files
         val copyPaths: List<Path> = createTestFiles(originalPaths, warnPluginConfig)
@@ -126,9 +132,9 @@ class WarnPlugin(
             copyPaths,
             extraFlagsExtractor,
             pb,
-            evaluatedToolConfig.execCmd ?: generalConfig.execCmd,
-            evaluatedToolConfig.execFlags ?: warnPluginConfig.execFlags,
-            evaluatedToolConfig.batchSeparator,
+            generalConfig.execCmd,
+            warnPluginConfig.execFlags,
+            batchSeparator,
             warnPluginConfig,
             testConfig,
             fs,

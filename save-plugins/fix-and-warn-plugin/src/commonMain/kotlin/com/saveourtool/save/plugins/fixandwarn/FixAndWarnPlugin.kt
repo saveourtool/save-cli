@@ -1,6 +1,5 @@
 package com.saveourtool.save.plugins.fixandwarn
 
-import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.readLines
 import com.saveourtool.save.core.plugin.GeneralConfig
@@ -8,6 +7,7 @@ import com.saveourtool.save.core.plugin.Plugin
 import com.saveourtool.save.core.plugin.PluginConfig
 import com.saveourtool.save.core.result.Pass
 import com.saveourtool.save.core.result.TestResult
+import com.saveourtool.save.core.utils.singleIsInstance
 import com.saveourtool.save.plugin.warn.WarnPlugin
 import com.saveourtool.save.plugin.warn.WarnPluginConfig
 import com.saveourtool.save.plugins.fix.FixPlugin
@@ -38,16 +38,14 @@ class FixAndWarnPlugin(
 ) {
     private val fixPluginConfig: FixPluginConfig =
             testConfig.pluginConfigs
-                .filterIsInstance<FixAndWarnPluginConfig>()
-                .single()
+                .singleIsInstance<FixAndWarnPluginConfig>()
                 .fix
     private val warnPluginConfig: WarnPluginConfig =
             testConfig.pluginConfigs
-                .filterIsInstance<FixAndWarnPluginConfig>()
-                .single()
+                .singleIsInstance<FixAndWarnPluginConfig>()
                 .warn
     private val generalConfig: GeneralConfig =
-            testConfig.pluginConfigs.filterIsInstance<GeneralConfig>().single()
+            testConfig.pluginConfigs.singleIsInstance()
 
     @Suppress("MISSING_KDOC_CLASS_ELEMENTS")
     internal lateinit var fixPlugin: FixPlugin
@@ -71,10 +69,11 @@ class FixAndWarnPlugin(
             generalConfig,
             pluginConfig
         ),
+        testConfig.overridesPluginConfigs,
         fs,
     )
 
-    override fun handleFiles(evaluatedToolConfig: EvaluatedToolConfig, files: Sequence<TestFiles>): Sequence<TestResult> {
+    override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
         testConfig.validateAndSetDefaults()
         // Need to update private fields after validation
         initOrUpdateConfigs()
@@ -84,7 +83,7 @@ class FixAndWarnPlugin(
         // fixme: should be performed on copies of files
         val filesAndTheirWarningsMap = removeWarningsFromExpectedFiles(expectedFiles)
 
-        val fixTestResults = fixPlugin.handleFiles(evaluatedToolConfig, files).toList()
+        val fixTestResults = fixPlugin.handleFiles(files).toList()
 
         val (fixTestResultsPassed, fixTestResultsFailed) = fixTestResults.partition { it.status is Pass }
 
@@ -110,7 +109,7 @@ class FixAndWarnPlugin(
         // TODO: then warn plugin should look at the fix plugin output for actual warnings, and not execute command one more time.
         // TODO: However it's required changes in warn plugin logic (it's should be able to compare expected and actual warnings from different places),
         // TODO: this probably could be obtained after https://github.com/saveourtool/save/issues/164,
-        val warnTestResults = warnPlugin.handleFiles(evaluatedToolConfig, expectedFilesWithPass.map { Test(it) })
+        val warnTestResults = warnPlugin.handleFiles(expectedFilesWithPass.map { Test(it) })
 
         val fixAndWarnTestResults = fixTestResultsFailed.asSequence() + warnTestResults.map { testResult ->
             files.map { it as FixPlugin.FixTestFiles }

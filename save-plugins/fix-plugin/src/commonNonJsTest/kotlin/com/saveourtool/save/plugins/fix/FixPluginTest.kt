@@ -1,6 +1,5 @@
 package com.saveourtool.save.plugins.fix
 
-import com.saveourtool.save.core.config.EvaluatedToolConfig
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
 import com.saveourtool.save.core.files.fs
@@ -77,17 +76,22 @@ class FixPluginTest {
         val diskWithTmpDir = if (isCurrentOsWindows()) "${tmpDir.toString().substringBefore("\\").lowercase()} && " else ""
         val executionCmd = "${diskWithTmpDir}cd $tmpDir && echo Expected file >"
 
-        val fixPlugin = FixPlugin(TestConfig(config,
-            null,
-            mutableListOf(
-                FixPluginConfig(executionCmd),
-                GeneralConfig("", listOf(""), "", "")
-            ), fs),
+        val fixPlugin = FixPlugin(
+            TestConfig(
+                config,
+                null,
+                mutableListOf(
+                    FixPluginConfig(executionCmd),
+                    GeneralConfig("", 1, ", ", listOf(""), "", "")
+                ),
+                emptyList(),
+                fs
+            ),
             testFiles = emptyList(),
             fs,
             useInternalRedirections = false
         )
-        val results = fixPlugin.execute(EvaluatedToolConfig(null, null, 1, ", ")).toList()
+        val results = fixPlugin.execute().toList()
 
         assertEquals(1, results.size, "Size of results should equal number of pairs")
         val testResult = results.single()
@@ -138,18 +142,23 @@ class FixPluginTest {
 
         val fixPluginConfig = FixPluginConfig(executionCmd)
 
-        val fixPlugin = FixPlugin(TestConfig(config,
-            null,
-            mutableListOf(
-                fixPluginConfig,
-                GeneralConfig("", listOf(""), "", "")
-            ), fs),
+        val batchSeparator = if (isCurrentOsWindows()) ", " else " "
+        val fixPlugin = FixPlugin(
+            TestConfig(
+                config,
+                null,
+                mutableListOf(
+                    fixPluginConfig,
+                    GeneralConfig("", 2, batchSeparator, listOf(""), "", "")
+                ),
+                emptyList(),
+                fs
+            ),
             testFiles = emptyList(),
             fs,
             useInternalRedirections = false
         )
-        val batchSeparator = if (isCurrentOsWindows()) ", " else " "
-        val results = fixPlugin.execute(EvaluatedToolConfig(null, null, 2, batchSeparator)).toList()
+        val results = fixPlugin.execute().toList()
 
         // We call ProcessBuilder ourselves, because the command ">" does not work for the list of files
         ProcessBuilder(false, fs).exec("echo Expected file > $testFile2", "", null, 10_000L)
@@ -167,7 +176,13 @@ class FixPluginTest {
     }
 
     internal fun discoverFilePairs() = FixPlugin(
-        TestConfig(tmpDir / "save.toml", null, mutableListOf(FixPluginConfig("")), fs),
+        TestConfig(
+            tmpDir / "save.toml",
+            null,
+            mutableListOf(FixPluginConfig("")),
+            emptyList(),
+            fs
+        ),
         testFiles = emptyList(),
         fs,
         useInternalRedirections = false

@@ -5,6 +5,7 @@ import com.saveourtool.save.core.config.isSaveTomlConfig
 import com.saveourtool.save.core.logging.logDebug
 import com.saveourtool.save.core.logging.logError
 import com.saveourtool.save.core.logging.logTrace
+import com.saveourtool.save.core.plugin.PluginConfig
 
 import okio.FileSystem
 import okio.Path
@@ -12,9 +13,12 @@ import okio.Path
 /**
  * A class that is capable of discovering config files hierarchy.
  */
-class ConfigDetector(private val fs: FileSystem) {
+class ConfigDetector(
+    private val fs: FileSystem,
+    private val overridesPluginConfigs: List<PluginConfig>,
+) {
     /**
-     * Try to create SAVE config file from [file].
+     * Try to create SAVE config file from [testConfig].
      *
      * @param testConfig - testing configuration (save.toml) from which SAVE config file should be built
      * @return [TestConfig] or null if no suitable config file has been found.
@@ -61,6 +65,7 @@ class ConfigDetector(private val fs: FileSystem) {
                         TestConfig(
                             path,
                             parentConfig,
+                            overridesPluginConfigs = overridesPluginConfigs,
                             fs = fs,
                         )
                     )
@@ -111,6 +116,7 @@ class ConfigDetector(private val fs: FileSystem) {
         return TestConfig(
             file,
             parentConfig,
+            overridesPluginConfigs = overridesPluginConfigs,
             fs = fs,
         )
     }
