@@ -29,7 +29,8 @@ class ExtraFlagsExtractor(private val generalConfig: GeneralConfig,
      * @return [ExtraFlags] or null if no match occurred
      */
     internal fun extractExtraFlagsFrom(line: String) = line
-        .split(",", ", ")
+        .splitByNonEscaped(',')
+        .map { it.replace("\\,", ",") }
         .associate { part ->
             val pair = part.split("=", limit = 2).map {
                 it.replace("\\=", "=")
@@ -94,4 +95,23 @@ fun resolvePlaceholdersFrom(
                 plus(" $fileNames")
             }
         }
+}
+
+/**
+ * Split [this] string by [delimiter] unless it's prepended by `\`.
+ */
+internal fun String.splitByNonEscaped(delimiter: Char): List<String> {
+    val indicesToSplit = mapIndexed { index, c -> index to c }
+        .filter { (index, c) ->
+            c == delimiter && (index == 0 || get(index - 1) != '\\')
+        }
+        .map { (index, _) -> index }
+    val result = mutableListOf<String>()
+    var currentOffset = 0
+    indicesToSplit.forEach {
+        result.add(substring(currentOffset, it))
+        currentOffset = it + 1
+    }
+    result.add(substring(currentOffset, length))
+    return result
 }
