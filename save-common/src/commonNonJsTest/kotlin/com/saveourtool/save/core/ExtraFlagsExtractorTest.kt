@@ -5,12 +5,17 @@ import com.saveourtool.save.core.plugin.ExtraFlagsExtractor
 import com.saveourtool.save.core.plugin.GeneralConfig
 import com.saveourtool.save.core.plugin.filterAndJoinBy
 import com.saveourtool.save.core.plugin.resolvePlaceholdersFrom
+import com.saveourtool.save.core.plugin.splitByNonEscaped
 
 import okio.fakefilesystem.FakeFileSystem
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@Suppress(
+    "TOO_LONG_FUNCTION",
+    "WRONG_INDENTATION",  // issue in diktat
+)
 class ExtraFlagsExtractorTest {
     @Test
     fun `basic test`() {
@@ -26,6 +31,9 @@ class ExtraFlagsExtractorTest {
             "Unparseable nonsense" to ExtraFlags.empty,
             "args1=--flag --opt,args2=-debug --flag2" to ExtraFlags("--flag --opt", "-debug --flag2"),
             "args1=--flag\\=value,args2=--foo=bar" to ExtraFlags("--flag=value", "--foo=bar"),
+            "args1=option1\\,option2,args2=option3\\,option4" to ExtraFlags("option1,option2", "option3,option4"),
+            "args1=option1\\,option2" to ExtraFlags("option1,option2", ""),
+            "args2=option3\\,option4" to ExtraFlags("", "option3,option4"),
         )
             .forEach { (line, extraFlags) ->
                 assertEquals(extraFlags, extraFlagsExtractor.extractExtraFlagsFrom(line))
@@ -104,6 +112,52 @@ class ExtraFlagsExtractorTest {
                 "command --flag --another-flag",
                 "another-cmd --flag"
             )
+        )
+
+        checkMultilineDirectives(
+            Regex("""// RUN: (.*([^\\]=)?.*)\\?"""),
+            listOf(
+                "// RUN: command --flag=option\\,\\",
+                "// RUN: another-option --another-flag",
+                "// RUN: another-cmd\\=\\",
+                "// RUN: --flag=option\\,another-option",
+            ),
+            listOf(
+                "command --flag=option\\,another-option --another-flag",
+                "another-cmd\\=--flag=option\\,another-option"
+            )
+        )
+    }
+
+    @Test
+    fun `test for splitByNonEscaped`() {
+        assertEquals(
+            listOf("this string\\, not split"),
+            "this string\\, not split".splitByNonEscaped(','),
+        )
+        assertEquals(
+            listOf("this string", " but split"),
+            "this string, but split".splitByNonEscaped(','),
+        )
+        assertEquals(
+            listOf("this string\\, not split", " but here - it's split"),
+            "this string\\, not split, but here - it's split".splitByNonEscaped(','),
+        )
+        assertEquals(
+            listOf("", ""),
+            ",".splitByNonEscaped(','),
+        )
+        assertEquals(
+            listOf("", "text"),
+            ",text".splitByNonEscaped(','),
+        )
+        assertEquals(
+            listOf("\\,"),
+            "\\,".splitByNonEscaped(','),
+        )
+        assertEquals(
+            listOf("\\,text"),
+            "\\,text".splitByNonEscaped(','),
         )
     }
 
