@@ -71,6 +71,29 @@ internal fun List<String>.filterAndJoinBy(regex: Regex, ending: Char): List<Stri
     }
 
 /**
+ * Split [this] string by [delimiter] unless it's prepended by `\`.
+ *
+ * @param delimiter
+ * @return list of string parts
+ */
+@Suppress("IDENTIFIER_LENGTH")
+internal fun String.splitByNonEscaped(delimiter: Char): List<String> {
+    val indicesToSplit = mapIndexed { index, c -> index to c }
+        .filter { (index, c) ->
+            c == delimiter && (index == 0 || get(index - 1) != '\\')
+        }
+        .map { (index, _) -> index }
+    val result: MutableList<String> = mutableListOf()
+    var currentOffset = 0
+    indicesToSplit.forEach {
+        result.add(substring(currentOffset, it))
+        currentOffset = it + 1
+    }
+    result.add(substring(currentOffset, length))
+    return result
+}
+
+/**
  * Substitute placeholders in `this.execFlags` with values from provided arguments
  *
  * @param execFlags a command that will be executed to check resources and emit warnings
@@ -95,23 +118,4 @@ fun resolvePlaceholdersFrom(
                 plus(" $fileNames")
             }
         }
-}
-
-/**
- * Split [this] string by [delimiter] unless it's prepended by `\`.
- */
-internal fun String.splitByNonEscaped(delimiter: Char): List<String> {
-    val indicesToSplit = mapIndexed { index, c -> index to c }
-        .filter { (index, c) ->
-            c == delimiter && (index == 0 || get(index - 1) != '\\')
-        }
-        .map { (index, _) -> index }
-    val result = mutableListOf<String>()
-    var currentOffset = 0
-    indicesToSplit.forEach {
-        result.add(substring(currentOffset, it))
-        currentOffset = it + 1
-    }
-    result.add(substring(currentOffset, length))
-    return result
 }

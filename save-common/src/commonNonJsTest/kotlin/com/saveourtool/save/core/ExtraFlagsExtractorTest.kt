@@ -1,12 +1,21 @@
 package com.saveourtool.save.core
 
-import com.saveourtool.save.core.plugin.*
+import com.saveourtool.save.core.plugin.ExtraFlags
+import com.saveourtool.save.core.plugin.ExtraFlagsExtractor
+import com.saveourtool.save.core.plugin.GeneralConfig
+import com.saveourtool.save.core.plugin.filterAndJoinBy
+import com.saveourtool.save.core.plugin.resolvePlaceholdersFrom
+import com.saveourtool.save.core.plugin.splitByNonEscaped
 
 import okio.fakefilesystem.FakeFileSystem
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@Suppress(
+    "TOO_LONG_FUNCTION",
+    "WRONG_INDENTATION",  // issue in diktat
+)
 class ExtraFlagsExtractorTest {
     @Test
     fun `basic test`() {
