@@ -131,6 +131,9 @@ patternForRegexInWarning = ["{{", "}}"]
 partialWarnTextMatch = false # (default value)
 # if not set than stdout will be used as result of warn plugin execution
 testToolResFileOutput = "result.out" # (no default value is set)
+
+# Extra flags will be extracted from a line that mathces this regex if it's present in a file
+runConfigPattern = "# RUN: (.+)"
 ```
 
 When executed from project root (where `save.propertes` is located), SAVE will cd to `rootDir` and discover all files
