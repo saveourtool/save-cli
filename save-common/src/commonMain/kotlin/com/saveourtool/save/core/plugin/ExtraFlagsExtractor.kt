@@ -29,7 +29,8 @@ class ExtraFlagsExtractor(private val generalConfig: GeneralConfig,
      * @return [ExtraFlags] or null if no match occurred
      */
     internal fun extractExtraFlagsFrom(line: String) = line
-        .split(",", ", ")
+        .splitByNonEscaped(',')
+        .map { it.replace("\\,", ",") }
         .associate { part ->
             val pair = part.split("=", limit = 2).map {
                 it.replace("\\=", "=")
@@ -68,6 +69,29 @@ internal fun List<String>.filterAndJoinBy(regex: Regex, ending: Char): List<Stri
             acc
         }
     }
+
+/**
+ * Split [this] string by [delimiter] unless it's prepended by `\`.
+ *
+ * @param delimiter
+ * @return list of string parts
+ */
+@Suppress("IDENTIFIER_LENGTH")
+internal fun String.splitByNonEscaped(delimiter: Char): List<String> {
+    val indicesToSplit = mapIndexed { index, c -> index to c }
+        .filter { (index, c) ->
+            c == delimiter && (index == 0 || get(index - 1) != '\\')
+        }
+        .map { (index, _) -> index }
+    val result: MutableList<String> = mutableListOf()
+    var currentOffset = 0
+    indicesToSplit.forEach {
+        result.add(substring(currentOffset, it))
+        currentOffset = it + 1
+    }
+    result.add(substring(currentOffset, length))
+    return result
+}
 
 /**
  * Substitute placeholders in `this.execFlags` with values from provided arguments
