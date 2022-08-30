@@ -56,12 +56,12 @@
       "default" : null
     },
     "language" : {
-      "argType" : "ArgType.Choice<LanguageType>()",
-      "kotlinType": "com.saveourtool.save.core.config.LanguageType",
+      "argType" : "ArgType.String",
+      "kotlinType": "kotlin.String",
       "fullName" : "language",
       "shortName" : "l",
       "description" : "Language that you are developing analyzer for",
-      "default" : "LanguageType.UNDEFINED"
+      "default" : null
     },
     "resultOutput" : {
       "argType" : "ArgType.Choice<OutputStreamType>()",
