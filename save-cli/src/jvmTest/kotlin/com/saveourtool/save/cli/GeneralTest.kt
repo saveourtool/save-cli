@@ -12,6 +12,7 @@ import com.saveourtool.save.plugins.fix.FixPlugin
 import com.saveourtool.save.reporter.Report
 import com.saveourtool.save.reporter.json.JsonReporter
 
+import okio.FileNotFoundException
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
@@ -96,7 +97,17 @@ class GeneralTest {
         val saveBinName = if (isCurrentOsWindows()) "save.exe" else "save"
         val destination = workingDir.toPath() / saveBinName
         // Copy latest version of save into examples
-        fs.copy(actualSaveBinary, destination)
+        try {
+            fs.copy(actualSaveBinary, destination)
+        } catch (fnfe: FileNotFoundException) {
+            /*
+             * Ignore a potential FNFE on Windows (the destination .exe file may
+             * get locked by an external process).
+             */
+            if (!isCurrentOsWindows()) {
+                throw fnfe
+            }
+        }
         assertTrue(fs.exists(destination))
 
         // Check for existence of diktat and ktlint
