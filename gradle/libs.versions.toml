@@ -10,6 +10,7 @@ junit = "5.9.1"
 ktoml = "0.3.0"
 multiplatform-diff = "0.4.0"
 kotlinpoet = "1.12.0"
+sarif4k = "0.3.0"
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
@@ -33,3 +34,4 @@ ktoml-file = { module = "com.akuleshov7:ktoml-file", version.ref = "ktoml" }
 multiplatform-diff = { module = "io.github.petertrr:kotlin-multiplatform-diff", version.ref = "multiplatform-diff" }
 square-kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
 diktat-gradle-plugin = { module = "org.cqfn.diktat:diktat-gradle-plugin", version.ref = "diktat" }
+sarif4k = { module = "io.github.detekt.sarif4k:sarif4k", version.ref = "sarif4k" }

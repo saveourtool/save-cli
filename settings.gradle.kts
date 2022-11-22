@@ -8,21 +8,4 @@ include("save-plugins:warn-plugin")
 include("save-reporters")
 include("save-common-test")
 
-dependencyResolutionManagement {
-    repositories {
-        mavenCentral()
-        maven {
-            url = uri("https://maven.pkg.github.com/saveourtool/sarif4k")
-            val gprUser: String? by settings
-            val gprKey: String? by settings
-            credentials {
-                username = gprUser
-                password = gprKey
-            }
-            content {
-                includeGroup("io.github.detekt.sarif4k")
-            }
-        }
-    }
-}
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
