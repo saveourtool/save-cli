@@ -8,4 +8,9 @@ include("save-plugins:warn-plugin")
 include("save-reporters")
 include("save-common-test")
 
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+    }
+}
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
