@@ -7,8 +7,8 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(projects.saveCommon)
-                implementation(libs.kotlinx.serialization.core)
-                implementation("io.github.detekt.sarif4k:sarif4k:0.1.0-SNAPSHOT")
+                implementation(libs.kotlinx.serialization.json)
+                implementation(libs.sarif4k)
             }
         }
     }
