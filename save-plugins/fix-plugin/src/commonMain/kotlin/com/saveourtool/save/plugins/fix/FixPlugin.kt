@@ -62,8 +62,8 @@ class FixPlugin(
         newTag = { _, start -> if (start) "<" else ">" },
     )
 
-    // fixme: consider refactoring under https://github.com/saveourtool/save/issues/156
-    // fixme: should not be common for a class instance during https://github.com/saveourtool/save/issues/28
+    // fixme: consider refactoring under https://github.com/saveourtool/save-cli/issues/156
+    // fixme: should not be common for a class instance during https://github.com/saveourtool/save-cli/issues/28
     private var tmpDirectory: Path? = null
     private lateinit var extraFlagsExtractor: ExtraFlagsExtractor
 
@@ -94,7 +94,7 @@ class FixPlugin(
 
                 val pathMap = chunk.map { it.test to it.expected }
                 val pathCopyMap = pathMap.map { (test, expected) ->
-                    createTestFile(test, generalConfig, fixPluginConfig) to expected
+                    createCopyOfTestFile(test, generalConfig, fixPluginConfig) to expected
                 }
                 val testCopyNames =
                         pathCopyMap.joinToString(separator = batchSeparator) { (testCopy, _) -> testCopy.toString() }
@@ -160,7 +160,7 @@ class FixPlugin(
                 }
             }
 
-    private fun createTestFile(
+    private fun createCopyOfTestFile(
         path: Path,
         generalConfig: GeneralConfig,
         fixPluginConfig: FixPluginConfig,
