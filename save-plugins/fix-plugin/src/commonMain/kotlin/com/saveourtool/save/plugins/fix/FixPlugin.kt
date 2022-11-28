@@ -67,6 +67,10 @@ class FixPlugin(
     private var tmpDirectory: Path? = null
     private lateinit var extraFlagsExtractor: ExtraFlagsExtractor
 
+    // TODO:
+    // 1) Add expectedFixFormat: file or sarif
+    // 2) If sarif -- apply fixes from it to copy of test file
+    // 3) Compare with expected file
     @Suppress("TOO_LONG_FUNCTION", "LongMethod")
     override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
         testConfig.validateAndSetDefaults()

@@ -2,6 +2,7 @@
 
 package com.saveourtool.save.plugins.fix
 
+import com.saveourtool.save.core.config.ActualFixFormat
 import com.saveourtool.save.core.config.TestConfigSections
 import com.saveourtool.save.core.plugin.PluginConfig
 import com.saveourtool.save.core.utils.RegexSerializer
@@ -28,7 +29,8 @@ data class FixPluginConfig(
     val execFlags: String? = null,
     val resourceNameTestSuffix: String? = null,
     val resourceNameExpectedSuffix: String? = null,
-    val ignoreLines: MutableList<String>? = null
+    val ignoreLines: MutableList<String>? = null,
+    val actualFixFormat: ActualFixFormat? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.FIX
 
@@ -62,7 +64,8 @@ data class FixPluginConfig(
             this.resourceNameExpectedSuffix ?: other.resourceNameExpectedSuffix,
             other.ignoreLines?.let {
                 this.ignoreLines?.let { other.ignoreLines.union(this.ignoreLines) } ?: other.ignoreLines
-            }?.toMutableList() ?: this.ignoreLines
+            }?.toMutableList() ?: this.ignoreLines,
+            this.actualFixFormat ?: other.actualFixFormat
         ).also {
             it.configLocation = this.configLocation
         }
@@ -73,7 +76,8 @@ data class FixPluginConfig(
         execFlags ?: "",
         resourceNameTest,
         resourceNameExpected,
-        ignoreLines
+        ignoreLines,
+        actualFixFormat ?: ActualFixFormat.PLAIN
     ).also {
         it.configLocation = this.configLocation
     }
