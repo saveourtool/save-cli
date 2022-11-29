@@ -92,18 +92,7 @@ class FixAndWarnPlugin(
         }
 
         // Fill back original data with warnings
-        filesAndTheirWarningsMap.forEach { (filePath, warningsList) ->
-            val fileData = fs.readLines(filePath) as MutableList
-            // Append warnings into appropriate place
-            warningsList.forEach { (line, warningMsg) ->
-                fileData.add(line, warningMsg)
-            }
-            fs.write(filePath) {
-                fileData.forEach {
-                    write((it + "\n").encodeToByteArray())
-                }
-            }
-        }
+        restoreWarningsIntoExpectedFiles(filesAndTheirWarningsMap)
 
         // TODO: If we receive just one command for execution, and want to avoid extra executions
         // TODO: then warn plugin should look at the fix plugin output for actual warnings, and not execute command one more time.
@@ -136,7 +125,7 @@ class FixAndWarnPlugin(
     /**
      * Remove warnings from the given files, which satisfy pattern from <warn> plugin and save data about warnings, which were deleted
      *
-     * @files files to be modified
+     * @param files files to be modified
      *
      * @return map of files and theirs list of warnings
      */
@@ -155,6 +144,26 @@ class FixAndWarnPlugin(
             writeDataWithoutWarnings(file, filesAndTheirWarningsMap, fileDataWithoutWarnings)
         }
         return filesAndTheirWarningsMap
+    }
+
+    /**
+     * Remove warnings into the given files, which were deleted in aim to provide clear fix changes by FixPlugin
+     *
+     * @param filesAndTheirWarningsMap map of files with corresponding warnings list, which need to be restored
+     */
+    private fun restoreWarningsIntoExpectedFiles(filesAndTheirWarningsMap: MutableMap<Path, WarningsList>) {
+        filesAndTheirWarningsMap.forEach { (filePath, warningsList) ->
+            val fileData = fs.readLines(filePath) as MutableList
+            // Append warnings into appropriate place
+            warningsList.forEach { (line, warningMsg) ->
+                fileData.add(line, warningMsg)
+            }
+            fs.write(filePath) {
+                fileData.forEach {
+                    write((it + "\n").encodeToByteArray())
+                }
+            }
+        }
     }
 
     private fun writeDataWithoutWarnings(

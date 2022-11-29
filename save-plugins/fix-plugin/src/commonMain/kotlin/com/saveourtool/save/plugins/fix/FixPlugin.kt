@@ -1,5 +1,6 @@
 package com.saveourtool.save.plugins.fix
 
+import com.saveourtool.save.core.config.ActualFixFormat
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
 import com.saveourtool.save.core.files.createRelativePathToTheRoot
@@ -67,10 +68,6 @@ class FixPlugin(
     private var tmpDirectory: Path? = null
     private lateinit var extraFlagsExtractor: ExtraFlagsExtractor
 
-    // TODO:
-    // 1) Add expectedFixFormat: file or sarif
-    // 2) If sarif -- apply fixes from it to copy of test file
-    // 3) Compare with expected file
     @Suppress("TOO_LONG_FUNCTION", "LongMethod")
     override fun handleFiles(files: Sequence<TestFiles>): Sequence<TestResult> {
         testConfig.validateAndSetDefaults()
@@ -108,6 +105,10 @@ class FixPlugin(
                 val execCmdWithoutFlags = generalConfig.execCmd
                 val execCmd = "$execCmdWithoutFlags $execFlagsAdjusted"
                 val time = generalConfig.timeOutMillis!!.times(pathMap.size)
+
+                if (fixPluginConfig.actualFixFormat == ActualFixFormat.SARIF) {
+                    // TODO: Apply fixes from sarif file on `testCopyNames` here
+                }
 
                 val executionResult = try {
                     pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time)
