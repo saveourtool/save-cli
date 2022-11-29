@@ -106,10 +106,6 @@ class FixPlugin(
                 val execCmd = "$execCmdWithoutFlags $execFlagsAdjusted"
                 val time = generalConfig.timeOutMillis!!.times(pathMap.size)
 
-                if (fixPluginConfig.actualFixFormat == ActualFixFormat.SARIF) {
-                    // TODO: Apply fixes from sarif file on `testCopyNames` here
-                }
-
                 val executionResult = try {
                     pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time)
                 } catch (ex: ProcessTimeoutException) {
@@ -121,6 +117,13 @@ class FixPlugin(
 
                 val stdout = executionResult.stdout
                 val stderr = executionResult.stderr
+
+                // In this case fixes weren't performed by tool into the test files directly,
+                // instead, there was created sarif file with list of fixes, which we will apply ourselves
+                if (fixPluginConfig.actualFixFormat == ActualFixFormat.SARIF) {
+                    // TODO: Apply fixes from sarif file on `testCopyNames` here
+                    // applySarifFixesToFiles(fixPluginConfig.actualFixSarifFileName, testCopyNames)
+                }
 
                 pathCopyMap.map { (testCopy, expected) ->
                     val fixedLines = fs.readLines(testCopy)

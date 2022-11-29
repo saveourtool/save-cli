@@ -5,10 +5,10 @@
 package com.saveourtool.save.core.config
 
 /**
- * Possible formats of actual (i.e. produces by the tool) warnings
+ * Possible formats of actual set of fixes, provided by user
  */
 enum class ActualFixFormat {
-    PLAIN,
+    IN_PLACE,
     SARIF,
     ;
 }

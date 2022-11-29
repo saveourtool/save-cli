@@ -31,6 +31,7 @@ data class FixPluginConfig(
     val resourceNameExpectedSuffix: String? = null,
     val ignoreLines: MutableList<String>? = null,
     val actualFixFormat: ActualFixFormat? = null,
+    val actualFixSarifFileName: String? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.FIX
 
@@ -66,6 +67,7 @@ data class FixPluginConfig(
                 this.ignoreLines?.let { other.ignoreLines.union(this.ignoreLines) } ?: other.ignoreLines
             }?.toMutableList() ?: this.ignoreLines,
             this.actualFixFormat ?: other.actualFixFormat
+            this.actualFixSarifFileName ?: other.actualFixSarifFileName
         ).also {
             it.configLocation = this.configLocation
         }
@@ -77,7 +79,8 @@ data class FixPluginConfig(
         resourceNameTest,
         resourceNameExpected,
         ignoreLines,
-        actualFixFormat ?: ActualFixFormat.PLAIN
+        actualFixFormat ?: ActualFixFormat.IN_PLACE,
+        actualFixSarifFileName ?: "save-fixes.sarif",
     ).also {
         it.configLocation = this.configLocation
     }
