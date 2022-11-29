@@ -126,7 +126,6 @@ class FixAndWarnPlugin(
      * Remove warnings from the given files, which satisfy pattern from <warn> plugin and save data about warnings, which were deleted
      *
      * @param files files to be modified
-     *
      * @return map of files and theirs list of warnings
      */
     private fun removeWarningsFromExpectedFiles(files: Sequence<Path>): MutableMap<Path, WarningsList> {

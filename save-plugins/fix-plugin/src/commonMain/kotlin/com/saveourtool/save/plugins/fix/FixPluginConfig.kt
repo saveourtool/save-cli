@@ -23,6 +23,8 @@ import kotlinx.serialization.UseSerializers
  * @property resourceNameTestSuffix suffix name of the test file.
  * @property resourceNameExpectedSuffix suffix name of the expected file.
  * @property ignoreLines mutable list of patterns that later will be used to filter lines in test file
+ * @property actualFixFormat format for type for fixes: they could be done in place or provided via Sarif file
+ * @property actualFixSarifFileName name of sarif file with list of fixes, that were made by tool
  */
 @Serializable
 data class FixPluginConfig(
@@ -66,7 +68,7 @@ data class FixPluginConfig(
             other.ignoreLines?.let {
                 this.ignoreLines?.let { other.ignoreLines.union(this.ignoreLines) } ?: other.ignoreLines
             }?.toMutableList() ?: this.ignoreLines,
-            this.actualFixFormat ?: other.actualFixFormat
+            this.actualFixFormat ?: other.actualFixFormat,
             this.actualFixSarifFileName ?: other.actualFixSarifFileName
         ).also {
             it.configLocation = this.configLocation

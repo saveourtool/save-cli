@@ -2,6 +2,8 @@
  * Classes that describe format of expected and actual fixes
  */
 
+@file:Suppress("FILE_NAME_MATCH_CLASS")
+
 package com.saveourtool.save.core.config
 
 /**
