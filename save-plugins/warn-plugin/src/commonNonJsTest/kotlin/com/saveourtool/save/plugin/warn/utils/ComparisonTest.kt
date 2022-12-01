@@ -46,7 +46,7 @@ class ComparisonTest {
             )
         )
         val warnPluginConfig = WarnPluginConfig(exactWarningsMatch = false, patternForRegexInWarning = listOf("{{", "}}"))
-        val config = fs.createFile(tmpDir / "save.toml")
+        fs.createFile(tmpDir / "save.toml")
 
         val results = ResultsChecker(
             expectedWarningsMap, actualWarningsMap, warnPluginConfig
