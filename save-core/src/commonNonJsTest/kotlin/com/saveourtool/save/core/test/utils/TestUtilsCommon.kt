@@ -17,6 +17,7 @@ import com.saveourtool.save.core.result.Fail
 import com.saveourtool.save.core.result.Ignored
 import com.saveourtool.save.core.result.Pass
 import com.saveourtool.save.reporter.test.TestReporter
+import io.kotest.matchers.types.shouldBeTypeOf
 
 import okio.Path
 
@@ -79,7 +80,7 @@ fun runTestsWithDiktat(
             if (test.status is Ignored) {
                 assertEquals(Ignored("Excluded by configuration"), test.status)
             } else {
-                assertTrue(test.status is Pass)
+                test.status.shouldBeTypeOf<Pass>()
             }
         }
     }

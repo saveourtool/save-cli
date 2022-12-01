@@ -1,10 +1,11 @@
 package com.saveourtool.save.core.integration
 
 import com.saveourtool.save.core.test.utils.runTestsWithDiktat
+import io.kotest.matchers.collections.exist
+import io.kotest.matchers.shouldNot
 
 import kotlin.test.Ignore
 import kotlin.test.Test
-import kotlin.test.assertTrue
 
 @Ignore  // https://github.com/saveourtool/save-cli/issues/402
 class WarnDirTest {
@@ -31,8 +32,8 @@ class WarnDirTest {
     @Test
     fun `execute warn plugin on root directory`() {
         val reporter = runTestsWithDiktat(listOf("warn-dir"), 6)
-        reporter.results.forEach { testResult ->
-            assertTrue(!testResult.debugInfo!!.execCmd!!.contains("chapter"))
+        reporter.results shouldNot exist { testResult ->
+            testResult.debugInfo!!.execCmd!!.contains("chapter")
         }
     }
 }
