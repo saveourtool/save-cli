@@ -72,6 +72,7 @@ internal fun List<String>.filterAndJoinBy(regex: Regex, ending: Char): List<Stri
 
 /**
  * Split [this] string by [delimiter] unless it's prepended by `\`.
+ * fixme: allow escaping of slashes, i.e. `\\,` shouldn't lead to splitting.
  *
  * @param delimiter
  * @return list of string parts

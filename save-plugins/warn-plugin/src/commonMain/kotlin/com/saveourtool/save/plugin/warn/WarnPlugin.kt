@@ -79,7 +79,7 @@ class WarnPlugin(
         // 
         // In case, when user doesn't want to use directory mode, he needs simply not to pass [wildCardInDirectoryMode] and it will be null
         return warnPluginConfig.wildCardInDirectoryMode?.let {
-            handleTestFile(files.map { it.test }.toList(), warnPluginConfig, generalConfig, batchSeparator).asSequence()
+            handleTestFile(files.map { it.test }.toList(), warnPluginConfig, generalConfig, batchSeparator)
         } ?: run {
             files.chunked(batchSize).flatMap { chunk ->
                 handleTestFile(chunk.map { it.test }, warnPluginConfig, generalConfig, batchSeparator)
