@@ -2,6 +2,7 @@
 
 package com.saveourtool.save.plugins.fix
 
+import com.saveourtool.save.core.config.ActualFixFormat
 import com.saveourtool.save.core.config.TestConfigSections
 import com.saveourtool.save.core.plugin.PluginConfig
 import com.saveourtool.save.core.utils.RegexSerializer
@@ -22,13 +23,17 @@ import kotlinx.serialization.UseSerializers
  * @property resourceNameTestSuffix suffix name of the test file.
  * @property resourceNameExpectedSuffix suffix name of the expected file.
  * @property ignoreLines mutable list of patterns that later will be used to filter lines in test file
+ * @property actualFixFormat format for type for fixes: they could be done in place or provided via Sarif file
+ * @property actualFixSarifFileName name of sarif file with list of fixes, that were made by tool
  */
 @Serializable
 data class FixPluginConfig(
     val execFlags: String? = null,
     val resourceNameTestSuffix: String? = null,
     val resourceNameExpectedSuffix: String? = null,
-    val ignoreLines: MutableList<String>? = null
+    val ignoreLines: MutableList<String>? = null,
+    val actualFixFormat: ActualFixFormat? = null,
+    val actualFixSarifFileName: String? = null,
 ) : PluginConfig {
     override val type = TestConfigSections.FIX
 
@@ -62,7 +67,9 @@ data class FixPluginConfig(
             this.resourceNameExpectedSuffix ?: other.resourceNameExpectedSuffix,
             other.ignoreLines?.let {
                 this.ignoreLines?.let { other.ignoreLines.union(this.ignoreLines) } ?: other.ignoreLines
-            }?.toMutableList() ?: this.ignoreLines
+            }?.toMutableList() ?: this.ignoreLines,
+            this.actualFixFormat ?: other.actualFixFormat,
+            this.actualFixSarifFileName ?: other.actualFixSarifFileName
         ).also {
             it.configLocation = this.configLocation
         }
@@ -73,7 +80,9 @@ data class FixPluginConfig(
         execFlags ?: "",
         resourceNameTest,
         resourceNameExpected,
-        ignoreLines
+        ignoreLines,
+        actualFixFormat ?: ActualFixFormat.IN_PLACE,
+        actualFixSarifFileName ?: "save-fixes.sarif",
     ).also {
         it.configLocation = this.configLocation
     }

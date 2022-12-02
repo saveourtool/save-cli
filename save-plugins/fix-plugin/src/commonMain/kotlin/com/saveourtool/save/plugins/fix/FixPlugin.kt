@@ -1,5 +1,6 @@
 package com.saveourtool.save.plugins.fix
 
+import com.saveourtool.save.core.config.ActualFixFormat
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
 import com.saveourtool.save.core.files.createRelativePathToTheRoot
@@ -62,8 +63,8 @@ class FixPlugin(
         newTag = { _, start -> if (start) "<" else ">" },
     )
 
-    // fixme: consider refactoring under https://github.com/saveourtool/save/issues/156
-    // fixme: should not be common for a class instance during https://github.com/saveourtool/save/issues/28
+    // fixme: consider refactoring under https://github.com/saveourtool/save-cli/issues/156
+    // fixme: should not be common for a class instance during https://github.com/saveourtool/save-cli/issues/28
     private var tmpDirectory: Path? = null
     private lateinit var extraFlagsExtractor: ExtraFlagsExtractor
 
@@ -94,7 +95,7 @@ class FixPlugin(
 
                 val pathMap = chunk.map { it.test to it.expected }
                 val pathCopyMap = pathMap.map { (test, expected) ->
-                    createTestFile(test, generalConfig, fixPluginConfig) to expected
+                    createCopyOfTestFile(test, generalConfig, fixPluginConfig) to expected
                 }
                 val testCopyNames =
                         pathCopyMap.joinToString(separator = batchSeparator) { (testCopy, _) -> testCopy.toString() }
@@ -116,6 +117,13 @@ class FixPlugin(
 
                 val stdout = executionResult.stdout
                 val stderr = executionResult.stderr
+
+                // In this case fixes weren't performed by tool into the test files directly,
+                // instead, there was created sarif file with list of fixes, which we will apply ourselves
+                if (fixPluginConfig.actualFixFormat == ActualFixFormat.SARIF) {
+                    // TODO: Apply fixes from sarif file on `testCopyNames` here
+                    // applySarifFixesToFiles(fixPluginConfig.actualFixSarifFileName, testCopyNames)
+                }
 
                 pathCopyMap.map { (testCopy, expected) ->
                     val fixedLines = fs.readLines(testCopy)
@@ -160,7 +168,7 @@ class FixPlugin(
                 }
             }
 
-    private fun createTestFile(
+    private fun createCopyOfTestFile(
         path: Path,
         generalConfig: GeneralConfig,
         fixPluginConfig: FixPluginConfig,
