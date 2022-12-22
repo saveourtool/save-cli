@@ -16,7 +16,7 @@
       ],
       "excludePackagePatterns": [
         "^org\\.jetbrains\\.kotlin[.:]",
-        "^org\\.cqfn\\.diktat\\:diktat-gradle-plugin"
+        "^org\\.cqfn\\.diktat[.:]diktat-gradle-plugin"
       ],
       "matchUpdateTypes": [
         "minor",
@@ -28,7 +28,7 @@
     {
       "managers": ["gradle"],
       "matchPackagePatterns": [
-        "^org\\.cqfn\\.diktat\\:diktat-gradle-plugin"
+        "^org\\.cqfn\\.diktat[.:]diktat-gradle-plugin"
       ],
       "allowedVersions": "!/1\\.2\\.4\\.2/",
       "groupName": "all non-major dependencies (except core Kotlin)",
