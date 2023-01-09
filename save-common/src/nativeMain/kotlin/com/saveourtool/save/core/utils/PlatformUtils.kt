@@ -18,35 +18,35 @@ import platform.posix.stdout
  * Atomic values
  */
 actual class AtomicInt actual constructor(value: Int) {
-    private val atomicInt = kotlin.native.concurrent.AtomicInt(value)
+    private val holder = kotlin.native.concurrent.AtomicInt(value)
 
     /**
      * @return value
      */
-    actual fun get(): Int = atomicInt.value
+    actual fun get(): Int = holder.value
 
     /**
      * @param delta increments the value_ by delta
      * @return the new value
      */
-    actual fun addAndGet(delta: Int): Int = atomicInt.addAndGet(delta)
+    actual fun addAndGet(delta: Int): Int = holder.addAndGet(delta)
 }
 
 @Suppress("FUNCTION_BOOLEAN_PREFIX")
 actual class AtomicBoolean actual constructor(value: Boolean) {
-    private val atomicBoolean = kotlin.native.concurrent.AtomicReference(value)
+    private val holder = kotlin.native.concurrent.AtomicReference(value)
 
     /**
      * @return value
      */
-    actual fun get(): Boolean = atomicBoolean.value
+    actual fun get(): Boolean = holder.value
 
     /**
      * @param expect expected value
      * @param update updated value
      * @return the result of the comparison
      */
-    actual fun compareAndSet(expect: Boolean, update: Boolean): Boolean = atomicBoolean.compareAndSet(expect, update)
+    actual fun compareAndSet(expect: Boolean, update: Boolean): Boolean = holder.compareAndSet(expect, update)
 }
 
 @Suppress("USE_DATA_CLASS")
