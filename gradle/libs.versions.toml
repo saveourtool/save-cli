@@ -38,5 +38,5 @@ square-kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinp
 diktat-gradle-plugin = { module = "org.cqfn.diktat:diktat-gradle-plugin", version.ref = "diktat" }
 sarif4k = { module = "io.github.detekt.sarif4k:sarif4k", version.ref = "sarif4k" }
 kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
-sarif-utils = { module = "com.saveourtool.sarif-utils:fixpatches", version.ref = "save-core" }
-sarif-utils-jvm = { module = "com.saveourtool.sarif-utils:fixpatches-jvm", version.ref = "save-core" }
+sarif-utils = { module = "com.saveourtool.sarif-utils:fixpatches", version.ref = "sarif-utils" }
+sarif-utils-jvm = { module = "com.saveourtool.sarif-utils:fixpatches-jvm", version.ref = "sarif-utils" }
