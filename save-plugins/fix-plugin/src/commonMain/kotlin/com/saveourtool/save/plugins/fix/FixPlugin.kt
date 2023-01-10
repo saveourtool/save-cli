@@ -9,6 +9,8 @@ import com.saveourtool.save.core.files.getWorkingDirectory
 import com.saveourtool.save.core.files.myDeleteRecursively
 import com.saveourtool.save.core.files.readLines
 import com.saveourtool.save.core.logging.describe
+import com.saveourtool.save.core.logging.logDebug
+import com.saveourtool.save.core.logging.logInfo
 import com.saveourtool.save.core.logging.logWarn
 import com.saveourtool.save.core.plugin.ExtraFlags
 import com.saveourtool.save.core.plugin.ExtraFlagsExtractor
@@ -20,6 +22,7 @@ import com.saveourtool.save.core.result.DebugInfo
 import com.saveourtool.save.core.result.Fail
 import com.saveourtool.save.core.result.Pass
 import com.saveourtool.save.core.result.TestResult
+import com.saveourtool.save.core.utils.ExecutionResult
 import com.saveourtool.save.core.utils.PathSerializer
 import com.saveourtool.save.core.utils.ProcessExecutionException
 import com.saveourtool.save.core.utils.ProcessTimeoutException
@@ -108,27 +111,29 @@ class FixPlugin(
                 val execCmd = "$execCmdWithoutFlags $execFlagsAdjusted"
                 val time = generalConfig.timeOutMillis!!.times(pathMap.size)
 
-                val executionResult = try {
-                    pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time)
-                } catch (ex: ProcessTimeoutException) {
-                    logWarn("The following tests took too long to run and were stopped: ${chunk.map { it.test }}, timeout for single test: ${ex.timeoutMillis}")
-                    return@map failTestResult(chunk, ex, execCmd)
-                } catch (ex: ProcessExecutionException) {
-                    return@map failTestResult(chunk, ex, execCmd)
+                println("\n\n\nGET WORKING DIR ${getWorkingDirectory()} fixPluginConfig ${fixPluginConfig.actualFixFormat} ${fixPluginConfig.actualFixSarifFileName}")
+                logDebug("Executing fix plugin in ${fixPluginConfig.actualFixFormat?.name} mode")
+
+                val executionResult = if (fixPluginConfig.actualFixFormat == ActualFixFormat.IN_PLACE) {
+                    try {
+                        pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time)
+                    } catch (ex: ProcessTimeoutException) {
+                        logWarn("The following tests took too long to run and were stopped: ${chunk.map { it.test }}, timeout for single test: ${ex.timeoutMillis}")
+                        return@map failTestResult(chunk, ex, execCmd)
+                    } catch (ex: ProcessExecutionException) {
+                        return@map failTestResult(chunk, ex, execCmd)
+                    }
+                } else {
+                    // In this case fixes weren't performed by tool into the test files directly,
+                    // instead, there was created sarif file with list of fixes, which we will apply ourselves
+                    // TODO: ADD INFO TO README
+                    // TODO: Apply fixes from sarif file on `testCopyNames` here
+                    // applySarifFixesToFiles(fixPluginConfig.actualFixSarifFileName, testCopyNames)
+                    ExecutionResult(0, emptyList(), emptyList())
                 }
 
                 val stdout = executionResult.stdout
                 val stderr = executionResult.stderr
-
-                println("\n\n\nGET WORKING DIR ${getWorkingDirectory()}")
-
-                // In this case fixes weren't performed by tool into the test files directly,
-                // instead, there was created sarif file with list of fixes, which we will apply ourselves
-                // TODO: ADD INFO TO README
-                if (fixPluginConfig.actualFixFormat == ActualFixFormat.SARIF) {
-                    // TODO: Apply fixes from sarif file on `testCopyNames` here
-                    // applySarifFixesToFiles(fixPluginConfig.actualFixSarifFileName, testCopyNames)
-                }
 
                 pathCopyMap.map { (testCopy, expected) ->
                     val fixedLines = fs.readLines(testCopy)

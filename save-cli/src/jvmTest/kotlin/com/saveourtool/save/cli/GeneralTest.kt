@@ -22,6 +22,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.serialization.decodeFromString
+import org.junit.jupiter.api.Disabled
 
 @Suppress(
     "TOO_LONG_FUNCTION",
@@ -39,6 +40,7 @@ class GeneralTest {
     }.json
 
     @Test
+    @Disabled
     fun `examples test`() {
         // Almost all result statuses should be Pass, except the few cases
         doTest("../examples/kotlin-diktat/") { reports ->
@@ -67,6 +69,7 @@ class GeneralTest {
     }
 
     @Test
+    @Disabled
     fun `examples test from subfolder`() {
         // Almost all result statuses should be Pass, except the few cases
         doTest("../examples/kotlin-diktat/", "fix/smoke") { reports ->

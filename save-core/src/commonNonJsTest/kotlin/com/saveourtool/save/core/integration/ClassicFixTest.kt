@@ -67,4 +67,14 @@ class ClassicFixTest {
             ), 1
         )
     }
+
+
+    @Test
+    fun `execute fix plugin in sarif mode`() {
+        runTestsWithDiktat(
+            listOf(
+                "fix/sarif/src/main/kotlin/com/saveourtool/save"
+            ), 1
+        )
+    }
 }
