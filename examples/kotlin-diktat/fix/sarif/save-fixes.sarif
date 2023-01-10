@@ -1,0 +1,81 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "originalUriBaseIds": {
+        "%SRCROOT%": {
+          "uri": "."
+        }
+      },
+      "results": [
+        {
+          "fixes": [
+            {
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "src/main/kotlin/com/saveourtool/save/Example1Test.kt"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "endColumn": 10,
+                        "startColumn": 32,
+                        "startLine": 8
+                        "endLine": 9
+                      },
+                      "insertedContent": {
+                        "text": "some new comment\n    name"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "description": {
+                "text": "[ENUM_VALUE] enum values should be in selected UPPER_CASE snake/PascalCase format: NAme_MYa_sayR_"
+              }
+            }
+          ],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/main/kotlin/com/saveourtool/save/Example1Test.kt",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "snippet": {
+                    "text": "enum values should be in selected UPPER_CASE snake/PascalCase format: NAme_MYa_sayR_{{.*}}\n    NAme_"
+                  },
+                    "endColumn": 10,
+                    "startColumn": 32,
+                    "startLine": 8
+                    "endLine": 9
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "[ENUM_VALUE] enum values should be in selected UPPER_CASE snake/PascalCase format: NAme_MYa_sayR_"
+          },
+          "ruleId": "diktat-ruleset:identifier-naming"
+        }
+      ],
+      "tool": {
+        "driver": {
+          "downloadUri": "https://github.com/pinterest/ktlint/releases/tag/0.42.0",
+          "fullName": "ktlint",
+          "informationUri": "https://github.com/pinterest/ktlint/",
+          "language": "en",
+          "name": "ktlint",
+          "organization": "pinterest",
+          "rules": [
+          ],
+          "semanticVersion": "0.42.0",
+          "version": "0.42.0"
+        }
+      }
+    }
+  ]
+}
