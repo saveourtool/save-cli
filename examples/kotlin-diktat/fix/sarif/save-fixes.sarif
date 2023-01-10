@@ -20,20 +20,19 @@
                   "replacements": [
                     {
                       "deletedRegion": {
-                        "endColumn": 10,
-                        "startColumn": 32,
-                        "startLine": 8
-                        "endLine": 9
+                        "endColumn": 8,
+                        "startColumn": 7,
+                        "startLine": 3
                       },
                       "insertedContent": {
-                        "text": "some new comment\n    name"
+                        "text": "E"
                       }
                     }
                   ]
                 }
               ],
               "description": {
-                "text": "[ENUM_VALUE] enum values should be in selected UPPER_CASE snake/PascalCase format: NAme_MYa_sayR_"
+                "text": "Class name should be in PascalCase"
               }
             }
           ],
@@ -46,18 +45,17 @@
                 },
                 "region": {
                   "snippet": {
-                    "text": "enum values should be in selected UPPER_CASE snake/PascalCase format: NAme_MYa_sayR_{{.*}}\n    NAme_"
+                    "text": "e"
                   },
-                    "endColumn": 10,
-                    "startColumn": 32,
-                    "startLine": 8
-                    "endLine": 9
+                    "endColumn": 8,
+                    "startColumn": 7,
+                    "startLine": 3
                 }
               }
             }
           ],
           "message": {
-            "text": "[ENUM_VALUE] enum values should be in selected UPPER_CASE snake/PascalCase format: NAme_MYa_sayR_"
+            "text": "Class name should be in PascalCase"
           },
           "ruleId": "diktat-ruleset:identifier-naming"
         }

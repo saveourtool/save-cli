@@ -91,6 +91,7 @@ class FixPlugin(
             .map { chunk ->
                 val copyPaths = chunk.map { it.test }
 
+                // TODO REFACTOR THIS PART
                 val extraFlagsList = copyPaths.mapNotNull { path -> extraFlagsExtractor.extractExtraFlagsFrom(path) }.distinct()
                 require(extraFlagsList.size <= 1) {
                     "Extra flags for all files in a batch should be same, but you have batchSize=$batchSize" +
@@ -127,11 +128,16 @@ class FixPlugin(
                     // In this case fixes weren't performed by tool into the test files directly,
                     // instead, there was created sarif file with list of fixes, which we will apply ourselves
                     // TODO: ADD INFO TO README
-                    println("testCopyNames ${testCopyNames.split(batchSeparator)}")
-                    val result = SarifFixAdapter(
+
+                    //val tmpTestFiles = testCopyNames.split(batchSeparator).map { it.toPath() }
+                    val tmpTestFiles = copyPaths
+                    println("tmpTestFiles ${tmpTestFiles}")
+                    val fixedFile = SarifFixAdapter(
                         sarifFile = fixPluginConfig.actualFixSarifFileName!!.toPath(),
-                        targetFiles = testCopyNames.split(batchSeparator).map { it.toPath() }
+                        targetFiles = tmpTestFiles
                     ).process()
+                    val fixedFileData = fs.readLines(fixedFile.first())
+                    println("----------->RESULT\n${fixedFileData}")
                     ExecutionResult(0, emptyList(), emptyList())
                 }
 
