@@ -61,7 +61,6 @@ fun runTestsWithDiktat(
 
     assertEquals(numberOfTests, testReporter.results.size)
     testReporter.results.forEach { test ->
-        println("TEST STATUS: ${test.status}")
         // FixMe: if we will have other failing tests - we will make the logic less hardcoded
         if (test.resources.test.name == "ThisShouldAlwaysFailTest.kt") {
             assertEquals(
@@ -75,7 +74,6 @@ fun runTestsWithDiktat(
         } else if (test.resources.test.toString().contains("warn${Path.DIRECTORY_SEPARATOR}chapter2")) {
             assertEquals(Fail("ProcessTimeoutException: Timeout is reached: 1", "ProcessTimeoutException: Timeout is reached: 1"), test.status)
         } else {
-            println("TEST STATUS 222222: ${test.status}")
             assertTrue("test.status is actually ${test.status::class.simpleName}: $test") {
                 test.status is Pass || test.status is Ignored
             }

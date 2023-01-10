@@ -127,8 +127,11 @@ class FixPlugin(
                     // In this case fixes weren't performed by tool into the test files directly,
                     // instead, there was created sarif file with list of fixes, which we will apply ourselves
                     // TODO: ADD INFO TO README
-                    // TODO: Apply fixes from sarif file on `testCopyNames` here
-                    // applySarifFixesToFiles(fixPluginConfig.actualFixSarifFileName, testCopyNames)
+                    println("testCopyNames ${testCopyNames.split(batchSeparator)}")
+                    val result = SarifFixAdapter(
+                        sarifFile = fixPluginConfig.actualFixSarifFileName!!.toPath(),
+                        targetFiles = testCopyNames.split(batchSeparator).map { it.toPath() }
+                    ).process()
                     ExecutionResult(0, emptyList(), emptyList())
                 }
 

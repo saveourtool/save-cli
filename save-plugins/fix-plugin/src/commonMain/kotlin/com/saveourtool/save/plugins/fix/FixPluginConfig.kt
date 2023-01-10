@@ -13,6 +13,7 @@ import okio.Path.Companion.toPath
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.UseSerializers
+import okio.Path.Companion.DIRECTORY_SEPARATOR
 
 /**
  * Some fields by default are null, instead of some natural value, because of the fact, that in stage of merging
@@ -82,13 +83,20 @@ data class FixPluginConfig(
         resourceNameExpectedSuffix = resourceNameExpected,
         ignoreLines = ignoreLines,
         actualFixFormat = actualFixFormat ?: ActualFixFormat.IN_PLACE,
-        actualFixSarifFileName = if (actualFixFormat == ActualFixFormat.SARIF ) {
-            actualFixSarifFileName ?: "save-fixes.sarif"
-        } else {
-               null
-        },
+        actualFixSarifFileName = calculateActualFixSarifFileName(),
     ).also {
-        println("------------>this.configLocation" + this.configLocation)
+        println("------------>actualFixSarifFileName " + it.actualFixSarifFileName)
         it.configLocation = this.configLocation
+    }
+
+    private fun calculateActualFixSarifFileName(): String? {
+        return if (actualFixFormat == ActualFixFormat.SARIF ) {
+            (
+                configLocation.parent!! /
+                    (actualFixSarifFileName ?: "save-fixes.sarif").toPath()
+                ).toString()
+        } else {
+            null
+        }
     }
 }
