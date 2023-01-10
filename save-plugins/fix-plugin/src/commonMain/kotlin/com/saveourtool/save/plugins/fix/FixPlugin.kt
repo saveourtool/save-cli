@@ -1,5 +1,6 @@
 package com.saveourtool.save.plugins.fix
 
+import com.saveourtool.sarifutils.cli.adapter.SarifFixAdapter
 import com.saveourtool.save.core.config.ActualFixFormat
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
