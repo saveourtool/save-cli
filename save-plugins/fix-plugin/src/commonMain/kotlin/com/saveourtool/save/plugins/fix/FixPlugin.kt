@@ -5,6 +5,7 @@ import com.saveourtool.save.core.config.ActualFixFormat
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
 import com.saveourtool.save.core.files.createRelativePathToTheRoot
+import com.saveourtool.save.core.files.getWorkingDirectory
 import com.saveourtool.save.core.files.myDeleteRecursively
 import com.saveourtool.save.core.files.readLines
 import com.saveourtool.save.core.logging.describe
@@ -119,8 +120,11 @@ class FixPlugin(
                 val stdout = executionResult.stdout
                 val stderr = executionResult.stderr
 
+                println("\n\n\nGET WORKING DIR ${getWorkingDirectory()}")
+
                 // In this case fixes weren't performed by tool into the test files directly,
                 // instead, there was created sarif file with list of fixes, which we will apply ourselves
+                // TODO: ADD INFO TO README
                 if (fixPluginConfig.actualFixFormat == ActualFixFormat.SARIF) {
                     // TODO: Apply fixes from sarif file on `testCopyNames` here
                     // applySarifFixesToFiles(fixPluginConfig.actualFixSarifFileName, testCopyNames)

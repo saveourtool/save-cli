@@ -77,13 +77,18 @@ data class FixPluginConfig(
 
     // due to probable bug in ktoml, ignoreLines = [] and no ignoreLines is ktoml are parsed to be mutableListOf("null")
     override fun validateAndSetDefaults(): FixPluginConfig = FixPluginConfig(
-        execFlags ?: "",
-        resourceNameTest,
-        resourceNameExpected,
-        ignoreLines,
-        actualFixFormat ?: ActualFixFormat.IN_PLACE,
-        actualFixSarifFileName ?: "save-fixes.sarif",
+        execFlags = execFlags ?: "",
+        resourceNameTestSuffix = resourceNameTest,
+        resourceNameExpectedSuffix = resourceNameExpected,
+        ignoreLines = ignoreLines,
+        actualFixFormat = actualFixFormat ?: ActualFixFormat.IN_PLACE,
+        actualFixSarifFileName = if (actualFixFormat == ActualFixFormat.SARIF ) {
+            actualFixSarifFileName ?: "save-fixes.sarif"
+        } else {
+               null
+        },
     ).also {
+        println("------------>this.configLocation" + this.configLocation)
         it.configLocation = this.configLocation
     }
 }
