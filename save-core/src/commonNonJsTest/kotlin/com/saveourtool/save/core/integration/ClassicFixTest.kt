@@ -68,7 +68,6 @@ class ClassicFixTest {
         )
     }
 
-
     @Test
     fun `execute fix plugin in sarif mode`() {
         runTestsWithDiktat(

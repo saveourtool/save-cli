@@ -23,7 +23,7 @@ import kotlinx.serialization.UseSerializers
  * @property resourceNameTestSuffix suffix name of the test file.
  * @property resourceNameExpectedSuffix suffix name of the expected file.
  * @property ignoreLines mutable list of patterns that later will be used to filter lines in test file
- * @property actualFixFormat format for type for fixes: they could be done in place or provided via Sarif file
+ * @property actualFixFormat format for type for fixes: they could be done in place or provided via Sarif file // TODO: Add information about these properties to README
  * @property actualFixSarifFileName name of sarif file with list of fixes, that were made by tool
  */
 @Serializable
@@ -32,7 +32,6 @@ data class FixPluginConfig(
     val resourceNameTestSuffix: String? = null,
     val resourceNameExpectedSuffix: String? = null,
     val ignoreLines: MutableList<String>? = null,
-    // TODO: Add information about these properties to README
     val actualFixFormat: ActualFixFormat? = null,
     val actualFixSarifFileName: String? = null,
 ) : PluginConfig {
@@ -88,14 +87,12 @@ data class FixPluginConfig(
         it.configLocation = this.configLocation
     }
 
-    private fun calculateActualFixSarifFileName(): String? {
-        return if (actualFixFormat == ActualFixFormat.SARIF ) {
-            (
+    private fun calculateActualFixSarifFileName(): String? = if (actualFixFormat == ActualFixFormat.SARIF) {
+        (
                 configLocation.parent!! /
-                    (actualFixSarifFileName ?: "save-fixes.sarif").toPath()
-                ).toString()
-        } else {
-            null
-        }
+                        (actualFixSarifFileName ?: "save-fixes.sarif").toPath()
+        ).toString()
+    } else {
+        null
     }
 }

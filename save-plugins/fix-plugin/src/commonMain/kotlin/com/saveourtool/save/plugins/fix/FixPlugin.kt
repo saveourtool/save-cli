@@ -1,6 +1,5 @@
 package com.saveourtool.save.plugins.fix
 
-import com.saveourtool.sarifutils.cli.adapter.SarifFixAdapter
 import com.saveourtool.save.core.config.ActualFixFormat
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
@@ -26,6 +25,7 @@ import com.saveourtool.save.core.utils.ProcessExecutionException
 import com.saveourtool.save.core.utils.ProcessTimeoutException
 import com.saveourtool.save.core.utils.singleIsInstance
 
+import com.saveourtool.sarifutils.cli.adapter.SarifFixAdapter
 import io.github.petertrr.diffutils.diff
 import io.github.petertrr.diffutils.patch.ChangeDelta
 import io.github.petertrr.diffutils.patch.Delta
@@ -172,26 +172,24 @@ class FixPlugin(
         execCmd: String,
         stdout: List<String>,
         stderr: List<String>,
-    ): List<TestResult> {
-        return testCopyToExpectedFilesMap.map { (testCopy, expected) ->
-            val fixedLines = fs.readLines(testCopy)
-            val expectedLines = fs.readLines(expected)
+    ): List<TestResult> = testCopyToExpectedFilesMap.map { (testCopy, expected) ->
+        val fixedLines = fs.readLines(testCopy)
+        val expectedLines = fs.readLines(expected)
 
-            // FixMe: https://github.com/saveourtool/save-cli/issues/473
-            val test = testToExpectedFilesMap.first { (test, _) -> test.name == testCopy.name }.first
+        // FixMe: https://github.com/saveourtool/save-cli/issues/473
+        val test = testToExpectedFilesMap.first { (test, _) -> test.name == testCopy.name }.first
 
-            TestResult(
-                FixTestFiles(test, expected),
-                checkStatus(expectedLines, fixedLines),
-                DebugInfo(
-                    execCmd,
-                    stdout.filter { it.contains(testCopy.name) }.joinToString("\n"),
-                    stderr.filter { it.contains(testCopy.name) }.joinToString("\n"),
-                    null,
-                    CountWarnings.notApplicable,
-                )
+        TestResult(
+            FixTestFiles(test, expected),
+            checkStatus(expectedLines, fixedLines),
+            DebugInfo(
+                execCmd,
+                stdout.filter { it.contains(testCopy.name) }.joinToString("\n"),
+                stderr.filter { it.contains(testCopy.name) }.joinToString("\n"),
+                null,
+                CountWarnings.notApplicable,
             )
-        }
+        )
     }
 
     private fun failTestResult(
