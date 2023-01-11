@@ -20,12 +20,12 @@
                   "replacements": [
                     {
                       "deletedRegion": {
-                        "endColumn": 8,
-                        "startColumn": 7,
-                        "startLine": 3
+                        "endColumn": 19,
+                        "startColumn": 9,
+                        "startLine": 1
                       },
                       "insertedContent": {
-                        "text": "E"
+                        "text": "com.saveourtool.save"
                       }
                     }
                   ]
@@ -62,11 +62,11 @@
                 },
                 "region": {
                   "snippet": {
-                    "text": "e"
+                    "text": "test.smoke"
                   },
-                    "endColumn": 8,
-                    "startColumn": 7,
-                    "startLine": 3
+                    "endColumn": 19,
+                    "startColumn": 9,
+                    "startLine": 1
                 }
               }
             },

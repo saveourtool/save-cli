@@ -117,9 +117,6 @@ class FixPlugin(
                         targetFiles = testsPaths
                     ).process()
 
-                    val rest = fs.readLines(fixedFiles.first())
-                    println("\n\n\nACTUAL\n${rest}")
-
                     // modify existing map, replace test copies to fixed test copies
                     val fixedTestCopyToExpectedFilesMap = testCopyToExpectedFilesMap.toMutableList().map { (testCopy, expected) ->
                         val fixedTestCopy = fixedFiles.first {
