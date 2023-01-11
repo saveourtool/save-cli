@@ -99,7 +99,6 @@ class FixPlugin(
                 val execCmd = buildExecCmd(generalConfig, fixPluginConfig, pathCopyMap, batchSeparator, extraFlags)
                 val time = generalConfig.timeOutMillis!!.times(pathMap.size)
 
-                println("\n\n\nGET WORKING DIR ${getWorkingDirectory()} fixPluginConfig ${fixPluginConfig.actualFixFormat} ${fixPluginConfig.actualFixSarifFileName}")
                 logDebug("Executing fix plugin in ${fixPluginConfig.actualFixFormat?.name} mode")
 
                 val executionResult = if (fixPluginConfig.actualFixFormat == ActualFixFormat.IN_PLACE) {
@@ -138,10 +137,10 @@ class FixPlugin(
     }
 
     private fun buildExtraFlags(
-        copyPaths: List<Path>,
+        testsPaths: List<Path>,
         batchSize: Int,
     ): ExtraFlags {
-        val extraFlagsList = copyPaths.mapNotNull { path -> extraFlagsExtractor.extractExtraFlagsFrom(path) }.distinct()
+        val extraFlagsList = testsPaths.mapNotNull { path -> extraFlagsExtractor.extractExtraFlagsFrom(path) }.distinct()
         require(extraFlagsList.size <= 1) {
             "Extra flags for all files in a batch should be same, but you have batchSize=$batchSize" +
                     " and there are ${extraFlagsList.size} different sets of flags inside it, namely $extraFlagsList"
@@ -157,10 +156,9 @@ class FixPlugin(
         batchSeparator: String,
         extraFlags: ExtraFlags
     ): String {
-        val testCopyNames =
-            pathCopyMap.joinToString(separator = batchSeparator) { (testCopy, _) -> testCopy.toString() }
+        val testsCopyNames = pathCopyMap.joinToString(separator = batchSeparator) { (testCopy, _) -> testCopy.toString() }
         val execFlags = fixPluginConfig.execFlags
-        val execFlagsAdjusted = resolvePlaceholdersFrom(execFlags, extraFlags, testCopyNames)
+        val execFlagsAdjusted = resolvePlaceholdersFrom(execFlags, extraFlags, testsCopyNames)
         val execCmdWithoutFlags = generalConfig.execCmd
         val execCmd = "$execCmdWithoutFlags $execFlagsAdjusted"
         return execCmd
