@@ -29,6 +29,23 @@
                       }
                     }
                   ]
+                },
+                {
+                  "artifactLocation": {
+                    "uri": "src/main/kotlin/com/saveourtool/save/Example1Test.kt"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "endColumn": 8,
+                        "startColumn": 7,
+                        "startLine": 3
+                      },
+                      "insertedContent": {
+                        "text": "E"
+                      }
+                    }
+                  ]
                 }
               ],
               "description": {
@@ -37,6 +54,22 @@
             }
           ],
           "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/main/kotlin/com/saveourtool/save/Example1Test.kt",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "snippet": {
+                    "text": "e"
+                  },
+                    "endColumn": 8,
+                    "startColumn": 7,
+                    "startLine": 3
+                }
+              }
+            },
             {
               "physicalLocation": {
                 "artifactLocation": {

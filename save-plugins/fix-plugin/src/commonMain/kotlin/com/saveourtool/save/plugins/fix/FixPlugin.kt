@@ -117,6 +117,9 @@ class FixPlugin(
                         targetFiles = testsPaths
                     ).process()
 
+                    val rest = fs.readLines(fixedFiles.first())
+                    println("\n\n\nACTUAL\n${rest}")
+
                     // modify existing map, replace test copies to fixed test copies
                     val fixedTestCopyToExpectedFilesMap = testCopyToExpectedFilesMap.toMutableList().map { (testCopy, expected) ->
                         val fixedTestCopy = fixedFiles.first {
@@ -177,6 +180,7 @@ class FixPlugin(
             val fixedLines = fs.readLines(testCopy)
             val expectedLines = fs.readLines(expected)
 
+            // FixMe: https://github.com/saveourtool/save-cli/issues/473
             val test = testToExpectedFilesMap.first { (test, _) -> test.name == testCopy.name }.first
 
             TestResult(
