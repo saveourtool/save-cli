@@ -41,6 +41,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.PolymorphicModuleBuilder
 import kotlinx.serialization.modules.subclass
 
+private typealias PathPair = Pair<Path, Path>
+
 /**
  * A plugin that runs an executable on a file and compares output with expected output.
  * @property testConfig
@@ -111,7 +113,9 @@ class FixPlugin(
                         return@map failTestResult(chunk, ex, execCmd)
                     }
                 } else {
-                    applyFixesFromSarif(fixPluginConfig, testsPaths, testCopyToExpectedFilesMap)
+                    val fixedTestCopyToExpectedFilesMap = applyFixesFromSarif(fixPluginConfig, testsPaths, testCopyToExpectedFilesMap)
+                    val dbgMsg = "Fixes were obtained from SARIF file, no debug info is available"
+                    ExecutionResult(0, listOf(dbgMsg), listOf(dbgMsg)) to fixedTestCopyToExpectedFilesMap
                 }
 
                 val stdout = executionResult.stdout
@@ -138,7 +142,7 @@ class FixPlugin(
     private fun buildExecCmd(
         generalConfig: GeneralConfig,
         fixPluginConfig: FixPluginConfig,
-        testCopyToExpectedFilesMap: List<Pair<Path, Path>>,
+        testCopyToExpectedFilesMap: List<PathPair>,
         batchSeparator: String,
         extraFlags: ExtraFlags
     ): String {
@@ -153,8 +157,8 @@ class FixPlugin(
     private fun applyFixesFromSarif(
         fixPluginConfig: FixPluginConfig,
         testsPaths: List<Path>,
-        testCopyToExpectedFilesMap: List<Pair<Path, Path>>,
-    ): Pair<ExecutionResult, List<Pair<Path, Path>>> {
+        testCopyToExpectedFilesMap: List<PathPair>,
+    ): List<PathPair> {
         // In this case fixes weren't performed by tool into the test files directly,
         // instead, there was created sarif file with list of fixes, which we will apply ourselves
         val fixedFiles = SarifFixAdapter(
@@ -171,13 +175,12 @@ class FixPlugin(
             }
             fixedTestCopy to expected
         }
-        val dbgMsg = "Fixes were obtained from SARIF file, no debug info is available"
-        return ExecutionResult(0, listOf(dbgMsg), listOf(dbgMsg)) to fixedTestCopyToExpectedFilesMap
+        return fixedTestCopyToExpectedFilesMap
     }
 
     private fun buildTestResultsForChunk(
-        testToExpectedFilesMap: List<Pair<Path, Path>>,
-        testCopyToExpectedFilesMap: List<Pair<Path, Path>>,
+        testToExpectedFilesMap: List<PathPair>,
+        testCopyToExpectedFilesMap: List<PathPair>,
         execCmd: String,
         stdout: List<String>,
         stderr: List<String>,
