@@ -100,9 +100,9 @@ class FixPlugin(
 
                 logDebug("Executing fix plugin in ${fixPluginConfig.actualFixFormat?.name} mode")
 
-                val executionResult = if (fixPluginConfig.actualFixFormat == ActualFixFormat.IN_PLACE) {
+                val (executionResult, adjustedTestCopyToExpectedFilesMap) = if (fixPluginConfig.actualFixFormat == ActualFixFormat.IN_PLACE) {
                     try {
-                        pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time)
+                        pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time) to testCopyToExpectedFilesMap
                     } catch (ex: ProcessTimeoutException) {
                         logWarn("The following tests took too long to run and were stopped: ${chunk.map { it.test }}, timeout for single test: ${ex.timeoutMillis}")
                         return@map failTestResult(chunk, ex, execCmd)
@@ -112,26 +112,28 @@ class FixPlugin(
                 } else {
                     // In this case fixes weren't performed by tool into the test files directly,
                     // instead, there was created sarif file with list of fixes, which we will apply ourselves
-                    // TODO: ADD INFO TO README
-
-                    println("tmpTestFiles ${testsPaths}")
-                    val fixedFile = SarifFixAdapter(
+                    val fixedFiles = SarifFixAdapter(
                         sarifFile = fixPluginConfig.actualFixSarifFileName!!.toPath(),
                         targetFiles = testsPaths
                     ).process()
 
-                    println("----------->FIXED FILES:\n$fixedFile\n\n${testCopyToExpectedFilesMap}\n------------\n")
-
-                    ExecutionResult(0, emptyList(), emptyList())
+                    // modify existing map, replace test copies to fixed test copies
+                    val fixedTestCopyToExpectedFilesMap = testCopyToExpectedFilesMap.toMutableList().map { (testCopy, expected) ->
+                        val fixedTestCopy = fixedFiles.first {
+                            // FixMe: Until https://github.com/saveourtool/sarif-utils/issues/23
+                            // FixMe: compare only by names, but should by full paths
+                            it.name == testCopy.name
+                        }
+                        fixedTestCopy to expected
+                    }
+                    val dbgMsg = "Fixes were obtained from SARIF file, no debug info is available"
+                    ExecutionResult(0, listOf(dbgMsg), listOf(dbgMsg)) to fixedTestCopyToExpectedFilesMap
                 }
 
                 val stdout = executionResult.stdout
                 val stderr = executionResult.stderr
 
-                println("STDOUT $stdout")
-                println("stderr $stderr")
-
-                buildTestResultsForChunk(testCopyToExpectedFilesMap, testToExpectedFilesMap, execCmd, stdout, stderr)
+                buildTestResultsForChunk(testToExpectedFilesMap, adjustedTestCopyToExpectedFilesMap, execCmd, stdout, stderr)
             }
             .flatten()
     }
@@ -165,8 +167,8 @@ class FixPlugin(
     }
 
     private fun buildTestResultsForChunk(
-        testCopyToExpectedFilesMap: List<Pair<Path, Path>>,
         testToExpectedFilesMap: List<Pair<Path, Path>>,
+        testCopyToExpectedFilesMap: List<Pair<Path, Path>>,
         execCmd: String,
         stdout: List<String>,
         stderr: List<String>,

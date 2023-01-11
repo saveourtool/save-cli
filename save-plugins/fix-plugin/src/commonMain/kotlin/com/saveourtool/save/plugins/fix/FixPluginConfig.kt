@@ -33,6 +33,7 @@ data class FixPluginConfig(
     val resourceNameTestSuffix: String? = null,
     val resourceNameExpectedSuffix: String? = null,
     val ignoreLines: MutableList<String>? = null,
+    // TODO: Add information about these properties to README
     val actualFixFormat: ActualFixFormat? = null,
     val actualFixSarifFileName: String? = null,
 ) : PluginConfig {
