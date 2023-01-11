@@ -19,7 +19,7 @@ class ClassicFixTest {
         runTestsWithDiktat(
             listOf(
                 "fix/save.toml"
-            ), 5
+            ), 6
         )
     }
 

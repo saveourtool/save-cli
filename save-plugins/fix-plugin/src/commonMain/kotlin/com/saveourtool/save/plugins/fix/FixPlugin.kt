@@ -10,7 +10,6 @@ import com.saveourtool.save.core.files.myDeleteRecursively
 import com.saveourtool.save.core.files.readLines
 import com.saveourtool.save.core.logging.describe
 import com.saveourtool.save.core.logging.logDebug
-import com.saveourtool.save.core.logging.logInfo
 import com.saveourtool.save.core.logging.logWarn
 import com.saveourtool.save.core.plugin.ExtraFlags
 import com.saveourtool.save.core.plugin.ExtraFlagsExtractor
@@ -89,27 +88,15 @@ class FixPlugin(
         return files.map { it as FixTestFiles }
             .chunked(batchSize)
             .map { chunk ->
-                val copyPaths = chunk.map { it.test }
-
-                // TODO REFACTOR THIS PART
-                val extraFlagsList = copyPaths.mapNotNull { path -> extraFlagsExtractor.extractExtraFlagsFrom(path) }.distinct()
-                require(extraFlagsList.size <= 1) {
-                    "Extra flags for all files in a batch should be same, but you have batchSize=$batchSize" +
-                            " and there are ${extraFlagsList.size} different sets of flags inside it, namely $extraFlagsList"
-                }
-                val extraFlags = extraFlagsList.singleOrNull() ?: ExtraFlags("", "")
+                val testsPaths = chunk.map { it.test }
+                val extraFlags = buildExtraFlags(testsPaths, batchSize)
 
                 val pathMap = chunk.map { it.test to it.expected }
                 val pathCopyMap = pathMap.map { (test, expected) ->
                     createCopyOfTestFile(test, generalConfig, fixPluginConfig) to expected
                 }
-                val testCopyNames =
-                        pathCopyMap.joinToString(separator = batchSeparator) { (testCopy, _) -> testCopy.toString() }
 
-                val execFlags = fixPluginConfig.execFlags
-                val execFlagsAdjusted = resolvePlaceholdersFrom(execFlags, extraFlags, testCopyNames)
-                val execCmdWithoutFlags = generalConfig.execCmd
-                val execCmd = "$execCmdWithoutFlags $execFlagsAdjusted"
+                val execCmd = buildExecCmd(generalConfig, fixPluginConfig, pathCopyMap, batchSeparator, extraFlags)
                 val time = generalConfig.timeOutMillis!!.times(pathMap.size)
 
                 println("\n\n\nGET WORKING DIR ${getWorkingDirectory()} fixPluginConfig ${fixPluginConfig.actualFixFormat} ${fixPluginConfig.actualFixSarifFileName}")
@@ -129,12 +116,10 @@ class FixPlugin(
                     // instead, there was created sarif file with list of fixes, which we will apply ourselves
                     // TODO: ADD INFO TO README
 
-                    //val tmpTestFiles = testCopyNames.split(batchSeparator).map { it.toPath() }
-                    val tmpTestFiles = copyPaths
-                    println("tmpTestFiles ${tmpTestFiles}")
+                    println("tmpTestFiles ${testsPaths}")
                     val fixedFile = SarifFixAdapter(
                         sarifFile = fixPluginConfig.actualFixSarifFileName!!.toPath(),
-                        targetFiles = tmpTestFiles
+                        targetFiles = testsPaths
                     ).process()
                     val fixedFileData = fs.readLines(fixedFile.first())
                     println("----------->RESULT\n${fixedFileData}")
@@ -144,26 +129,68 @@ class FixPlugin(
                 val stdout = executionResult.stdout
                 val stderr = executionResult.stderr
 
-                pathCopyMap.map { (testCopy, expected) ->
-                    val fixedLines = fs.readLines(testCopy)
-                    val expectedLines = fs.readLines(expected)
+                println("STDOUT $stdout")
+                println("stderr $stderr")
 
-                    val test = pathMap.first { (test, _) -> test.name == testCopy.name }.first
-
-                    TestResult(
-                        FixTestFiles(test, expected),
-                        checkStatus(expectedLines, fixedLines),
-                        DebugInfo(
-                            execCmd,
-                            stdout.filter { it.contains(testCopy.name) }.joinToString("\n"),
-                            stderr.filter { it.contains(testCopy.name) }.joinToString("\n"),
-                            null,
-                            CountWarnings.notApplicable,
-                        )
-                    )
-                }
+                buildTestResultsForChunk(pathCopyMap, pathMap, execCmd, stdout, stderr)
             }
             .flatten()
+    }
+
+    private fun buildExtraFlags(
+        copyPaths: List<Path>,
+        batchSize: Int,
+    ): ExtraFlags {
+        val extraFlagsList = copyPaths.mapNotNull { path -> extraFlagsExtractor.extractExtraFlagsFrom(path) }.distinct()
+        require(extraFlagsList.size <= 1) {
+            "Extra flags for all files in a batch should be same, but you have batchSize=$batchSize" +
+                    " and there are ${extraFlagsList.size} different sets of flags inside it, namely $extraFlagsList"
+        }
+        val extraFlags = extraFlagsList.singleOrNull() ?: ExtraFlags("", "")
+        return extraFlags
+    }
+
+    private fun buildExecCmd(
+        generalConfig: GeneralConfig,
+        fixPluginConfig: FixPluginConfig,
+        pathCopyMap: List<Pair<Path, Path>>,
+        batchSeparator: String,
+        extraFlags: ExtraFlags
+    ): String {
+        val testCopyNames =
+            pathCopyMap.joinToString(separator = batchSeparator) { (testCopy, _) -> testCopy.toString() }
+        val execFlags = fixPluginConfig.execFlags
+        val execFlagsAdjusted = resolvePlaceholdersFrom(execFlags, extraFlags, testCopyNames)
+        val execCmdWithoutFlags = generalConfig.execCmd
+        val execCmd = "$execCmdWithoutFlags $execFlagsAdjusted"
+        return execCmd
+    }
+
+    private fun buildTestResultsForChunk(
+        pathCopyMap: List<Pair<Path, Path>>,
+        pathMap: List<Pair<Path, Path>>,
+        execCmd: String,
+        stdout: List<String>,
+        stderr: List<String>,
+    ): List<TestResult> {
+        return pathCopyMap.map { (testCopy, expected) ->
+            val fixedLines = fs.readLines(testCopy)
+            val expectedLines = fs.readLines(expected)
+
+            val test = pathMap.first { (test, _) -> test.name == testCopy.name }.first
+
+            TestResult(
+                FixTestFiles(test, expected),
+                checkStatus(expectedLines, fixedLines),
+                DebugInfo(
+                    execCmd,
+                    stdout.filter { it.contains(testCopy.name) }.joinToString("\n"),
+                    stderr.filter { it.contains(testCopy.name) }.joinToString("\n"),
+                    null,
+                    CountWarnings.notApplicable,
+                )
+            )
+        }
     }
 
     private fun failTestResult(
