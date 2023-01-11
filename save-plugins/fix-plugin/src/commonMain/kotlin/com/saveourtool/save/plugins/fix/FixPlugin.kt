@@ -5,7 +5,6 @@ import com.saveourtool.save.core.config.ActualFixFormat
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
 import com.saveourtool.save.core.files.createRelativePathToTheRoot
-import com.saveourtool.save.core.files.getWorkingDirectory
 import com.saveourtool.save.core.files.myDeleteRecursively
 import com.saveourtool.save.core.files.readLines
 import com.saveourtool.save.core.logging.describe
@@ -91,13 +90,13 @@ class FixPlugin(
                 val testsPaths = chunk.map { it.test }
                 val extraFlags = buildExtraFlags(testsPaths, batchSize)
 
-                val pathMap = chunk.map { it.test to it.expected }
-                val pathCopyMap = pathMap.map { (test, expected) ->
+                val testToExpectedFilesMap = chunk.map { it.test to it.expected }
+                val testCopyToExpectedFilesMap = testToExpectedFilesMap.map { (test, expected) ->
                     createCopyOfTestFile(test, generalConfig, fixPluginConfig) to expected
                 }
 
-                val execCmd = buildExecCmd(generalConfig, fixPluginConfig, pathCopyMap, batchSeparator, extraFlags)
-                val time = generalConfig.timeOutMillis!!.times(pathMap.size)
+                val execCmd = buildExecCmd(generalConfig, fixPluginConfig, testCopyToExpectedFilesMap, batchSeparator, extraFlags)
+                val time = generalConfig.timeOutMillis!!.times(testToExpectedFilesMap.size)
 
                 logDebug("Executing fix plugin in ${fixPluginConfig.actualFixFormat?.name} mode")
 
@@ -120,8 +119,9 @@ class FixPlugin(
                         sarifFile = fixPluginConfig.actualFixSarifFileName!!.toPath(),
                         targetFiles = testsPaths
                     ).process()
-                    val fixedFileData = fs.readLines(fixedFile.first())
-                    println("----------->RESULT\n${fixedFileData}")
+
+                    println("----------->FIXED FILES:\n$fixedFile\n\n${testCopyToExpectedFilesMap}\n------------\n")
+
                     ExecutionResult(0, emptyList(), emptyList())
                 }
 
@@ -131,7 +131,7 @@ class FixPlugin(
                 println("STDOUT $stdout")
                 println("stderr $stderr")
 
-                buildTestResultsForChunk(pathCopyMap, pathMap, execCmd, stdout, stderr)
+                buildTestResultsForChunk(testCopyToExpectedFilesMap, testToExpectedFilesMap, execCmd, stdout, stderr)
             }
             .flatten()
     }
@@ -152,11 +152,11 @@ class FixPlugin(
     private fun buildExecCmd(
         generalConfig: GeneralConfig,
         fixPluginConfig: FixPluginConfig,
-        pathCopyMap: List<Pair<Path, Path>>,
+        testCopyToExpectedFilesMap: List<Pair<Path, Path>>,
         batchSeparator: String,
         extraFlags: ExtraFlags
     ): String {
-        val testsCopyNames = pathCopyMap.joinToString(separator = batchSeparator) { (testCopy, _) -> testCopy.toString() }
+        val testsCopyNames = testCopyToExpectedFilesMap.joinToString(separator = batchSeparator) { (testCopy, _) -> testCopy.toString() }
         val execFlags = fixPluginConfig.execFlags
         val execFlagsAdjusted = resolvePlaceholdersFrom(execFlags, extraFlags, testsCopyNames)
         val execCmdWithoutFlags = generalConfig.execCmd
@@ -165,17 +165,17 @@ class FixPlugin(
     }
 
     private fun buildTestResultsForChunk(
-        pathCopyMap: List<Pair<Path, Path>>,
-        pathMap: List<Pair<Path, Path>>,
+        testCopyToExpectedFilesMap: List<Pair<Path, Path>>,
+        testToExpectedFilesMap: List<Pair<Path, Path>>,
         execCmd: String,
         stdout: List<String>,
         stderr: List<String>,
     ): List<TestResult> {
-        return pathCopyMap.map { (testCopy, expected) ->
+        return testCopyToExpectedFilesMap.map { (testCopy, expected) ->
             val fixedLines = fs.readLines(testCopy)
             val expectedLines = fs.readLines(expected)
 
-            val test = pathMap.first { (test, _) -> test.name == testCopy.name }.first
+            val test = testToExpectedFilesMap.first { (test, _) -> test.name == testCopy.name }.first
 
             TestResult(
                 FixTestFiles(test, expected),
