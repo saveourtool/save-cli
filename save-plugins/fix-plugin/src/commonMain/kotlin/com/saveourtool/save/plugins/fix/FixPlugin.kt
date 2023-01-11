@@ -45,6 +45,7 @@ import kotlinx.serialization.modules.subclass
  * A plugin that runs an executable on a file and compares output with expected output.
  * @property testConfig
  */
+@Suppress("TooManyFunctions")
 class FixPlugin(
     testConfig: TestConfig,
     testFiles: List<String>,
@@ -110,24 +111,7 @@ class FixPlugin(
                         return@map failTestResult(chunk, ex, execCmd)
                     }
                 } else {
-                    // In this case fixes weren't performed by tool into the test files directly,
-                    // instead, there was created sarif file with list of fixes, which we will apply ourselves
-                    val fixedFiles = SarifFixAdapter(
-                        sarifFile = fixPluginConfig.actualFixSarifFileName!!.toPath(),
-                        targetFiles = testsPaths
-                    ).process()
-
-                    // modify existing map, replace test copies to fixed test copies
-                    val fixedTestCopyToExpectedFilesMap = testCopyToExpectedFilesMap.toMutableList().map { (testCopy, expected) ->
-                        val fixedTestCopy = fixedFiles.first {
-                            // FixMe: Until https://github.com/saveourtool/sarif-utils/issues/23
-                            // FixMe: compare only by names, but should by full paths
-                            it.name == testCopy.name
-                        }
-                        fixedTestCopy to expected
-                    }
-                    val dbgMsg = "Fixes were obtained from SARIF file, no debug info is available"
-                    ExecutionResult(0, listOf(dbgMsg), listOf(dbgMsg)) to fixedTestCopyToExpectedFilesMap
+                    applyFixesFromSarif(fixPluginConfig, testsPaths, testCopyToExpectedFilesMap)
                 }
 
                 val stdout = executionResult.stdout
@@ -164,6 +148,31 @@ class FixPlugin(
         val execCmdWithoutFlags = generalConfig.execCmd
         val execCmd = "$execCmdWithoutFlags $execFlagsAdjusted"
         return execCmd
+    }
+
+    private fun applyFixesFromSarif(
+        fixPluginConfig: FixPluginConfig,
+        testsPaths: List<Path>,
+        testCopyToExpectedFilesMap: List<Pair<Path, Path>>,
+    ): Pair<ExecutionResult, List<Pair<Path, Path>>> {
+        // In this case fixes weren't performed by tool into the test files directly,
+        // instead, there was created sarif file with list of fixes, which we will apply ourselves
+        val fixedFiles = SarifFixAdapter(
+            sarifFile = fixPluginConfig.actualFixSarifFileName!!.toPath(),
+            targetFiles = testsPaths
+        ).process()
+
+        // modify existing map, replace test copies to fixed test copies
+        val fixedTestCopyToExpectedFilesMap = testCopyToExpectedFilesMap.toMutableList().map { (testCopy, expected) ->
+            val fixedTestCopy = fixedFiles.first {
+                // FixMe: Until https://github.com/saveourtool/sarif-utils/issues/23
+                // FixMe: compare only by names, but should by full paths
+                it.name == testCopy.name
+            }
+            fixedTestCopy to expected
+        }
+        val dbgMsg = "Fixes were obtained from SARIF file, no debug info is available"
+        return ExecutionResult(0, listOf(dbgMsg), listOf(dbgMsg)) to fixedTestCopyToExpectedFilesMap
     }
 
     private fun buildTestResultsForChunk(
