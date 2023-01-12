@@ -105,6 +105,7 @@ class FixPlugin(
 
                 val (executionResult, adjustedTestCopyToExpectedFilesMap) = if (fixPluginConfig.actualFixFormat == ActualFixFormat.IN_PLACE) {
                     try {
+                        // hold testCopyToExpectedFilesMap as is
                         pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time) to testCopyToExpectedFilesMap
                     } catch (ex: ProcessTimeoutException) {
                         logWarn("The following tests took too long to run and were stopped: ${chunk.map { it.test }}, timeout for single test: ${ex.timeoutMillis}")
@@ -113,6 +114,7 @@ class FixPlugin(
                         return@map failTestResult(chunk, ex, execCmd)
                     }
                 } else {
+                    // replace test files by modificated copies, obtained from sarif lib
                     val fixedTestCopyToExpectedFilesMap = applyFixesFromSarif(fixPluginConfig, testsPaths, testCopyToExpectedFilesMap)
                     val dbgMsg = "Fixes were obtained from SARIF file, no debug info is available"
                     ExecutionResult(0, listOf(dbgMsg), listOf(dbgMsg)) to fixedTestCopyToExpectedFilesMap
@@ -126,6 +128,13 @@ class FixPlugin(
             .flatten()
     }
 
+    /**
+     * Build additional flags which could be provided directly from text of test file
+     *
+     * @param testsPaths list of paths of the test files
+     * @param batchSize
+     * @return [ExtraFlags] instance
+     */
     private fun buildExtraFlags(
         testsPaths: List<Path>,
         batchSize: Int,
@@ -139,6 +148,16 @@ class FixPlugin(
         return extraFlags
     }
 
+    /**
+     * Build [execCmd] according provided configuration
+     *
+     * @param generalConfig
+     * @param fixPluginConfig
+     * @param testCopyToExpectedFilesMap list of paths to the copy of tests files, which will be modificated
+     * @param batchSeparator
+     * @param extraFlags
+     * @return execution command
+     */
     private fun buildExecCmd(
         generalConfig: GeneralConfig,
         fixPluginConfig: FixPluginConfig,
@@ -154,6 +173,14 @@ class FixPlugin(
         return execCmd
     }
 
+    /**
+     * In this case fixes would be provided by sarif library, which will extract appropriate fixes from SARIF file
+     *
+     * @param fixPluginConfig
+     * @param testsPaths path to tests file, which need to be modificated
+     * @param testCopyToExpectedFilesMap list of paths to the copy of tests files, which will be replaced by modificated files
+     * @return updated list of test files copies
+     */
     private fun applyFixesFromSarif(
         fixPluginConfig: FixPluginConfig,
         testsPaths: List<Path>,
@@ -178,6 +205,16 @@ class FixPlugin(
         return fixedTestCopyToExpectedFilesMap
     }
 
+    /**
+     * For each chunk, build test results
+     *
+     * @param testToExpectedFilesMap list of initial test files, necessary for proper report
+     * @param testCopyToExpectedFilesMap list of fixed files
+     * @param execCmd execution command for debug info
+     * @param stdout std out of executed tool, if any
+     * @param stderr std err of executed tool, if any
+     * @return list of the test results
+     */
     private fun buildTestResultsForChunk(
         testToExpectedFilesMap: List<PathPair>,
         testCopyToExpectedFilesMap: List<PathPair>,

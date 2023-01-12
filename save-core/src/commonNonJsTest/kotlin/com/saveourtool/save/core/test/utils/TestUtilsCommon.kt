@@ -53,7 +53,7 @@ fun runTestsWithDiktat(
     ).let(overrideProperties)
 
     // logger is not set from save properties without a config reader, need to set it explicitly
-    logType.set(LogType.WARN)
+    logType.set(LogType.ALL)
     // In this test we need to merge with emulated empty save.properties file in aim to use default values,
     // since initially all fields are null
     val save = Save(saveProperties, fs)
