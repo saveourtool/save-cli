@@ -15,7 +15,7 @@
               "artifactChanges": [
                 {
                   "artifactLocation": {
-                    "uri": "src/main/kotlin/com/saveourtool/save/Example1Test.kt"
+                    "uri": "sarif/src/main/kotlin/com/saveourtool/save/Example1Test.kt"
                   },
                   "replacements": [
                     {
@@ -40,7 +40,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "src/main/kotlin/com/saveourtool/save/Example1Test.kt",
+                  "uri": "sarif/src/main/kotlin/com/saveourtool/save/Example1Test.kt",
                   "uriBaseId": "%SRCROOT%"
                 },
                 "region": {
@@ -65,7 +65,7 @@
               "artifactChanges": [
                 {
                   "artifactLocation": {
-                    "uri": "src/main/kotlin/com/saveourtool/save/Example1Test.kt"
+                    "uri": "sarif/src/main/kotlin/com/saveourtool/save/Example1Test.kt"
                   },
                   "replacements": [
                     {
@@ -90,7 +90,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "src/main/kotlin/com/saveourtool/save/Example1Test.kt",
+                  "uri": "sarif/src/main/kotlin/com/saveourtool/save/Example1Test.kt",
                   "uriBaseId": "%SRCROOT%"
                 },
                 "region": {
