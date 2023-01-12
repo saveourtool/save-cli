@@ -26,7 +26,7 @@ import com.saveourtool.save.core.utils.ProcessTimeoutException
 import com.saveourtool.save.core.utils.singleIsInstance
 
 import com.saveourtool.sarifutils.cli.adapter.SarifFixAdapter
-import com.saveourtool.save.core.utils.findAncestorDirContainingFile
+import com.saveourtool.save.core.utils.calculatePathToSarifFile
 import io.github.petertrr.diffutils.diff
 import io.github.petertrr.diffutils.patch.ChangeDelta
 import io.github.petertrr.diffutils.patch.Delta
@@ -187,13 +187,15 @@ class FixPlugin(
         testsPaths: List<Path>,
         testCopyToExpectedFilesMap: List<PathPair>,
     ): List<PathPair> {
-        val sarifFileName = fixPluginConfig.actualFixSarifFileName!!
-        val sarif = com.saveourtool.save.core.files.fs.findAncestorDirContainingFile(testsPaths.first(), sarifFileName)?.let { it / sarifFileName }!!
-        println("SARIF PATH $sarif ${fs.exists(sarif)}")
+        val sarif = calculatePathToSarifFile(
+            sarifFileName = fixPluginConfig.actualFixSarifFileName!!,
+            // Since we have one .sarif file for all tests, just take the first of them as anchor for calculation of paths
+            anchorTestFilePath = testsPaths.first()
+        )
         // In this case fixes weren't performed by tool into the test files directly,
         // instead, there was created sarif file with list of fixes, which we will apply ourselves
         val fixedFiles = SarifFixAdapter(
-            sarifFile = sarif!!,
+            sarifFile = sarif,
             targetFiles = testsPaths
         ).process()
 

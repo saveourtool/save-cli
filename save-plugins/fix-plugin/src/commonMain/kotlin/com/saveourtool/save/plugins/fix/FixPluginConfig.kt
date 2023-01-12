@@ -86,14 +86,4 @@ data class FixPluginConfig(
     ).also {
         it.configLocation = this.configLocation
     }
-
-    // we require from sarif file to be located at the same level as corresponding save.toml
-    private fun calculateActualFixSarifFilePath(): String? = if (actualFixFormat == ActualFixFormat.SARIF) {
-        (
-
-                        (actualFixSarifFileName ?: "save-fixes.sarif").toPath()
-        ).toString()
-    } else {
-        null
-    }
 }

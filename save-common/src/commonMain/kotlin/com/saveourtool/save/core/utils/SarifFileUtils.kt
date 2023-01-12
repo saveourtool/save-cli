@@ -4,7 +4,10 @@
 
 package com.saveourtool.save.core.utils
 
+import com.saveourtool.save.core.files.findAncestorDirContainingFile
+import com.saveourtool.save.core.files.fs
 import com.saveourtool.save.core.files.parents
+import com.saveourtool.save.core.plugin.PluginException
 
 import okio.FileSystem
 import okio.Path
@@ -17,19 +20,6 @@ fun String.dropFileProtocol() = substringAfter("file://")
         // It is a valid format for Windows paths to look like `file:///C:/stuff`
         if (it[0] == '/' && it[2] == ':') it.drop(1) else it
     }
-
-/**
- * Find a file in any of parent directories and return this directory
- *
- * @param path path for which ancestors should be checked
- * @param fileName a name of the file that will be searched for
- * @return a path to one of parent directories or null if no directory contains [fileName]
- */
-fun FileSystem.findAncestorDirContainingFile(path: Path, fileName: String): Path? = path.parents().firstOrNull { parent ->
-    metadata(parent).isDirectory && list(parent).any {
-        it.name == fileName
-    }
-}
 
 /**
  * Make all paths in [this] collection relative to [root]
@@ -49,4 +39,24 @@ fun List<Path>.adjustToCommonRoot(root: Path) = map {
  */
 fun FileSystem.topmostTestDirectory(path: Path): Path = path.parents().last { parent ->
     list(parent).any { it.name == "save.toml" }
+}
+
+/**
+ * Calculate the path to sarif file; we expect, that it located at the same level, as top save.toml config
+ * from current hierarchy tree
+ *
+ * @param sarifFileName sarif file name
+ * @param anchorTestFilePath anchor file for calculating corresponding sarif file;
+ * since .sarif file expected to be the one for all test files, it could be any of test file
+ * @return path to sarif
+ */
+fun calculatePathToSarifFile(sarifFileName: String, anchorTestFilePath: Path): Path {
+    return fs.findAncestorDirContainingFile(
+        anchorTestFilePath, sarifFileName
+    )?.let {
+        it / sarifFileName
+    } ?: throw PluginException(
+        "Could not find SARIF file with expected warnings/fixes for file $anchorTestFilePath. " +
+                "Please check if correct `FarningsFormat`/`FixFormat` is set (should be SARIF) and if the file is present and called `$sarifFileName`."
+    )
 }
