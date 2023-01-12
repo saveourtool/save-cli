@@ -11,6 +11,7 @@ kotlin {
                 implementation(projects.saveCommon)
                 implementation(libs.multiplatform.diff)
                 implementation(libs.kotlinx.serialization.core)
+                implementation(libs.sarif.utils)
             }
         }
     }

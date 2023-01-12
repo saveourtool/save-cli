@@ -19,7 +19,7 @@ class ClassicFixTest {
         runTestsWithDiktat(
             listOf(
                 "fix/save.toml"
-            ), 5
+            ), 6
         )
     }
 
@@ -64,6 +64,15 @@ class ClassicFixTest {
         runTestsWithDiktat(
             listOf(
                 "fix/smoke/src/main/kotlin/com/saveourtool/save/IgnoreLinesTest/IgnoreLines"
+            ), 1
+        )
+    }
+
+    @Test
+    fun `execute fix plugin in sarif mode`() {
+        runTestsWithDiktat(
+            listOf(
+                "fix/sarif/src/main/kotlin/com/saveourtool/save"
             ), 1
         )
     }
