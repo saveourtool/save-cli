@@ -2,7 +2,7 @@
  * Utility methods to work with SARIF files.
  */
 
-package com.saveourtool.save.plugin.warn.sarif
+package com.saveourtool.save.core.utils
 
 import com.saveourtool.save.core.files.parents
 
@@ -47,6 +47,6 @@ fun List<Path>.adjustToCommonRoot(root: Path) = map {
  * @param path a path to start the search
  * @return one of parent directories
  */
-internal fun FileSystem.topmostTestDirectory(path: Path): Path = path.parents().last { parent ->
+fun FileSystem.topmostTestDirectory(path: Path): Path = path.parents().last { parent ->
     list(parent).any { it.name == "save.toml" }
 }

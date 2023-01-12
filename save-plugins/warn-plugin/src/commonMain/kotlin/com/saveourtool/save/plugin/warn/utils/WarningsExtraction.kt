@@ -9,10 +9,10 @@ import com.saveourtool.save.core.files.readFile
 import com.saveourtool.save.core.plugin.GeneralConfig
 import com.saveourtool.save.core.plugin.PluginException
 import com.saveourtool.save.plugin.warn.WarnPluginConfig
-import com.saveourtool.save.plugin.warn.sarif.adjustToCommonRoot
-import com.saveourtool.save.plugin.warn.sarif.findAncestorDirContainingFile
+import com.saveourtool.save.core.utils.adjustToCommonRoot
+import com.saveourtool.save.core.utils.findAncestorDirContainingFile
 import com.saveourtool.save.plugin.warn.sarif.toWarnings
-import com.saveourtool.save.plugin.warn.sarif.topmostTestDirectory
+import com.saveourtool.save.core.utils.topmostTestDirectory
 
 import io.github.detekt.sarif4k.SarifSchema210
 import okio.FileSystem
