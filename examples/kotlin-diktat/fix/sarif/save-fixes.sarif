@@ -29,7 +29,40 @@
                       }
                     }
                   ]
+                }
+              ],
+              "description": {
+                "text": "Package name is incorrect"
+              }
+            }
+          ],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/main/kotlin/com/saveourtool/save/Example1Test.kt",
+                  "uriBaseId": "%SRCROOT%"
                 },
+                "region": {
+                  "snippet": {
+                    "text": "test.smoke"
+                  },
+                    "endColumn": 19,
+                    "startColumn": 9,
+                    "startLine": 1
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Package name is incorrect"
+          },
+          "ruleId": "diktat-ruleset:identifier-naming"
+        },
+        {
+          "fixes": [
+            {
+              "artifactChanges": [
                 {
                   "artifactLocation": {
                     "uri": "src/main/kotlin/com/saveourtool/save/Example1Test.kt"
@@ -62,27 +95,11 @@
                 },
                 "region": {
                   "snippet": {
-                    "text": "test.smoke"
-                  },
-                    "endColumn": 19,
-                    "startColumn": 9,
-                    "startLine": 1
-                }
-              }
-            },
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "src/main/kotlin/com/saveourtool/save/Example1Test.kt",
-                  "uriBaseId": "%SRCROOT%"
-                },
-                "region": {
-                  "snippet": {
                     "text": "e"
                   },
-                    "endColumn": 8,
-                    "startColumn": 7,
-                    "startLine": 3
+                  "endColumn": 8,
+                  "startColumn": 7,
+                  "startLine": 3
                 }
               }
             }
