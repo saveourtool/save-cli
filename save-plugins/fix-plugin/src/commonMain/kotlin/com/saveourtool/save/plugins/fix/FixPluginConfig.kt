@@ -82,12 +82,13 @@ data class FixPluginConfig(
         resourceNameExpectedSuffix = resourceNameExpected,
         ignoreLines = ignoreLines,
         actualFixFormat = actualFixFormat ?: ActualFixFormat.IN_PLACE,
-        actualFixSarifFileName = calculateActualFixSarifFileName(),
+        actualFixSarifFileName = calculateActualFixSarifFilePath(),
     ).also {
         it.configLocation = this.configLocation
     }
 
-    private fun calculateActualFixSarifFileName(): String? = if (actualFixFormat == ActualFixFormat.SARIF) {
+    // we require from sarif file to be located at the same level as corresponding save.toml
+    private fun calculateActualFixSarifFilePath(): String? = if (actualFixFormat == ActualFixFormat.SARIF) {
         (
                 configLocation.parent!! /
                         (actualFixSarifFileName ?: "save-fixes.sarif").toPath()
