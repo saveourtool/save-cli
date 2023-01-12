@@ -42,8 +42,8 @@ fun FileSystem.topmostTestDirectory(path: Path): Path = path.parents().last { pa
 }
 
 /**
- * Calculate the path to sarif file; we expect, that it located at the same level, as top save.toml config
- * from current hierarchy tree
+ * Calculate the path to sarif file; we expect, that it single for the all tests and located in one of parent directories
+ * for evaluated test files
  *
  * @param sarifFileName sarif file name
  * @param anchorTestFilePath anchor file for calculating corresponding sarif file;
@@ -51,9 +51,11 @@ fun FileSystem.topmostTestDirectory(path: Path): Path = path.parents().last { pa
  * @return path to sarif
  */
 fun calculatePathToSarifFile(sarifFileName: String, anchorTestFilePath: Path): Path {
+    println("anchorTestFilePath $anchorTestFilePath")
     return fs.findAncestorDirContainingFile(
         anchorTestFilePath, sarifFileName
     )?.let {
+        println("${it / sarifFileName}")
         it / sarifFileName
     } ?: throw PluginException(
         "Could not find SARIF file with expected warnings/fixes for file $anchorTestFilePath. " +
