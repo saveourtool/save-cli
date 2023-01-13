@@ -23,6 +23,7 @@ import com.saveourtool.save.core.utils.ExecutionResult
 import com.saveourtool.save.core.utils.PathSerializer
 import com.saveourtool.save.core.utils.ProcessExecutionException
 import com.saveourtool.save.core.utils.ProcessTimeoutException
+import com.saveourtool.save.core.utils.calculatePathToSarifFile
 import com.saveourtool.save.core.utils.singleIsInstance
 
 import com.saveourtool.sarifutils.cli.adapter.SarifFixAdapter
@@ -186,10 +187,15 @@ class FixPlugin(
         testsPaths: List<Path>,
         testCopyToExpectedFilesMap: List<PathPair>,
     ): List<PathPair> {
+        val sarif = calculatePathToSarifFile(
+            sarifFileName = fixPluginConfig.actualFixSarifFileName!!,
+            // Since we have one .sarif file for all tests, just take the first of them as anchor for calculation of paths
+            anchorTestFilePath = testsPaths.first()
+        )
         // In this case fixes weren't performed by tool into the test files directly,
         // instead, there was created sarif file with list of fixes, which we will apply ourselves
         val fixedFiles = SarifFixAdapter(
-            sarifFile = fixPluginConfig.actualFixSarifFileName!!.toPath(),
+            sarifFile = sarif,
             targetFiles = testsPaths
         ).process()
 
