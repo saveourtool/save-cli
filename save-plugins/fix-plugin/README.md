@@ -1,5 +1,11 @@
 ## Save fix plugin
 Plugin that runs provided executable on the initial file with a test source code and compares its output with an expected result.
+
+Fix plugin supports two types of execution: `IN_PLACE` and `SARIF`, which could be specified by `actualFixFormat` flag.
+In case of `IN_PLACE` mode, `save` will apply fixes, obtained by static analysis tool by executing it with provided configuration,
+while in `SARIF` mode, it will expect the `.sarif` file, with the list of fixes, which could be provided by `actualFixSarifFileName` flag.
+Plugin will extract all fixes from sarif and apply them to the test files. More information about sarif fix sections could be found [here](https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/sarif-v2.1.0-os.html#_Toc34317881).
+
 Please note, that it is important for test resources to have specific postfixes. By the default test file it should be `Test`
 , for the file with expected result - it should be `Expected`.
 
