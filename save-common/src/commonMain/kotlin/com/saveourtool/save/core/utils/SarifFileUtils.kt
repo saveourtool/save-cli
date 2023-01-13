@@ -49,16 +49,13 @@ fun FileSystem.topmostTestDirectory(path: Path): Path = path.parents().last { pa
  * @param anchorTestFilePath anchor file for calculating corresponding sarif file;
  * since .sarif file expected to be the one for all test files, it could be any of test file
  * @return path to sarif
+ * @throws PluginException in case of absence of sarif file
  */
-fun calculatePathToSarifFile(sarifFileName: String, anchorTestFilePath: Path): Path {
-    println("anchorTestFilePath $anchorTestFilePath")
-    return fs.findAncestorDirContainingFile(
-        anchorTestFilePath, sarifFileName
-    )?.let {
-        println("${it / sarifFileName}")
-        it / sarifFileName
-    } ?: throw PluginException(
-        "Could not find SARIF file with expected warnings/fixes for file $anchorTestFilePath. " +
-                "Please check if correct `FarningsFormat`/`FixFormat` is set (should be SARIF) and if the file is present and called `$sarifFileName`."
-    )
-}
+fun calculatePathToSarifFile(sarifFileName: String, anchorTestFilePath: Path): Path = fs.findAncestorDirContainingFile(
+    anchorTestFilePath, sarifFileName
+)?.let {
+    it / sarifFileName
+} ?: throw PluginException(
+    "Could not find SARIF file with expected warnings/fixes for file $anchorTestFilePath. " +
+            "Please check if correct `FarningsFormat`/`FixFormat` is set (should be SARIF) and if the file is present and called `$sarifFileName`."
+)

@@ -218,6 +218,19 @@ fun Path.parentsWithSelf() = listOf(this) + this.parents().toList()
 expect fun FileSystem.myDeleteRecursively(path: Path)
 
 /**
+ * Find a file in any of parent directories and return this directory
+ *
+ * @param path path for which ancestors should be checked
+ * @param fileName a name of the file that will be searched for
+ * @return a path to one of parent directories or null if no directory contains [fileName]
+ */
+fun FileSystem.findAncestorDirContainingFile(path: Path, fileName: String): Path? = path.parents().firstOrNull { parent ->
+    metadata(parent).isDirectory && list(parent).any {
+        it.name == fileName
+    }
+}
+
+/**
  * @return current working directory
  */
 expect fun getWorkingDirectory(): Path
@@ -244,17 +257,4 @@ private fun createRelativePathFromThisToTheRoot(currentPath: Path, rootPath: Pat
         parentDirectory = parentDirectory.parent!!
     }
     return relativePath + currentPath.name
-}
-
-/**
- * Find a file in any of parent directories and return this directory
- *
- * @param path path for which ancestors should be checked
- * @param fileName a name of the file that will be searched for
- * @return a path to one of parent directories or null if no directory contains [fileName]
- */
-fun FileSystem.findAncestorDirContainingFile(path: Path, fileName: String): Path? = path.parents().firstOrNull { parent ->
-    metadata(parent).isDirectory && list(parent).any {
-        it.name == fileName
-    }
 }

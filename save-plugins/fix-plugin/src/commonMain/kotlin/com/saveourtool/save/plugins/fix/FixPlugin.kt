@@ -23,10 +23,10 @@ import com.saveourtool.save.core.utils.ExecutionResult
 import com.saveourtool.save.core.utils.PathSerializer
 import com.saveourtool.save.core.utils.ProcessExecutionException
 import com.saveourtool.save.core.utils.ProcessTimeoutException
+import com.saveourtool.save.core.utils.calculatePathToSarifFile
 import com.saveourtool.save.core.utils.singleIsInstance
 
 import com.saveourtool.sarifutils.cli.adapter.SarifFixAdapter
-import com.saveourtool.save.core.utils.calculatePathToSarifFile
 import io.github.petertrr.diffutils.diff
 import io.github.petertrr.diffutils.patch.ChangeDelta
 import io.github.petertrr.diffutils.patch.Delta
