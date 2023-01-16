@@ -6,7 +6,7 @@ import kotlin.test.Test
 class FixDirTest {
     @Test
     fun `execute fix plugin`() {
-        runTestsWithDiktat(listOf("fix/smoke/src/main/kotlin/com/saveourtool/save"), 5)
+        runTestsWithDiktat(listOf("fix/smoke/src/main/kotlin/com/saveourtool/save"), 6)
     }
 
     @Test
