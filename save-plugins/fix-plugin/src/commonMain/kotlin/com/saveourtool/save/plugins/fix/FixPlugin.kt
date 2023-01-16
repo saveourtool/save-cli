@@ -230,10 +230,7 @@ class FixPlugin(
     ): List<TestResult> = testCopyToExpectedFilesMap.map { (testCopy, expected) ->
         val fixedLines = fs.readLines(testCopy)
         val expectedLines = fs.readLines(expected)
-
-        // FixMe: https://github.com/saveourtool/save-cli/issues/473
-        val test = testToExpectedFilesMap.first { (test, _) -> test.name == testCopy.name }.first
-
+        val test = testToExpectedFilesMap.first { (test, _) -> test.createRelativePathToTheRoot(testConfig.directory) in testCopy.toString() }.first
         TestResult(
             FixTestFiles(test, expected),
             checkStatus(expectedLines, fixedLines),
