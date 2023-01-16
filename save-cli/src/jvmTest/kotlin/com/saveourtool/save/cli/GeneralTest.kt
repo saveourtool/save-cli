@@ -70,7 +70,7 @@ class GeneralTest {
     fun `examples test from subfolder`() {
         // Almost all result statuses should be Pass, except the few cases
         doTest("../examples/kotlin-diktat/", "fix/smoke") { reports ->
-            assertEquals(5, reports.size)
+            assertEquals(6, reports.size)
         }
     }
 
