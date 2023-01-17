@@ -248,16 +248,14 @@ class FixPlugin(
     }
 
     private fun isComparingTestAndCopy(test: Path, testCopy: Path): Boolean {
-        // If the test is in the root directory, then we compare them by name.
-        return if (testConfig.directory.compareTo(test.parents().first()) == 0) {
-            test.name == testCopy.name
-        } else {
-            testCopy.relativeTo(FileSystem.SYSTEM_TEMPORARY_DIRECTORY)
-                .toString()
-                .substringAfter(testConfig.directory.name + Path.DIRECTORY_SEPARATOR)
-                .toPath()
-                .compareTo(test.createRelativePathToTheRoot(testConfig.directory).toPath()) == 0
-        }
+        val testCopyPath = testCopy.relativeTo(FileSystem.SYSTEM_TEMPORARY_DIRECTORY)
+            .toString()
+            .substringAfter(Path.DIRECTORY_SEPARATOR)
+            .toPath()
+
+        val testCopy = test.createRelativePathToTheRoot(testConfig.getRootConfig().directory).toPath()
+
+        return testCopyPath.compareTo(testCopy) == 0
     }
 
     private fun failTestResult(
