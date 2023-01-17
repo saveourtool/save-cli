@@ -5,6 +5,7 @@ import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
 import com.saveourtool.save.core.files.createRelativePathToTheRoot
 import com.saveourtool.save.core.files.myDeleteRecursively
+import com.saveourtool.save.core.files.parents
 import com.saveourtool.save.core.files.readLines
 import com.saveourtool.save.core.logging.describe
 import com.saveourtool.save.core.logging.logDebug
@@ -231,8 +232,7 @@ class FixPlugin(
         val fixedLines = fs.readLines(testCopy)
         val expectedLines = fs.readLines(expected)
         val test = testToExpectedFilesMap.first { (test, _) ->
-            testCopy.relativeTo(FileSystem.SYSTEM_TEMPORARY_DIRECTORY).toString().substringAfter(testConfig.directory.name + Path.DIRECTORY_SEPARATOR)
-                .toPath().compareTo(test.createRelativePathToTheRoot(testConfig.directory).toPath()) == 0
+            isComparingTestAndCopy(test, testCopy)
         }.first
         TestResult(
             FixTestFiles(test, expected),
@@ -245,6 +245,19 @@ class FixPlugin(
                 CountWarnings.notApplicable,
             )
         )
+    }
+
+    private fun isComparingTestAndCopy(test: Path, testCopy: Path): Boolean {
+        // If the test is in the root directory, then we compare them by name.
+        return if (testConfig.directory.compareTo(test.parents().first()) == 0) {
+            test.name == testCopy.name
+        } else {
+            testCopy.relativeTo(FileSystem.SYSTEM_TEMPORARY_DIRECTORY)
+                .toString()
+                .substringAfter(testConfig.directory.name + Path.DIRECTORY_SEPARATOR)
+                .toPath()
+                .compareTo(test.createRelativePathToTheRoot(testConfig.directory).toPath()) == 0
+        }
     }
 
     private fun failTestResult(
