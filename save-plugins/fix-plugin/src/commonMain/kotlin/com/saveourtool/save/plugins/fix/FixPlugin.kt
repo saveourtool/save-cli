@@ -230,7 +230,10 @@ class FixPlugin(
     ): List<TestResult> = testCopyToExpectedFilesMap.map { (testCopy, expected) ->
         val fixedLines = fs.readLines(testCopy)
         val expectedLines = fs.readLines(expected)
-        val test = testToExpectedFilesMap.first { (test, _) -> test.createRelativePathToTheRoot(testConfig.directory) in testCopy.toString() }.first
+        val test = testToExpectedFilesMap.first { (test, _) ->
+            testCopy.relativeTo(FileSystem.SYSTEM_TEMPORARY_DIRECTORY).toString().substringAfter(testConfig.directory.name + Path.DIRECTORY_SEPARATOR)
+                .toPath().compareTo(test.createRelativePathToTheRoot(testConfig.directory).toPath()) == 0
+        }.first
         TestResult(
             FixTestFiles(test, expected),
             checkStatus(expectedLines, fixedLines),
