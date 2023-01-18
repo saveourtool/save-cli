@@ -5,7 +5,6 @@ import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
 import com.saveourtool.save.core.files.createRelativePathToTheRoot
 import com.saveourtool.save.core.files.myDeleteRecursively
-import com.saveourtool.save.core.files.parents
 import com.saveourtool.save.core.files.readLines
 import com.saveourtool.save.core.logging.describe
 import com.saveourtool.save.core.logging.logDebug
@@ -248,14 +247,16 @@ class FixPlugin(
     }
 
     private fun isComparingTestAndCopy(test: Path, testCopy: Path): Boolean {
+        // TestCopyPath stored in tmpDir, holding the whole hierarchy of original file
+        // while testPath comes to us with path, starting from testRootPath, so we compare them in such way
         val testCopyPath = testCopy.relativeTo(FileSystem.SYSTEM_TEMPORARY_DIRECTORY)
             .toString()
             .substringAfter(Path.DIRECTORY_SEPARATOR)
             .toPath()
 
-        val testCopy = test.createRelativePathToTheRoot(testConfig.getRootConfig().directory).toPath()
+        val testPath = test.createRelativePathToTheRoot(testConfig.getRootConfig().directory).toPath()
 
-        return testCopyPath.compareTo(testCopy) == 0
+        return testCopyPath.compareTo(testPath) == 0
     }
 
     private fun failTestResult(
