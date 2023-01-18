@@ -1,0 +1,8 @@
+[general]
+execCmd = "sh -c"
+
+[fix]
+execFlags = "--encode"
+
+[warn]
+execFlags = "--warn"

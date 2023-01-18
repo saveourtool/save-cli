@@ -1,0 +1,10 @@
+[general]
+    tags = ["smoke"]
+    description = "SARIF fix objects: Smoke tests for diktat"
+    suiteName = "SARIF fix objects - Autofix"
+
+# FixMe: Until https://github.com/saveourtool/sarif-utils/issues/23
+# FixMe: compare only by names, but should by full paths
+#[fix]
+    #actualFixFormat = "SARIF"
+    #actualFixSarifFileName = "save-fixes.sarif"

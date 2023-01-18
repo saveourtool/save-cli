@@ -1,5 +1,5 @@
 plugins {
-    id("org.cqfn.save.buildutils.kotlin-library")
+    id("com.saveourtool.save.buildutils.kotlin-library")
 }
 
 kotlin {

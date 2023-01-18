@@ -1,7 +1,7 @@
 
 
 plugins {
-    id("org.cqfn.save.buildutils.kotlin-library")
+    id("com.saveourtool.save.buildutils.kotlin-library")
 }
 
 kotlin {
@@ -11,6 +11,7 @@ kotlin {
                 implementation(projects.saveCommon)
                 implementation(libs.multiplatform.diff)
                 implementation(libs.kotlinx.serialization.core)
+                implementation(libs.sarif.utils)
             }
         }
     }

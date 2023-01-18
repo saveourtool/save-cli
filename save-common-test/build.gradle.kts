@@ -1,10 +1,10 @@
 plugins {
-    id("org.cqfn.save.buildutils.kotlin-library")  // todo: disable publishing
+    id("com.saveourtool.save.buildutils.kotlin-library")  // todo: disable publishing
 }
 
 kotlin {
     sourceSets {
-        val commonMain by getting {
+        val commonNonJsMain by getting {
             dependencies {
                 implementation(projects.saveCommon)
                 api(libs.okio)
@@ -17,13 +17,6 @@ kotlin {
             dependencies {
                 implementation(kotlin("test-junit5"))
             }
-        }
-        val jvmTest by getting {
-            dependsOn(jvmMain)
-        }
-        val nativeMain by getting
-        val nativeTest by getting {
-            dependsOn(nativeMain)
         }
     }
 }

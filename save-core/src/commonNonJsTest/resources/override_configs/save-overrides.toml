@@ -1,0 +1,8 @@
+[general]
+execCmd = "java -jar tool.jar"
+
+[fix]
+execFlags = "--fix"
+
+[warn]
+execFlags = "--warn"

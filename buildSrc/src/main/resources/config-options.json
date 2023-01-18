@@ -17,7 +17,7 @@
     },
     "logType" : {
       "argType" : "ArgType.Choice<LogType>()",
-      "kotlinType": "org.cqfn.save.core.config.LogType",
+      "kotlinType": "com.saveourtool.save.core.config.LogType",
       "fullName" : "log",
       "shortName" : "",
       "description" : "Type of logging mode",
@@ -25,7 +25,7 @@
     },
     "reportType" : {
       "argType" : "ArgType.Choice<ReportType>()",
-      "kotlinType": "org.cqfn.save.core.config.ReportType",
+      "kotlinType": "com.saveourtool.save.core.config.ReportType",
       "fullName" : "report-type",
       "shortName" : "",
       "description" : "Type of generated report with execution results",
@@ -37,7 +37,7 @@
       "fullName" : "baseline",
       "shortName" : "b",
       "description" : "Path to the file with baseline data",
-      "default" : "null"
+      "default" : null
     },
     "excludeSuites" : {
       "argType" : "ArgType.String",
@@ -45,7 +45,7 @@
       "fullName" : "exclude-suites",
       "shortName" : "e",
       "description" : "Test suites, which won't be checked",
-      "default" : "null"
+      "default" : null
     },
     "includeSuites" : {
       "argType" : "ArgType.String",
@@ -53,19 +53,19 @@
       "fullName" : "include-suites",
       "shortName" : "i",
       "description" : "Test suites, only which ones will be checked",
-      "default" : "null"
+      "default" : null
     },
     "language" : {
-      "argType" : "ArgType.Choice<LanguageType>()",
-      "kotlinType": "org.cqfn.save.core.config.LanguageType",
+      "argType" : "ArgType.String",
+      "kotlinType": "kotlin.String",
       "fullName" : "language",
       "shortName" : "l",
       "description" : "Language that you are developing analyzer for",
-      "default" : "LanguageType.UNDEFINED"
+      "default" : null
     },
     "resultOutput" : {
       "argType" : "ArgType.Choice<OutputStreamType>()",
-      "kotlinType": "org.cqfn.save.core.config.OutputStreamType",
+      "kotlinType": "com.saveourtool.save.core.config.OutputStreamType",
       "fullName" : "result-output",
       "shortName" : "out",
       "description" : "Data output stream",

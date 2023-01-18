@@ -1,13 +1,14 @@
-![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/cqfn/save)
-![Maven Central](https://img.shields.io/maven-central/v/org.cqfn.save/save-core)
-![Lines of code](https://img.shields.io/tokei/lines/github.com/cqfn/save)
-![Hits-of-Code](https://hitsofcode.com/github/cqfn/save?branch=main)
-![GitHub repo size](https://img.shields.io/github/repo-size/cqfn/save)
-![Run deteKT](https://github.com/cqfn/save/actions/workflows/detekt.yml/badge.svg)
-![Run diKTat](https://github.com/cqfn/save/actions/workflows/diktat.yml/badge.svg)
-![Build and test](https://github.com/cqfn/save/workflows/Build%20and%20test/badge.svg)
-[![License](https://img.shields.io/github/license/cqfn/save)](https://github.com/cqfn/save/blob/master/LICENSE)
-[![codecov](https://codecov.io/gh/cqfn/save/branch/master/graph/badge.svg)](https://codecov.io/gh/cqfn/save)
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/saveourtool/save-cli)
+![Maven Central](https://img.shields.io/maven-central/v/com.saveourtool.save/save-common)
+![Lines of code](https://img.shields.io/tokei/lines/github.com/saveourtool/save-cli)
+[![Hits-of-Code](https://hitsofcode.com/github/saveourtool/save-cli?branch=main)](https://hitsofcode.com/github/saveourtool/save-cli/view?branch=main)
+![GitHub repo size](https://img.shields.io/github/repo-size/saveourtool/save-cli)
+[![Run deteKT](https://github.com/saveourtool/save-cli/actions/workflows/detekt.yml/badge.svg)](https://github.com/saveourtool/save-cli/actions/workflows/detekt.yml)
+[![Run diKTat](https://github.com/saveourtool/save-cli/actions/workflows/diktat.yml/badge.svg)](https://github.com/saveourtool/save-cli/actions/workflows/diktat.yml)
+[![Build and test](https://github.com/saveourtool/save-cli/actions/workflows/build_and_test.yml/badge.svg)](https://github.com/saveourtool/save-cli/actions/workflows/build_and_test.yml)
+[![License](https://img.shields.io/github/license/saveourtool/save-cli)](https://github.com/saveourtool/save-cli/blob/main/LICENSE)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsaveourtool%2Fsave-cli.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsaveourtool%2Fsave-cli?ref=badge_shield)
+[![codecov](https://codecov.io/gh/saveourtool/save-api/branch/master/graph/badge.svg)](https://codecov.io/gh/saveourtool/save-api)
 
 <!--
 # ![codebeat badge] TO DO
@@ -25,7 +26,7 @@ especially which work with the code. Fully native and multiplatform application.
 
 
 ## What is SAVE?
-Static Analysis Verification and Evaluation (SAVE) - is an eco-system (see also [save-cloud](https://github.com/cqfn/save-cloud)) for evaluation, testing and certification of static analyzers.
+Static Analysis Verification and Evaluation (SAVE) - is an eco-system (see also [save-cloud](https://github.com/saveourtool/save-cloud)) for evaluation, testing and certification of static analyzers.
 Instead of writing your own test framework, you can use SAVE to have a command-line test application. The only thing you need is to prepare test resources in a proper format.
 
 <!-- 
@@ -218,8 +219,19 @@ or using [PMD rules](https://pmd.github.io/). But in all cases a lot of time wil
 The project uses gradle as a build system and can be built with the command `./gradlew build`.
 To compile native artifacts, you will need to install prerequisites as described in Kotlin/Native documentation.
 
+To access dependencies hosted on Github Package Registry, you need to add the foolowing into `gradle.properties` or `~/.gradle/gradle.properties`:
+```properties
+gprUser=<GH username>
+gprKey=<GH personal access token>
+```
+Personal Access Token should be generated via https://github.com/settings/tokens/new with the scope at least containing `read:packages`.
+
 Because of generated code, you will need to run the build once to correctly import project in IDE with resolved imports.
 
 ## Contribution
 You can always contribute to the main SAVE framework - just create a PR for it. But to contribute or change tests in categories you will need get approvals from 
 the maintainer of the test package/analysis category. Please see the list of them.  
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsaveourtool%2Fsave-cli.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsaveourtool%2Fsave-cli?ref=badge_large)

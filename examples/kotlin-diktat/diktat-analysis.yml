@@ -1,7 +1,7 @@
 - name: DIKTAT_COMMON
   enabled: true
   configuration:
-    domainName: org.cqfn.save
+    domainName: com.saveourtool.save
     kotlinVersion: 1.5
     srcDirectories: "main,nativeMain"
     testDirs: "test,nativeTest,commonTest"

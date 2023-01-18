@@ -1,0 +1,6 @@
+[general]
+tags = ["smoke"]
+description = "Test for tests with same name"
+suiteName = "Autofix: Smoke Tests"
+
+[fix]

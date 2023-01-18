@@ -2,29 +2,30 @@ name: Run diKTat
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
 
 jobs:
   diktat_check:
-    runs-on: ubuntu-20.04
-    env:
-      GRADLE_OPTS: -Dorg.gradle.daemon=false
-
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
           java-version: 11
-          distribution: zulu
-      - uses: burrunan/gradle-cache-action@v1
+          distribution: temurin
+      - uses: gradle/gradle-build-action@v2
         with:
           gradle-version: wrapper
-          # additional files to calculate key for dependency cache
-          gradle-dependencies-cache-key: |
-            buildSrc/**/Versions.kt
           arguments: |
-            diktatCheckAll
-          properties: |
-            detekt.multiplatform.disabled=true
+            diktatCheck
+            mergeDiktatReports
+            -Pdetekt.multiplatform.disabled=true
+            -Pdiktat.githubActions=true
+            --continue
+      - name: Upload SARIF report to Github
+        if: always()
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: build/reports/diktat/diktat-merged.sarif

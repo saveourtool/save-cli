@@ -1,7 +1,7 @@
 - name: DIKTAT_COMMON
   enabled: true
   configuration:
-    domainName: org.cqfn.save
+    domainName: com.saveourtool.save
     kotlinVersion: 1.6
     srcDirectories: "main,nativeMain,commonNonJsMain"
     testDirs: "test,nativeTest,commonTest,jvmTest,commonNonJsTest"
@@ -53,6 +53,7 @@
     extendedIndentBeforeDot: false
     # The indentation size for each file
     indentationSize: 4
+    extendedIndentForExpressionBodies: true
 - name: EMPTY_BLOCK_STRUCTURE_ERROR
   enabled: true
   configuration:
@@ -108,3 +109,6 @@
   configuration:
     valueArgument: true
     valueParameter: true
+- name: DEBUG_PRINT
+  enabled: true
+  ignoreAnnotated: [ Test ]

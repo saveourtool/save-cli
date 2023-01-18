@@ -79,6 +79,8 @@ you will need the following SAVE configuration:
 ```toml
 [general]
 execCmd = "./detekt"
+batchSize = 1 # (default value)
+batchSeparator  = ", " # (default value)
 description = "My suite description"
 suiteName = "DocsCheck"
 language = "Kotlin"
@@ -123,14 +125,15 @@ messageCaptureGroupEnd = 1 # (default value)
 warningTextHasColumn = true # (default value)
 warningTextHasLine = true # (default value)
 testNameRegex = ".*Test.*" # (default value)
-batchSize = 1 # (default value)
-batchSeparator  = ", " # (default value)
 linePlaceholder = "$line" # (default value)
 patternForRegexInWarning = ["{{", "}}"]
 # if true - the regex created from expected warning will be wrapped with '.*': .*warn.*.
 partialWarnTextMatch = false # (default value)
 # if not set than stdout will be used as result of warn plugin execution
 testToolResFileOutput = "result.out" # (no default value is set)
+
+# Extra flags will be extracted from a line that mathces this regex if it's present in a file
+runConfigPattern = "# RUN: (.+)"
 ```
 
 When executed from project root (where `save.propertes` is located), SAVE will cd to `rootDir` and discover all files
@@ -146,22 +149,33 @@ with `lineCaptureGroup`, `columnCaptureGroup` and `messageCaptureGroup` paramete
 usually you'll want them to be consistent to make testing easier, i.e. if input has line number, then so should output.
 `testNameRegex` is a regular expression which sets the name of the test file.
 
-### Customize `execCmd` per file with placefolders and execFlags
+### Customize `execCmd` per file with placeholders and execFlags
 As the next level of customization, execution command can be customized per individual test. To do so, one can use a special comment in that file.
 The pattern of the comment is taken from `WarnPluginConfig.runConfigPattern`. It should contain a single capture group, which corresponds to
-execution command.
+execution command. Capturing of multiline commands is supported; in this case the line should be finalized by `\`.
 
 Additionally, that execution command can define a number of placeholders, which can be used in `execFlags` in TOML config:
 * `args1` a set of CLI parameters which will be inserted _between_ `execFlags` from TOML config and name of the test file
 * `args2` a set of CLI parameters which will be inserted _after_ the name of the test file
-These placeholders are optional; if present, they should be comma-separated. Equal sign can be escaped with `\`. They can be accessed
-from `warn.execFlags` with `$` sign. Additionally, `$fileName` in `execFlags` is substituted by the name of analyzed file
+These placeholders are optional; if present, they should be comma-separated. Comma and equal sign can be escaped with `\`.
+They can be accessed from `warn.execFlags` with `$` sign. Additionally, `$fileName` in `execFlags` is substituted by the name of analyzed file
 (or a set of names in batch mode).
 
-For example, the comment `// RUN: args1=--foo\=bar,args2=--log debug` in combination with `warn.execCmd = ./my-tool` will lead to execution
+For example, the comment `// RUN: args1=--foo\=bar,args2=--baz=opt-1\,opt-2` in combination with `warn.execCmd = ./my-tool` will lead to execution
 of the following command when checking file `FileName`:
 ```bash
-./my-tool --foo=bar FileName --log debug
+./my-tool --foo=bar FileName --baz=opt-1,opt-2
+```
+
+More examples:
+```c++
+// RUN: args1=--log debug\
+// RUN: args2=--verbose --verbosity=4 \
+// RUN: --output out.txt
+```
+translates to
+```bash
+./my-tool --log debug FileName --verbose --verbosity=4 --output out.txt
 ```
 
 The following images explain how `execFlags` can be used:
