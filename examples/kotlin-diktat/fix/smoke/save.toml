@@ -2,5 +2,6 @@
     tags = ["smoke"]
     description = "Smoke tests for diktat"
     suiteName = "Autofix: Smoke Tests"
+    batchSize = 2
 
 [fix]

@@ -230,10 +230,9 @@ class FixPlugin(
     ): List<TestResult> = testCopyToExpectedFilesMap.map { (testCopy, expected) ->
         val fixedLines = fs.readLines(testCopy)
         val expectedLines = fs.readLines(expected)
-
-        // FixMe: https://github.com/saveourtool/save-cli/issues/473
-        val test = testToExpectedFilesMap.first { (test, _) -> test.name == testCopy.name }.first
-
+        val test = testToExpectedFilesMap.first { (test, _) ->
+            isComparingTestAndCopy(test, testCopy)
+        }.first
         TestResult(
             FixTestFiles(test, expected),
             checkStatus(expectedLines, fixedLines),
@@ -245,6 +244,19 @@ class FixPlugin(
                 CountWarnings.notApplicable,
             )
         )
+    }
+
+    private fun isComparingTestAndCopy(test: Path, testCopy: Path): Boolean {
+        // TestCopyPath stored in tmpDir, holding the whole hierarchy of original file
+        // while testPath comes to us with path, starting from testRootPath, so we compare them in such way
+        val testCopyPath = testCopy.relativeTo(FileSystem.SYSTEM_TEMPORARY_DIRECTORY)
+            .toString()
+            .substringAfter(Path.DIRECTORY_SEPARATOR)
+            .toPath()
+
+        val testPath = test.createRelativePathToTheRoot(testConfig.getRootConfig().directory).toPath()
+
+        return testCopyPath.compareTo(testPath) == 0
     }
 
     private fun failTestResult(
