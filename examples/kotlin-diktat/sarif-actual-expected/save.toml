@@ -9,7 +9,7 @@
     expectedWarningsFormat = "SARIF"
     expectedWarningsFileName = "save-warnings-expected.sarif"
     actualWarningsFormat = "SARIF"
-    actualWarningsFileName = "/Users/vladislav/IdeaProjects/save/examples/kotlin-diktat/sarif-actual-expected/save-warnings-actual.sarif"
+    actualWarningsFileName = "../examples/kotlin-diktat/sarif-actual-expected/save-warnings-actual.sarif"
     # diktat warnings have the following format: filename.kt:1:15: [WARN_NAME] my warning
     actualWarningsPattern="(\\w+\\..+):(\\d+):(\\d+): (\\[.*\\].*)"
     fileNameCaptureGroupOut = 1
