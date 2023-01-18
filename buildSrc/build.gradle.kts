@@ -17,5 +17,5 @@ dependencies {
     implementation("io.github.gradle-nexus:publish-plugin:1.1.0")
     implementation("org.ajoberstar.reckon:reckon-gradle:0.16.1")
     implementation("com.squareup:kotlinpoet:1.12.0")
-    implementation("com.google.code.gson:gson:2.10")
+    implementation("com.google.code.gson:gson:2.10.1")
 }
