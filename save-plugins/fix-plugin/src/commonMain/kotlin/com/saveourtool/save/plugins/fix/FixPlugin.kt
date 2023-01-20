@@ -209,9 +209,7 @@ class FixPlugin(
         // modify existing map, replace test copies to fixed test copies
         val fixedTestCopyToExpectedFilesMap = testCopyToExpectedFilesMap.toMutableList().map { (testCopy, expected) ->
             val fixedTestCopy = fixedFiles.first {
-                // FixMe: Until https://github.com/saveourtool/sarif-utils/issues/23
-                // FixMe: compare only by names, but should by full paths
-                it.name == testCopy.name
+                isComparingTestAndCopy(it, testCopy, fixPluginConfig.actualFixFormat!!)
             }
             fixedTestCopy to expected
         }
@@ -270,11 +268,11 @@ class FixPlugin(
             testCopyPathAfterTmpDir
         } else {
             // in sarif mode in comes with testRootPath, since it was copied by sarif library itself
-            // trim testRootPath
+            // so trim testRootPath
             testCopyPathAfterTmpDir
                 .relativeTo(testConfig.getRootConfig().directory)
                 // seems, that relativeTo not indefinitely add DIRECTORY_SEPARATOR: sometimes / , sometimes \
-                // into the final path, so we use such strange hack in aim to apply toPath, which will set
+                // into the path, so we use such strange hack in aim to apply toPath, which will set
                 // all separators correctly
                 .toString()
                 .toPath()
