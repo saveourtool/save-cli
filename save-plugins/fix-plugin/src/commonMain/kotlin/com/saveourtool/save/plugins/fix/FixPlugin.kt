@@ -26,7 +26,7 @@ import com.saveourtool.save.core.utils.ProcessTimeoutException
 import com.saveourtool.save.core.utils.calculatePathToSarifFile
 import com.saveourtool.save.core.utils.singleIsInstance
 
-import com.saveourtool.sarifutils.cli.adapter.SarifFixAdapter
+import com.saveourtool.sarifutils.adapter.SarifFixAdapter
 import io.github.petertrr.diffutils.diff
 import io.github.petertrr.diffutils.patch.ChangeDelta
 import io.github.petertrr.diffutils.patch.Delta
@@ -124,7 +124,14 @@ class FixPlugin(
                 val stdout = executionResult.stdout
                 val stderr = executionResult.stderr
 
-                buildTestResultsForChunk(testToExpectedFilesMap, adjustedTestCopyToExpectedFilesMap, execCmd, stdout, stderr)
+                buildTestResultsForChunk(
+                    testToExpectedFilesMap,
+                    adjustedTestCopyToExpectedFilesMap,
+                    execCmd,
+                    stdout,
+                    stderr,
+                    fixPluginConfig.actualFixFormat!!
+                )
             }
             .flatten()
     }
@@ -219,6 +226,7 @@ class FixPlugin(
      * @param execCmd execution command for debug info
      * @param stdout std out of executed tool, if any
      * @param stderr std err of executed tool, if any
+     * @param fixFormat fix format
      * @return list of the test results
      */
     private fun buildTestResultsForChunk(
@@ -227,11 +235,12 @@ class FixPlugin(
         execCmd: String,
         stdout: List<String>,
         stderr: List<String>,
+        fixFormat: ActualFixFormat
     ): List<TestResult> = testCopyToExpectedFilesMap.map { (testCopy, expected) ->
         val fixedLines = fs.readLines(testCopy)
         val expectedLines = fs.readLines(expected)
         val test = testToExpectedFilesMap.first { (test, _) ->
-            isComparingTestAndCopy(test, testCopy)
+            isComparingTestAndCopy(test, testCopy, fixFormat)
         }.first
         TestResult(
             FixTestFiles(test, expected),
@@ -246,15 +255,30 @@ class FixPlugin(
         )
     }
 
-    private fun isComparingTestAndCopy(test: Path, testCopy: Path): Boolean {
-        // TestCopyPath stored in tmpDir, holding the whole hierarchy of original file
-        // while testPath comes to us with path, starting from testRootPath, so we compare them in such way
-        val testCopyPath = testCopy.relativeTo(FileSystem.SYSTEM_TEMPORARY_DIRECTORY)
+    private fun isComparingTestAndCopy(test: Path, testCopy: Path, fixFormat: ActualFixFormat): Boolean {
+        // testPath stored in tmpDir, holding the whole hierarchy of original file, trim after testRootPath
+        val testPath = test.createRelativePathToTheRoot(testConfig.getRootConfig().directory).toPath()
+
+        // trim tmpDir
+        val testCopyPathAfterTmpDir = testCopy.relativeTo(FileSystem.SYSTEM_TEMPORARY_DIRECTORY)
             .toString()
             .substringAfter(Path.DIRECTORY_SEPARATOR)
             .toPath()
 
-        val testPath = test.createRelativePathToTheRoot(testConfig.getRootConfig().directory).toPath()
+        val testCopyPath = if (fixFormat == ActualFixFormat.IN_PLACE) {
+            // testCopyPath represents the path, after testRootPath, so we return as is
+            testCopyPathAfterTmpDir
+        } else {
+            // in sarif mode in comes with testRootPath, since it was copied by sarif library itself
+            // trim testRootPath
+            testCopyPathAfterTmpDir
+                .relativeTo(testConfig.getRootConfig().directory)
+                // seems, that relativeTo not indefinitely add DIRECTORY_SEPARATOR: sometimes / , sometimes \
+                // into the final path, so we use such strange hack in aim to apply toPath, which will set
+                // all separators correctly
+                .toString()
+                .toPath()
+        }
 
         return testCopyPath.compareTo(testPath) == 0
     }
