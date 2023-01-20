@@ -129,8 +129,7 @@ class FixPlugin(
                     adjustedTestCopyToExpectedFilesMap,
                     execCmd,
                     stdout,
-                    stderr,
-                    fixPluginConfig.actualFixFormat!!
+                    stderr
                 )
             }
             .flatten()
@@ -210,10 +209,7 @@ class FixPlugin(
         val fixedTestCopyToExpectedFilesMap = testCopyToExpectedFilesMap.toMutableList().map { (testCopy, expected) ->
             val fixedTestCopy = fixedFiles.first {
                 isComparingTestAndCopy(
-                    it.relativeTo(FileSystem.SYSTEM_TEMPORARY_DIRECTORY)
-                        .toString()
-                        .substringAfter(Path.DIRECTORY_SEPARATOR)
-                        .toPath(),
+                    it,
                     testCopy
                 )
             }
@@ -238,8 +234,7 @@ class FixPlugin(
         testCopyToExpectedFilesMap: List<PathPair>,
         execCmd: String,
         stdout: List<String>,
-        stderr: List<String>,
-        fixFormat: ActualFixFormat
+        stderr: List<String>
     ): List<TestResult> = testCopyToExpectedFilesMap.map { (testCopy, expected) ->
         val fixedLines = fs.readLines(testCopy)
         val expectedLines = fs.readLines(expected)
