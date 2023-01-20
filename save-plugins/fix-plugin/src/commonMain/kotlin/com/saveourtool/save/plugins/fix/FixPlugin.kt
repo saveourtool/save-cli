@@ -209,7 +209,13 @@ class FixPlugin(
         // modify existing map, replace test copies to fixed test copies
         val fixedTestCopyToExpectedFilesMap = testCopyToExpectedFilesMap.toMutableList().map { (testCopy, expected) ->
             val fixedTestCopy = fixedFiles.first {
-                isComparingTestAndCopy(it, testCopy, fixPluginConfig.actualFixFormat!!)
+                isComparingTestAndCopy(
+                    it.relativeTo(FileSystem.SYSTEM_TEMPORARY_DIRECTORY)
+                        .toString()
+                        .substringAfter(Path.DIRECTORY_SEPARATOR)
+                        .toPath(),
+                    testCopy
+                )
             }
             fixedTestCopy to expected
         }
@@ -238,7 +244,7 @@ class FixPlugin(
         val fixedLines = fs.readLines(testCopy)
         val expectedLines = fs.readLines(expected)
         val test = testToExpectedFilesMap.first { (test, _) ->
-            isComparingTestAndCopy(test, testCopy, fixFormat)
+            isComparingTestAndCopy(test, testCopy)
         }.first
         TestResult(
             FixTestFiles(test, expected),
@@ -253,32 +259,44 @@ class FixPlugin(
         )
     }
 
-    private fun isComparingTestAndCopy(test: Path, testCopy: Path, fixFormat: ActualFixFormat): Boolean {
-        // testPath stored in tmpDir, holding the whole hierarchy of original file, trim after testRootPath
-        val testPath = test.createRelativePathToTheRoot(testConfig.getRootConfig().directory).toPath()
-
-        // trim tmpDir
-        val testCopyPathAfterTmpDir = testCopy.relativeTo(FileSystem.SYSTEM_TEMPORARY_DIRECTORY)
-            .toString()
-            .substringAfter(Path.DIRECTORY_SEPARATOR)
-            .toPath()
-
-        val testCopyPath = if (fixFormat == ActualFixFormat.IN_PLACE) {
-            // testCopyPath represents the path, after testRootPath, so we return as is
-            testCopyPathAfterTmpDir
-        } else {
-            // in sarif mode in comes with testRootPath, since it was copied by sarif library itself
-            // so trim testRootPath
-            testCopyPathAfterTmpDir
-                .relativeTo(testConfig.getRootConfig().directory)
-                // seems, that relativeTo not indefinitely add DIRECTORY_SEPARATOR: sometimes / , sometimes \
-                // into the path, so we use such strange hack in aim to apply toPath, which will set
-                // all separators correctly
-                .toString()
-                .toPath()
-        }
-
+    private fun isComparingTestAndCopy(
+        test: Path,
+        testCopy: Path,
+    ): Boolean {
+        val testPath = test.trimTmpDir().trimTestRootPath()
+        val testCopyPath = testCopy.trimTmpDir().trimTestRootPath()
         return testCopyPath.compareTo(testPath) == 0
+    }
+
+    private fun Path.trimTmpDir(): Path {
+        val currentPathAdjusted = this.toString().replaceSeparators()
+        val tmpDirAdjusted = FileSystem.SYSTEM_TEMPORARY_DIRECTORY.toString().replaceSeparators()
+        return if (currentPathAdjusted.startsWith(tmpDirAdjusted)) {
+            currentPathAdjusted
+                // remove tmpDir
+                .substringAfter("$tmpDirAdjusted/")
+                // remove FixPlugin dir
+                .substringAfter("/")
+                .toPath()
+        } else {
+            this
+        }
+    }
+
+    private fun Path.trimTestRootPath(): Path {
+        val currentPathAdjusted = this.toString().replaceSeparators()
+        val testRootPathAdjusted = testConfig.getRootConfig().directory.toString().replaceSeparators()
+        return if (currentPathAdjusted.startsWith(testRootPathAdjusted)) {
+            currentPathAdjusted
+                .substringAfter("$testRootPathAdjusted/")
+                .toPath()
+        } else {
+            this
+        }
+    }
+
+    private fun String.replaceSeparators(): String {
+        return this.replace("\\", "/")
     }
 
     private fun failTestResult(
