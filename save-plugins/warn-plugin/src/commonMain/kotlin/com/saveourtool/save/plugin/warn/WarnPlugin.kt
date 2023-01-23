@@ -152,18 +152,7 @@ class WarnPlugin(
         }
 
         val (actualWarningsMap, result) = try {
-            warnPluginConfig.actualWarningsFileName?.let {
-                val sarif = calculatePathToSarifFile(
-                    sarifFileName = warnPluginConfig.actualWarningsFileName,
-                    anchorTestFilePath = originalPaths.first()
-                )
-                val execResult = ExecutionResult(
-                    0,
-                    fs.readLines(sarif),
-                    listOf("Warnings were obtained from SARIF file, no debug info is available")
-                )
-                collectActualWarningsWithLineNumbers(execResult, warnPluginConfig, workingDirectory) to execResult
-            }
+            actualWarningsIfExistActualWarningsFile(warnPluginConfig, originalPaths, workingDirectory)
         } catch (ex: SarifParsingException) {
             return failTestResult(originalPaths, ex, execCmd)
         } ?: run {
@@ -198,6 +187,23 @@ class WarnPlugin(
                 ),
             )
         }.asSequence()
+    }
+
+    private fun actualWarningsIfExistActualWarningsFile(
+        warnPluginConfig: WarnPluginConfig,
+        originalPaths: List<Path>,
+        workingDirectory: Path,
+    ) = warnPluginConfig.actualWarningsFileName?.let {
+        val sarif = calculatePathToSarifFile(
+            sarifFileName = warnPluginConfig.actualWarningsFileName,
+            anchorTestFilePath = originalPaths.first()
+        )
+        val execResult = ExecutionResult(
+            0,
+            fs.readLines(sarif),
+            listOf("Warnings were obtained from SARIF file, no debug info is available")
+        )
+        collectActualWarningsWithLineNumbers(execResult, warnPluginConfig, workingDirectory) to execResult
     }
 
     private fun createTestFiles(paths: List<Path>, warnPluginConfig: WarnPluginConfig): List<Path> {
