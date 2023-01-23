@@ -20,6 +20,7 @@ import com.saveourtool.save.core.utils.ExecutionResult
 import com.saveourtool.save.core.utils.ProcessExecutionException
 import com.saveourtool.save.core.utils.ProcessTimeoutException
 import com.saveourtool.save.core.utils.SarifParsingException
+import com.saveourtool.save.core.utils.calculatePathToSarifFile
 import com.saveourtool.save.core.utils.singleIsInstance
 import com.saveourtool.save.plugin.warn.sarif.toWarnings
 import com.saveourtool.save.plugin.warn.utils.CmdExecutorWarn
@@ -151,6 +152,7 @@ class WarnPlugin(
             warnMissingExpectedWarnings(warnPluginConfig, generalConfig, originalPaths)
         }
 
+        // FixMe: When actualWarningsFileName is not null, we can skip this execution
         val result = try {
             cmdExecutor.execCmdAndGetExecutionResults(redirectTo)
         } catch (ex: ProcessTimeoutException) {
@@ -162,9 +164,13 @@ class WarnPlugin(
 
         val actualWarningsMap = try {
             warnPluginConfig.actualWarningsFileName?.let {
+                val sarif = calculatePathToSarifFile(
+                    sarifFileName = warnPluginConfig.actualWarningsFileName,
+                    anchorTestFilePath = originalPaths.first()
+                )
                 val execResult = ExecutionResult(
                     result.code,
-                    fs.readLines(warnPluginConfig.actualWarningsFileName.toPath()),
+                    fs.readLines(sarif),
                     result.stderr
                 )
                 collectActualWarningsWithLineNumbers(execResult, warnPluginConfig, workingDirectory)
