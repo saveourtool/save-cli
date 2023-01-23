@@ -18,7 +18,7 @@ import com.akuleshov7.ktoml.TomlInputConfig
 import com.akuleshov7.ktoml.exceptions.TomlDecodingException
 import com.akuleshov7.ktoml.file.TomlFileReader
 import com.akuleshov7.ktoml.parsers.TomlParser
-import com.akuleshov7.ktoml.tree.TomlTable
+import com.akuleshov7.ktoml.tree.nodes.TomlTable
 import okio.FileSystem
 import okio.Path
 
@@ -26,21 +26,21 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.serializer
 
 private fun Path.testConfigFactory(table: TomlTable) =
-        when (table.fullTableName.uppercase().replace("\"", "")) {
+        when (table.fullTableKey.toString().uppercase().replace("\"", "")) {
             TestConfigSections.FIX.name -> this.createPluginConfig<FixPluginConfig>(
-                table.fullTableName
+                table.fullTableKey.toString()
             )
             TestConfigSections.`FIX AND WARN`.name -> this.createPluginConfig<FixAndWarnPluginConfig>(
-                table.fullTableName
+                table.fullTableKey.toString()
             )
             TestConfigSections.WARN.name -> this.createPluginConfig<WarnPluginConfig>(
-                table.fullTableName
+                table.fullTableKey.toString()
             )
             TestConfigSections.GENERAL.name -> this.createPluginConfig<GeneralConfig>(
-                table.fullTableName
+                table.fullTableKey.toString()
             )
             else -> throw PluginException(
-                "Received unknown plugin section name in the input: [${table.fullTableName}]." +
+                "Received unknown plugin section name in the input: [${table.fullTableKey}]." +
                         " Please check your <$this> config"
             )
         }
