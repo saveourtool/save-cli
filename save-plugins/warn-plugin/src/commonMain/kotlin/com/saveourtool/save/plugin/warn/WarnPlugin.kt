@@ -35,7 +35,6 @@ import com.saveourtool.save.plugin.warn.utils.getLineNumber
 import io.github.detekt.sarif4k.SarifSchema210
 import okio.FileSystem
 import okio.Path
-import okio.Path.Companion.toPath
 
 import kotlin.random.Random
 import kotlinx.serialization.decodeFromString

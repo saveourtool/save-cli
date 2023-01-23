@@ -29,27 +29,6 @@
             "text": "[ENUM_VALUE] enum values should be in selected UPPER_CASE snake/PascalCase format: NAme_MYa_sayR_"
           },
           "ruleId": "diktat-ruleset:identifier-naming"
-        },
-        {
-          "level": "error",
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "src\\kotlin\\GenericFunctionTest.kt",
-                  "uriBaseId": "%SRCROOT%"
-                },
-                "region": {
-                  "startColumn": 1,
-                  "startLine": 1
-                }
-              }
-            }
-          ],
-          "message": {
-            "text": "class ClassName should be declared in a file named ClassName.kt (cannot be auto-corrected)"
-          },
-          "ruleId": "filename"
         }
       ],
       "tool": {
