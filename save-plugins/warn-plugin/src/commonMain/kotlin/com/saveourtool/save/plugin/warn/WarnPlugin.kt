@@ -46,6 +46,7 @@ private typealias WarningMap = Map<String, List<Warning>>
  * A plugin that runs an executable and verifies that it produces required warning messages.
  * @property testConfig
  */
+@Suppress("TooManyFunctions")
 class WarnPlugin(
     testConfig: TestConfig,
     testFiles: List<String>,
