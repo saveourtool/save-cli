@@ -26,7 +26,7 @@ import com.saveourtool.save.core.utils.ProcessTimeoutException
 import com.saveourtool.save.core.utils.calculatePathToSarifFile
 import com.saveourtool.save.core.utils.singleIsInstance
 
-import com.saveourtool.sarifutils.cli.adapter.SarifFixAdapter
+import com.saveourtool.sarifutils.adapter.SarifFixAdapter
 import io.github.petertrr.diffutils.diff
 import io.github.petertrr.diffutils.patch.ChangeDelta
 import io.github.petertrr.diffutils.patch.Delta
@@ -124,7 +124,13 @@ class FixPlugin(
                 val stdout = executionResult.stdout
                 val stderr = executionResult.stderr
 
-                buildTestResultsForChunk(testToExpectedFilesMap, adjustedTestCopyToExpectedFilesMap, execCmd, stdout, stderr)
+                buildTestResultsForChunk(
+                    testToExpectedFilesMap,
+                    adjustedTestCopyToExpectedFilesMap,
+                    execCmd,
+                    stdout,
+                    stderr
+                )
             }
             .flatten()
     }
@@ -202,9 +208,10 @@ class FixPlugin(
         // modify existing map, replace test copies to fixed test copies
         val fixedTestCopyToExpectedFilesMap = testCopyToExpectedFilesMap.toMutableList().map { (testCopy, expected) ->
             val fixedTestCopy = fixedFiles.first {
-                // FixMe: Until https://github.com/saveourtool/sarif-utils/issues/23
-                // FixMe: compare only by names, but should by full paths
-                it.name == testCopy.name
+                isComparingTestAndCopy(
+                    it,
+                    testCopy
+                )
             }
             fixedTestCopy to expected
         }
@@ -226,7 +233,7 @@ class FixPlugin(
         testCopyToExpectedFilesMap: List<PathPair>,
         execCmd: String,
         stdout: List<String>,
-        stderr: List<String>,
+        stderr: List<String>
     ): List<TestResult> = testCopyToExpectedFilesMap.map { (testCopy, expected) ->
         val fixedLines = fs.readLines(testCopy)
         val expectedLines = fs.readLines(expected)
@@ -246,18 +253,48 @@ class FixPlugin(
         )
     }
 
-    private fun isComparingTestAndCopy(test: Path, testCopy: Path): Boolean {
-        // TestCopyPath stored in tmpDir, holding the whole hierarchy of original file
-        // while testPath comes to us with path, starting from testRootPath, so we compare them in such way
-        val testCopyPath = testCopy.relativeTo(FileSystem.SYSTEM_TEMPORARY_DIRECTORY)
-            .toString()
-            .substringAfter(Path.DIRECTORY_SEPARATOR)
-            .toPath()
-
-        val testPath = test.createRelativePathToTheRoot(testConfig.getRootConfig().directory).toPath()
-
+    private fun isComparingTestAndCopy(
+        test: Path,
+        testCopy: Path,
+    ): Boolean {
+        val testPath = test.trimTmpDir().trimTestRootPath().replaceSeparators()
+        val testCopyPath = testCopy.trimTmpDir().trimTestRootPath().replaceSeparators()
         return testCopyPath.compareTo(testPath) == 0
     }
+
+    private fun Path.trimTmpDir(): Path {
+        val currentPathAdjusted = this.toString().replaceSeparators()
+        val tmpDirAdjusted = FileSystem.SYSTEM_TEMPORARY_DIRECTORY.toString().replaceSeparators()
+        return if (currentPathAdjusted.startsWith(tmpDirAdjusted)) {
+            currentPathAdjusted
+                // trim tmpDir
+                .substringAfter("$tmpDirAdjusted/")
+                // trim tmp FixPlugin dir
+                .substringAfter("/")
+                .toPath()
+        } else {
+            this
+        }
+    }
+
+    private fun Path.trimTestRootPath(): Path {
+        val currentPathAdjusted = this.toString().replaceSeparators()
+        val testRootPathAdjusted = testConfig.getRootConfig()
+            .directory
+            .toString()
+            .replaceSeparators()
+        return if (currentPathAdjusted.startsWith(testRootPathAdjusted)) {
+            currentPathAdjusted
+                .substringAfter("$testRootPathAdjusted/")
+                .toPath()
+        } else {
+            this
+        }
+    }
+
+    private fun String.replaceSeparators(): String = this.replace("\\", "/")
+
+    private fun Path.replaceSeparators(): Path = this.toString().replaceSeparators().toPath()
 
     private fun failTestResult(
         chunk: List<FixTestFiles>,
