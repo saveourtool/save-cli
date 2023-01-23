@@ -226,7 +226,6 @@ class FixPlugin(
      * @param execCmd execution command for debug info
      * @param stdout std out of executed tool, if any
      * @param stderr std err of executed tool, if any
-     * @param fixFormat fix format
      * @return list of the test results
      */
     private fun buildTestResultsForChunk(
@@ -268,9 +267,9 @@ class FixPlugin(
         val tmpDirAdjusted = FileSystem.SYSTEM_TEMPORARY_DIRECTORY.toString().replaceSeparators()
         return if (currentPathAdjusted.startsWith(tmpDirAdjusted)) {
             currentPathAdjusted
-                // remove tmpDir
+                // trim tmpDir
                 .substringAfter("$tmpDirAdjusted/")
-                // remove FixPlugin dir
+                // trim tmp FixPlugin dir
                 .substringAfter("/")
                 .toPath()
         } else {
@@ -280,7 +279,10 @@ class FixPlugin(
 
     private fun Path.trimTestRootPath(): Path {
         val currentPathAdjusted = this.toString().replaceSeparators()
-        val testRootPathAdjusted = testConfig.getRootConfig().directory.toString().replaceSeparators()
+        val testRootPathAdjusted = testConfig.getRootConfig()
+            .directory
+            .toString()
+            .replaceSeparators()
         return if (currentPathAdjusted.startsWith(testRootPathAdjusted)) {
             currentPathAdjusted
                 .substringAfter("$testRootPathAdjusted/")
@@ -290,9 +292,7 @@ class FixPlugin(
         }
     }
 
-    private fun String.replaceSeparators(): String {
-        return this.replace("\\", "/")
-    }
+    private fun String.replaceSeparators(): String = this.replace("\\", "/")
 
     private fun failTestResult(
         chunk: List<FixTestFiles>,
