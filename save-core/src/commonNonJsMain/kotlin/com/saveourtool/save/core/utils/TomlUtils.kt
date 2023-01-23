@@ -26,7 +26,9 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.serializer
 
 private fun Path.testConfigFactory(table: TomlTable) =
-        when (table.fullTableKey.toString().uppercase().replace("\"", "")) {
+        when (table.fullTableKey.toString()
+            .uppercase()
+            .replace("\"", "")) {
             TestConfigSections.FIX.name -> this.createPluginConfig<FixPluginConfig>(
                 table.fullTableKey.toString()
             )
