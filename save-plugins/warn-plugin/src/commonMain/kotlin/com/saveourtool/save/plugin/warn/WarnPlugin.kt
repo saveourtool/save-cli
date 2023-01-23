@@ -152,31 +152,31 @@ class WarnPlugin(
             warnMissingExpectedWarnings(warnPluginConfig, generalConfig, originalPaths)
         }
 
-        // FixMe: When actualWarningsFileName is not null, we can skip this execution
-        val result = try {
-            cmdExecutor.execCmdAndGetExecutionResults(redirectTo)
-        } catch (ex: ProcessTimeoutException) {
-            logWarn("The following tests took too long to run and were stopped: $originalPaths, timeout for single test: ${ex.timeoutMillis}")
-            return failTestResult(originalPaths, ex, execCmd)
-        } catch (ex: ProcessExecutionException) {
-            return failTestResult(originalPaths, ex, execCmd)
-        }
-
-        val actualWarningsMap = try {
+        val (actualWarningsMap, result) = try {
             warnPluginConfig.actualWarningsFileName?.let {
                 val sarif = calculatePathToSarifFile(
                     sarifFileName = warnPluginConfig.actualWarningsFileName,
                     anchorTestFilePath = originalPaths.first()
                 )
                 val execResult = ExecutionResult(
-                    result.code,
+                    0,
                     fs.readLines(sarif),
-                    result.stderr
+                    listOf("Warnings were obtained from SARIF file, no debug info is available")
                 )
-                collectActualWarningsWithLineNumbers(execResult, warnPluginConfig, workingDirectory)
-            } ?: collectActualWarningsWithLineNumbers(result, warnPluginConfig, workingDirectory)
+                collectActualWarningsWithLineNumbers(execResult, warnPluginConfig, workingDirectory) to execResult
+            }
         } catch (ex: SarifParsingException) {
             return failTestResult(originalPaths, ex, execCmd)
+        } ?: run {
+            val result = try {
+                cmdExecutor.execCmdAndGetExecutionResults(redirectTo)
+            } catch (ex: ProcessTimeoutException) {
+                logWarn("The following tests took too long to run and were stopped: $originalPaths, timeout for single test: ${ex.timeoutMillis}")
+                return failTestResult(originalPaths, ex, execCmd)
+            } catch (ex: ProcessExecutionException) {
+                return failTestResult(originalPaths, ex, execCmd)
+            }
+            collectActualWarningsWithLineNumbers(result, warnPluginConfig, workingDirectory) to result
         }
 
         val resultsChecker = ResultsChecker(
