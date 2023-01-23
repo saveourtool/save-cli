@@ -257,8 +257,8 @@ class FixPlugin(
         test: Path,
         testCopy: Path,
     ): Boolean {
-        val testPath = test.trimTmpDir().trimTestRootPath()
-        val testCopyPath = testCopy.trimTmpDir().trimTestRootPath()
+        val testPath = test.trimTmpDir().trimTestRootPath().replaceSeparators()
+        val testCopyPath = testCopy.trimTmpDir().trimTestRootPath().replaceSeparators()
         return testCopyPath.compareTo(testPath) == 0
     }
 
@@ -293,6 +293,8 @@ class FixPlugin(
     }
 
     private fun String.replaceSeparators(): String = this.replace("\\", "/")
+
+    private fun Path.replaceSeparators(): Path = this.toString().replaceSeparators().toPath()
 
     private fun failTestResult(
         chunk: List<FixTestFiles>,
