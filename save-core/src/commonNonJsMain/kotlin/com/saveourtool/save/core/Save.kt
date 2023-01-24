@@ -62,7 +62,7 @@ class Save(
      * @return Reporter
      * @throws PluginException when we receive invalid type of PluginConfig
      */
-    @Suppress("TOO_LONG_FUNCTION")
+    @Suppress("TOO_LONG_FUNCTION", "LongMethod")
     fun performAnalysis(): Reporter {
         logInfo("Welcome to SAVE version $SAVE_VERSION")
         val rootTestConfigPath = testRootPath.resolveSaveTomlConfig()

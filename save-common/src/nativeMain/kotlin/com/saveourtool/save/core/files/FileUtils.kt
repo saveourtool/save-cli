@@ -27,7 +27,7 @@ actual val fs: FileSystem = FileSystem.SYSTEM
  *
  * @param path a path to a directory
  */
-@Suppress("MAGIC_NUMBER")
+@Suppress("MAGIC_NUMBER", "MagicNumber")
 actual fun FileSystem.myDeleteRecursively(path: Path) {
     nftw(path.toString(), staticCFunction<CPointer<ByteVar>?, CPointer<stat>?, Int, CPointer<FTW>?, Int> { pathName, _, _, _ ->
         val fileName = pathName!!.toKString()

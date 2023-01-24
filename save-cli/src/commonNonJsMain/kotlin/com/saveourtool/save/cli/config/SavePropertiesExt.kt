@@ -48,7 +48,8 @@ private fun SaveProperties.validate(): SaveProperties {
     } catch (e: FileNotFoundException) {
         return logErrorAndExit(
             ExitCodes.INVALID_CONFIGURATION, "Not able to find configuration file '$fullConfigPath'." +
-                    " Please provide a valid path to the test config via command-line or using the file with properties."
+                    " Please provide a valid path to the test config via command-line or using the file with properties. " +
+                    " Error: ${e.message}"
         )
     }
     return this
