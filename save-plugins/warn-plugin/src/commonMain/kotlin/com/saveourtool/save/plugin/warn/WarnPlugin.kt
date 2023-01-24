@@ -20,6 +20,7 @@ import com.saveourtool.save.core.utils.ExecutionResult
 import com.saveourtool.save.core.utils.ProcessExecutionException
 import com.saveourtool.save.core.utils.ProcessTimeoutException
 import com.saveourtool.save.core.utils.SarifParsingException
+import com.saveourtool.save.core.utils.calculatePathToSarifFile
 import com.saveourtool.save.core.utils.singleIsInstance
 import com.saveourtool.save.plugin.warn.sarif.toWarnings
 import com.saveourtool.save.plugin.warn.utils.CmdExecutorWarn
@@ -34,7 +35,6 @@ import com.saveourtool.save.plugin.warn.utils.getLineNumber
 import io.github.detekt.sarif4k.SarifSchema210
 import okio.FileSystem
 import okio.Path
-import okio.Path.Companion.toPath
 
 import kotlin.random.Random
 import kotlinx.serialization.decodeFromString
@@ -46,6 +46,7 @@ private typealias WarningMap = Map<String, List<Warning>>
  * A plugin that runs an executable and verifies that it produces required warning messages.
  * @property testConfig
  */
+@Suppress("TooManyFunctions")
 class WarnPlugin(
     testConfig: TestConfig,
     testFiles: List<String>,
@@ -151,26 +152,20 @@ class WarnPlugin(
             warnMissingExpectedWarnings(warnPluginConfig, generalConfig, originalPaths)
         }
 
-        val result = try {
-            cmdExecutor.execCmdAndGetExecutionResults(redirectTo)
-        } catch (ex: ProcessTimeoutException) {
-            logWarn("The following tests took too long to run and were stopped: $originalPaths, timeout for single test: ${ex.timeoutMillis}")
-            return failTestResult(originalPaths, ex, execCmd)
-        } catch (ex: ProcessExecutionException) {
-            return failTestResult(originalPaths, ex, execCmd)
-        }
-
-        val actualWarningsMap = try {
-            warnPluginConfig.actualWarningsFileName?.let {
-                val execResult = ExecutionResult(
-                    result.code,
-                    fs.readLines(warnPluginConfig.actualWarningsFileName.toPath()),
-                    result.stderr
-                )
-                collectActualWarningsWithLineNumbers(execResult, warnPluginConfig, workingDirectory)
-            } ?: collectActualWarningsWithLineNumbers(result, warnPluginConfig, workingDirectory)
+        val (actualWarningsMap, result) = try {
+            actualWarningsIfExistActualWarningsFile(warnPluginConfig, originalPaths, workingDirectory)
         } catch (ex: SarifParsingException) {
             return failTestResult(originalPaths, ex, execCmd)
+        } ?: run {
+            val result = try {
+                cmdExecutor.execCmdAndGetExecutionResults(redirectTo)
+            } catch (ex: ProcessTimeoutException) {
+                logWarn("The following tests took too long to run and were stopped: $originalPaths, timeout for single test: ${ex.timeoutMillis}")
+                return failTestResult(originalPaths, ex, execCmd)
+            } catch (ex: ProcessExecutionException) {
+                return failTestResult(originalPaths, ex, execCmd)
+            }
+            collectActualWarningsWithLineNumbers(result, warnPluginConfig, workingDirectory) to result
         }
 
         val resultsChecker = ResultsChecker(
@@ -193,6 +188,23 @@ class WarnPlugin(
                 ),
             )
         }.asSequence()
+    }
+
+    private fun actualWarningsIfExistActualWarningsFile(
+        warnPluginConfig: WarnPluginConfig,
+        originalPaths: List<Path>,
+        workingDirectory: Path,
+    ) = warnPluginConfig.actualWarningsFileName?.let {
+        val sarif = calculatePathToSarifFile(
+            sarifFileName = warnPluginConfig.actualWarningsFileName,
+            anchorTestFilePath = originalPaths.first()
+        )
+        val execResult = ExecutionResult(
+            0,
+            fs.readLines(sarif),
+            listOf("Warnings were obtained from SARIF file, no debug info is available")
+        )
+        collectActualWarningsWithLineNumbers(execResult, warnPluginConfig, workingDirectory) to execResult
     }
 
     private fun createTestFiles(paths: List<Path>, warnPluginConfig: WarnPluginConfig): List<Path> {
