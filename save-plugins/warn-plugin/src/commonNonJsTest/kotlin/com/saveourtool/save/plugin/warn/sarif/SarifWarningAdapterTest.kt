@@ -2,6 +2,7 @@ package com.saveourtool.save.plugin.warn.sarif
 
 import com.saveourtool.save.core.files.getWorkingDirectory
 import com.saveourtool.save.core.logging.logInfo
+import com.saveourtool.save.core.utils.adjustToCommonRoot
 import com.saveourtool.save.plugin.warn.utils.Warning
 
 import io.github.detekt.sarif4k.ArtifactLocation

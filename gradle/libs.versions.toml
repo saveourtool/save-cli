@@ -12,6 +12,7 @@ multiplatform-diff = "0.4.0"
 kotlinpoet = "1.12.0"
 kotest = "5.5.4"
 sarif4k = "0.3.0"
+sarif-utils = "0.2.0-SNAPSHOT"
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
@@ -37,3 +38,5 @@ square-kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinp
 diktat-gradle-plugin = { module = "org.cqfn.diktat:diktat-gradle-plugin", version.ref = "diktat" }
 sarif4k = { module = "io.github.detekt.sarif4k:sarif4k", version.ref = "sarif4k" }
 kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+sarif-utils = { module = "com.saveourtool.sarifutils:fixpatches", version.ref = "sarif-utils" }
+sarif-utils-jvm = { module = "com.saveourtool.sarifutils:fixpatches-jvm", version.ref = "sarif-utils" }

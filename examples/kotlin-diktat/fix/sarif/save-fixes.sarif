@@ -1,0 +1,129 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "originalUriBaseIds": {
+        "%SRCROOT%": {
+          "uri": "."
+        }
+      },
+      "results": [
+        {
+          "fixes": [
+            {
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "src/main/kotlin/com/saveourtool/save/Example1Test.kt"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "endColumn": 19,
+                        "startColumn": 9,
+                        "startLine": 1
+                      },
+                      "insertedContent": {
+                        "text": "com.saveourtool.save"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "description": {
+                "text": "Package name is incorrect"
+              }
+            }
+          ],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/main/kotlin/com/saveourtool/save/Example1Test.kt",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "snippet": {
+                    "text": "test.smoke"
+                  },
+                    "endColumn": 19,
+                    "startColumn": 9,
+                    "startLine": 1
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Package name is incorrect"
+          },
+          "ruleId": "diktat-ruleset:identifier-naming"
+        },
+        {
+          "fixes": [
+            {
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "src/main/kotlin/com/saveourtool/save/Example1Test.kt"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "endColumn": 8,
+                        "startColumn": 7,
+                        "startLine": 3
+                      },
+                      "insertedContent": {
+                        "text": "E"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "description": {
+                "text": "Class name should be in PascalCase"
+              }
+            }
+          ],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/main/kotlin/com/saveourtool/save/Example1Test.kt",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "snippet": {
+                    "text": "e"
+                  },
+                  "endColumn": 8,
+                  "startColumn": 7,
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Class name should be in PascalCase"
+          },
+          "ruleId": "diktat-ruleset:identifier-naming"
+        }
+      ],
+      "tool": {
+        "driver": {
+          "downloadUri": "https://github.com/pinterest/ktlint/releases/tag/0.42.0",
+          "fullName": "ktlint",
+          "informationUri": "https://github.com/pinterest/ktlint/",
+          "language": "en",
+          "name": "ktlint",
+          "organization": "pinterest",
+          "rules": [
+          ],
+          "semanticVersion": "0.42.0",
+          "version": "0.42.0"
+        }
+      }
+    }
+  ]
+}

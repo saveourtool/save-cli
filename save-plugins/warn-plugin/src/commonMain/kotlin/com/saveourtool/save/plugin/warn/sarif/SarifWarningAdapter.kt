@@ -4,6 +4,7 @@
 
 package com.saveourtool.save.plugin.warn.sarif
 
+import com.saveourtool.save.core.utils.dropFileProtocol
 import com.saveourtool.save.core.utils.isCurrentOsWindows
 import com.saveourtool.save.plugin.warn.utils.Warning
 

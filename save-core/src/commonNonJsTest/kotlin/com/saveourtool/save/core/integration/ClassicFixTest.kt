@@ -19,7 +19,7 @@ class ClassicFixTest {
         runTestsWithDiktat(
             listOf(
                 "fix/save.toml"
-            ), 5
+            ), 7
         )
     }
 
@@ -28,7 +28,7 @@ class ClassicFixTest {
         runTestsWithDiktat(
             listOf(
                 "fix/smoke/save.toml"
-            ), 5
+            ), 6
         )
     }
 
@@ -37,7 +37,7 @@ class ClassicFixTest {
         runTestsWithDiktat(
             listOf(
                 "fix/smoke/src/main/kotlin/com/saveourtool/save/"
-            ), 5
+            ), 6
         )
     }
 
@@ -65,6 +65,27 @@ class ClassicFixTest {
             listOf(
                 "fix/smoke/src/main/kotlin/com/saveourtool/save/IgnoreLinesTest/IgnoreLines"
             ), 1
+        )
+    }
+
+    @Test
+    fun `execute fix plugin in sarif mode`() {
+        runTestsWithDiktat(
+            listOf(
+                "fix/sarif/src/main/kotlin/com/saveourtool/save"
+            ), 1
+        )
+    }
+
+    @Test
+    fun `tests with the same name`() {
+        runTestsWithDiktat(
+            listOf(
+                "fix/smoke/src/main/kotlin/com/saveourtool/save/Example1Test.kt",
+                "fix/smoke/src/main/kotlin/com/saveourtool/save/Example1Expected.kt",
+                "fix/smoke/src/main/kotlin/com/saveourtool/save/chapter2/Example1Test.kt",
+                "fix/smoke/src/main/kotlin/com/saveourtool/save/chapter2/Example1Expected.kt",
+            ), 2
         )
     }
 }

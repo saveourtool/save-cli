@@ -11,6 +11,10 @@ include("save-common-test")
 dependencyResolutionManagement {
     repositories {
         mavenCentral()
+        // add sonatype repository
+        maven {
+            url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+        }
     }
 }
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

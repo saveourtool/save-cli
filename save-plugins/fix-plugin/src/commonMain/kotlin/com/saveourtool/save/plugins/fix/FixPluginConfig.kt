@@ -23,7 +23,7 @@ import kotlinx.serialization.UseSerializers
  * @property resourceNameTestSuffix suffix name of the test file.
  * @property resourceNameExpectedSuffix suffix name of the expected file.
  * @property ignoreLines mutable list of patterns that later will be used to filter lines in test file
- * @property actualFixFormat format for type for fixes: they could be done in place or provided via Sarif file
+ * @property actualFixFormat format for type for fixes: they could be done in place or provided via Sarif file // TODO: Add information about these properties to README
  * @property actualFixSarifFileName name of sarif file with list of fixes, that were made by tool
  */
 @Serializable
@@ -77,12 +77,12 @@ data class FixPluginConfig(
 
     // due to probable bug in ktoml, ignoreLines = [] and no ignoreLines is ktoml are parsed to be mutableListOf("null")
     override fun validateAndSetDefaults(): FixPluginConfig = FixPluginConfig(
-        execFlags ?: "",
-        resourceNameTest,
-        resourceNameExpected,
-        ignoreLines,
-        actualFixFormat ?: ActualFixFormat.IN_PLACE,
-        actualFixSarifFileName ?: "save-fixes.sarif",
+        execFlags = execFlags ?: "",
+        resourceNameTestSuffix = resourceNameTest,
+        resourceNameExpectedSuffix = resourceNameExpected,
+        ignoreLines = ignoreLines,
+        actualFixFormat = actualFixFormat ?: ActualFixFormat.IN_PLACE,
+        actualFixSarifFileName = (actualFixSarifFileName ?: "save-fixes.sarif"),
     ).also {
         it.configLocation = this.configLocation
     }

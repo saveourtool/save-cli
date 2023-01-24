@@ -1,0 +1,8 @@
+[general]
+    tags = ["smoke"]
+    description = "SARIF fix objects: Smoke tests for diktat"
+    suiteName = "SARIF fix objects - Autofix"
+
+[fix]
+    actualFixFormat = "SARIF"
+    actualFixSarifFileName = "save-fixes.sarif"
