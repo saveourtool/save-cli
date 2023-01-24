@@ -26,23 +26,23 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.serializer
 
 private fun Path.testConfigFactory(table: TomlTable) =
-        when (table.fullTableKey.toString()
+        when (table.fullTableName()
             .uppercase()
             .replace("\"", "")) {
             TestConfigSections.FIX.name -> this.createPluginConfig<FixPluginConfig>(
-                table.fullTableKey.toString()
+                table.fullTableName()
             )
             TestConfigSections.`FIX AND WARN`.name -> this.createPluginConfig<FixAndWarnPluginConfig>(
-                table.fullTableKey.toString()
+                table.fullTableName()
             )
             TestConfigSections.WARN.name -> this.createPluginConfig<WarnPluginConfig>(
-                table.fullTableKey.toString()
+                table.fullTableName()
             )
             TestConfigSections.GENERAL.name -> this.createPluginConfig<GeneralConfig>(
-                table.fullTableKey.toString()
+                table.fullTableName()
             )
             else -> throw PluginException(
-                "Received unknown plugin section name in the input: [${table.fullTableKey}]." +
+                "Received unknown plugin section name in the input: [${table.fullTableName()}]." +
                         " Please check your <$this> config"
             )
         }
@@ -68,6 +68,8 @@ private inline fun <reified T : PluginConfig> Path.createPluginConfig(
     )
     throw e
 }
+
+private fun TomlTable.fullTableName(): String = fullTableKey.toString()
 
 /**
  * Create the list of plugins from toml file with plugin sections
