@@ -157,4 +157,12 @@ class ClassicWarnTest {
             1
         )
     }
+
+    @Test
+    fun `execute warn-plugin with actual and expected warnings from SARIF`() {
+        runTestsWithDiktat(
+            listOf("sarif-actual-expected"),
+            1
+        )
+    }
 }
