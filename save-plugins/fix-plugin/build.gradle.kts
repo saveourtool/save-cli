@@ -12,9 +12,6 @@ kotlin {
                 implementation(libs.multiplatform.diff)
                 implementation(libs.kotlinx.serialization.core)
                 implementation(libs.sarif.utils)
-                // log engine for sarif-utils library
-                implementation(libs.log4j.core)
-                implementation(libs.log4j.slf4j2.impl)
             }
         }
     }
