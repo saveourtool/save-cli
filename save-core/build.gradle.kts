@@ -92,7 +92,6 @@ tasks.register<Download>("downloadTestResources") {
 }
 
 val cleanupTask = tasks.register("cleanupTestResources") {
-    this.dependsOn(":save-cli:jvmTest")
     mustRunAfter(tasks.withType<Test>())
     doFirst {
         file("../examples/kotlin-diktat/ktlint").delete()
