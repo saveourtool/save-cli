@@ -26,6 +26,9 @@ kotlin {
                 implementation(projects.saveCore)
                 implementation(projects.saveCommon)
                 implementation(libs.kotlinx.serialization.properties)
+                // log engine for sarif-utils library
+                implementation(libs.log4j.core)
+                implementation(libs.log4j.slf4j2.impl)
             }
         }
 
