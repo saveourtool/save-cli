@@ -4,7 +4,9 @@ import com.saveourtool.save.generation.generateConfigOptions
 import com.saveourtool.save.generation.optionsConfigFilePath
 
 import de.undercouch.gradle.tasks.download.Download
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem
 import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
+
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
@@ -77,6 +79,17 @@ tasks.withType<KotlinCompile<*>>().forEach {
 }
 
 tasks.register<Download>("downloadTestResources") {
+    // Integration test should be able to have access to binary during the execution. Also we use here the debug version,
+    // in aim to have ability to run it in CI, which operates only with debug versions
+    val os = getCurrentOperatingSystem()
+    dependsOn(
+        when {
+            os.isLinux -> ":save-cli:linkDebugExecutableLinuxX64"
+            os.isWindows -> ":save-cli:linkDebugExecutableMingwX64"
+            os.isMacOsX -> ":save-cli:linkDebugExecutableMacosX64"
+            else -> throw GradleException("Unknown operating system $os")
+        }
+    )
     src(listOf(
         Versions.IntegrationTest.ktlintLink,
         Versions.IntegrationTest.diktatLink,
