@@ -77,10 +77,12 @@ tasks.withType<KotlinCompile<*>>().forEach {
 }
 
 tasks.register<Download>("downloadTestResources") {
-    src { listOf(
-        Versions.IntegrationTest.ktlintLink,
-        Versions.IntegrationTest.diktatLink,
-    )}
+    src {
+        listOf(
+            Versions.IntegrationTest.ktlintLink,
+            Versions.IntegrationTest.diktatLink,
+        )
+    }
     dest { "../examples/kotlin-diktat" }
     retries(3)
     doLast {
