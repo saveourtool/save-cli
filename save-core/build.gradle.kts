@@ -6,7 +6,6 @@ import com.saveourtool.save.generation.optionsConfigFilePath
 import de.undercouch.gradle.tasks.download.Download
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem
 import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
-
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
@@ -90,11 +89,14 @@ tasks.register<Download>("downloadTestResources") {
             else -> throw GradleException("Unknown operating system $os")
         }
     )
-    src(listOf(
-        Versions.IntegrationTest.ktlintLink,
-        Versions.IntegrationTest.diktatLink,
-    ))
-    dest("../examples/kotlin-diktat")
+    src {
+        listOf(
+            Versions.IntegrationTest.ktlintLink,
+            Versions.IntegrationTest.diktatLink,
+        )
+    }
+    dest { "../examples/kotlin-diktat" }
+    retries(3)
     doLast {
         Files.move(
             file("../examples/kotlin-diktat/diktat-${Versions.IntegrationTest.diktat}.jar").toPath(),
