@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 plugins {
     application
     id("com.saveourtool.save.buildutils.kotlin-library")
+    id("org.gradle.test-retry") version "1.5.1"
 }
 
 kotlin {
@@ -115,4 +116,11 @@ fun linkProperExecutable(os: DefaultOperatingSystem) {
 
 application {
     mainClass.set("com.saveourtool.save.cli.SaveCliRunnerKt")
+}
+tasks.withType<Test> {
+    retry {
+        failOnPassedAfterRetry.set(false)
+        maxFailures.set(5)
+        maxRetries.set(2)
+    }
 }

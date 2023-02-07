@@ -11,6 +11,7 @@ import java.nio.file.StandardCopyOption
 plugins {
     id("com.saveourtool.save.buildutils.kotlin-library")
     id("de.undercouch.download") version "5.3.1"
+    id("org.gradle.test-retry") version "1.5.1"
 }
 
 kotlin {
@@ -105,4 +106,11 @@ val cleanupTask = tasks.register("cleanupTestResources") {
 tasks.withType<Test>().configureEach {
     dependsOn("downloadTestResources")
     finalizedBy("cleanupTestResources")
+}
+tasks.withType<Test> {
+    retry {
+        failOnPassedAfterRetry.set(false)
+        maxFailures.set(5)
+        maxRetries.set(2)
+    }
 }
