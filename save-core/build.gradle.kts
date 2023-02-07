@@ -77,11 +77,12 @@ tasks.withType<KotlinCompile<*>>().forEach {
 }
 
 tasks.register<Download>("downloadTestResources") {
-    src(listOf(
+    src { listOf(
         Versions.IntegrationTest.ktlintLink,
         Versions.IntegrationTest.diktatLink,
-    ))
-    dest("../examples/kotlin-diktat")
+    )}
+    dest { "../examples/kotlin-diktat" }
+    retries(3)
     doLast {
         Files.move(
             file("../examples/kotlin-diktat/diktat-${Versions.IntegrationTest.diktat}.jar").toPath(),
