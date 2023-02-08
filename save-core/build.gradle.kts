@@ -94,15 +94,19 @@ tasks.register<Download>("downloadTestResources") {
     }
 }
 
+// couldn't use just type `Test`,
+// since `Test` and `KotlinNativeTest` are actually different classes,
+// but both inherited from `AbstractTestTask`
+
 val cleanupTask = tasks.register("cleanupTestResources") {
-    this.dependsOn(":save-cli:jvmTest")
-    mustRunAfter(tasks.withType<Test>())
+    mustRunAfter(tasks.withType<AbstractTestTask>())
     doFirst {
         file("../examples/kotlin-diktat/ktlint").delete()
         file("../examples/kotlin-diktat/diktat.jar").delete()
     }
 }
-tasks.withType<Test>().configureEach {
+
+tasks.withType<AbstractTestTask>().configureEach {
     dependsOn("downloadTestResources")
     finalizedBy("cleanupTestResources")
 }

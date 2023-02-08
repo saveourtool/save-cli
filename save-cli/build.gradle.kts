@@ -46,8 +46,12 @@ kotlin {
 
     linkProperExecutable(os)
 
-    tasks.withType<Test>().configureEach {
+    // couldn't use just type `Test`,
+    // since `Test` and `KotlinNativeTest` are actually different classes,
+    // but both inherited from `AbstractTestTask`
+    tasks.withType<AbstractTestTask>().configureEach {
         dependsOn(":save-core:downloadTestResources")
+        finalizedBy(":save-core:cleanupTestResources")
     }
 }
 
@@ -100,7 +104,6 @@ fun linkProperExecutable(os: DefaultOperatingSystem) {
     if (enabledExecutables != null && enabledExecutables != "all") {
         linkReleaseExecutableTaskProvider.enabled = false
     }
-
     // Integration test should be able to have access to binary during the execution. Also we use here the debug version,
     // in aim to have ability to run it in CI, which operates only with debug versions
     tasks.getByName("jvmTest").dependsOn(tasks.getByName(
