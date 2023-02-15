@@ -164,7 +164,9 @@ data class WarnPluginConfig(
         val expectedWarningsFileName = expectedWarningsFileName ?: "save-warnings-expected.sarif"
 
         val actualWarningsFormat = actualWarningsFormat ?: ActualWarningsFormat.PLAIN
-        val actualWarningsFileName = actualWarningsFileName ?: "save-warnings-actual.sarif"
+        // it could be null even, if actualWarningsFormat = sarif: in this case, we suppose, that tool will print
+        // sarif report into stdout
+        val actualWarningsFileName = actualWarningsFileName
 
         val newWarningTextHasLine = warningTextHasLine ?: true
         val newWarningTextHasColumn = warningTextHasColumn ?: true

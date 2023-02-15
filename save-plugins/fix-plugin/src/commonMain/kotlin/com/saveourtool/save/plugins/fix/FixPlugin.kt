@@ -188,6 +188,7 @@ class FixPlugin(
      * @param testCopyToExpectedFilesMap list of paths to the copy of tests files, which will be replaced by modificated files
      * @return updated list of test files copies
      */
+    // TODO: support case, when sarif report is provided via stdout
     private fun applyFixesFromSarif(
         fixPluginConfig: FixPluginConfig,
         testsPaths: List<Path>,

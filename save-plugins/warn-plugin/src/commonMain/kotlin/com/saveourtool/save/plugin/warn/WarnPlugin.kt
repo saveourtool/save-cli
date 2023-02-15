@@ -229,15 +229,18 @@ class WarnPlugin(
         originalPaths: List<Path>,
         workingDirectory: Path,
     ): WarningMap {
-        val actualResult = if (warnPluginConfig.actualWarningsFormat == ActualWarningsFormat.SARIF) {
+        val actualResult = if (warnPluginConfig.actualWarningsFormat == ActualWarningsFormat.SARIF &&
+            warnPluginConfig.actualWarningsFileName != null) {
             // in this case, after tool execution, there was created sarif report, extract warnings from it,
             // not from stdout
             val sarif = calculatePathToSarifFile(
-                sarifFileName = warnPluginConfig.actualWarningsFileName!!,
+                sarifFileName = warnPluginConfig.actualWarningsFileName,
                 anchorTestFilePath = originalPaths.first()
             )
             ExecutionResult(executionResult.code, fs.readLines(sarif), executionResult.stderr)
         } else {
+            // Note: this case is applicable both for PLAIN and SARIF mode, but in the latter case, we suppose,
+            // that sarif report is provided in stdout of tool
             executionResult
         }
         return collectActualWarningsWithLineNumbers(actualResult, warnPluginConfig, workingDirectory)
