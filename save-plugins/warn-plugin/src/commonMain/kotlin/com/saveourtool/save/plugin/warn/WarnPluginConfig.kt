@@ -161,8 +161,10 @@ data class WarnPluginConfig(
         requireValidPatternForRegexInWarning()
 
         val expectedWarningsFormat = expectedWarningsFormat ?: ExpectedWarningsFormat.IN_PLACE
+        val expectedWarningsFileName = expectedWarningsFileName ?: "save-warnings-expected.sarif"
+
         val actualWarningsFormat = actualWarningsFormat ?: ActualWarningsFormat.PLAIN
-        val expectedWarningsFileName = expectedWarningsFileName ?: "save-warnings.sarif"
+        val actualWarningsFileName = actualWarningsFileName ?: "save-warnings-actual.sarif"
 
         val newWarningTextHasLine = warningTextHasLine ?: true
         val newWarningTextHasColumn = warningTextHasColumn ?: true
