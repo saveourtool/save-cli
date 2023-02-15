@@ -142,15 +142,12 @@ class WarnPlugin(
         )
         val execCmd = cmdExecutor.constructExecCmd(tmpDirName)
 
-//        val expectedWarningsMap = try {
-//            collectExpectedWarnings(generalConfig, warnPluginConfig, originalPaths, copyPaths, workingDirectory)
-//        } catch (ex: SarifParsingException) {
-//            return failTestResult(originalPaths, ex, execCmd)
-//        }
-//
-//        if (expectedWarningsMap.isEmpty()) {
-//            warnMissingExpectedWarnings(warnPluginConfig, generalConfig, originalPaths)
-//        }
+        val expectedWarningsMap = try {
+            processExpectedWarnings(generalConfig, warnPluginConfig, originalPaths, copyPaths, workingDirectory)
+        }
+        catch (ex: SarifParsingException) {
+            return failTestResult(originalPaths, ex, execCmd)
+        }
 
         val executionResult = try {
             cmdExecutor.execCmdAndGetExecutionResults(redirectTo)
@@ -161,21 +158,10 @@ class WarnPlugin(
             return failTestResult(originalPaths, ex, execCmd)
         }
 
-        val actualResult = if (warnPluginConfig.actualWarningsFormat == ActualWarningsFormat.SARIF) {
-            // in this case, after tool execution, there was created sarif report, extract warnings from it,
-            // not from stdout
-            val sarif = calculatePathToSarifFile(
-                sarifFileName = warnPluginConfig.actualWarningsFileName!!,
-                anchorTestFilePath = originalPaths.first()
-            )
-            ExecutionResult(executionResult.code, fs.readLines(sarif), executionResult.stderr)
-        } else {
-            executionResult
-        }
-
         val actualWarningsMap = try {
-            collectActualWarningsWithLineNumbers(actualResult, warnPluginConfig, workingDirectory)
-        } catch (ex: SarifParsingException) {
+            processActualWarnings(executionResult, warnPluginConfig, originalPaths, workingDirectory)
+        }
+        catch (ex: SarifParsingException) {
             return failTestResult(originalPaths, ex, execCmd)
         }
 
@@ -230,12 +216,8 @@ class WarnPlugin(
         originalPaths: List<Path>,
         copyPaths: List<Path>,
         workingDirectory: Path,
-    ) {
-        val expectedWarningsMap = try {
-            collectExpectedWarnings(generalConfig, warnPluginConfig, originalPaths, copyPaths, workingDirectory)
-        } catch (ex: SarifParsingException) {
-            return failTestResult(originalPaths, ex, execCmd)
-        }
+    ): WarningMap {
+        val expectedWarningsMap = collectExpectedWarnings(generalConfig, warnPluginConfig, originalPaths, copyPaths, workingDirectory)
 
         if (expectedWarningsMap.isEmpty()) {
             warnMissingExpectedWarnings(warnPluginConfig, generalConfig, originalPaths)
@@ -243,6 +225,25 @@ class WarnPlugin(
         return expectedWarningsMap
     }
 
+    private fun processActualWarnings(
+        executionResult: ExecutionResult,
+        warnPluginConfig: WarnPluginConfig,
+        originalPaths: List<Path>,
+        workingDirectory: Path,
+    ): WarningMap {
+        val actualResult = if (warnPluginConfig.actualWarningsFormat == ActualWarningsFormat.SARIF) {
+            // in this case, after tool execution, there was created sarif report, extract warnings from it,
+            // not from stdout
+            val sarif = calculatePathToSarifFile(
+                sarifFileName = warnPluginConfig.actualWarningsFileName!!,
+                anchorTestFilePath = originalPaths.first()
+            )
+            ExecutionResult(executionResult.code, fs.readLines(sarif), executionResult.stderr)
+        } else {
+            executionResult
+        }
+        return collectActualWarningsWithLineNumbers(actualResult, warnPluginConfig, workingDirectory)
+    }
 
     private fun failTestResult(
         paths: List<Path>,
