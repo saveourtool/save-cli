@@ -19,7 +19,6 @@ import com.saveourtool.save.core.result.DebugInfo
 import com.saveourtool.save.core.result.Fail
 import com.saveourtool.save.core.result.Pass
 import com.saveourtool.save.core.result.TestResult
-import com.saveourtool.save.core.utils.ExecutionResult
 import com.saveourtool.save.core.utils.PathSerializer
 import com.saveourtool.save.core.utils.ProcessExecutionException
 import com.saveourtool.save.core.utils.ProcessTimeoutException

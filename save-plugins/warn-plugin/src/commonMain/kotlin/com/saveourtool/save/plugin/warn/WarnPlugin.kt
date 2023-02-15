@@ -144,8 +144,7 @@ class WarnPlugin(
 
         val expectedWarningsMap = try {
             processExpectedWarnings(generalConfig, warnPluginConfig, originalPaths, copyPaths, workingDirectory)
-        }
-        catch (ex: SarifParsingException) {
+        } catch (ex: SarifParsingException) {
             return failTestResult(originalPaths, ex, execCmd)
         }
 
@@ -160,8 +159,7 @@ class WarnPlugin(
 
         val actualWarningsMap = try {
             processActualWarnings(executionResult, warnPluginConfig, originalPaths, workingDirectory)
-        }
-        catch (ex: SarifParsingException) {
+        } catch (ex: SarifParsingException) {
             return failTestResult(originalPaths, ex, execCmd)
         }
 
