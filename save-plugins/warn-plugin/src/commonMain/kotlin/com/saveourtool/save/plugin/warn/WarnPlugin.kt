@@ -230,7 +230,7 @@ class WarnPlugin(
         workingDirectory: Path,
     ): WarningMap {
         val actualResult = if (warnPluginConfig.actualWarningsFormat == ActualWarningsFormat.SARIF &&
-            warnPluginConfig.actualWarningsFileName != null) {
+                warnPluginConfig.actualWarningsFileName != null) {
             // in this case, after tool execution, there was created sarif report, extract warnings from it,
             // not from stdout
             val sarif = calculatePathToSarifFile(
