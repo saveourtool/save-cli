@@ -19,7 +19,6 @@ import com.saveourtool.save.core.result.DebugInfo
 import com.saveourtool.save.core.result.Fail
 import com.saveourtool.save.core.result.Pass
 import com.saveourtool.save.core.result.TestResult
-import com.saveourtool.save.core.utils.ExecutionResult
 import com.saveourtool.save.core.utils.PathSerializer
 import com.saveourtool.save.core.utils.ProcessExecutionException
 import com.saveourtool.save.core.utils.ProcessTimeoutException
@@ -104,21 +103,22 @@ class FixPlugin(
 
                 logDebug("Executing fix plugin in ${fixPluginConfig.actualFixFormat?.name} mode")
 
-                val (executionResult, adjustedTestCopyToExpectedFilesMap) = if (fixPluginConfig.actualFixFormat == ActualFixFormat.IN_PLACE) {
-                    try {
-                        // hold testCopyToExpectedFilesMap as is
-                        pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time) to testCopyToExpectedFilesMap
-                    } catch (ex: ProcessTimeoutException) {
-                        logWarn("The following tests took too long to run and were stopped: ${chunk.map { it.test }}, timeout for single test: ${ex.timeoutMillis}")
-                        return@map failTestResult(chunk, ex, execCmd)
-                    } catch (ex: ProcessExecutionException) {
-                        return@map failTestResult(chunk, ex, execCmd)
-                    }
+                val executionResult = try {
+                    pb.exec(execCmd, testConfig.getRootConfig().directory.toString(), redirectTo, time)
+                } catch (ex: ProcessTimeoutException) {
+                    logWarn("The following tests took too long to run and were stopped: ${chunk.map { it.test }}, timeout for single test: ${ex.timeoutMillis}")
+                    return@map failTestResult(chunk, ex, execCmd)
+                } catch (ex: ProcessExecutionException) {
+                    return@map failTestResult(chunk, ex, execCmd)
+                }
+
+                val adjustedTestCopyToExpectedFilesMap = if (fixPluginConfig.actualFixFormat == ActualFixFormat.IN_PLACE) {
+                    // hold testCopyToExpectedFilesMap as is
+                    testCopyToExpectedFilesMap
                 } else {
-                    // replace test files by modificated copies, obtained from sarif lib
+                    // replace test files with modified copies, obtained from sarif lib
                     val fixedTestCopyToExpectedFilesMap = applyFixesFromSarif(fixPluginConfig, testsPaths, testCopyToExpectedFilesMap)
-                    val dbgMsg = "Fixes were obtained from SARIF file, no debug info is available"
-                    ExecutionResult(0, listOf(dbgMsg), listOf(dbgMsg)) to fixedTestCopyToExpectedFilesMap
+                    fixedTestCopyToExpectedFilesMap
                 }
 
                 val stdout = executionResult.stdout
@@ -188,6 +188,7 @@ class FixPlugin(
      * @param testCopyToExpectedFilesMap list of paths to the copy of tests files, which will be replaced by modificated files
      * @return updated list of test files copies
      */
+    // TODO: support case, when sarif report is provided via stdout
     private fun applyFixesFromSarif(
         fixPluginConfig: FixPluginConfig,
         testsPaths: List<Path>,

@@ -10,6 +10,9 @@
     # regular expression to detect tests
     testNameRegex = ".*Test.kt"
     actualWarningsFormat = "SARIF"
+    # by default, in SARIF mode, it's supposed, that tool will print sarif report into the stdout
+    # however, it also could be provided via file
+    # actualWarningsFileName = "save-warnings-actual.sarif"
     fileNameCaptureGroupOut = 1
     lineCaptureGroupOut = 2
     columnCaptureGroupOut = 3
