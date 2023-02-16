@@ -188,7 +188,9 @@ class FixPlugin(
     /**
      * In this case fixes would be provided by sarif library, which will extract appropriate fixes from SARIF file
      *
-     * @param fixPluginConfig
+     * @param executionResultStdout sarif report data: if sarif file is not provided,
+     * supposed, that sarif report is present in stdout of execution result
+     * @param fixPluginConfig fix plugin configuration
      * @param testsPaths path to tests file, which need to be modified
      * @param testCopyToExpectedFilesMap list of paths to the copy of tests files, which will be replaced by modified files
      * @return updated list of test files copies
@@ -199,30 +201,20 @@ class FixPlugin(
         testsPaths: List<Path>,
         testCopyToExpectedFilesMap: List<PathPair>,
     ): List<PathPair> {
-        val sarifFileName = fixPluginConfig.actualFixSarifFileName
-        var needToEmulateSarifFile = false
         val tmpDirName = "${FixPlugin::class.simpleName!!}-${Random.nextInt()}".toPath()
-        val sarifFile = if (fixPluginConfig.actualFixSarifFileName != null) {
-            calculatePathToSarifFile(
-                sarifFileName = sarifFileName!!,
-                // Since we have one .sarif file for all tests, just take the first of them as anchor for calculation of paths
-                anchorTestFilePath = testsPaths.first()
-            )
-        } else {
-            needToEmulateSarifFile = true
-            createTempDir(tmpDirName)
-            val sarifFile = fs.createFile(tmpDirName / "emulated-sarif.sarif")
-            fs.write(sarifFile) {
-                write(executionResultStdout.joinToString("\n").encodeToByteArray())
-            }
-            sarifFile
-        }
-        // In this case fixes weren't performed by tool into the test files directly,
+        val (sarifFile, isSarifFileEmulated) = getSarifFile(executionResultStdout, fixPluginConfig, testsPaths, tmpDirName)
+
+        // Fixes weren't performed by tool into the test files directly,
         // instead, there was created sarif file with list of fixes, which we will apply ourselves
         val fixedFiles = SarifFixAdapter(
             sarifFile = sarifFile,
             targetFiles = testsPaths
         ).process()
+
+        // sarif file was created by us, remove tmp data
+        if (isSarifFileEmulated) {
+            fs.deleteRecursively(tmpDirName, mustExist = true)
+        }
 
         // modify existing map, replace test copies to fixed test copies
         val fixedTestCopyToExpectedFilesMap = testCopyToExpectedFilesMap.toMutableList().map { (testCopy, expected) ->
@@ -235,6 +227,37 @@ class FixPlugin(
             fixedTestCopy to expected
         }
         return fixedTestCopyToExpectedFilesMap
+    }
+
+    private fun getSarifFile(
+        executionResultStdout: List<String>,
+        fixPluginConfig: FixPluginConfig,
+        testsPaths: List<Path>,
+        tmpDirName: Path,
+    ): Pair<Path, Boolean> {
+        var isSarifFileEmulated = false
+
+        val sarifFile = if (fixPluginConfig.actualFixSarifFileName != null) {
+            // get provided sarif file
+            calculatePathToSarifFile(
+                sarifFileName = fixPluginConfig.actualFixSarifFileName,
+                // Since we have one .sarif file for all tests, just take the first of them as anchor for calculation of paths
+                anchorTestFilePath = testsPaths.first()
+            )
+        } else {
+            // sarif report is passed via stdout of executed tool
+            // since sarif-utils lib need a real sarif file for processing,
+            // emulate it here
+            isSarifFileEmulated = true
+            createTempDir(tmpDirName)
+            val sarifFile = fs.createFile(tmpDirName / "emulated-sarif-report.sarif")
+            fs.write(sarifFile) {
+                writeUtf8(executionResultStdout.joinToString("\n"))
+            }
+            sarifFile
+        }
+
+        return sarifFile to isSarifFileEmulated
     }
 
     /**
