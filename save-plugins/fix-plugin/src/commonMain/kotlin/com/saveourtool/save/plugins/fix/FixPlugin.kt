@@ -248,6 +248,8 @@ class FixPlugin(
                 anchorTestFilePath = testsPaths.first()
             )
         } else {
+            // TODO: This case should be actually covered by tests too,
+            // TODO: however, need to find analysis tool which create sarif report with fixes in stdout
             // sarif report is passed via stdout of executed tool
             // since sarif-utils lib need a real sarif file for processing,
             // emulate it here
