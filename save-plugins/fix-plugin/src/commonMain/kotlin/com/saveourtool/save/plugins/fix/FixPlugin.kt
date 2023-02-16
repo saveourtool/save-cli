@@ -1,3 +1,5 @@
+@file:Suppress("FILE_IS_TOO_LONG")
+
 package com.saveourtool.save.plugins.fix
 
 import com.saveourtool.save.core.config.ActualFixFormat
@@ -229,6 +231,7 @@ class FixPlugin(
         return fixedTestCopyToExpectedFilesMap
     }
 
+    @Suppress("SAY_NO_TO_VAR")
     private fun getSarifFile(
         executionResultStdout: List<String>,
         fixPluginConfig: FixPluginConfig,
