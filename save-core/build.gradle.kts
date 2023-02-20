@@ -76,6 +76,11 @@ tasks.withType<KotlinCompile<*>>().forEach {
     it.dependsOn(generateVersionFileTaskProvider)
 }
 
+tasks.getByName("sourcesJar") {
+    dependsOn(generateConfigOptionsTaskProvider)
+    dependsOn(generateVersionFileTaskProvider)
+}
+
 tasks.register<Download>("downloadTestResources") {
     src {
         listOf(
