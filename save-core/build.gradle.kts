@@ -41,8 +41,6 @@ kotlin {
 }
 
 val generateConfigOptionsTaskProvider = tasks.register("generateConfigOptions") {
-    mustRunAfter(tasks.getByName(":save-core:compileCommonNonJsMainKotlinMetadata"))
-    mustRunAfter(tasks.getByName(":save-core:sourcesJar"))
     inputs.file(optionsConfigFilePath())
     inputs.file(argumentsConfigFilePath())
     val generatedFile = File("$buildDir/generated/src/com/saveourtool/save/core/config/SaveProperties.kt")
@@ -53,8 +51,6 @@ val generateConfigOptionsTaskProvider = tasks.register("generateConfigOptions") 
     }
 }
 val generateVersionFileTaskProvider = tasks.register("generateVersionsFile") {
-    mustRunAfter(tasks.getByName(":save-core:compileCommonNonJsMainKotlinMetadata"))
-    mustRunAfter(tasks.getByName(":save-core:sourcesJar"))
     inputs.property("project version", version.toString())
     val versionsFile = File("$buildDir/generated/src/com/saveourtool/save/core/config/Versions.kt")
     outputs.file(versionsFile)
@@ -78,6 +74,17 @@ tasks.withType<KotlinCompile<*>>().forEach {
     it.dependsOn(generateConfigOptionsTaskProvider)
     it.dependsOn(generateVersionFileTaskProvider)
 }
+
+val taskNames = listOf("sourcesJar", "compileCommonNonJsMainKotlinMetadata")
+taskNames.forEach {
+    if (tasks.names.contains(it)) {
+        tasks.named(it) {
+            mustRunAfter(generateConfigOptionsTaskProvider)
+            mustRunAfter(generateVersionFileTaskProvider)
+        }
+    }
+}
+
 
 tasks.register<Download>("downloadTestResources") {
     src {
