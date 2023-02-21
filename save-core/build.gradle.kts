@@ -68,23 +68,14 @@ val generateVersionFileTaskProvider = tasks.register("generateVersionsFile") {
     }
 }
 kotlin.sourceSets.getByName("commonNonJsMain") {
-    kotlin.srcDir("$buildDir/generated/src")
-}
-tasks.withType<KotlinCompile<*>>().forEach {
-    it.dependsOn(generateConfigOptionsTaskProvider)
-    it.dependsOn(generateVersionFileTaskProvider)
-}
-
-val taskNames = listOf("sourcesJar", "compileCommonNonJsMainKotlinMetadata")
-taskNames.forEach {
-    if (tasks.names.contains(it)) {
-        tasks.named(it) {
-            mustRunAfter(generateConfigOptionsTaskProvider)
-            mustRunAfter(generateVersionFileTaskProvider)
+    kotlin.srcDir(
+        generateVersionFileTaskProvider.zip(generateConfigOptionsTaskProvider) { _, _ ->
+            // Simply discard both tasks. However, `zip` is essential to tell Gradle
+            // that `srcDir` depends on both tasks.
+            "$buildDir/generated/src"
         }
-    }
+    )
 }
-
 
 tasks.register<Download>("downloadTestResources") {
     src {
