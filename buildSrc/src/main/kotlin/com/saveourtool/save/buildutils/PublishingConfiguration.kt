@@ -15,9 +15,9 @@ import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.extra
 import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import org.gradle.plugins.signing.Sign
@@ -85,7 +85,7 @@ fun Project.configurePublishing() {
     }
 }
 
-@Suppress("TOO_LONG_FUNCTION")
+@Suppress("TOO_LONG_FUNCTION", "GENERIC_VARIABLE_WRONG_DECLARATION")
 private fun Project.configurePublications() {
     val dokkaJarProvider = tasks.register<Jar>("dokkaJar") {
         group = "documentation"
