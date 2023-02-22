@@ -11,14 +11,16 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.publish.maven.tasks.AbstractPublishToMaven
+import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.extra
 import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.plugins.signing.SigningPlugin
 
@@ -83,9 +85,9 @@ fun Project.configurePublishing() {
     }
 }
 
-@Suppress("TOO_LONG_FUNCTION")
+@Suppress("TOO_LONG_FUNCTION", "GENERIC_VARIABLE_WRONG_DECLARATION")
 private fun Project.configurePublications() {
-    val dokkaJar: Jar = tasks.create<Jar>("dokkaJar") {
+    val dokkaJarProvider = tasks.register<Jar>("dokkaJar") {
         group = "documentation"
         archiveClassifier.set("javadoc")
         from(tasks.findByName("dokkaHtml"))
@@ -95,7 +97,7 @@ private fun Project.configurePublications() {
             mavenLocal()
         }
         publications.withType<MavenPublication>().forEach { publication ->
-            publication.artifact(dokkaJar)
+            publication.artifact(dokkaJarProvider)
             publication.pom {
                 name.set(project.name)
                 description.set(project.description ?: project.name)
@@ -111,7 +113,7 @@ private fun Project.configurePublications() {
                     developer {
                         id.set("petertrr")
                         name.set("Petr Trifanov")
-                        email.set("peter.trifanov@mail.ru")
+                        email.set("peter.trifanov@gmail.com")
                     }
                     developer {
                         id.set("akuleshov7")
@@ -133,6 +135,13 @@ private fun Project.configureSigning() {
         useInMemoryPgpKeys(property("signingKey") as String?, property("signingPassword") as String?)
         logger.lifecycle("The following publications are getting signed: ${extensions.getByType<PublishingExtension>().publications.map { it.name }}")
         sign(*extensions.getByType<PublishingExtension>().publications.toTypedArray())
+    }
+
+    tasks.withType<PublishToMavenRepository>().configureEach {
+        // Workaround for the problem described at https://github.com/saveourtool/save-cli/pull/501#issuecomment-1439705340.
+        // We have a single Javadoc artifact shared by all platforms, hence all publications depend on signing of this artifact.
+        // This causes weird implicit dependencies, like `publishJsPublication...` depends on `signJvmPublication`.
+        dependsOn(tasks.withType<Sign>())
     }
 }
 
