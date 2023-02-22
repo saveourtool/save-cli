@@ -3,7 +3,6 @@ import com.saveourtool.save.generation.generateConfigOptions
 import com.saveourtool.save.generation.optionsConfigFilePath
 
 import de.undercouch.gradle.tasks.download.Download
-import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
