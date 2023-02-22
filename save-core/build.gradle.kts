@@ -1,10 +1,8 @@
-
 import com.saveourtool.save.generation.argumentsConfigFilePath
 import com.saveourtool.save.generation.generateConfigOptions
 import com.saveourtool.save.generation.optionsConfigFilePath
 
 import de.undercouch.gradle.tasks.download.Download
-import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
@@ -69,11 +67,13 @@ val generateVersionFileTaskProvider = tasks.register("generateVersionsFile") {
     }
 }
 kotlin.sourceSets.getByName("commonNonJsMain") {
-    kotlin.srcDir("$buildDir/generated/src")
-}
-tasks.withType<KotlinCompile<*>>().forEach {
-    it.dependsOn(generateConfigOptionsTaskProvider)
-    it.dependsOn(generateVersionFileTaskProvider)
+    kotlin.srcDir(
+        generateVersionFileTaskProvider.zip(generateConfigOptionsTaskProvider) { _, _ ->
+            // Simply discard both tasks. However, `zip` is essential to tell Gradle
+            // that `srcDir` depends on both tasks.
+            "$buildDir/generated/src"
+        }
+    )
 }
 
 tasks.register<Download>("downloadTestResources") {
