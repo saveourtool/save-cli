@@ -14,7 +14,7 @@ import org.gradle.api.publish.maven.tasks.AbstractPublishToMaven
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.extra
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.withType
@@ -85,7 +85,7 @@ fun Project.configurePublishing() {
 
 @Suppress("TOO_LONG_FUNCTION")
 private fun Project.configurePublications() {
-    val dokkaJar: Jar = tasks.create<Jar>("dokkaJar") {
+    val dokkaJarProvider = tasks.register<Jar>("dokkaJar") {
         group = "documentation"
         archiveClassifier.set("javadoc")
         from(tasks.findByName("dokkaHtml"))
@@ -95,7 +95,7 @@ private fun Project.configurePublications() {
             mavenLocal()
         }
         publications.withType<MavenPublication>().forEach { publication ->
-            publication.artifact(dokkaJar)
+            publication.artifact(dokkaJarProvider)
             publication.pom {
                 name.set(project.name)
                 description.set(project.description ?: project.name)
