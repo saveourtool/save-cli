@@ -6,6 +6,8 @@ on:
       - 'v*'
     branches:
       - main
+      # Fixme: temporary, for experiments
+      - bugfix/gradle-publishing
 env:
   GPG_SEC: ${{ secrets.PGP_SEC }}
   GPG_PASSWORD: ${{ secrets.PGP_PASSWORD }}
