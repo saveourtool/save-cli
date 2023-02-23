@@ -210,7 +210,8 @@ class FixPlugin(
         // instead, there was created sarif file with list of fixes, which we will apply ourselves
         val fixedFiles = SarifFixAdapter(
             sarifFile = sarifFile,
-            targetFiles = testsPaths
+            targetFiles = testsPaths,
+            testRoot = testConfig.getRootConfig().directory,
         ).process()
 
         // sarif file was created by us, remove tmp data

@@ -24,7 +24,7 @@ fun SaveProperties.Companion.of(args: Array<String>): SaveProperties {
     val configFromCli = try {
         parseArgs(fs, args)
     } catch (e: IOException) {
-        return logErrorAndExit(
+        logErrorAndExit(
             ExitCodes.INVALID_CONFIGURATION,
             "Save expects to get the root directory for test files as the first CLI argument: save [cli-options] <test-root> [...]. " +
                     "Provided value to cli as a root for test directory and is not able to find it. " +
@@ -46,7 +46,7 @@ private fun SaveProperties.validate(): SaveProperties {
     try {
         fs.metadata(fullConfigPath)
     } catch (e: FileNotFoundException) {
-        return logErrorAndExit(
+        logErrorAndExit(
             ExitCodes.INVALID_CONFIGURATION, "Not able to find configuration file '$fullConfigPath'." +
                     " Please provide a valid path to the test config via command-line or using the file with properties. " +
                     " Error: ${e.message}"
