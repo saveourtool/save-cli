@@ -55,7 +55,7 @@ jobs:
             --continue
             -x detekt
             -Pkotlin.tests.individualTaskReports=true
-            -Porg.gradle.caching=true
+#            -Porg.gradle.caching=true
             -Pdetekt.multiplatform.disabled=true
             -PdisableRedundantTargets=true
             -PenabledExecutables=debug
