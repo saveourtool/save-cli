@@ -14,7 +14,7 @@ dependencies {
     implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.22.0")
     implementation(libs.kotlin.gradle.plugin)
     implementation(libs.kotlin.plugin.serialization)
-    implementation("io.github.gradle-nexus:publish-plugin:1.2.0")
+    implementation("io.github.gradle-nexus:publish-plugin:1.3.0")
     implementation("org.ajoberstar.reckon:reckon-gradle:0.16.1")
     implementation("com.squareup:kotlinpoet:1.12.0")
     implementation("com.google.code.gson:gson:2.10.1")
