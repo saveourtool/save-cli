@@ -262,6 +262,7 @@ internal fun String.getLineNumberAndMessage(
  * @param lineGroupIdx index of capture group for line number
  * @return line number
  */
+@Suppress("WRONG_OVERLOADING_FUNCTION_ARGUMENTS")
 internal fun String.getLineNumber(warningRegex: Regex,
                                   lineGroupIdx: Long?,
 ): Int? {
