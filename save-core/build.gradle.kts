@@ -8,7 +8,7 @@ import java.nio.file.StandardCopyOption
 
 plugins {
     id("com.saveourtool.save.buildutils.kotlin-library")
-    id("de.undercouch.download") version "5.3.1"
+    id("de.undercouch.download") version "5.4.0"
 }
 
 kotlin {
