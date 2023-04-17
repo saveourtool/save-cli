@@ -29,7 +29,7 @@ kotlin {
     if (project.name == "save-common") {
         // additionally, save-common should be available for JS too
         // fixme: shouldn't rely on hardcoded project name here
-        js(BOTH).browser()
+        js(IR).browser()
 
         // store yarn.lock in the root directory
         rootProject.extensions.configure<org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension> {
@@ -70,7 +70,7 @@ kotlin {
         val commonMain by getting
         val commonTest by getting {
             dependencies {
-                implementation("io.kotest:kotest-assertions-core:5.5.5")
+                implementation("io.kotest:kotest-assertions-core:5.6.0")
             }
         }
         val commonNonJsMain by creating {
