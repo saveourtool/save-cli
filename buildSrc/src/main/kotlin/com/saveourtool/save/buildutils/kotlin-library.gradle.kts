@@ -70,7 +70,7 @@ kotlin {
         val commonMain by getting
         val commonTest by getting {
             dependencies {
-                implementation("io.kotest:kotest-assertions-core:5.6.0")
+                implementation("io.kotest:kotest-assertions-core:5.6.1")
             }
         }
         val commonNonJsMain by creating {
