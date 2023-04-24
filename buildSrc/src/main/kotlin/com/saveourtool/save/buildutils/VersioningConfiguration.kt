@@ -4,17 +4,17 @@
 
 package com.saveourtool.save.buildutils
 
-import org.ajoberstar.grgit.Grgit
-import org.ajoberstar.grgit.gradle.GrgitServiceExtension
-import org.ajoberstar.grgit.gradle.GrgitServicePlugin
+import org.ajoberstar.reckon.core.Scope
+import org.ajoberstar.reckon.core.VersionTagParser
 import org.ajoberstar.reckon.gradle.ReckonExtension
 import org.ajoberstar.reckon.gradle.ReckonPlugin
+import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.getByType
+import java.util.*
 
 /**
  * Configures how project version is determined.
@@ -23,36 +23,40 @@ import org.gradle.kotlin.dsl.getByType
  */
 fun Project.configureVersioning() {
     apply<ReckonPlugin>()
-    apply<GrgitServicePlugin>()
-    val grgitProvider = project.extensions
-        .getByType<GrgitServiceExtension>()
-        .service
-        .map { it.grgit }
 
     val isSnapshot = hasProperty("reckon.stage") && property("reckon.stage") == "snapshot"
     configure<ReckonExtension> {
-        scopeFromProp()
+        setDefaultInferredScope(Scope.MINOR.name)
+        setScopeCalc(calcScopeFromProp())
         if (isSnapshot) {
             // we should build snapshots only for snapshot publishing, so it requires explicit parameter
-            snapshotFromProp()
+            snapshots()
+            setStageCalc(calcStageFromProp())
+
+            /**
+             * A terrible hack to remove all pre-release tags. Because in semver `0.1.0-SNAPSHOT` < `0.1.0-alpha`, in snapshot mode
+             * we remove tags like `0.1.0-alpha`, and then reckoned version will still be `0.1.0-SNAPSHOT` and it will be compliant.
+             */
+            setTagParser { tagName ->
+                Optional.of(tagName)
+                    .filter { it.matches(Regex("""^v\d+\.\d+\.\d+$""")) }
+                    .flatMap { VersionTagParser.getDefault().parse(it) }
+            }
         } else {
-            stageFromProp("alpha", "rc", "final")
+            stages("alpha", "rc", "final")
+            setStageCalc(calcStageFromProp())
         }
     }
 
     // to activate release, provide `-Prelease` or `-Prelease=true`. To deactivate, either omit the property, or set `-Prelease=false`.
     val isRelease = hasProperty("release") && (property("release") as String != "false")
     if (isRelease) {
-        failOnUncleanTree(grgitProvider)
-    }
-    if (isSnapshot) {
-        fixForSnapshot(grgitProvider)
+        failOnUncleanTree()
     }
 }
 
-private fun failOnUncleanTree(grgitProvider: Provider<Grgit>) {
-    val grgit = grgitProvider.get()
-    val status = grgit.repository.jgit
+private fun Project.failOnUncleanTree() {
+    val status = Git(FileRepository(project.rootDir))
         .status()
         .call()
     if (!status.isClean) {
@@ -61,18 +65,3 @@ private fun failOnUncleanTree(grgitProvider: Provider<Grgit>) {
     }
 }
 
-/**
- * A terrible hack to remove all pre-release tags. Because in semver `0.1.0-SNAPSHOT` < `0.1.0-alpha`, in snapshot mode
- * we remove tags like `0.1.0-alpha`, and then reckoned version will still be `0.1.0-SNAPSHOT` and it will be compliant.
- */
-private fun fixForSnapshot(grgitProvider: Provider<Grgit>) {
-    val grgit = grgitProvider.get()
-    val preReleaseTagNames = grgit.tag.list()
-        .sortedByDescending { it.commit.dateTime }
-        .takeWhile {
-            // take latest tags that are pre-release
-            !it.name.matches(Regex("""^v\d+\.\d+\.\d+$"""))
-        }
-        .map { it.name }
-    grgit.tag.remove { this.names = preReleaseTagNames }
-}
