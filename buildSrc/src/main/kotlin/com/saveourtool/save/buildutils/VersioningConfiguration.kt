@@ -10,6 +10,7 @@ import org.ajoberstar.reckon.gradle.ReckonExtension
 import org.ajoberstar.reckon.gradle.ReckonPlugin
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
@@ -47,7 +48,11 @@ fun Project.configureVersioning() {
 }
 
 private fun Project.failOnUncleanTree() {
-    val status = Git(FileRepository(project.rootDir))
+    val status = FileRepositoryBuilder()
+        .findGitDir(project.rootDir)
+        .setup()
+        .let(::FileRepository)
+        .let(::Git)
         .status()
         .call()
     if (!status.isClean) {
