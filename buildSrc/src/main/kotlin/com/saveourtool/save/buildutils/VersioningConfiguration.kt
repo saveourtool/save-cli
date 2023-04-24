@@ -32,16 +32,7 @@ fun Project.configureVersioning() {
             // we should build snapshots only for snapshot publishing, so it requires explicit parameter
             snapshots()
             setStageCalc(calcStageFromProp())
-
-            /*
-             * A terrible hack to remove all pre-release tags. Because in semver `0.1.0-SNAPSHOT` < `0.1.0-alpha`, in snapshot mode
-             * we remove tags like `0.1.0-alpha`, and then reckoned version will still be `0.1.0-SNAPSHOT` and it will be compliant.
-             */
-            setTagParser { tagName ->
-                Optional.of(tagName)
-                    .filter { it.matches(Regex("""^v\d+\.\d+\.\d+$""")) }
-                    .flatMap { VersionTagParser.getDefault().parse(it) }
-            }
+            fixForSnapshot()
         } else {
             stages("alpha", "rc", "final")
             setStageCalc(calcStageFromProp())
@@ -62,5 +53,17 @@ private fun Project.failOnUncleanTree() {
     if (!status.isClean) {
         throw GradleException("Release build will be performed with not clean git tree; aborting. " +
                 "Untracked files: ${status.untracked}, uncommitted changes: ${status.uncommittedChanges}")
+    }
+}
+
+/**
+ * A terrible hack to remove all pre-release tags. Because in semver `0.1.0-SNAPSHOT` < `0.1.0-alpha`, in snapshot mode
+ * we remove tags like `0.1.0-alpha`, and then reckoned version will still be `0.1.0-SNAPSHOT` and it will be compliant.
+ */
+private fun ReckonExtension.fixForSnapshot() {
+    setTagParser { tagName ->
+        Optional.of(tagName)
+            .filter { it.matches(Regex("""^v\d+\.\d+\.\d+$""")) }
+            .flatMap { VersionTagParser.getDefault().parse(it) }
     }
 }
