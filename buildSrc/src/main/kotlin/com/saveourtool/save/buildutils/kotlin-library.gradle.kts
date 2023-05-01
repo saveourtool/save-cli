@@ -90,7 +90,7 @@ kotlin {
             dependsOn(commonNonJsTest)
             dependencies {
                 implementation(kotlin("test-junit5"))
-                implementation("org.junit.jupiter:junit-jupiter-engine:5.9.2")
+                implementation("org.junit.jupiter:junit-jupiter-engine:5.9.3")
             }
         }
         val nativeMain by creating {
