@@ -23,6 +23,7 @@ kotlin {
                 implementation(libs.kotlinx.cli)
                 implementation(libs.ktoml.core)
                 implementation(libs.ktoml.file)
+                implementation(libs.ktoml.source)
                 implementation(projects.savePlugins.fixPlugin)
                 implementation(projects.savePlugins.fixAndWarnPlugin)
                 implementation(projects.savePlugins.warnPlugin)

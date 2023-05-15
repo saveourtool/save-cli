@@ -1,16 +1,16 @@
 [versions]
 kotlin = "1.8.21"
 okio = "3.3.0"
-serialization = "1.5.0"
+serialization = "1.5.1"
 diktat = "1.2.5"
 kotlinx-cli = "0.3.5"
 kotlinx-datetime = "0.4.0"
 kotlinx-coroutines = "1.6.3-native-mt"
 junit = "5.9.3"
-ktoml = "0.4.1"
+ktoml = "0.5.0"
 multiplatform-diff = "0.4.0"
 kotlinpoet = "1.13.2"
-kotest = "5.6.1"
+kotest = "5.6.2"
 sarif4k = "0.3.0"
 sarif-utils = "0.2.1"
 log4j = "2.20.0"
@@ -34,6 +34,7 @@ kotlinx-cli = { module = "org.jetbrains.kotlinx:kotlinx-cli", version.ref = "kot
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
 ktoml-core = { module = "com.akuleshov7:ktoml-core", version.ref = "ktoml" }
 ktoml-file = { module = "com.akuleshov7:ktoml-file", version.ref = "ktoml" }
+ktoml-source = { module = "com.akuleshov7:ktoml-source", version.ref = "ktoml" }
 multiplatform-diff = { module = "io.github.petertrr:kotlin-multiplatform-diff", version.ref = "multiplatform-diff" }
 square-kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
 diktat-gradle-plugin = { module = "org.cqfn.diktat:diktat-gradle-plugin", version.ref = "diktat" }
