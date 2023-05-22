@@ -11,7 +11,7 @@ ktoml = "0.5.0"
 multiplatform-diff = "0.4.0"
 kotlinpoet = "1.13.2"
 kotest = "5.6.2"
-sarif4k = "0.3.0"
+sarif4k = "0.4.0"
 sarif-utils = "0.2.1"
 log4j = "2.20.0"
 
