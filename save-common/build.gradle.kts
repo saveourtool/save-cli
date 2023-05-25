@@ -17,5 +17,11 @@ kotlin {
                 implementation(libs.okio.fakefilesystem)
             }
         }
+
+        val jvmTest by getting {
+            dependencies {
+                implementation("junit:junit:4.13.2")
+            }
+        }
     }
 }
