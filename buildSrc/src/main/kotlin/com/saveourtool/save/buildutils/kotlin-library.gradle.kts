@@ -65,7 +65,11 @@ kotlin {
      */
     sourceSets {
         all {
-            languageSettings.optIn("kotlin.RequiresOptIn")
+            languageSettings.run {
+                optIn("kotlin.RequiresOptIn")
+                optIn("kotlinx.cinterop.ExperimentalForeignApi")
+                optIn("kotlin.experimental.ExperimentalNativeApi")
+            }
         }
         val commonMain by getting
         val commonTest by getting {

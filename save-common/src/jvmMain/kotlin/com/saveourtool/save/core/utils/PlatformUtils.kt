@@ -9,10 +9,6 @@ package com.saveourtool.save.core.utils
 
 import com.saveourtool.save.core.config.OutputStreamType
 
-actual typealias AtomicInt = java.util.concurrent.atomic.AtomicInteger
-
-actual typealias AtomicBoolean = java.util.concurrent.atomic.AtomicBoolean
-
 @Suppress("USE_DATA_CLASS")
 actual class GenericAtomicReference<T> actual constructor(valueToStore: T) {
     private val holder: java.util.concurrent.atomic.AtomicReference<T> = java.util.concurrent.atomic.AtomicReference(valueToStore)
