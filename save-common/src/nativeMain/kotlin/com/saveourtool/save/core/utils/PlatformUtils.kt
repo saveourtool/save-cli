@@ -2,18 +2,20 @@
     "HEADER_MISSING_IN_NON_SINGLE_CLASS_FILE",
     "MISSING_KDOC_TOP_LEVEL",
     "MISSING_KDOC_ON_FUNCTION",
-    "FILE_NAME_MATCH_CLASS"
+    "FILE_NAME_MATCH_CLASS",
+    "MatchingDeclarationName",
 )
 
 package com.saveourtool.save.core.utils
 
 import com.saveourtool.save.core.config.OutputStreamType
-import kotlinx.cinterop.ExperimentalForeignApi
 
 import platform.posix.fflush
 import platform.posix.fprintf
 import platform.posix.stderr
 import platform.posix.stdout
+
+import kotlinx.cinterop.ExperimentalForeignApi
 
 @Suppress("USE_DATA_CLASS")
 actual class GenericAtomicReference<T> actual constructor(valueToStore: T) {

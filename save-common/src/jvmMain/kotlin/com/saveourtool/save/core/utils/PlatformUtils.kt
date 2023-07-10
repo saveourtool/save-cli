@@ -3,6 +3,7 @@
     "MISSING_KDOC_TOP_LEVEL",
     "MISSING_KDOC_ON_FUNCTION",
     "FILE_NAME_MATCH_CLASS",
+    "MatchingDeclarationName",
 )
 
 package com.saveourtool.save.core.utils
