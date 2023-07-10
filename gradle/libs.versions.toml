@@ -1,6 +1,6 @@
 [versions]
 kotlin = "1.8.22"
-okio = "3.3.0"
+okio = "3.4.0"
 serialization = "1.5.1"
 diktat = "1.2.5"
 kotlinx-cli = "0.3.5"
