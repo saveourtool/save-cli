@@ -45,7 +45,10 @@ class ProcessBuilderTest {
         when {
             isCurrentOsWindows() -> {
                 expectedCode = 1
-                expectedStderr = listOf("The system cannot find the path specified.")
+                expectedStderr = listOf(
+                    "The system cannot find the path specified.",
+                    "The process tried to write to a nonexistent pipe.",
+                )
             }
             else -> {
                 expectedCode = 0
