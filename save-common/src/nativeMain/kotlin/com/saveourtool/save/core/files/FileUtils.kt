@@ -29,7 +29,8 @@ actual val fs: FileSystem = FileSystem.SYSTEM
  */
 @Suppress("MAGIC_NUMBER", "MagicNumber")
 actual fun FileSystem.myDeleteRecursively(path: Path) {
-    nftw(path.toString(), staticCFunction<CPointer<ByteVar>?, CPointer<stat>?, Int, CPointer<FTW>?, Int> { pathName, _, _, _ ->
+    @OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
+    nftw(path.toString(), staticCFunction { pathName, _, _, _ ->
         val fileName = pathName!!.toKString()
         logTrace("Attempt to delete file $fileName")
         remove(fileName)

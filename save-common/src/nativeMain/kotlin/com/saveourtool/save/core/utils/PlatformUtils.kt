@@ -8,6 +8,7 @@
 package com.saveourtool.save.core.utils
 
 import com.saveourtool.save.core.config.OutputStreamType
+import kotlinx.cinterop.ExperimentalForeignApi
 
 import platform.posix.fflush
 import platform.posix.fprintf
@@ -70,10 +71,13 @@ actual fun writeToConsole(msg: String, outputType: OutputStreamType) {
  * @param output output stream (stdout or stderr)
  */
 private fun processStandardStreams(msg: String, output: OutputStreamType) {
+    @OptIn(ExperimentalForeignApi::class)
     val stream = when (output) {
         OutputStreamType.STDERR -> stderr
         else -> stdout
     }
+    @OptIn(ExperimentalForeignApi::class)
     fprintf(stream, msg.escapePercent() + "\n")
+    @OptIn(ExperimentalForeignApi::class)
     fflush(stream)
 }
