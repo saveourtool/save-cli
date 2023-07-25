@@ -16,6 +16,40 @@ enum class CurrentOs {
 }
 
 /**
+ * Atomic values
+ */
+expect class AtomicInt(value: Int) {
+    /**
+     * @return value
+     */
+    fun get(): Int
+
+    /**
+     * @param delta increments the value_ by delta
+     * @return the new value
+     */
+    fun addAndGet(delta: Int): Int
+}
+
+/**
+ * Atomic boolean
+ */
+@Suppress("FUNCTION_BOOLEAN_PREFIX")
+expect class AtomicBoolean(value: Boolean) {
+    /**
+     * @return value
+     */
+    fun get(): Boolean
+
+    /**
+     * @param expect expected value
+     * @param update updated value
+     * @return the result of the comparison
+     */
+    fun compareAndSet(expect: Boolean, update: Boolean): Boolean
+}
+
+/**
  *  Class that holds value and shares atomic reference to the value (native only)
  *
  *  @param valueToStore value to store

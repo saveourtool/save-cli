@@ -3,12 +3,15 @@
     "MISSING_KDOC_TOP_LEVEL",
     "MISSING_KDOC_ON_FUNCTION",
     "FILE_NAME_MATCH_CLASS",
-    "MatchingDeclarationName",
 )
 
 package com.saveourtool.save.core.utils
 
 import com.saveourtool.save.core.config.OutputStreamType
+
+actual typealias AtomicInt = java.util.concurrent.atomic.AtomicInteger
+
+actual typealias AtomicBoolean = java.util.concurrent.atomic.AtomicBoolean
 
 @Suppress("USE_DATA_CLASS")
 actual class GenericAtomicReference<T> actual constructor(valueToStore: T) {

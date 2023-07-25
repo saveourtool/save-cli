@@ -9,10 +9,14 @@ import com.saveourtool.save.core.logging.logTrace
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
+import platform.posix.FTW
 import platform.posix.FTW_DEPTH
 import platform.posix.nftw
 import platform.posix.remove
+import platform.posix.stat
 
+import kotlinx.cinterop.ByteVar
+import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.staticCFunction
 import kotlinx.cinterop.toKString
 
@@ -25,8 +29,7 @@ actual val fs: FileSystem = FileSystem.SYSTEM
  */
 @Suppress("MAGIC_NUMBER", "MagicNumber")
 actual fun FileSystem.myDeleteRecursively(path: Path) {
-    @OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
-    nftw(path.toString(), staticCFunction { pathName, _, _, _ ->
+    nftw(path.toString(), staticCFunction<CPointer<ByteVar>?, CPointer<stat>?, Int, CPointer<FTW>?, Int> { pathName, _, _, _ ->
         val fileName = pathName!!.toKString()
         logTrace("Attempt to delete file $fileName")
         remove(fileName)
