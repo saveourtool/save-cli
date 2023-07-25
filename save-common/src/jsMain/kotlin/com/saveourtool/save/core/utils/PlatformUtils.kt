@@ -13,16 +13,6 @@ package com.saveourtool.save.core.utils
 
 import com.saveourtool.save.core.config.OutputStreamType
 
-actual class AtomicInt actual constructor(value: Int) {
-    actual fun get(): Int = error("Not implemented for JS")
-    actual fun addAndGet(delta: Int): Int = error("Not implemented for JS")
-}
-
-actual class AtomicBoolean actual constructor(value: Boolean) {
-    actual fun get(): Boolean = error("Not implemented for JS")
-    actual fun compareAndSet(expect: Boolean, update: Boolean): Boolean = error("Not implemented for JS")
-}
-
 @Suppress("USE_DATA_CLASS")
 actual class GenericAtomicReference<T> actual constructor(valueToStore: T) {
     private var value: T = valueToStore

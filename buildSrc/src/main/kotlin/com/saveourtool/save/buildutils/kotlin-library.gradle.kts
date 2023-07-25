@@ -64,9 +64,6 @@ kotlin {
      * linux  mingw macos
      */
     sourceSets {
-        all {
-            languageSettings.optIn("kotlin.RequiresOptIn")
-        }
         val commonMain by getting
         val commonTest by getting {
             dependencies {
