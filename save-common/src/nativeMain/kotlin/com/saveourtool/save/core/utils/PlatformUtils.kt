@@ -2,7 +2,8 @@
     "HEADER_MISSING_IN_NON_SINGLE_CLASS_FILE",
     "MISSING_KDOC_TOP_LEVEL",
     "MISSING_KDOC_ON_FUNCTION",
-    "FILE_NAME_MATCH_CLASS"
+    "FILE_NAME_MATCH_CLASS",
+    "MatchingDeclarationName",
 )
 
 package com.saveourtool.save.core.utils
@@ -14,44 +15,11 @@ import platform.posix.fprintf
 import platform.posix.stderr
 import platform.posix.stdout
 
-/**
- * Atomic values
- */
-actual class AtomicInt actual constructor(value: Int) {
-    private val holder = kotlin.native.concurrent.AtomicInt(value)
-
-    /**
-     * @return value
-     */
-    actual fun get(): Int = holder.value
-
-    /**
-     * @param delta increments the value_ by delta
-     * @return the new value
-     */
-    actual fun addAndGet(delta: Int): Int = holder.addAndGet(delta)
-}
-
-@Suppress("FUNCTION_BOOLEAN_PREFIX")
-actual class AtomicBoolean actual constructor(value: Boolean) {
-    private val holder = kotlin.native.concurrent.AtomicReference(value)
-
-    /**
-     * @return value
-     */
-    actual fun get(): Boolean = holder.value
-
-    /**
-     * @param expect expected value
-     * @param update updated value
-     * @return the result of the comparison
-     */
-    actual fun compareAndSet(expect: Boolean, update: Boolean): Boolean = holder.compareAndSet(expect, update)
-}
+import kotlinx.cinterop.ExperimentalForeignApi
 
 @Suppress("USE_DATA_CLASS")
 actual class GenericAtomicReference<T> actual constructor(valueToStore: T) {
-    private val holder: kotlin.native.concurrent.AtomicReference<T> = kotlin.native.concurrent.AtomicReference(valueToStore)
+    private val holder: kotlin.concurrent.AtomicReference<T> = kotlin.concurrent.AtomicReference(valueToStore)
     actual fun get(): T = holder.value
     actual fun set(newValue: T) {
         holder.value = newValue
@@ -104,11 +72,14 @@ actual fun writeToConsole(msg: String, outputType: OutputStreamType) {
  * @param msg a message string
  * @param output output stream (stdout or stderr)
  */
-fun processStandardStreams(msg: String, output: OutputStreamType) {
+private fun processStandardStreams(msg: String, output: OutputStreamType) {
+    @OptIn(ExperimentalForeignApi::class)
     val stream = when (output) {
         OutputStreamType.STDERR -> stderr
         else -> stdout
     }
+    @OptIn(ExperimentalForeignApi::class)
     fprintf(stream, msg.escapePercent() + "\n")
+    @OptIn(ExperimentalForeignApi::class)
     fflush(stream)
 }
