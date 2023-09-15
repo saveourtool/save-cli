@@ -15,8 +15,14 @@
 # ![maintainability] TO DO
 -->
 
-Save is an all-purpose command-line test framework that could be used for testing of development tools,
-especially which work with the code. Fully native and multiplatform application.  
+Save is an all-purpose command-line test framework that can be used for testing tools that work with code, 
+such as static analyzers and compilers. It is a fully native application, requiring no need to install any SDK.
+
+## What is SAVE?
+Static Analysis Verification and Evaluation (SAVE) is an ecosystem (also see [save-cloud](https://github.com/saveourtool/save-cloud)) designed for the evaluation, 
+testing, and certification of static analyzers, compilers or any other software tools. Instead of developing your own test 
+framework, you can utilize SAVE as a command-line test application. The only requirement is to prepare test 
+resources in the appropriate format.
 
 ## Quick start
 
@@ -25,27 +31,33 @@ especially which work with the code. Fully native and multiplatform application.
 |[CLI properties](/OptionsTable.md)|[examples](/examples/kotlin-diktat)|[save.toml config](#save_toml_configuration_file)|[Warn plugin](save-plugins/warn-plugin/README.md) | [Fix plugin](save-plugins/fix-plugin/README.md) | [Save presentation](/readme/save.pdf)|
 
 
-## What is SAVE?
-Static Analysis Verification and Evaluation (SAVE) - is an eco-system (see also [save-cloud](https://github.com/saveourtool/save-cloud)) for evaluation, testing and certification of static analyzers.
-Instead of writing your own test framework, you can use SAVE to have a command-line test application. The only thing you need is to prepare test resources in a proper format.
+## User scenarios
+### 1. Static analysis, warnings, sequentially
+> - My code analysis tool processes files **sequentially, one by one**;
+> - It produces **warnings** and outputs them to **stdout**;
+> - I want to compare actual warnings with expected warnings that are specified **within the test resource code**.
 
-<!-- 
-SAVE supports 5 different categories of static analysis and can be used for testing tools that are used both for checking and for autofixing the code.
-All of them have the description and special test packages:
-- code style issues
-- functional bugs
-- security issues
-- code smells
-- best practices
--->
-  
-Save can be used not only with static analyzers, but can be used as a test framework for writing functional tests for other development tools, like compilers (as testing principles remain the same).
+### 2. Static analysis, warnings, processing whole project
+> - I also have code analysis tool, but it processes **the entire project** at once and is aware of all the code **relations**.;
+> - It produces **warnings** and outputs them to **stdout**;
+> - I want to compare actual warnings with expected warnings that are specified **within the test resource code**.
+
+### 3. Automated code fixing or generation
+> - My tool **manipulates** the original code, for example, by auto-fixing it;
+> - I would like to check how my tool **fixes the code** by comparing it with expected result;
+> - Additionally, it can be used by compilers to validate **code generation**, **transitioning** from the original source 
+> - code to **intermediate representation** (IR), another programming language, or even assembly.
+
+### 4. Expected warnings in a separated file
+> - I do not want to specify my expected warnings in code; 
+> - I prefer to use **a separate file** in SARIF or any other format.
 
 <img src="/readme/static-analysis-process.png" width="500px"/>
 
 ## How to start
+0. Download [the latest release for your particular arch](https://github.com/saveourtool/save-cli)
 1. Prepare and configure your test base in the proper format. See [test_detection](#test_detection) and [plugins](#plugins)
-2. Run the following: `save "/my/path/to/tests"`. Directory `tests` should contain `save.toml` configuration file. 
+2. Run the following command (adapt it to your architecture and OS): `save "/my/path/to/tests"`. Directory `tests` should contain `save.toml` configuration file. 
 
 ## Plugins with examples
 Here is a list of standard default plugins:
