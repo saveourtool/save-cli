@@ -66,13 +66,13 @@ application {
  */
 fun registerNativeBinaries(os: DefaultOperatingSystem, kotlin: KotlinMultiplatformExtension) {
     val saveTarget = when {
-        os.isWindows -> kotlin.mingwX64()
-        os.isLinux -> kotlin.linuxX64()
-        os.isMacOsX -> kotlin.macosX64()
+        os.isWindows -> listOf(kotlin.mingwX64())
+        os.isLinux -> listOf(kotlin.linuxX64())
+        os.isMacOsX  -> listOf(kotlin.macosX64(), /* kotlin.macosArm64() */)
         else -> throw GradleException("Unknown operating system $os")
     }
 
-    configure(listOf(saveTarget)) {
+    configure(saveTarget) {
         binaries {
             val name = "save-${project.version}-${this@configure.name}"
             executable {
