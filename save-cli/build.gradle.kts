@@ -68,7 +68,10 @@ fun registerNativeBinaries(os: DefaultOperatingSystem, kotlin: KotlinMultiplatfo
     val saveTarget = when {
         os.isWindows -> listOf(kotlin.mingwX64())
         os.isLinux -> listOf(kotlin.linuxX64())
-        os.isMacOsX  -> listOf(kotlin.macosX64(), /* kotlin.macosArm64() */)
+        os.isMacOsX -> listOf(
+            kotlin.macosX64(),
+            /* kotlin.macosArm64() */
+        )
         else -> throw GradleException("Unknown operating system $os")
     }
 
