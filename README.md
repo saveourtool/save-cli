@@ -15,45 +15,69 @@
 # ![maintainability] TO DO
 -->
 
-Save is an all-purpose command-line test framework that could be used for testing of development tools,
-especially which work with the code. Fully native and multiplatform application.  
-
-## Quick start
-
-|  |  |  |  |  |  |
-| --- | --- | --- | --- | --- | --- |
-|[CLI properties](/OptionsTable.md)|[examples](/examples/kotlin-diktat)|[save.toml config](#save_toml_configuration_file)|[Warn plugin](save-plugins/warn-plugin/README.md) | [Fix plugin](save-plugins/fix-plugin/README.md) | [Save presentation](/readme/save.pdf)|
-
+Save is an all-purpose command-line test framework that can be used for testing tools that work with code, 
+such as static analyzers and compilers. It is a fully native application, requiring no need to install any SDK.
 
 ## What is SAVE?
-Static Analysis Verification and Evaluation (SAVE) - is an eco-system (see also [save-cloud](https://github.com/saveourtool/save-cloud)) for evaluation, testing and certification of static analyzers.
-Instead of writing your own test framework, you can use SAVE to have a command-line test application. The only thing you need is to prepare test resources in a proper format.
+Static Analysis Verification and Evaluation (SAVE) is an ecosystem (also see [save-cloud](https://github.com/saveourtool/save-cloud)) designed for the evaluation, 
+testing, and certification of static analyzers, compilers or any other software tools. Instead of developing your own test 
+framework, you can utilize SAVE as a command-line test application. The only requirement is to prepare test 
+resources in the appropriate format.
 
-<!-- 
-SAVE supports 5 different categories of static analysis and can be used for testing tools that are used both for checking and for autofixing the code.
-All of them have the description and special test packages:
-- code style issues
-- functional bugs
-- security issues
-- code smells
-- best practices
--->
-  
-Save can be used not only with static analyzers, but can be used as a test framework for writing functional tests for other development tools, like compilers (as testing principles remain the same).
+## Contribution
+We need your help! We will be glad if you will use, test or contribute to this project.
+In case you don't have much time for this - at least **give us a star** to attract other contributors! 
+Thanks! 🙏 🥳
+
+## Quick start: User scenarios
+### 1. Static analysis, warnings, sequentially
+> - My code analysis tool processes files **sequentially, one by one**;
+> - It produces **warnings** and outputs them to **stdout**;
+> - I want to compare actual warnings with expected warnings that are specified **within the test resource code**.
+
+### 2. Static analysis, warnings, processing whole project
+> - I also have code analysis tool, but it processes **the entire project** at once and is aware of all the code **relations**.;
+> - It produces **warnings** and outputs them to **stdout**;
+> - I want to compare actual warnings with expected warnings that are specified **within the test resource code**.
+
+### 3. Automated code fixing or generation
+> - My tool **manipulates** the original code, for example, by auto-fixing it;
+> - I would like to check how my tool **fixes the code** by comparing it with expected result;
+> - Additionally, it can be used by compilers to validate **code generation**, **transitioning** from the original source 
+> - code to **intermediate representation** (IR), another programming language, or even assembly.
+
+### 4. Expected warnings in a separated file
+> - I do not want to specify my expected warnings in code; 
+> - I prefer to use **a separate file** in SARIF or any other format.
+
+## How to Run
+1. Download [the latest release](https://github.com/saveourtool/save-cli) suitable for your OS and architecture.
+2. Set up and configure your test base in the correct SAVE format. Refer to [test_detection](#test_detection) and [plugins](#plugins) for guidance.
+3. Execute the following command (modify it according to your architecture and OS): `save "/my/path/to/tests"`
+
+Ensure the `tests` directory contains the `save.toml` configuration file.
+
+## SAVE Logging
+
+To debug SAVE execution, you can use the following argument:
+`--log=TYPE`, where `TYPE` can be one of the following:
+
+- `all` - Comprehensive logging that includes all information from SAVE execution, even more detailed than DEBUG (akin to a trace).
+- `debug` - Displays results, warnings, and debug information.
+- `warnings` - Shows results and critical warnings.
+- `results_only` - Displays only the results.
+
+## Plugins with examples
 
 <img src="/readme/static-analysis-process.png" width="500px"/>
 
-## How to start
-1. Prepare and configure your test base in the proper format. See [test_detection](#test_detection) and [plugins](#plugins)
-2. Run the following: `save "/my/path/to/tests"`. Directory `tests` should contain `save.toml` configuration file. 
+Here is a list of standard plugins:
+* [warn plugin](save-plugins/warn-plugin/README.md): This is for testing tools that detect issues in the source code and produce warnings.
+* [fix plugin](save-plugins/fix-plugin/README.md): This is used for testing static analyzer tools that modify text.
+* [fix-and-warn plugin](save-plugins/fix-and-warn-plugin/README.md): An optimization for scenarios where you want to correct a file and subsequently check for warnings that the tool couldn't address in a single run.
 
-## Plugins with examples
-Here is a list of standard default plugins:
-* [warn plugin](save-plugins/warn-plugin/README.md) for testing tools that find problems in the source code and emit warnings
-* [fix plugin](save-plugins/fix-plugin/README.md) for testing tools for static analyzers that mutate text
-* [fix-and-warn plugin](save-plugins/fix-and-warn-plugin/README.md) optimization in case you would like to fix file and after that check warnings that the tool was not able to fix in one execution.
+If you want multiple plugins to operate in your directory using the same test files (resources), simply add them all to the `save.toml` configuration:
 
-In case you would like to have several plugins to work in your directory with same test files (resources), just simply add them all to `save.toml` config:
 ```text
 [general]
 ...
@@ -72,166 +96,164 @@ In case you would like to have several plugins to work in your directory with sa
 ![save-cli](https://user-images.githubusercontent.com/58667063/146390474-71e4921d-416b-4922-b2ea-894f71e491c3.jpg)
 You can read more about the `warn plugin` [here](save-plugins/warn-plugin/README.md)
 
+## How to Configure
 
-## How to configure 
-SAVE has a command line interface that runs the framework and your executable. What you need is simply to configure the output of your static analyzer so SAVE will be able to
-check if the proper error was raised on the proper line of test code.
+SAVE has a command-line interface that allows you to run both the framework and your executable. Your main task is to configure the output of your static analyzer so that SAVE can verify whether the appropriate error was flagged at the correct line of the test code.
 
-To check that the warning is correct for SAVE - your static analyzer must print the result to stderr/stdout or to some log file.
+To ensure the warning is accurate for SAVE, your static analyzer must output the result either to stderr/stdout or a designated log file (for example in Sarif format).
 
-General behavior of SAVE can be configured using command line arguments, or a configuration file `save.properties` that should be placed in the same folder with a root test config `save.toml`.
+You can configure SAVE's general behavior using command-line arguments or by using a configuration file named `save.properties`. This file should be located in the same directory as the root test config, `save.toml`.
 
-For the complete list of supported options that can be passed to SAVE via command line or save.properties file, please refer to the [options table](/OptionsTable.md) or run `save --help`.
-Note, that options with choice are case-sensitive.
+For a comprehensive list of options that can be passed to SAVE via the command line or the `save.properties` file, refer to the [options table](/OptionsTable.md) or execute the `save --help` command. Please be aware that options with choices are case-sensitive.
 
-Example of `save.properties` file:
-```properties
-reportType=plain
-language=c++
-```
+The SAVE framework will automatically **detect** your tests, run your analyzer on them, calculate the pass rate, and return test results in the expected format.
 
-OR you can pass these arguments directly in command line: 
-```bash
-save --report-type json --language java
-```
+## <a name="test_detection"></a> Test Detection and save.toml File
+To enable SAVE to detect your test suites, you must place a `save.toml` file in each directory containing **test suites**. It's important to note that these configuration files inherit configurations from parent directories.
 
-SAVE framework is able to automatically detect your tests, run your analyzer on these tests, calculate the pass-rate and return test results in the expected format.
+Although most fields can be left undefined at lower levels and can inherit values from top levels, you should be cautious. 
+Some fields in the `[general]` section are mandatory for execution, so you need to specify them in at least one config file in the inheritance chain for tests that are meant to run. 
+[Check which fields are mandatory](#save_toml_configuration_file).
 
-## <a name="test_detection"></a> Test detection and save.toml file
-To make SAVE detect your test suites you need to put `save.toml` file in each directory where you have tests that should be run.
-Note, that these configuration files inherit configurations from the previous level of directories.
-
-Despite the fact, that almost all fields may not be defined in bottom levels and can be inherited from the top level,
-you should be accurate: some fields in `[general]` section are required for execution, so you need to provide them at least in one config from inheritance chain
-for test that should be run.
-[Look which fields are required](#save_toml_configuration_file).
-
-For example, in case of the following hierarchy of directories:
+For instance, with the following directory hierarchy:
 ```text
 | A
   | save.toml
   | B
     | save.toml
 ```
+The `save.toml` in directory B will inherit settings and properties from directory A.
 
-`save.toml` from the directory B will inherit settings and properties from directory A.
+Bear in mind that SAVE will detect all files with the 'Test' postfix and will automatically utilize configurations from the `save.toml` file present in the same directory (or inherited from parent). 
+Tests are named according to the test file's resource name, excluding the 'Test' suffix. 
+If SAVE detects a file with the 'Test' postfix in the test resources and cannot locate any `save.toml` configurations in the **directory hierarchy**, it will throw an error.
 
-Please note, that SAVE will detect all files with Test postfix and will automatically use configuration from `save.toml` file that is placed
-in the directory. Tests are named by the test file resource name without a suffix 'Test'.
-In case SAVE will detect a file with Test postfix in test resources and will not be able to find any `save.toml` configurations
-in the hierarchy of directories - it will raise an error.
-
-For example, the following example is invalid and will cause an error, because SAVE framework will not be able to find `save.toml` configuration file:
+For instance, the scenario below is invalid and will trigger an error, as the SAVE framework cannot locate the `save.toml` configuration file:
 ```text
 | A
   | B
   | myTest.java
 ```
 
-As described above, `save.toml` is needed to configure tests. The idea is to have only one configuration file for a directory with tests (one to many relation). 
-Such directories we will call `test suites`. We decided to have only one configuration file as we have many times seen that for such tests there is a duplication of configuration in the same test suite.
+As previously mentioned, the `save.toml` is essential for configuring tests. 
+_Ideally_, there should be one configuration file for each directory containing tests, establishing a one-to-many relationship. 
+We refer to these directories as `test suites`. 
 
-## <a name="save_toml_configuration_file"></a> save.toml configuration file
-Save configuration uses [toml](https://toml.io/en/) format. As it was told [above](#test_detection), save.toml can be imported from the directory hierarchy.
-The configuration file has `[general]` table and `[plugins]` table. To see more information about plugins, read [this](#plugins) section.
-In this section we will give information only about the `[general]` table that can be used in all plugins.
+The rationale behind having a single configuration file for one test suite is to avoid redundant configurations within the same test suite.
+
+## <a name="save_toml_configuration_file"></a> save.toml Configuration File
+
+The save configuration uses the [TOML](https://toml.io/en/) format powered by [ktoml](https://github.com/akuleshov7/ktoml) project.
+As mentioned [above](#test_detection), `save.toml` can be inherited from the directory hierarchy (parent directories).
+
+The configuration file contains a `[general]` table and a `[plugins]` table. For more information about plugins, refer to the [plugins section](#plugins).
+
+In this section, we will provide information only about the `[general]` table, which can be used across all plugins.
 
 ```text
 [general]
-# your custom tags that will be used to detect groups of tests (required)
-tags = ["parsing", "null-pointer", e.t.c]
+# Your custom tags that will be used to detect groups of tests (required)
+tags = ["parsing", "null-pointer", "etc"]
 
-# custom free text that describes the test suite (required)
+# Custom free text that describes the test suite (required)
 description = "My suite description"
 
 # Simple suite name (required)
-suiteName = DocsCheck, CaseCheck, NpeTests, e.t.c 
+suiteName = "DocsCheck", "CaseCheck", "NpeTests", "etc" 
 
-// FixMe: add tests that check that it is required and that it can be overwritten by child configs
 # Execution command (required at least once in the configuration hierarchy)
+# By the default these binaries should be in the same directory of where SAVE is run 
+# or should have full or relational path (root - is the directory with save executable)
 execCmd="./ktlint -R diktat-0.4.2.jar"
 
-# excluded tests in the suite (optional). Here you can provide names of excluded tests, separated by comma. By the default no tests are excluded. 
-# to exclude tests use relative path to the root of test project (to the root directory of `save.toml`)
-excludedTests = ["warn/chapter1/GarbageTest.kt", "warn/otherDir/NewTest.kt"], e.t.c
+# Excluded tests in the suite (optional). Here, you can list the names of excluded tests, separated by commas. By default, no tests are excluded.
+# To exclude tests, use the relative path to the root of the test project (to the root directory of `save.toml`)
+excludedTests = ["warn/chapter1/GarbageTest.kt", "warn/otherDir/NewTest.kt", "etc"]
 
-# command execution time for one test (milliseconds)
+# Command execution time for one test (in milliseconds)
 timeOutMillis = 10000
 
-# language for tests
+# Language for tests
 language = "Kotlin"
 ```
 
-## Executing specific tests
-It can be useful to execute only a number of tests instead of all tests under a particular `save.toml` config.
-To do so, you want to pass a relative path to test file after all configuration options:
+## Executing Specific Tests
+
+At times, you might want to execute only a specific set of tests instead of running all the tests under a particular `save.toml` config. 
+To achieve this, pass the relative path to the test file after all configuration options (root - is directory with save binary):
+
 ```bash
 $ save [options] /path/to/tests/Test1
 ```
-or a list of relative paths to test files (separated with spaces)
+
+You can also provide a list of relative paths to test files (separated by spaces):
+
 ```bash
 $ save [options] /path/to/tests/Test1 /path/to/tests/Test2
 ```
-SAVE will detect the closest `save.toml` file and use configuration from there.
 
-`Note:` On Windows, you may need to use double backslash `\\` as path separator
+SAVE will automatically detect the nearest `save.toml` file and use the configuration from it.
 
+`Note:` On Windows, remember to use a double backslash `\\` as the path separator.
 
-## <a name="plugins"></a> Using plugins for specific test-scenarios
-SAVE doesn't have any inspections active by default, instead the behavior of the analysis is fully configurable using plugins.
+## SAVE Output
+SAVE supports several formats for test report output:
+- `PLAIN`: A markdown-like table showing all test results.
+- `PLAIN_FAILED`: Similar to `PLAIN`, but only displays failed tests.
+- `JSON`: Structured representation of the execution result.
 
-// FixMe: Custom plugins are not yet fully supported. Do not use custom pluins.
-Plugins are dynamic libraries (`.so` or `.dll`) and they should be provided using argument `--plugins-path`. Some plugins are bundled
-with SAVE out-of-the-box and don't require an additional setup. 
-
-## SAVE output
-Save supports several formats of test result output: `PLAIN` (markdown-like table with all test results), `PLAIN_FAILED`
-(same as `PLAIN`, but doesn't show passed tests) and `JSON` (structured representation of execution result).
-The format could be selected with `--report-type` option.
+The desired format can be selected using the `--report-type=PLAIN` option.
 
 ## Purpose of Static Analysis Verification and Evaluation (SAVE) project
-Usage of [static analyzers](https://en.wikipedia.org/wiki/Static_program_analysis) - is a very important part of development each and every software product.
-All human beings can make a mistake in their code even when a software developer is writing all kinds of tests and has a very good test-coverage.
-All these issues can lead to potential money losses of companies. Static analysis of programs helps to reduce the number of such bugs and issues
-that cannot be found by validations on the compiler's side.
+## Purpose of Static Analysis Verification and Evaluation (SAVE) Project
 
-There are different kinds and purposes of static analysis: it can be simple analysis using AST (abstract syntax tree), it can be more complex CFA
-(control-flow analysis), interprocedural analysis, context sensitive analysis, e.t.c. Static analyzers can check code style, find potential issues on the runtime in
-the logic of an application, check for code smells and suggest best practices. But what exactly should static analyzers do? How their functionality can be measured?
-What is an acceptance criteria for Which functionality do developers really need when they are writing a brand new analyzer? These questions are still remain not answered,
-even after decades of development of static analyzers.
+<details>
+<summary>Purpose of SAVE</summary>
 
-## Problematics
-Each and every creator of static analyzers in the beginning of his development journey starts
-from the very simple thing: types of issues that his tool will detect. This leads to a searching of existing lists of potential issues or test packages that can be used to
-measure the result of his work or can be used for TDD (test driven development). In other areas of system programming such benchmarks and test sets already exists,
-for example [SPEC.org](http://spec.org/benchmarks.html) benchmarks are used all over the world to test the functionality, evaluate and measure the performance of different applications
-and hardware: from compilers to CPUs, from web-servers to Java Clients. But there are no test sets and even strict standards for detection of issues that can be found in
-popular programming languages. There were some guidelines of coding on C/C++ done by [MISRA](https://www.misra.org.uk/), but there are no analogues of it even for the most popular
-languages in the world like Python and [JVM-languages](https://stackoverflow.com/questions/6050618/is-there-a-java-equivalent-to-misra-c). There are only existing test suites at [NIST](https://samate.nist.gov/SRD/testsuite.php), but the framework and eco-system remain limited.
+### Intro
 
-In this situation each and every new developer that reinvents his new code style or mechanism of static analysis each time reinvents his brand new test framework and writting test sets
-that have been written already thousands of times for his analyzer/linter. Someone uses existing guidelines like [Google code style](https://google.github.io/styleguide/javaguide.html)
-or using [PMD rules](https://pmd.github.io/). But in all cases a lot of time will be spent on reinventing, writing and debuging tests.
+The use of [static analyzers](https://en.wikipedia.org/wiki/Static_program_analysis) is an integral part of the development process for every 
+software product. While software developers may write various tests and achieve good test coverage, human error remains inevitable. 
+Such errors can result in significant financial losses for companies. Static program analysis assists in identifying and rectifying bugs 
+and issues that might not be detectable through compiler validations alone.
+
+Static analysis comes in various forms and serves different purposes. It might involve a simple analysis using an AST 
+(abstract syntax tree) or delve into more complex procedures like CFA (control-flow analysis), interprocedural analysis, 
+or context-sensitive analysis. Static analyzers can assess code style, pinpoint potential runtime issues in application logic, 
+detect code smells, and suggest best practices. However, there remains a lack of clarity about the core functions of static analyzers. 
+How can their efficacy be quantified? What criteria determine their acceptance? What functionalities are essential for developers creating 
+a new analyzer? Despite years of static analyzer development, these questions remain largely unanswered.
+
+### Problematics
+
+At the onset of their development journey, every creator of a static analyzer begins with identifying the kinds of issues 
+their tool will target. This often necessitates a search for existing lists of potential issues or test packages that can 
+guide the development process, particularly if following a TDD (test-driven development) approach. While other domains in 
+system programming have established benchmarks and test sets, such as the [SPEC.org](http://spec.org/benchmarks.html) benchmarks 
+used globally to evaluate various software and hardware components, no such standards exist for identifying issues in popular 
+programming languages. While guidelines for coding in C/C++ have been established by [MISRA](https://www.misra.org.uk/), 
+there are no equivalents for widely used languages like Python and
+[JVM-languages](https://stackoverflow.com/questions/6050618/is-there-a-java-equivalent-to-misra-c). 
+There are test suites available at [NIST](https://samate.nist.gov/SRD/testsuite.php), but their framework and ecosystem are somewhat restrictive.
+
+Given this scenario, developers often find themselves recreating mechanisms for static analysis or developing new test frameworks,
+leading to repetitive work. Some might opt for existing guidelines such as the [Google code style](https://google.github.io/styleguide/javaguide.html) 
+or [PMD rules](https://pmd.github.io/), but regardless of the approach, significant time is invariably spent on conceptualizing, writing, 
+and debugging tests.
+
+</details>
 
 ## Development
 ### Build
-The project uses gradle as a build system and can be built with the command `./gradlew build`.
-To compile native artifacts, you will need to install prerequisites as described in Kotlin/Native documentation.
+The project uses Gradle as its build system and can be built using the command `./gradlew build`.
 
-To access dependencies hosted on Github Package Registry, you need to add the foolowing into `gradle.properties` or `~/.gradle/gradle.properties`:
+To compile native artifacts, you must install the prerequisites as described in the Kotlin/Native documentation.
+
+To access dependencies hosted on the GitHub Package Registry, add the following to either `gradle.properties` or `~/.gradle/gradle.properties`:
 ```properties
 gprUser=<GH username>
 gprKey=<GH personal access token>
 ```
-Personal Access Token should be generated via https://github.com/settings/tokens/new with the scope at least containing `read:packages`.
+A Personal Access Token can be generated at https://github.com/settings/tokens/new. Ensure the token has a scope that includes `read:packages`.
 
-Because of generated code, you will need to run the build once to correctly import project in IDE with resolved imports.
-
-## Contribution
-You can always contribute to the main SAVE framework - just create a PR for it. But to contribute or change tests in categories you will need get approvals from 
-the maintainer of the test package/analysis category. Please see the list of them.  
-
-
-## License
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsaveourtool%2Fsave-cli.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsaveourtool%2Fsave-cli?ref=badge_large)
+Due to the generated code, you need to **run the build once** to correctly import the project into an IDE with resolved imports.
