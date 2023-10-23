@@ -15,7 +15,7 @@
         "*"
       ],
       "excludePackagePatterns": [
-        "^org\\.jetbrains\\.kotlin[.:]",
+        "^org\\.jetbrains\\.kotlinx?[.:]",
         "^org\\.cqfn\\.diktat[.:]diktat-gradle-plugin"
       ],
       "matchUpdateTypes": [
@@ -37,17 +37,10 @@
     {
       "managers": ["gradle"],
       "matchPackagePatterns": [
-        "^org\\.jetbrains\\.kotlin[.:]"
+        "^org\\.jetbrains\\.kotlinx?[.:]"
       ],
       "groupName": "Kotlin core dependencies",
       "groupSlug": "core-kotlin"
-    },
-    {
-      "managers": ["gradle"],
-      "matchPackagePatterns": [
-        "^org\\.jetbrains\\.kotlinx:kotlinx-coroutines.*"
-      ],
-      "versioning": "docker"
     }
   ]
 }
