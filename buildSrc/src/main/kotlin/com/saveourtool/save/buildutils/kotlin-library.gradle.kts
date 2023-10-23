@@ -25,7 +25,12 @@ kotlin {
             }
         }
     }
-    val nativeTargets = listOf(linuxX64(), mingwX64(), macosX64())
+    val nativeTargets = listOf(
+        linuxX64(),
+        mingwX64(),
+        macosX64(),
+        /* macosArm64() */
+    )
     if (project.name == "save-common") {
         // additionally, save-common should be available for JS too
         // fixme: shouldn't rely on hardcoded project name here
