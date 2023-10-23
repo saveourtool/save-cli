@@ -1,6 +1,6 @@
 [versions]
 kotlin = "1.9.10"
-okio = "3.4.0"
+okio = "3.6.0"
 serialization = "1.6.0"
 diktat = "1.2.5"
 kotlinx-cli = "0.3.6"
@@ -10,10 +10,10 @@ junit = "5.10.0"
 ktoml = "0.5.0"
 multiplatform-diff = "0.4.0"
 kotlinpoet = "1.14.2"
-kotest = "5.6.2"
-sarif4k = "0.4.0"
+kotest = "5.7.2"
+sarif4k = "0.5.0"
 sarif-utils = "0.2.1"
-log4j = "2.20.0"
+log4j = "2.21.0"
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
