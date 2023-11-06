@@ -72,7 +72,7 @@ kotlin {
         val commonMain by getting
         val commonTest by getting {
             dependencies {
-                implementation("io.kotest:kotest-assertions-core:5.7.2")
+                implementation("io.kotest:kotest-assertions-core:5.8.0")
             }
         }
         val commonNonJsMain by creating {
@@ -92,7 +92,7 @@ kotlin {
             dependsOn(commonNonJsTest)
             dependencies {
                 implementation(kotlin("test-junit5"))
-                implementation("org.junit.jupiter:junit-jupiter-engine:5.10.0")
+                implementation("org.junit.jupiter:junit-jupiter-engine:5.10.1")
             }
         }
         val nativeMain by creating {
