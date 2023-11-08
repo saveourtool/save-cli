@@ -10,6 +10,7 @@ package com.saveourtool.save.core.logging
 import com.saveourtool.save.core.config.LogType
 import com.saveourtool.save.core.config.OutputStreamType
 import com.saveourtool.save.core.utils.GenericAtomicReference
+import com.saveourtool.save.core.utils.createGenericAtomicReference
 import com.saveourtool.save.core.utils.writeToStream
 
 import kotlin.native.concurrent.SharedImmutable
@@ -21,7 +22,7 @@ import kotlinx.datetime.toLocalDateTime
  *  Logging mode
  */
 @SharedImmutable
-val logType: GenericAtomicReference<LogType> = GenericAtomicReference(LogType.WARN)
+val logType: GenericAtomicReference<LogType> = createGenericAtomicReference(LogType.WARN)
 
 /**
  * Whether to add time stamps to log messages

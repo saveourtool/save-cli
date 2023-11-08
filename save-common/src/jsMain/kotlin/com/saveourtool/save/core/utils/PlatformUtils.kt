@@ -13,14 +13,14 @@ package com.saveourtool.save.core.utils
 
 import com.saveourtool.save.core.config.OutputStreamType
 
-@Suppress("USE_DATA_CLASS")
-actual class GenericAtomicReference<T> actual constructor(valueToStore: T) {
-    private var value: T = valueToStore
-    actual fun get(): T = value
-    actual fun set(newValue: T) {
-        value = newValue
-    }
-}
+actual fun <T> createGenericAtomicReference(valueToStore: T): GenericAtomicReference<T> =
+        object : GenericAtomicReference<T> {
+            private var value: T = valueToStore
+            override fun get(): T = value
+            override fun set(newValue: T) {
+                value = newValue
+            }
+        }
 
 actual fun getCurrentOs(): CurrentOs = error("Not implemented for JS")
 
