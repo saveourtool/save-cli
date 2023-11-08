@@ -6,23 +6,17 @@ import okio.Path
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
-import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newFixedThreadPoolContext
 import kotlinx.coroutines.runBlocking
 
-@Suppress("MISSING_KDOC_TOP_LEVEL",
-    "MISSING_KDOC_CLASS_ELEMENTS",
-    "MISSING_KDOC_ON_FUNCTION"
-)
-actual class ProcessBuilderInternal actual constructor(
-    private val stdoutFile: Path,
-    private val stderrFile: Path,
-    private val useInternalRedirections: Boolean
-) {
-    @OptIn(ExperimentalStdlibApi::class)
-    actual fun prepareCmd(command: String): String {
+actual fun createProcessBuilderInternal(
+    stdoutFile: Path,
+    stderrFile: Path,
+    useInternalRedirections: Boolean,
+): ProcessBuilderInternal = object : ProcessBuilderInternal {
+    override fun prepareCmd(command: String): String {
         val cmd = buildList {
             if (isCurrentOsWindows()) {
                 add("CMD")
@@ -36,9 +30,8 @@ actual class ProcessBuilderInternal actual constructor(
         return cmd.joinToString()
     }
 
-    @OptIn(ObsoleteCoroutinesApi::class)
     @Suppress("UnsafeCallOnNullableType")
-    actual fun exec(
+    override fun exec(
         cmd: String,
         timeOutMillis: Long,
     ): Int {

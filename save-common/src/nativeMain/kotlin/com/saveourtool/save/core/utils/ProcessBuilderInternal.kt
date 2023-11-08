@@ -1,5 +1,3 @@
-@file:Suppress("FILE_WILDCARD_IMPORTS")
-
 package com.saveourtool.save.core.utils
 
 import com.saveourtool.save.core.logging.logTrace
@@ -14,23 +12,19 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 
-@Suppress("MISSING_KDOC_TOP_LEVEL",
-    "MISSING_KDOC_CLASS_ELEMENTS",
-    "MISSING_KDOC_ON_FUNCTION"
-)
-actual class ProcessBuilderInternal actual constructor(
-    private val stdoutFile: Path,
-    private val stderrFile: Path,
-    private val useInternalRedirections: Boolean
-) {
-    actual fun prepareCmd(command: String) = if (useInternalRedirections) {
+actual fun createProcessBuilderInternal(
+    stdoutFile: Path,
+    stderrFile: Path,
+    useInternalRedirections: Boolean,
+): ProcessBuilderInternal = object : ProcessBuilderInternal {
+    override fun prepareCmd(command: String) = if (useInternalRedirections) {
         "($command) >$stdoutFile 2>$stderrFile"
     } else {
         command
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    actual fun exec(
+    override fun exec(
         cmd: String,
         timeOutMillis: Long
     ): Int {

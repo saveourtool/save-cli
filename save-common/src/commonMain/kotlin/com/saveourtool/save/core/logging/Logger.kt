@@ -13,7 +13,6 @@ import com.saveourtool.save.core.utils.GenericAtomicReference
 import com.saveourtool.save.core.utils.createGenericAtomicReference
 import com.saveourtool.save.core.utils.writeToStream
 
-import kotlin.native.concurrent.SharedImmutable
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -21,7 +20,6 @@ import kotlinx.datetime.toLocalDateTime
 /**
  *  Logging mode
  */
-@SharedImmutable
 val logType: GenericAtomicReference<LogType> = createGenericAtomicReference(LogType.WARN)
 
 /**
