@@ -19,7 +19,7 @@ import kotlin.test.assertEquals
 )
 class ExtraFlagsExtractorTest {
     @Test
-    @JsName("basicTest")
+    @JsName("basic_test")
     fun `basic test`() {
         val extraFlagsExtractor = ExtraFlagsExtractor(
             GeneralConfig(runConfigPattern = Regex("""// RUN: (.*[^\\]=.*)""")),
@@ -43,7 +43,7 @@ class ExtraFlagsExtractorTest {
     }
 
     @Test
-    @JsName("shouldResolvePlaceholders")
+    @JsName("should_resolve_placeholders")
     fun `should resolve placeholders`() {
         // basic test
         checkPlaceholders(
@@ -83,7 +83,7 @@ class ExtraFlagsExtractorTest {
     }
 
     @Test
-    @JsName("shouldJoinMultilineDirectives")
+    @JsName("should_join_multiline_directives")
     fun `should join multiline directives`() {
         checkMultilineDirectives(
             Regex("""// RUN: (.*([^\\]=)?.*)\\?"""),
@@ -134,7 +134,7 @@ class ExtraFlagsExtractorTest {
     }
 
     @Test
-    @JsName("testForSplitByNonEscaped")
+    @JsName("test_for_splitByNonEscaped")
     fun `test for splitByNonEscaped`() {
         assertEquals(
             listOf("this string\\, not split"),

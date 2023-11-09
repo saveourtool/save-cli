@@ -41,7 +41,7 @@ class FileUtilsTest {
      * |   |   |-- file231
      */
     @Test
-    @JsName("exampleForFindAllFilesMatching")
+    @JsName("example_for_findAllFilesMatching")
     fun `example for findAllFilesMatching`() {
         val directory1 = (tmpDir / "directory1").also(fs::createDirectory)
         val file11 = fs.createFile(directory1 / "file11")
@@ -70,7 +70,7 @@ class FileUtilsTest {
     }
 
     @Test
-    @JsName("exampleForFindDescendantDirectoriesBy")
+    @JsName("example_for_findDescendantDirectoriesBy")
     fun `example for findDescendantDirectoriesBy`() {
         val directory1 = (tmpDir / "directory1").also(fs::createDirectory)
         fs.createFile(directory1 / "file1")
@@ -93,7 +93,7 @@ class FileUtilsTest {
     }
 
     @Test
-    @JsName("createRelativePathWhenConfigAndTestResourceLocatedInTheSameDirectory")
+    @JsName("create_relative_path_when_config_and_test_resource_located_in_the_same_directory")
     fun `create relative path when config and test resource located in the same directory`() {
         val config = fs.createFile(tmpDir / "save.toml")
         val testFile = fs.createFile(tmpDir / "Test1Test.java")
@@ -103,7 +103,7 @@ class FileUtilsTest {
     }
 
     @Test
-    @JsName("createRelativePathInCaseOfBranchyFileTree")
+    @JsName("create_relative_path_in_case_of_branchy_file_tree")
     fun `create relative path in case of branchy file tree`() {
         fs.createDirectories(tmpDir / "dir2" / "dir3" / "dir4")
         fs.createDirectory(tmpDir / "dir2" / "dir3" / "dir33")

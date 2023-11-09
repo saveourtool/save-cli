@@ -13,8 +13,7 @@ import com.saveourtool.save.cli.ExitCodes
  * @param message message to log
  * @return nothing, program terminates in this method
  */
-@Deprecated("never use this method in save-core as it can lead to a break of save-cloud application")
-expect fun logErrorAndExit(exitCode: ExitCodes, message: String): Nothing
+internal expect fun logErrorAndExit(exitCode: ExitCodes, message: String): Nothing
 
 /**
  * Log result of [messageSupplier] with level WARN
