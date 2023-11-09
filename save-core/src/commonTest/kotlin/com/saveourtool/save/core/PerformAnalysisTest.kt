@@ -2,14 +2,11 @@ package com.saveourtool.save.core
 
 import com.saveourtool.save.core.config.ReportType
 import com.saveourtool.save.core.config.SaveProperties
-
-import okio.FileSystem
+import com.saveourtool.save.core.files.fs
 
 import kotlin.test.Test
 
 class PerformAnalysisTest {
-    private val fs: FileSystem = FileSystem.SYSTEM
-
     @Test
     fun `detect plugins`() {
         val saveProperties = SaveProperties(
