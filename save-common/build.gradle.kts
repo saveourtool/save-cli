@@ -7,7 +7,7 @@ kotlin {
         browser()
         testRuns.configureEach {
             filter {
-                setExcludePatterns("*")
+                setExcludePatterns("*/ProcessBuilderTest.kt")
             }
         }
     }
