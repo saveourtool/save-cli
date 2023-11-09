@@ -8,6 +8,7 @@ import com.saveourtool.save.core.plugin.resolvePlaceholdersFrom
 import com.saveourtool.save.core.plugin.splitByNonEscaped
 
 import okio.fakefilesystem.FakeFileSystem
+import kotlin.js.JsName
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -18,6 +19,7 @@ import kotlin.test.assertEquals
 )
 class ExtraFlagsExtractorTest {
     @Test
+    @JsName("basicTest")
     fun `basic test`() {
         val extraFlagsExtractor = ExtraFlagsExtractor(
             GeneralConfig(runConfigPattern = Regex("""// RUN: (.*[^\\]=.*)""")),
@@ -41,6 +43,7 @@ class ExtraFlagsExtractorTest {
     }
 
     @Test
+    @JsName("shouldResolvePlaceholders")
     fun `should resolve placeholders`() {
         // basic test
         checkPlaceholders(
@@ -80,6 +83,7 @@ class ExtraFlagsExtractorTest {
     }
 
     @Test
+    @JsName("shouldJoinMultilineDirectives")
     fun `should join multiline directives`() {
         checkMultilineDirectives(
             Regex("""// RUN: (.*([^\\]=)?.*)\\?"""),
@@ -130,6 +134,7 @@ class ExtraFlagsExtractorTest {
     }
 
     @Test
+    @JsName("testForSplitByNonEscaped")
     fun `test for splitByNonEscaped`() {
         assertEquals(
             listOf("this string\\, not split"),

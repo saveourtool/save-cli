@@ -21,7 +21,7 @@ kotlin {
             }
         }
 
-        val commonNonJsMain by getting {
+        val commonTest by getting {
             dependencies {
                 implementation(projects.saveCore)
                 implementation(projects.saveCommon)

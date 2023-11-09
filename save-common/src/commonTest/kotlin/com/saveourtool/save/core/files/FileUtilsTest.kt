@@ -2,6 +2,7 @@ package com.saveourtool.save.core.files
 
 import okio.FileSystem
 import okio.Path
+import kotlin.js.JsName
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -40,6 +41,7 @@ class FileUtilsTest {
      * |   |   |-- file231
      */
     @Test
+    @JsName("exampleForFindAllFilesMatching")
     fun `example for findAllFilesMatching`() {
         val directory1 = (tmpDir / "directory1").also(fs::createDirectory)
         val file11 = fs.createFile(directory1 / "file11")
@@ -68,6 +70,7 @@ class FileUtilsTest {
     }
 
     @Test
+    @JsName("exampleForFindDescendantDirectoriesBy")
     fun `example for findDescendantDirectoriesBy`() {
         val directory1 = (tmpDir / "directory1").also(fs::createDirectory)
         fs.createFile(directory1 / "file1")
@@ -90,6 +93,7 @@ class FileUtilsTest {
     }
 
     @Test
+    @JsName("createRelativePathWhenConfigAndTestResourceLocatedInTheSameDirectory")
     fun `create relative path when config and test resource located in the same directory`() {
         val config = fs.createFile(tmpDir / "save.toml")
         val testFile = fs.createFile(tmpDir / "Test1Test.java")
@@ -99,6 +103,7 @@ class FileUtilsTest {
     }
 
     @Test
+    @JsName("createRelativePathInCaseOfBranchyFileTree")
     fun `create relative path in case of branchy file tree`() {
         fs.createDirectories(tmpDir / "dir2" / "dir3" / "dir4")
         fs.createDirectory(tmpDir / "dir2" / "dir3" / "dir33")

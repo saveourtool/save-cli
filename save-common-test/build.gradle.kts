@@ -4,7 +4,7 @@ plugins {
 
 kotlin {
     sourceSets {
-        val commonNonJsMain by getting {
+        val commonMain by getting {
             dependencies {
                 implementation(projects.saveCommon)
                 api(libs.okio)

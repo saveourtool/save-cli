@@ -3,8 +3,8 @@
   configuration:
     domainName: com.saveourtool.save
     kotlinVersion: 1.6
-    srcDirectories: "main,nativeMain,commonNonJsMain"
-    testDirs: "test,nativeTest,commonTest,jvmTest,commonNonJsTest"
+    srcDirectories: "main,nativeMain,commonMain"
+    testDirs: "test,nativeTest,commonTest,jvmTest,commonTest"
 - name: AVOID_NULL_CHECKS
   enabled: false
 - name: ENUM_VALUE
