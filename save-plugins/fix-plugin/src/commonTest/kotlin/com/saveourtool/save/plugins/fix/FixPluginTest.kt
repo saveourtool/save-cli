@@ -175,6 +175,9 @@ class FixPluginTest {
         fs.deleteRecursively(tmpDir)
     }
 
+    /**
+     * @return file pairs
+     */
     internal fun discoverFilePairs() = FixPlugin(
         TestConfig(
             tmpDir / "save.toml",
