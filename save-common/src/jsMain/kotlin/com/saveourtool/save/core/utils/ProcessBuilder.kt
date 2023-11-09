@@ -1,11 +1,6 @@
-@file:Suppress(
-    "MISSING_KDOC_TOP_LEVEL",
-    "MISSING_KDOC_CLASS_ELEMENTS",
-    "KDOC_NO_EMPTY_TAGS",
-    "MISSING_KDOC_ON_FUNCTION",
-    "FILE_NAME_MATCH_CLASS",
-    "MatchingDeclarationName",
-)
+/**
+ * Implementation of [ProcessBuilderInternal] for JS
+ */
 
 package com.saveourtool.save.core.utils
 

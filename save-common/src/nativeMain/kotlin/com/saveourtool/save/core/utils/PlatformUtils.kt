@@ -15,17 +15,8 @@ import platform.posix.fprintf
 import platform.posix.stderr
 import platform.posix.stdout
 
-import kotlinx.cinterop.ExperimentalForeignApi
 import kotlin.experimental.ExperimentalNativeApi
-
-actual fun <T> createGenericAtomicReference(valueToStore: T): GenericAtomicReference<T> =
-        object : GenericAtomicReference<T> {
-            private val holder = kotlin.concurrent.AtomicReference(valueToStore)
-            override fun get(): T = holder.value
-            override fun set(newValue: T) {
-                holder.value = newValue
-            }
-        }
+import kotlinx.cinterop.ExperimentalForeignApi
 
 /**
  * Escaping percent symbol in the string in case it is not escaped already
@@ -51,6 +42,15 @@ fun String.escapePercent(): String {
     }
     return stringBuilder.toString()
 }
+
+actual fun <T> createGenericAtomicReference(valueToStore: T): GenericAtomicReference<T> =
+        object : GenericAtomicReference<T> {
+            private val holder = kotlin.concurrent.AtomicReference(valueToStore)
+            override fun get(): T = holder.value
+            override fun set(newValue: T) {
+                holder.value = newValue
+            }
+        }
 
 @OptIn(ExperimentalNativeApi::class)
 actual fun getCurrentOs() = when (Platform.osFamily) {

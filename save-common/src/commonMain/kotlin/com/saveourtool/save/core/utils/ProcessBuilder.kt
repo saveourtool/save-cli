@@ -45,18 +45,6 @@ interface ProcessBuilderInternal {
 }
 
 /**
- * @param stdoutFile
- * @param stderrFile
- * @param useInternalRedirections
- * @return implementation of [ProcessBuilderInternal]
- */
-expect fun createProcessBuilderInternal(
-    stdoutFile: Path,
-    stderrFile: Path,
-    useInternalRedirections: Boolean,
-): ProcessBuilderInternal
-
-/**
  * Class contains common logic for all platforms
  *
  * @property useInternalRedirections whether to collect output for future usage, if false, [redirectTo] will be ignored
@@ -244,3 +232,15 @@ data class ExecutionResult(
     val stdout: List<String>,
     val stderr: List<String>,
 )
+
+/**
+ * @param stdoutFile
+ * @param stderrFile
+ * @param useInternalRedirections
+ * @return implementation of [ProcessBuilderInternal]
+ */
+expect fun createProcessBuilderInternal(
+    stdoutFile: Path,
+    stderrFile: Path,
+    useInternalRedirections: Boolean,
+): ProcessBuilderInternal

@@ -11,11 +11,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.newFixedThreadPoolContext
 import kotlinx.coroutines.runBlocking
 
-actual fun createProcessBuilderInternal(
-    stdoutFile: Path,
-    stderrFile: Path,
-    useInternalRedirections: Boolean,
-): ProcessBuilderInternal = object : ProcessBuilderInternal {
+private class ProcessBuilderInternalImpl(
+    private val stdoutFile: Path,
+    private val stderrFile: Path,
+    private val useInternalRedirections: Boolean,
+) : ProcessBuilderInternal {
     override fun prepareCmd(command: String): String {
         val cmd = buildList {
             if (isCurrentOsWindows()) {
@@ -85,3 +85,9 @@ actual fun createProcessBuilderInternal(
         }
     }
 }
+
+actual fun createProcessBuilderInternal(
+    stdoutFile: Path,
+    stderrFile: Path,
+    useInternalRedirections: Boolean,
+): ProcessBuilderInternal = ProcessBuilderInternalImpl(stdoutFile, stderrFile, useInternalRedirections)

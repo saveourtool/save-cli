@@ -12,11 +12,11 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 
-actual fun createProcessBuilderInternal(
-    stdoutFile: Path,
-    stderrFile: Path,
-    useInternalRedirections: Boolean,
-): ProcessBuilderInternal = object : ProcessBuilderInternal {
+private class ProcessBuilderInternalImpl(
+    private val stdoutFile: Path,
+    private val stderrFile: Path,
+    private val useInternalRedirections: Boolean,
+) : ProcessBuilderInternal {
     override fun prepareCmd(command: String) = if (useInternalRedirections) {
         "($command) >$stdoutFile 2>$stderrFile"
     } else {
@@ -60,3 +60,9 @@ actual fun createProcessBuilderInternal(
         logTrace("Executed kill command: $killCmd")
     }
 }
+
+actual fun createProcessBuilderInternal(
+    stdoutFile: Path,
+    stderrFile: Path,
+    useInternalRedirections: Boolean,
+): ProcessBuilderInternal = ProcessBuilderInternalImpl(stdoutFile, stderrFile, useInternalRedirections)
