@@ -1,5 +1,6 @@
 package com.saveourtool.save.core.utils
 
+import com.saveourtool.save.core.files.fs
 import okio.FileSystem
 import okio.IOException
 
@@ -13,7 +14,6 @@ import kotlinx.cli.ArgType
 import kotlinx.cli.default
 
 class CliUtilsTest {
-    private val fs: FileSystem = FileSystem.SYSTEM
     private val tmpDir = (FileSystem.SYSTEM_TEMPORARY_DIRECTORY / FileSystem::class.simpleName!!)
 
     @Test
