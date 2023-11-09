@@ -9,7 +9,7 @@ kotlin {
             filter {
                 setExcludePatterns(
                     "*ExtraFlagsExtractorTest*",
-                    "*ProcessBuilderTest",
+                    "*ProcessBuilderTest*",
                     "*FileUtilsTest*",
                 )
             }
