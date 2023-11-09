@@ -3,8 +3,10 @@ plugins {
 }
 
 kotlin {
+    // additionally, save-common should be available for JS too
     js(IR) {
         browser()
+        // tests don't work on JS
         testRuns.configureEach {
             filter {
                 setExcludePatterns(
