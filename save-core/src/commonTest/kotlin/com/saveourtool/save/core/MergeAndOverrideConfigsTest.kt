@@ -383,7 +383,7 @@ class MergeAndOverrideConfigsTest {
 
     @Test
     fun `merge real toml configs with empty execFlag in child`() {
-        val toml1 = "src/commonNonJsTest/resources/merge_configs/save.toml"
+        val toml1 = "src/commonTest/resources/merge_configs/save.toml"
         val configList1 = createPluginConfigListFromToml(toml1.toPath(), fs)
 
         val parentGeneralConfig: GeneralConfig = configList1.singleIsInstance()
@@ -392,7 +392,7 @@ class MergeAndOverrideConfigsTest {
         assertEquals(listOf("Tag"), parentGeneralConfig.tags)
         assertEquals(null, parentWarnConfig.execFlags)
 
-        val toml2 = "src/commonNonJsTest/resources/merge_configs/inner/save.toml"
+        val toml2 = "src/commonTest/resources/merge_configs/inner/save.toml"
         val configList2 = createPluginConfigListFromToml(toml2.toPath(), fs)
 
         val childGeneralConfig: GeneralConfig = configList2.singleIsInstance()
@@ -418,10 +418,10 @@ class MergeAndOverrideConfigsTest {
 
     @Test
     fun `override real toml configs`() {
-        val saveToml = "src/commonNonJsTest/resources/override_configs".toPath().resolveSaveTomlConfig()
+        val saveToml = "src/commonTest/resources/override_configs".toPath().resolveSaveTomlConfig()
         val configs = createPluginConfigListFromToml(saveToml, fs)
 
-        val saveOverridesToml = "src/commonNonJsTest/resources/override_configs".toPath().resolveSaveOverridesTomlConfig()
+        val saveOverridesToml = "src/commonTest/resources/override_configs".toPath().resolveSaveOverridesTomlConfig()
         val overrides = createPluginConfigListFromToml(saveOverridesToml, fs)
 
         val testConfig = TestConfig(
