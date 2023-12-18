@@ -80,7 +80,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
           name: xml-test-reports-${{ runner.os }}
@@ -90,7 +90,7 @@ jobs:
 
       - name: Upload gradle reports
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: gradle-reports-${{ matrix.os }}
           path: '**/build/reports/'
@@ -116,7 +116,7 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         if: ${{ always() }}
         with:
           name: xml-test-reports-${{ runner.os }}
