@@ -65,7 +65,7 @@ jobs:
         run: git status
       - name: Upload artifact
         id: upload_artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: save-cli-${{ runner.os }}
           path: save-cli/build/bin/**/releaseExecutable/*
@@ -79,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: tmpFolder
       - name: Create Github Release
