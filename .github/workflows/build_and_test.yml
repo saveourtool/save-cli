@@ -37,7 +37,7 @@ jobs:
           kv=$(cat gradle/libs.versions.toml | grep '^kotlin =' | awk -F'[=]' '{print $2}' | tr -d '" ')
           echo KOTLIN_VERSION=$kv >> $GITHUB_ENV
       - name: Cache konan
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           # [@actions/glob](https://github.com/actions/toolkit/tree/main/packages/glob) is used to match paths
           # It should correctly expand `~` on every OS.
