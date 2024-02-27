@@ -4,6 +4,7 @@ import com.saveourtool.save.core.config.ActualWarningsFormat
 import com.saveourtool.save.core.config.ExpectedWarningsFormat
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
+import com.saveourtool.save.core.files.findFileInAncestorDir
 import com.saveourtool.save.core.files.getWorkingDirectory
 import com.saveourtool.save.core.files.readLines
 import com.saveourtool.save.core.logging.describe
@@ -13,6 +14,7 @@ import com.saveourtool.save.core.logging.logWarn
 import com.saveourtool.save.core.plugin.ExtraFlagsExtractor
 import com.saveourtool.save.core.plugin.GeneralConfig
 import com.saveourtool.save.core.plugin.Plugin
+import com.saveourtool.save.core.plugin.PluginException
 import com.saveourtool.save.core.result.DebugInfo
 import com.saveourtool.save.core.result.Fail
 import com.saveourtool.save.core.result.TestResult
@@ -265,23 +267,51 @@ class WarnPlugin(
         originalPaths: List<Path>,
         copyPaths: List<Path>,
         workingDirectory: Path,
-    ): WarningMap = if (warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.SARIF) {
-        val warningsFromSarif = try {
-            collectWarningsFromSarif(warnPluginConfig, originalPaths, fs, workingDirectory)
-        } catch (e: Exception) {
-            throw SarifParsingException("We failed to parse sarif. Check the your tool generation of sarif report, cause: ${e.message}", e.cause)
+    ): WarningMap = when {
+        warnPluginConfig.expectedWarningsFileName != null -> {
+            val expectedWarningsFileName: String = warnPluginConfig.expectedWarningsFileName
+            when (warnPluginConfig.expectedWarningsFormat) {
+                ExpectedWarningsFormat.IN_PLACE, null ->
+                    throw IllegalArgumentException("<expectedWarningsFileName> cannot be provided for expectedWarningsFormat=${ExpectedWarningsFormat.IN_PLACE}")
+                ExpectedWarningsFormat.PLAIN -> {
+                    val anchorTestFilePath = originalPaths.first()
+                    val plainFile = fs.findFileInAncestorDir(anchorTestFilePath, expectedWarningsFileName) ?: throw PluginException(
+                        "Could not find PLAIN file with expected warnings/fixes for file $anchorTestFilePath. " +
+                                "Please check if correct `WarningsFormat`/`FixFormat` is set (should be PLAIN) and if the file is present and called `$expectedWarningsFileName`."
+                    )
+                    val warningsFromPlain = plainFile.collectExpectedWarningsWithLineNumbers(
+                        warnPluginConfig,
+                        generalConfig
+                    )
+                    copyPaths.associate { copyPath ->
+                        copyPath.name to warningsFromPlain.filter { it.fileName == copyPath.name }
+                    }
+                }
+                ExpectedWarningsFormat.SARIF -> {
+                    val warningsFromSarif = try {
+                        collectWarningsFromSarif(expectedWarningsFileName, originalPaths, fs, workingDirectory)
+                    } catch (e: Exception) {
+                        throw SarifParsingException("We failed to parse sarif. Check the your tool generation of sarif report, cause: ${e.message}", e.cause)
+                    }
+                    copyPaths.associate { copyPath ->
+                        copyPath.name to warningsFromSarif.filter { it.fileName == copyPath.name }
+                    }
+                }
+            }
+
         }
-        copyPaths.associate { copyPath ->
-            copyPath.name to warningsFromSarif.filter { it.fileName == copyPath.name }
-        }
-    } else {
-        copyPaths.associate { copyPath ->
-            val warningsForCurrentPath =
+        else -> {
+            require(warnPluginConfig.expectedWarningsFormat != ExpectedWarningsFormat.SARIF) {
+                "<expectedWarningsFileName> should be provided for expectedWarningsFormat=${ExpectedWarningsFormat.SARIF}"
+            }
+            copyPaths.associate { copyPath ->
+                val warningsForCurrentPath =
                     copyPath.collectExpectedWarningsWithLineNumbers(
                         warnPluginConfig,
                         generalConfig
                     )
-            copyPath.name to warningsForCurrentPath
+                copyPath.name to warningsForCurrentPath
+            }
         }
     }
 

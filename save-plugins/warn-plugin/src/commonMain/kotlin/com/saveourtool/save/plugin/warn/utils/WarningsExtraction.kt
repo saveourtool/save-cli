@@ -18,7 +18,6 @@ import io.github.detekt.sarif4k.SarifSchema210
 import okio.FileSystem
 import okio.Path
 
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 /**
@@ -97,7 +96,7 @@ internal fun collectionSingleWarnings(
     .sortedBy { warn -> warn.message }
 
 /**
- * @param warnPluginConfig
+ * @param sarifFileName
  * @param originalPaths
  * @param fs
  * @param workingDirectory initial working directory, when SAVE started
@@ -105,13 +104,11 @@ internal fun collectionSingleWarnings(
  * @throws PluginException
  */
 internal fun collectWarningsFromSarif(
-    warnPluginConfig: WarnPluginConfig,
+    sarifFileName: String,
     originalPaths: List<Path>,
     fs: FileSystem,
     workingDirectory: Path,
 ): List<Warning> {
-    val sarifFileName = warnPluginConfig.expectedWarningsFileName!!
-
     // Since we have one .sarif file for all tests, just take the first of them as anchor for calculation of paths
     val anchorTestFilePath = originalPaths.first()
     val sarif = calculatePathToSarifFile(
