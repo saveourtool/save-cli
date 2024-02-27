@@ -1,5 +1,6 @@
 package com.saveourtool.save.plugin.warn.utils
 
+import com.saveourtool.save.core.logging.logError
 import com.saveourtool.save.core.result.CountWarnings
 import com.saveourtool.save.core.result.Fail
 import com.saveourtool.save.core.result.Pass
@@ -20,6 +21,13 @@ class ResultsChecker(
     private val actualWarningsMap: FileToWarningsMap,
     private val warnPluginConfig: WarnPluginConfig,
 ) {
+    init {
+        val oddActualFileNames = actualWarningsMap.keys - expectedWarningsMap.keys
+        if (oddActualFileNames.isNotEmpty()) {
+            logError("Detected odd file names in actual result: $oddActualFileNames")
+        }
+    }
+
     /**
      * Compares actual and expected warnings and returns TestResult
      *
