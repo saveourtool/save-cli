@@ -4,7 +4,6 @@ import com.saveourtool.save.core.config.ActualWarningsFormat
 import com.saveourtool.save.core.config.ExpectedWarningsFormat
 import com.saveourtool.save.core.config.TestConfig
 import com.saveourtool.save.core.files.createFile
-import com.saveourtool.save.core.files.findFileInAncestorDir
 import com.saveourtool.save.core.files.getWorkingDirectory
 import com.saveourtool.save.core.files.readLines
 import com.saveourtool.save.core.logging.describe
@@ -14,7 +13,6 @@ import com.saveourtool.save.core.logging.logWarn
 import com.saveourtool.save.core.plugin.ExtraFlagsExtractor
 import com.saveourtool.save.core.plugin.GeneralConfig
 import com.saveourtool.save.core.plugin.Plugin
-import com.saveourtool.save.core.plugin.PluginException
 import com.saveourtool.save.core.result.DebugInfo
 import com.saveourtool.save.core.result.Fail
 import com.saveourtool.save.core.result.TestResult
@@ -28,6 +26,7 @@ import com.saveourtool.save.plugin.warn.sarif.toWarnings
 import com.saveourtool.save.plugin.warn.utils.CmdExecutorWarn
 import com.saveourtool.save.plugin.warn.utils.ResultsChecker
 import com.saveourtool.save.plugin.warn.utils.Warning
+import com.saveourtool.save.plugin.warn.utils.collectWarningsFromPlain
 import com.saveourtool.save.plugin.warn.utils.collectWarningsFromSarif
 import com.saveourtool.save.plugin.warn.utils.collectionMultilineWarnings
 import com.saveourtool.save.plugin.warn.utils.collectionSingleWarnings
@@ -259,7 +258,11 @@ class WarnPlugin(
         )
     }.asSequence()
 
-    @Suppress("TooGenericExceptionCaught", "SwallowedException")
+    @Suppress(
+        "TooGenericExceptionCaught",
+        "SwallowedException",
+        "TOO_LONG_FUNCTION"
+    )
     private fun collectExpectedWarnings(
         generalConfig: GeneralConfig,
         warnPluginConfig: WarnPluginConfig,
@@ -273,15 +276,12 @@ class WarnPlugin(
         }
         return when (warnPluginConfig.expectedWarningsFormat) {
             ExpectedWarningsFormat.PLAIN -> {
-                val anchorTestFilePath = originalPaths.first()
-                val plainFile = fs.findFileInAncestorDir(anchorTestFilePath, expectedWarningsFileName) ?: throw PluginException(
-                    "Could not find PLAIN file with expected warnings/fixes for file $anchorTestFilePath. " +
-                            "Please check if correct `WarningsFormat`/`FixFormat` is set (should be PLAIN) and if the file is present and called `$expectedWarningsFileName`."
-                )
-                val warningsFromPlain = plainFile.collectExpectedWarningsWithLineNumbers(
-                    warnPluginConfig,
-                    generalConfig
-                )
+                val warningsFromPlain = collectWarningsFromPlain(expectedWarningsFileName, originalPaths, fs) { plainFile ->
+                    plainFile.collectExpectedWarningsWithLineNumbers(
+                        warnPluginConfig,
+                        generalConfig
+                    )
+                }
                 copyPaths.associate { copyPath ->
                     copyPath.name to warningsFromPlain.filter { it.fileName == copyPath.name }
                 }
@@ -298,10 +298,10 @@ class WarnPlugin(
             }
             else -> copyPaths.associate { copyPath ->
                 val warningsForCurrentPath =
-                    copyPath.collectExpectedWarningsWithLineNumbers(
-                        warnPluginConfig,
-                        generalConfig
-                    )
+                        copyPath.collectExpectedWarningsWithLineNumbers(
+                            warnPluginConfig,
+                            generalConfig
+                        )
                 copyPath.name to warningsForCurrentPath
             }
         }
