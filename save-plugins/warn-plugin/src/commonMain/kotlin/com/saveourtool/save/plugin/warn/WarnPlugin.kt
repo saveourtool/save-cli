@@ -271,8 +271,6 @@ class WarnPlugin(
         warnPluginConfig.expectedWarningsFileName != null -> {
             val expectedWarningsFileName: String = warnPluginConfig.expectedWarningsFileName
             when (warnPluginConfig.expectedWarningsFormat) {
-                ExpectedWarningsFormat.IN_PLACE, null ->
-                    throw IllegalArgumentException("<expectedWarningsFileName> cannot be provided for expectedWarningsFormat=${ExpectedWarningsFormat.IN_PLACE}")
                 ExpectedWarningsFormat.PLAIN -> {
                     val anchorTestFilePath = originalPaths.first()
                     val plainFile = fs.findFileInAncestorDir(anchorTestFilePath, expectedWarningsFileName) ?: throw PluginException(
@@ -297,8 +295,9 @@ class WarnPlugin(
                         copyPath.name to warningsFromSarif.filter { it.fileName == copyPath.name }
                     }
                 }
+                else ->
+                    throw IllegalArgumentException("<expectedWarningsFileName> cannot be provided for expectedWarningsFormat=${ExpectedWarningsFormat.IN_PLACE}")
             }
-
         }
         else -> {
             require(warnPluginConfig.expectedWarningsFormat != ExpectedWarningsFormat.SARIF) {
