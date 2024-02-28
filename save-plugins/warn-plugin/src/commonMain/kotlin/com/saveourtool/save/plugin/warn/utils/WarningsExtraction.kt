@@ -5,6 +5,7 @@
 
 package com.saveourtool.save.plugin.warn.utils
 
+import com.saveourtool.save.core.files.findFileInAncestorDir
 import com.saveourtool.save.core.files.readFile
 import com.saveourtool.save.core.plugin.GeneralConfig
 import com.saveourtool.save.core.plugin.PluginException
@@ -18,7 +19,6 @@ import io.github.detekt.sarif4k.SarifSchema210
 import okio.FileSystem
 import okio.Path
 
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 /**
@@ -97,7 +97,30 @@ internal fun collectionSingleWarnings(
     .sortedBy { warn -> warn.message }
 
 /**
- * @param warnPluginConfig
+ * @param plainFileName
+ * @param originalPaths
+ * @param fs
+ * @param warningExtractor extractor of warning from [Path]
+ * @return a list of warnings extracted from PLAIN file for test [file]
+ * @throws PluginException
+ */
+internal fun collectWarningsFromPlain(
+    plainFileName: String,
+    originalPaths: List<Path>,
+    fs: FileSystem,
+    warningExtractor: (Path) -> List<Warning>,
+): List<Warning> {
+    // Since we have one <PLAIN> file for all tests, just take the first of them as anchor for calculation of paths
+    val anchorTestFilePath = originalPaths.first()
+    val plainFile = fs.findFileInAncestorDir(anchorTestFilePath, plainFileName) ?: throw PluginException(
+        "Could not find PLAIN file with expected warnings/fixes for file $anchorTestFilePath. " +
+                "Please check if correct `WarningsFormat`/`FixFormat` is set (should be PLAIN) and if the file is present and called `$plainFileName`."
+    )
+    return warningExtractor(plainFile)
+}
+
+/**
+ * @param sarifFileName
  * @param originalPaths
  * @param fs
  * @param workingDirectory initial working directory, when SAVE started
@@ -105,13 +128,11 @@ internal fun collectionSingleWarnings(
  * @throws PluginException
  */
 internal fun collectWarningsFromSarif(
-    warnPluginConfig: WarnPluginConfig,
+    sarifFileName: String,
     originalPaths: List<Path>,
     fs: FileSystem,
     workingDirectory: Path,
 ): List<Warning> {
-    val sarifFileName = warnPluginConfig.expectedWarningsFileName!!
-
     // Since we have one .sarif file for all tests, just take the first of them as anchor for calculation of paths
     val anchorTestFilePath = originalPaths.first()
     val sarif = calculatePathToSarifFile(

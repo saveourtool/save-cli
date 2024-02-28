@@ -4,7 +4,7 @@
 
 package com.saveourtool.save.core.utils
 
-import com.saveourtool.save.core.files.findAncestorDirContainingFile
+import com.saveourtool.save.core.files.findFileInAncestorDir
 import com.saveourtool.save.core.files.fs
 import com.saveourtool.save.core.files.parents
 import com.saveourtool.save.core.plugin.PluginException
@@ -51,11 +51,9 @@ fun FileSystem.topmostTestDirectory(path: Path): Path = path.parents().last { pa
  * @return path to sarif
  * @throws PluginException in case of absence of sarif file
  */
-fun calculatePathToSarifFile(sarifFileName: String, anchorTestFilePath: Path): Path = fs.findAncestorDirContainingFile(
+fun calculatePathToSarifFile(sarifFileName: String, anchorTestFilePath: Path): Path = fs.findFileInAncestorDir(
     anchorTestFilePath, sarifFileName
-)?.let {
-    it / sarifFileName
-} ?: throw PluginException(
+) ?: throw PluginException(
     "Could not find SARIF file with expected warnings/fixes for file $anchorTestFilePath. " +
-            "Please check if correct `FarningsFormat`/`FixFormat` is set (should be SARIF) and if the file is present and called `$sarifFileName`."
+            "Please check if correct `WarningsFormat`/`FixFormat` is set (should be SARIF) and if the file is present and called `$sarifFileName`."
 )
