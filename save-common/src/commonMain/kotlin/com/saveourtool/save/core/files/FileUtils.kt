@@ -231,6 +231,19 @@ fun FileSystem.findAncestorDirContainingFile(path: Path, fileName: String): Path
 }
 
 /**
+ * Find a file in any of parent directories and return this file
+ *
+ * @param path path for which ancestors should be checked
+ * @param fileName a name of the file that will be searched for
+ * @return a path to a file with name [fileName] or null
+ */
+fun FileSystem.findFileInAncestorDir(path: Path, fileName: String): Path? = findAncestorDirContainingFile(
+    path, fileName
+)?.let {
+    it / fileName
+}
+
+/**
  * @return current working directory
  */
 expect fun getWorkingDirectory(): Path

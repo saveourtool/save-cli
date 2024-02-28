@@ -18,6 +18,7 @@ enum class ActualWarningsFormat {
  */
 enum class ExpectedWarningsFormat {
     IN_PLACE,
+    PLAIN,
     SARIF,
     ;
 }
