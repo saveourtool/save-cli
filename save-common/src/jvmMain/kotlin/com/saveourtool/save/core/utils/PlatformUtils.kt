@@ -10,14 +10,14 @@ package com.saveourtool.save.core.utils
 
 import com.saveourtool.save.core.config.OutputStreamType
 
-@Suppress("USE_DATA_CLASS")
-actual class GenericAtomicReference<T> actual constructor(valueToStore: T) {
-    private val holder: java.util.concurrent.atomic.AtomicReference<T> = java.util.concurrent.atomic.AtomicReference(valueToStore)
-    actual fun get(): T = holder.get()
-    actual fun set(newValue: T) {
-        holder.set(newValue)
-    }
-}
+actual fun <T> createGenericAtomicReference(valueToStore: T): GenericAtomicReference<T> =
+        object : GenericAtomicReference<T> {
+            private val holder = java.util.concurrent.atomic.AtomicReference(valueToStore)
+            override fun get(): T = holder.get()
+            override fun set(newValue: T) {
+                holder.set(newValue)
+            }
+        }
 
 actual fun getCurrentOs() = when {
     System.getProperty("os.name").startsWith("Linux", ignoreCase = true) -> CurrentOs.LINUX

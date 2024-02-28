@@ -18,11 +18,6 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(libs.okio)
-            }
-        }
-
-        val commonNonJsMain by getting {
-            dependencies {
                 implementation(projects.saveCore)
                 implementation(projects.saveCommon)
                 implementation(libs.kotlinx.serialization.properties)

@@ -19,13 +19,9 @@ import okio.Path.Companion.toPath
 import kotlinx.datetime.Clock
 
 /**
- * A class that is capable of executing processes, specific to different OS and returning their output.
+ * An interface that is capable of executing processes, specific to different OS and returning their output.
  */
-expect class ProcessBuilderInternal(
-    stdoutFile: Path,
-    stderrFile: Path,
-    useInternalRedirections: Boolean,
-) {
+interface ProcessBuilderInternal {
     /**
      * Modify execution command according behavior of different OS,
      * also stdout and stderr will be redirected to tmp files
@@ -97,7 +93,7 @@ class ProcessBuilder(private val useInternalRedirections: Boolean, private val f
         val stderrFile = tmpDir / "stderr.txt"
         logTrace("Creating stderr file of ProcessBuilder: $stderrFile")
         // Instance, containing platform-dependent realization of command execution
-        val processBuilderInternal = ProcessBuilderInternal(stdoutFile, stderrFile, useInternalRedirections)
+        val processBuilderInternal = createProcessBuilderInternal(stdoutFile, stderrFile, useInternalRedirections)
         fs.createDirectories(tmpDir)
         fs.createFile(stdoutFile)
         fs.createFile(stderrFile)
@@ -236,3 +232,15 @@ data class ExecutionResult(
     val stdout: List<String>,
     val stderr: List<String>,
 )
+
+/**
+ * @param stdoutFile
+ * @param stderrFile
+ * @param useInternalRedirections
+ * @return implementation of [ProcessBuilderInternal]
+ */
+expect fun createProcessBuilderInternal(
+    stdoutFile: Path,
+    stderrFile: Path,
+    useInternalRedirections: Boolean,
+): ProcessBuilderInternal

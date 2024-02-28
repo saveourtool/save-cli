@@ -13,7 +13,7 @@ plugins {
 
 kotlin {
     sourceSets {
-        val commonNonJsMain by getting {
+        val commonMain by getting {
             dependencies {
                 implementation(projects.saveCommon)
                 implementation(projects.saveReporters)
@@ -29,7 +29,7 @@ kotlin {
                 implementation(projects.savePlugins.warnPlugin)
             }
         }
-        val commonNonJsTest by getting {
+        val commonTest by getting {
             dependencies {
                 implementation(projects.saveCommonTest)
                 implementation(kotlin("test-common"))
@@ -67,7 +67,7 @@ val generateVersionFileTaskProvider = tasks.register("generateVersionsFile") {
         )
     }
 }
-kotlin.sourceSets.getByName("commonNonJsMain") {
+kotlin.sourceSets.getByName("commonMain") {
     kotlin.srcDir(
         generateVersionFileTaskProvider.zip(generateConfigOptionsTaskProvider) { _, _ ->
             // Simply discard both tasks. However, `zip` is essential to tell Gradle

@@ -16,12 +16,10 @@ enum class CurrentOs {
 }
 
 /**
- *  Class that holds value and shares atomic reference to the value (native only)
+ * Interface that holds value and shares atomic reference to the value (native only)
  *
- *  @param valueToStore value to store
  */
-@Suppress("USE_DATA_CLASS")
-expect class GenericAtomicReference<T>(valueToStore: T) {
+interface GenericAtomicReference<T> {
     /**
      * @return stored value
      */
@@ -32,6 +30,12 @@ expect class GenericAtomicReference<T>(valueToStore: T) {
      */
     fun set(newValue: T)
 }
+
+/**
+ * @param valueToStore value to store
+ * @return a new [GenericAtomicReference] with default value [valueToStore]
+ */
+expect fun <T> createGenericAtomicReference(valueToStore: T): GenericAtomicReference<T>
 
 /**
  * Get type of current OS
