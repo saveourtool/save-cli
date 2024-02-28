@@ -43,7 +43,7 @@ jobs:
           # It should correctly expand `~` on every OS.
           path: ~/.konan
           key: ${{ runner.os }}-gradle-konan-${{ env.KOTLIN_VERSION }}
-      - uses: gradle/gradle-build-action@v2
+      - uses: gradle/gradle-build-action@v3
         with:
           gradle-version: wrapper
           # The `--continue` flag is necessary so that Gradle keeps going after the 1st test failure.
@@ -96,7 +96,7 @@ jobs:
           path: '**/build/reports/'
       - name: Code coverage report
         if: ${{ runner.os == 'Linux' }}
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           flags: unittests
           fail_ci_if_error: false # optional (default = false)
