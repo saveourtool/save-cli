@@ -26,6 +26,7 @@ import com.saveourtool.save.plugin.warn.sarif.toWarnings
 import com.saveourtool.save.plugin.warn.utils.CmdExecutorWarn
 import com.saveourtool.save.plugin.warn.utils.ResultsChecker
 import com.saveourtool.save.plugin.warn.utils.Warning
+import com.saveourtool.save.plugin.warn.utils.collectWarningsFromPlain
 import com.saveourtool.save.plugin.warn.utils.collectWarningsFromSarif
 import com.saveourtool.save.plugin.warn.utils.collectionMultilineWarnings
 import com.saveourtool.save.plugin.warn.utils.collectionSingleWarnings
@@ -37,7 +38,6 @@ import okio.FileSystem
 import okio.Path
 
 import kotlin.random.Random
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 private typealias WarningMap = Map<String, List<Warning>>
@@ -258,30 +258,52 @@ class WarnPlugin(
         )
     }.asSequence()
 
-    @Suppress("TooGenericExceptionCaught", "SwallowedException")
+    @Suppress(
+        "TooGenericExceptionCaught",
+        "SwallowedException",
+        "TOO_LONG_FUNCTION"
+    )
     private fun collectExpectedWarnings(
         generalConfig: GeneralConfig,
         warnPluginConfig: WarnPluginConfig,
         originalPaths: List<Path>,
         copyPaths: List<Path>,
         workingDirectory: Path,
-    ): WarningMap = if (warnPluginConfig.expectedWarningsFormat == ExpectedWarningsFormat.SARIF) {
-        val warningsFromSarif = try {
-            collectWarningsFromSarif(warnPluginConfig, originalPaths, fs, workingDirectory)
-        } catch (e: Exception) {
-            throw SarifParsingException("We failed to parse sarif. Check the your tool generation of sarif report, cause: ${e.message}", e.cause)
+    ): WarningMap {
+        val expectedWarningsFileName: String by lazy {
+            warnPluginConfig.expectedWarningsFileName
+                ?: throw IllegalArgumentException("<expectedWarningsFileName> is not provided for expectedWarningsFormat=${warnPluginConfig.expectedWarningsFormat}")
         }
-        copyPaths.associate { copyPath ->
-            copyPath.name to warningsFromSarif.filter { it.fileName == copyPath.name }
-        }
-    } else {
-        copyPaths.associate { copyPath ->
-            val warningsForCurrentPath =
-                    copyPath.collectExpectedWarningsWithLineNumbers(
+        return when (warnPluginConfig.expectedWarningsFormat) {
+            ExpectedWarningsFormat.PLAIN -> {
+                val warningsFromPlain = collectWarningsFromPlain(expectedWarningsFileName, originalPaths, fs) { plainFile ->
+                    plainFile.collectExpectedWarningsWithLineNumbers(
                         warnPluginConfig,
                         generalConfig
                     )
-            copyPath.name to warningsForCurrentPath
+                }
+                copyPaths.associate { copyPath ->
+                    copyPath.name to warningsFromPlain.filter { it.fileName == copyPath.name }
+                }
+            }
+            ExpectedWarningsFormat.SARIF -> {
+                val warningsFromSarif = try {
+                    collectWarningsFromSarif(expectedWarningsFileName, originalPaths, fs, workingDirectory)
+                } catch (e: Exception) {
+                    throw SarifParsingException("We failed to parse sarif. Check the your tool generation of sarif report, cause: ${e.message}", e.cause)
+                }
+                copyPaths.associate { copyPath ->
+                    copyPath.name to warningsFromSarif.filter { it.fileName == copyPath.name }
+                }
+            }
+            else -> copyPaths.associate { copyPath ->
+                val warningsForCurrentPath =
+                        copyPath.collectExpectedWarningsWithLineNumbers(
+                            warnPluginConfig,
+                            generalConfig
+                        )
+                copyPath.name to warningsForCurrentPath
+            }
         }
     }
 
