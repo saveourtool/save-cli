@@ -100,15 +100,15 @@ internal fun collectionSingleWarnings(
  * @param plainFileName
  * @param originalPaths
  * @param fs
- * @param warningExtractor extractor of warning from [Path]
- * @return a list of warnings extracted from PLAIN file for test [file]
+ * @param warningExtractor extractor of warning from [String]
+ * @return a list of warnings extracted from PLAIN file for all tests
  * @throws PluginException
  */
 internal fun collectWarningsFromPlain(
     plainFileName: String,
     originalPaths: List<Path>,
     fs: FileSystem,
-    warningExtractor: (Path) -> List<Warning>,
+    warningExtractor: (String) -> Warning?,
 ): List<Warning> {
     // Since we have one <PLAIN> file for all tests, just take the first of them as anchor for calculation of paths
     val anchorTestFilePath = originalPaths.first()
@@ -116,7 +116,15 @@ internal fun collectWarningsFromPlain(
         "Could not find PLAIN file with expected warnings/fixes for file $anchorTestFilePath. " +
                 "Please check if correct `WarningsFormat`/`FixFormat` is set (should be PLAIN) and if the file is present and called `$plainFileName`."
     )
-    return warningExtractor(plainFile)
+
+    return fs.read(plainFile) {
+        generateSequence { readUtf8Line() }
+            .map {
+                warningExtractor(it)
+            }
+            .filterNotNull()
+            .toList()
+    }
 }
 
 /**

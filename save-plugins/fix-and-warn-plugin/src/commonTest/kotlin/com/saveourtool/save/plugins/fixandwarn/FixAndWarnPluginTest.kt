@@ -77,8 +77,19 @@ class FixAndWarnPluginTest {
                     FixAndWarnPluginConfig(
                         FixPluginConfig(fixExecutionCmd),
                         WarnPluginConfig(warnExecutionCmd,
-                            Regex("(.+):(\\d+):(\\d+): (.+)"),
-                            true, true, 1, 2, 3, 1, 1, 1, 2, 3, 4
+                            actualWarningsPattern = Regex("(.+):(\\d+):(\\d+): (.+)"),
+                            warningTextHasLine = true,
+                            warningTextHasColumn = true,
+                            fileNameCaptureGroup = 1,
+                            lineCaptureGroup = null,
+                            columnCaptureGroup = 2,
+                            messageCaptureGroup = 3,
+                            messageCaptureGroupMiddle = 1,
+                            messageCaptureGroupEnd = 1,
+                            fileNameCaptureGroupOut = 1,
+                            lineCaptureGroupOut = 2,
+                            columnCaptureGroupOut = 3,
+                            messageCaptureGroupOut = 4,
                         )
                     ),
                     GeneralConfig("", 1, ", ", listOf(""), "", "", expectedWarningsPattern = Regex("// ;warn:(\\d+):(\\d+): (.*)"), runConfigPattern = defaultExtraConfigPattern)

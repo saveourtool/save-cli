@@ -26,6 +26,8 @@ import kotlinx.serialization.UseSerializers
  * @property actualWarningsPattern a regular expression by which warnings will be discovered in the process output
  * @property warningTextHasLine whether line number is included in [actualWarningsPattern]
  * @property warningTextHasColumn whether column number is included in [actualWarningsPattern]
+ * @property fileNameCaptureGroup an index of capture group in regular expressions, corresponding to file number. Indices start at 0 with 0
+ * corresponding to the whole string.
  * @property lineCaptureGroup an index of capture group in regular expressions, corresponding to line number. Indices start at 0 with 0
  * corresponding to the whole string.
  * @property columnCaptureGroup an index of capture group in regular expressions, corresponding to column number. Indices start at 0 with 0
@@ -65,6 +67,7 @@ data class WarnPluginConfig(
     val actualWarningsPattern: Regex? = null,
     val warningTextHasLine: Boolean? = null,
     val warningTextHasColumn: Boolean? = null,
+    val fileNameCaptureGroup: Long? = null,
     val lineCaptureGroup: Long? = null,
     val columnCaptureGroup: Long? = null,
     val messageCaptureGroup: Long? = null,
@@ -115,6 +118,7 @@ data class WarnPluginConfig(
             this.actualWarningsPattern ?: other.actualWarningsPattern,
             this.warningTextHasLine ?: other.warningTextHasLine,
             this.warningTextHasColumn ?: other.warningTextHasColumn,
+            this.fileNameCaptureGroup ?: other.fileNameCaptureGroup,
             this.lineCaptureGroup ?: other.lineCaptureGroup,
             this.columnCaptureGroup ?: other.columnCaptureGroup,
             this.messageCaptureGroup ?: other.messageCaptureGroup,
@@ -188,6 +192,7 @@ data class WarnPluginConfig(
             actualWarningsPattern ?: defaultOutputPattern,
             newWarningTextHasLine,
             newWarningTextHasColumn,
+            fileNameCaptureGroup,
             newLineCaptureGroup,
             newColumnCaptureGroup,
             newMessageCaptureGroup,
