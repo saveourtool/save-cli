@@ -7,7 +7,6 @@ package com.saveourtool.save.plugin.warn.utils
 
 import com.saveourtool.save.core.files.findFileInAncestorDir
 import com.saveourtool.save.core.files.readFile
-import com.saveourtool.save.core.files.readLines
 import com.saveourtool.save.core.plugin.GeneralConfig
 import com.saveourtool.save.core.plugin.PluginException
 import com.saveourtool.save.core.utils.adjustToCommonRoot
