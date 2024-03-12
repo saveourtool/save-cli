@@ -31,7 +31,6 @@ import com.saveourtool.save.plugin.warn.utils.collectWarningsFromSarif
 import com.saveourtool.save.plugin.warn.utils.collectionMultilineWarnings
 import com.saveourtool.save.plugin.warn.utils.collectionSingleWarnings
 import com.saveourtool.save.plugin.warn.utils.extractWarning
-import com.saveourtool.save.plugin.warn.utils.getLineNumber
 
 import io.github.detekt.sarif4k.SarifSchema210
 import okio.FileSystem
@@ -276,11 +275,17 @@ class WarnPlugin(
         }
         return when (warnPluginConfig.expectedWarningsFormat) {
             ExpectedWarningsFormat.PLAIN -> {
-                val warningsFromPlain = collectWarningsFromPlain(expectedWarningsFileName, originalPaths, fs) { plainFile ->
-                    plainFile.collectExpectedWarningsWithLineNumbers(
-                        warnPluginConfig,
-                        generalConfig
-                    )
+                val warningsFromPlain = collectWarningsFromPlain(expectedWarningsFileName, originalPaths, fs) { line ->
+                    with(warnPluginConfig) {
+                        line.extractWarning(
+                            generalConfig.expectedWarningsPattern!!,
+                            fileNameCaptureGroup!!,
+                            lineCaptureGroup,
+                            columnCaptureGroup,
+                            messageCaptureGroup!!,
+                            benchmarkMode!!,
+                        )
+                    }
                 }
                 copyPaths.associate { copyPath ->
                     copyPath.name to warningsFromPlain.filter { it.fileName == copyPath.name }
@@ -363,7 +368,7 @@ class WarnPlugin(
                 it.extractWarning(
                     actualWarningsPattern!!,
                     fileNameCaptureGroupOut!!,
-                    it.getLineNumber(actualWarningsPattern, lineCaptureGroupOut),
+                    lineCaptureGroupOut,
                     columnCaptureGroupOut,
                     messageCaptureGroupOut!!,
                     benchmarkMode!!
