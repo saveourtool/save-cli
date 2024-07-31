@@ -1,7 +1,7 @@
 [versions]
 kotlin = "1.9.25"
 okio = "3.8.0"
-serialization = "1.7.1"
+serialization = "1.6.3"
 diktat = "1.2.5"
 kotlinx-cli = "0.3.6"
 kotlinx-datetime = "0.6.0"
