@@ -16,6 +16,6 @@ dependencies {
     implementation(libs.kotlin.plugin.serialization)
     implementation("io.github.gradle-nexus:publish-plugin:2.0.0")
     implementation("org.ajoberstar.reckon:reckon-gradle:0.18.3")
-    implementation("com.squareup:kotlinpoet:1.16.0")
+    implementation("com.squareup:kotlinpoet:2.0.0")
     implementation("com.google.code.gson:gson:2.10.1")
 }
