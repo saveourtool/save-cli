@@ -25,9 +25,9 @@ jobs:
       statuses: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up JDK 11
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: 11
           distribution: temurin
@@ -37,7 +37,7 @@ jobs:
           kv=$(cat gradle/libs.versions.toml | grep '^kotlin =' | awk -F'[=]' '{print $2}' | tr -d '" ')
           echo KOTLIN_VERSION=$kv >> $GITHUB_ENV
       - name: Cache konan
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           # [@actions/glob](https://github.com/actions/toolkit/tree/main/packages/glob) is used to match paths
           # It should correctly expand `~` on every OS.
@@ -66,7 +66,7 @@ jobs:
         # into a separate job (or, otherwise, we'd need to upload the content
         # of the whole `.git` folder as an artifact).
       - name: JUnit Tests (dorny/test-reporter@v1)
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v3
         if: ${{ always() }}
         with:
           name: JUnit Tests (${{ runner.os }}, dorny/test-reporter@v1)
@@ -80,7 +80,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ always() }}
         with:
           name: xml-test-reports-${{ runner.os }}
@@ -90,13 +90,13 @@ jobs:
 
       - name: Upload gradle reports
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: gradle-reports-${{ matrix.os }}
           path: '**/build/reports/'
       - name: Code coverage report
         if: ${{ runner.os == 'Linux' }}
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v7
         with:
           flags: unittests
           fail_ci_if_error: false # optional (default = false)
@@ -116,7 +116,7 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         if: ${{ always() }}
         with:
           name: xml-test-reports-${{ runner.os }}
